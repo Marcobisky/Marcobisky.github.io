@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="前置要求 热情passion. 一些环境 为什么要环境（编译环境和可视化环境）？因为我们不是从头开始造轮子，我们将利用Yale N. Patt创造出的LC-3计算机的架构复现一遍。但是我们将站在一个发明者的视角。环境可以帮助我们学习和分析，并把我们头脑中的数据流动展现出来。我在MacOS上操作，但是其中的链接提供了其他操作系统的安装及使用方法。 我用到了以下环境： lc3tools&ndash;现成的LC-3汇编编译器 有一个现成的编译器总会make out live easier，lc3tools。Unix上请按照README自行编译文件。 使用方法参考LC-3 Simulator Lab Manual. lc3tools 接受一个.asm的文件，输出一个.obj的二进制可执行文件，这将是直接烧录到Program memory中的内容。在造出实物之前，可以将它烧录到lc3uarch中进行仿真和学习： lc3uarch&ndash;Data path 模拟 lc3uarch，它接受一个.obj的二进制可执行文件，输出一个单步执行和数据流动的过程： 很酷吧！ customasm&ndash;自己的汇编编译器！ 我们用customasm工具来写自己的汇编编译器。但不是有现成的LC-3编译器了吗？是因为我们以后可能要自己设计指令集，所以需要用自己写的汇编编译器。但是我们不是from scratch，已经有人写好了：customasm，下面就来安装这个工具。 customasm依赖rust，先用Homebrew安装rust环境： 1 brew install rust 检测是否装好了： 1 2 rustc --version cargo --version 其中rustc是rust的编译器，Cargo是Rust的包管理器和构建工具，我们用它再安装customasm并配置环境变量： 1 2 3 4 cargo install customasm nano ~/.zshrc export PATH=&#34;$HOME/.cargo/bin:$PATH&#34; # Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor.">
-<title>一起造轮子!</title>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Intro 我想在launchpad上面启动一个 java 项目，但是application只支持启动 .app 文件，怎么办？ 解决方案 spotlight 搜索 Automator，打开 Automator，按 command+W 关闭弹出的窗口： 在导航栏中再次打开 Automator，选择 Application： 搜索栏中搜索 Run AppleScript，拖拽到右侧的空白区域: 加入以下内容： 1 2 3 4 5 on run {input, parameters} set p to POSIX path of (path to me) do shell script &#34;java -jar &#34; &amp; p &amp; &#34;/Contents/Java/YOURJARFILE.jar&#34; end run 记得替换 YOURJARFILE.jar 为你的 jar 文件名。但是此时 &quot;/Contents/Java/ 这个路径是不存在的，而且 YOURJARFILE.jar 也没有在这个路径下，所以以后我们需要创建这个路径。但是首先我们先保存(Command+S)这个文件为一个 .app 文件，路径为 /Application，文件名为你期待这个app的名字，如：YOURJARFILE.app。 进入 /Application/YOURJARFILE.app，右键点击 Show Package Contents，在 Contents 文件夹下创建 java 文件夹，将你的 YOURJARFILE.">
+<title>java项目导入Launchpad方案 MacOS</title>
 
-<link rel='canonical' href='http://localhost:1313/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/'>
+<link rel='canonical' href='http://localhost:1313/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/'>
 
-<link rel="stylesheet" href="/scss/style.min.0304c6baf04e01a8fe70693791cb744d56a3578a3120a8796cefc66825aa39c7.css"><meta property='og:title' content="一起造轮子!">
-<meta property='og:description' content="前置要求 热情passion. 一些环境 为什么要环境（编译环境和可视化环境）？因为我们不是从头开始造轮子，我们将利用Yale N. Patt创造出的LC-3计算机的架构复现一遍。但是我们将站在一个发明者的视角。环境可以帮助我们学习和分析，并把我们头脑中的数据流动展现出来。我在MacOS上操作，但是其中的链接提供了其他操作系统的安装及使用方法。 我用到了以下环境： lc3tools&ndash;现成的LC-3汇编编译器 有一个现成的编译器总会make out live easier，lc3tools。Unix上请按照README自行编译文件。 使用方法参考LC-3 Simulator Lab Manual. lc3tools 接受一个.asm的文件，输出一个.obj的二进制可执行文件，这将是直接烧录到Program memory中的内容。在造出实物之前，可以将它烧录到lc3uarch中进行仿真和学习： lc3uarch&ndash;Data path 模拟 lc3uarch，它接受一个.obj的二进制可执行文件，输出一个单步执行和数据流动的过程： 很酷吧！ customasm&ndash;自己的汇编编译器！ 我们用customasm工具来写自己的汇编编译器。但不是有现成的LC-3编译器了吗？是因为我们以后可能要自己设计指令集，所以需要用自己写的汇编编译器。但是我们不是from scratch，已经有人写好了：customasm，下面就来安装这个工具。 customasm依赖rust，先用Homebrew安装rust环境： 1 brew install rust 检测是否装好了： 1 2 rustc --version cargo --version 其中rustc是rust的编译器，Cargo是Rust的包管理器和构建工具，我们用它再安装customasm并配置环境变量： 1 2 3 4 cargo install customasm nano ~/.zshrc export PATH=&#34;$HOME/.cargo/bin:$PATH&#34; # Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor.">
-<meta property='og:url' content='http://localhost:1313/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/'>
+<link rel="stylesheet" href="/scss/style.min.0304c6baf04e01a8fe70693791cb744d56a3578a3120a8796cefc66825aa39c7.css"><meta property='og:title' content="java项目导入Launchpad方案 MacOS">
+<meta property='og:description' content="Intro 我想在launchpad上面启动一个 java 项目，但是application只支持启动 .app 文件，怎么办？ 解决方案 spotlight 搜索 Automator，打开 Automator，按 command+W 关闭弹出的窗口： 在导航栏中再次打开 Automator，选择 Application： 搜索栏中搜索 Run AppleScript，拖拽到右侧的空白区域: 加入以下内容： 1 2 3 4 5 on run {input, parameters} set p to POSIX path of (path to me) do shell script &#34;java -jar &#34; &amp; p &amp; &#34;/Contents/Java/YOURJARFILE.jar&#34; end run 记得替换 YOURJARFILE.jar 为你的 jar 文件名。但是此时 &quot;/Contents/Java/ 这个路径是不存在的，而且 YOURJARFILE.jar 也没有在这个路径下，所以以后我们需要创建这个路径。但是首先我们先保存(Command+S)这个文件为一个 .app 文件，路径为 /Application，文件名为你期待这个app的名字，如：YOURJARFILE.app。 进入 /Application/YOURJARFILE.app，右键点击 Show Package Contents，在 Contents 文件夹下创建 java 文件夹，将你的 YOURJARFILE.">
+<meta property='og:url' content='http://localhost:1313/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/'>
 <meta property='og:site_name' content='Marcobisky'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Verilog' /><meta property='article:published_time' content='2024-09-07T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2024-09-07T00:00:00&#43;00:00'/>
-<meta name="twitter:title" content="一起造轮子!">
-<meta name="twitter:description" content="前置要求 热情passion. 一些环境 为什么要环境（编译环境和可视化环境）？因为我们不是从头开始造轮子，我们将利用Yale N. Patt创造出的LC-3计算机的架构复现一遍。但是我们将站在一个发明者的视角。环境可以帮助我们学习和分析，并把我们头脑中的数据流动展现出来。我在MacOS上操作，但是其中的链接提供了其他操作系统的安装及使用方法。 我用到了以下环境： lc3tools&ndash;现成的LC-3汇编编译器 有一个现成的编译器总会make out live easier，lc3tools。Unix上请按照README自行编译文件。 使用方法参考LC-3 Simulator Lab Manual. lc3tools 接受一个.asm的文件，输出一个.obj的二进制可执行文件，这将是直接烧录到Program memory中的内容。在造出实物之前，可以将它烧录到lc3uarch中进行仿真和学习： lc3uarch&ndash;Data path 模拟 lc3uarch，它接受一个.obj的二进制可执行文件，输出一个单步执行和数据流动的过程： 很酷吧！ customasm&ndash;自己的汇编编译器！ 我们用customasm工具来写自己的汇编编译器。但不是有现成的LC-3编译器了吗？是因为我们以后可能要自己设计指令集，所以需要用自己写的汇编编译器。但是我们不是from scratch，已经有人写好了：customasm，下面就来安装这个工具。 customasm依赖rust，先用Homebrew安装rust环境： 1 brew install rust 检测是否装好了： 1 2 rustc --version cargo --version 其中rustc是rust的编译器，Cargo是Rust的包管理器和构建工具，我们用它再安装customasm并配置环境变量： 1 2 3 4 cargo install customasm nano ~/.zshrc export PATH=&#34;$HOME/.cargo/bin:$PATH&#34; # Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor.">
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2024-09-11T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2024-09-11T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="java项目导入Launchpad方案 MacOS">
+<meta name="twitter:description" content="Intro 我想在launchpad上面启动一个 java 项目，但是application只支持启动 .app 文件，怎么办？ 解决方案 spotlight 搜索 Automator，打开 Automator，按 command+W 关闭弹出的窗口： 在导航栏中再次打开 Automator，选择 Application： 搜索栏中搜索 Run AppleScript，拖拽到右侧的空白区域: 加入以下内容： 1 2 3 4 5 on run {input, parameters} set p to POSIX path of (path to me) do shell script &#34;java -jar &#34; &amp; p &amp; &#34;/Contents/Java/YOURJARFILE.jar&#34; end run 记得替换 YOURJARFILE.jar 为你的 jar 文件名。但是此时 &quot;/Contents/Java/ 这个路径是不存在的，而且 YOURJARFILE.jar 也没有在这个路径下，所以以后我们需要创建这个路径。但是首先我们先保存(Command+S)这个文件为一个 .app 文件，路径为 /Application，文件名为你期待这个app的名字，如：YOURJARFILE.app。 进入 /Application/YOURJARFILE.app，右键点击 Show Package Contents，在 Contents 文件夹下创建 java 文件夹，将你的 YOURJARFILE.">
   
 
 
@@ -283,14 +283,10 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#前置要求">前置要求</a></li>
-    <li><a href="#一些环境">一些环境</a>
-      <ol>
-        <li><a href="#lc3tools--现成的lc-3汇编编译器"><code>lc3tools</code>&ndash;现成的LC-3汇编编译器</a></li>
-        <li><a href="#lc3uarch--data-path-模拟"><code>lc3uarch</code>&ndash;Data path 模拟</a></li>
-        <li><a href="#customasm--自己的汇编编译器"><code>customasm</code>&ndash;自己的汇编编译器！</a></li>
-      </ol>
-    </li>
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#解决方案">解决方案</a></li>
+    <li><a href="#改图标">改图标</a></li>
+    <li><a href="#references">References</a></li>
   </ol>
 </nav>
         </div>
@@ -318,7 +314,7 @@
 
     <div class="article-title-wrapper">
         <h2 class="article-title">
-            <a href="/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/">一起造轮子!</a>
+            <a href="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/">java项目导入Launchpad方案 MacOS</a>
         </h2>
     
         
@@ -340,7 +336,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published">Sep 07, 2024</time>
+                <time class="article-time--published">Sep 11, 2024</time>
             </div>
         
 
@@ -370,94 +366,124 @@
     <section class="article-content">
     
     
-    <h2 id="前置要求">前置要求
-</h2><p>热情passion.</p>
-<h2 id="一些环境">一些环境
-</h2><p>为什么要环境（编译环境和可视化环境）？因为我们不是从头开始造轮子，我们将利用Yale N. Patt创造出的LC-3计算机的架构复现一遍。但是我们将站在一个发明者的视角。环境可以帮助我们学习和分析，并把我们头脑中的数据流动展现出来。我在MacOS上操作，但是其中的链接提供了其他操作系统的安装及使用方法。</p>
-<p>我用到了以下环境：</p>
-<h3 id="lc3tools--现成的lc-3汇编编译器"><code>lc3tools</code>&ndash;现成的LC-3汇编编译器
-</h3><p>有一个现成的编译器总会make out live easier，<a class="link" href="https://highered.mheducation.com/sites/0072467509/student_view0/lc-3_simulator.html"  target="_blank" rel="noopener"
-    >lc3tools</a>。Unix上请按照README自行编译文件。</p>
-<p>使用方法参考<a class="link" href="https://highered.mheducation.com/sites/0072467509/student_view0/lc-3_simulator_lab_manual.html"  target="_blank" rel="noopener"
-    >LC-3 Simulator Lab Manual</a>.</p>
-<p><code>lc3tools</code> 接受一个<code>.asm</code>的文件，输出一个<code>.obj</code>的二进制可执行文件，这将是直接烧录到Program memory中的内容。在造出实物之前，可以将它烧录到<code>lc3uarch</code>中进行仿真和学习：</p>
-<h3 id="lc3uarch--data-path-模拟"><code>lc3uarch</code>&ndash;Data path 模拟
-</h3><p><a class="link" href="https://sourceforge.net/projects/lc3uarch/"  target="_blank" rel="noopener"
-    >lc3uarch</a>，它接受一个<code>.obj</code>的二进制可执行文件，输出一个单步执行和数据流动的过程：</p>
-<p><img src="/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/lc3uarch.png"
-	width="2034"
-	height="1480"
-	srcset="/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/lc3uarch_hu4839427865254108013.png 480w, /p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/lc3uarch_hu6854244350844045602.png 1024w"
+    <h2 id="intro">Intro
+</h2><p>我想在launchpad上面启动一个 java 项目，但是application只支持启动 <code>.app</code> 文件，怎么办？</p>
+<h2 id="解决方案">解决方案
+</h2><p>spotlight 搜索 Automator，打开 Automator，按 command+W 关闭弹出的窗口：</p>
+<p><img src="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/first-window.png"
+	width="1600"
+	height="896"
+	srcset="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/first-window_hu5764540466323638900.png 480w, /p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/first-window_hu3272302375274696184.png 1024w"
 	loading="lazy"
 	
 	
 		class="gallery-image" 
-		data-flex-grow="137"
-		data-flex-basis="329px"
+		data-flex-grow="178"
+		data-flex-basis="428px"
 	
 ></p>
-<p>很酷吧！</p>
-<h3 id="customasm--自己的汇编编译器"><code>customasm</code>&ndash;自己的汇编编译器！
-</h3><p>我们用<code>customasm</code>工具来写自己的汇编编译器。但不是有现成的LC-3编译器了吗？是因为我们以后可能要自己设计指令集，所以需要用自己写的汇编编译器。但是我们不是from scratch，已经有人写好了：<a class="link" href="https://github.com/hlorenzi/customasm"  target="_blank" rel="noopener"
-    >customasm</a>，下面就来安装这个工具。</p>
-<p><code>customasm</code>依赖<code>rust</code>，先用<code>Homebrew</code>安装<code>rust</code>环境：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-zsh" data-lang="zsh"><span class="line"><span class="cl">brew install rust
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>检测是否装好了：</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt">1
-</span><span class="lnt">2
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-zsh" data-lang="zsh"><span class="line"><span class="cl">rustc --version
-</span></span><span class="line"><span class="cl">cargo --version
-</span></span></code></pre></td></tr></table>
-</div>
-</div><p>其中<code>rustc</code>是<code>rust</code>的编译器，<code>Cargo</code>是<code>Rust</code>的包管理器和构建工具，我们用它再安装<code>customasm</code>并配置环境变量：</p>
+<p>在导航栏中再次打开 Automator，选择 Application：</p>
+<p><img src="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/second-window.png"
+	width="2000"
+	height="1760"
+	srcset="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/second-window_hu15618321735800569333.png 480w, /p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/second-window_hu2199349123572217045.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="113"
+		data-flex-basis="272px"
+	
+></p>
+<p>搜索栏中搜索 Run AppleScript，拖拽到右侧的空白区域:</p>
+<p><img src="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/applescipt.png"
+	width="2000"
+	height="1760"
+	srcset="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/applescipt_hu2690984028541822820.png 480w, /p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/applescipt_hu6873436930303473567.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="113"
+		data-flex-basis="272px"
+	
+></p>
+<p>加入以下内容：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span><span class="lnt">2
 </span><span class="lnt">3
 </span><span class="lnt">4
+</span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-zsh" data-lang="zsh"><span class="line"><span class="cl">cargo install customasm
-</span></span><span class="line"><span class="cl">nano ~/.zshrc
-</span></span><span class="line"><span class="cl"><span class="nb">export</span> <span class="nv">PATH</span><span class="o">=</span><span class="s2">&#34;</span><span class="nv">$HOME</span><span class="s2">/.cargo/bin:</span><span class="nv">$PATH</span><span class="s2">&#34;</span> <span class="c1"># Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor.</span>
-</span></span><span class="line"><span class="cl"><span class="nb">source</span> ~/.zshrc <span class="c1"># apply changes</span>
+<pre tabindex="0" class="chroma"><code class="language-applescript" data-lang="applescript"><span class="line"><span class="cl"><span class="k">on</span> <span class="nb">run</span> <span class="p">{</span><span class="nv">input</span><span class="p">,</span> <span class="nv">parameters</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">set</span> <span class="nv">p</span> <span class="k">to</span> <span class="nv">POSIX</span> <span class="na">path</span> <span class="k">of</span> <span class="p">(</span><span class="nb">path to</span> <span class="k">me</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="nb">do shell script</span> <span class="s2">&#34;java -jar &#34;</span> <span class="o">&amp;</span> <span class="nv">p</span> <span class="o">&amp;</span> <span class="s2">&#34;/Contents/Java/YOURJARFILE.jar&#34;</span>
+</span></span><span class="line"><span class="cl"> 
+</span></span><span class="line"><span class="cl"><span class="k">end</span> <span class="nb">run</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>检测:</p>
+</div><p>记得替换 <code>YOURJARFILE.jar</code> 为你的 jar 文件名。但是此时 <code>&quot;/Contents/Java/</code> 这个路径是不存在的，而且 <code>YOURJARFILE.jar</code> 也没有在这个路径下，所以以后我们需要创建这个路径。但是首先我们先保存(Command+S)这个文件为一个 <code>.app</code> 文件，路径为 <code>/Application</code>，文件名为你期待这个app的名字，如：<code>YOURJARFILE.app</code>。</p>
+<p>进入 <code>/Application/YOURJARFILE.app</code>，右键点击 <code>Show Package Contents</code>，在 <code>Contents</code> 文件夹下创建 <code>java</code> 文件夹，将你的 <code>YOURJARFILE.jar</code> 拷贝放入这个文件夹。</p>
+<p><img src="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/contents.png"
+	width="1470"
+	height="326"
+	srcset="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/contents_hu7039950545512434517.png 480w, /p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/contents_hu1234083596785263889.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="450"
+		data-flex-basis="1082px"
+	
+></p>
+<p>然后你就可以通过 launchpad <code>.app</code> 文件启动你的 java 项目了。</p>
+<h2 id="改图标">改图标
+</h2><p>还是在 <code>Contents</code> 文件夹下，把这个 <code>.icns</code> 文件换成你自己的图标文件，比如可以把 <code>png</code> 文件<a class="link" href="https://www.aconvert.com/image/png-to-icns/"  target="_blank" rel="noopener"
+    >转换</a>成 <code>icns</code> 文件，然后替换这个文件(文件名不变)。</p>
+<p><img src="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/change-icon.png"
+	width="1488"
+	height="580"
+	srcset="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/change-icon_hu5138805547705506267.png 480w, /p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/change-icon_hu3741437893283438026.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="256"
+		data-flex-basis="615px"
+	
+></p>
+<p>然后 Refresh the Icon Cache (if necessary):</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">customasm --version
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="line"><span class="cl">touch /path/to/YOURJARFILE.app
+</span></span><span class="line"><span class="cl">killall Dock
 </span></span></code></pre></td></tr></table>
 </div>
-</div><p>看<a class="link" href="https://github.com/hlorenzi/customasm/wiki"  target="_blank" rel="noopener"
-    >这里</a>学习如何使用<code>customasm</code>.</p>
+</div><p>Finish!</p>
+<h2 id="references">References
+</h2><ul>
+<li>
+<p><a class="link" href="https://www.youtube.com/watch?v=kwdK6Dg1a_Y"  target="_blank" rel="noopener"
+    >How to convert .jar to .app on Mac - a Java tutorial</a></p>
+</li>
+<li>
+<p><a class="link" href="https://stackoverflow.com/questions/8916269/launching-a-jar-file-as-an-app-on-mac-from-the-dock"  target="_blank" rel="noopener"
+    >Launching a jar file as an app on Mac (from the dock)</a></p>
+</li>
+</ul>
 
 </section>
 
 
     <footer class="article-footer">
     
-    <section class="article-tags">
-        
-            <a href="/tags/verilog/">Verilog</a>
-        
-    </section>
-
 
     
     <section class="article-copyright">
@@ -487,6 +513,32 @@
         <div class="flex article-list--tile">
             
                 
+<article class="">
+    <a href="/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">一起造轮子!</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/create-your-own-website-using-hugo-on-macos/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Create your own website using Hugo on MacOS</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
 <article class="has-image">
     <a href="/p/macos%E6%90%AD%E5%BB%BArtl%E5%88%86%E6%9E%90%E6%A1%86%E6%9E%B6/">
         
@@ -505,32 +557,6 @@
 
         <div class="article-details">
             <h2 class="article-title">MacOS搭建RTL分析框架</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/java%E9%A1%B9%E7%9B%AE%E5%AF%BC%E5%85%A5launchpad%E6%96%B9%E6%A1%88-macos/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">java项目导入Launchpad方案 MacOS</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/create-your-own-website-using-hugo-on-macos/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">Create your own website using Hugo on MacOS</h2>
         </div>
     </a>
 </article>
