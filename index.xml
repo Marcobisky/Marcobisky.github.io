@@ -7,18 +7,120 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>Marcobisky</copyright>
-        <lastBuildDate>Sat, 07 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Tue, 10 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Boolean Algebra 布尔代数的本质</title>
+        <link>http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/</link>
+        <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/</guid>
+        <description>&lt;h2 id=&#34;intro&#34;&gt;Intro
+&lt;/h2&gt;&lt;p&gt;首先我们提出研究布尔代数的动机，为啥要研究布尔代数？1和0的与、或、非运算是人都能算明白，简直显然到家，为啥还要花篇幅研究这个？首先请考虑以下问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;集合和布尔代数都有De Morgan&amp;rsquo;s laws，这是巧合吗？&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;$$
+\overline{A \cup B} = \overline{A} \cap \overline{B} \newline
+\overline{A \cap B} = \overline{A} \cup \overline{B}
+$$
+$$
+\overline{A \vee B} = \overline{A} \wedge \overline{B} \newline
+\overline{A \wedge B} = \overline{A} \vee \overline{B}
+$$&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;XOR和OR哪个运算更fundamental？&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;$\vee$和$\wedge$为什么满足双侧分配律？为什么一般的模或向量空间只满足乘法对加法的分配律？分配律的本质是什么？&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;逻辑学与布尔代数有什么关系？逻辑学是研究命题以及命题之间的关系的，布尔代数就是0和1一通操作的代数，这两者有什么关系？&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;为什么电路会跟逻辑相关？电路能实现一切运算吗？&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;很想用抽代的语言来描述布尔代数，具体怎么描述？&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;希望通过这篇文章，能够解答上述问题。&lt;/p&gt;
+&lt;h2 id=&#34;boole-algebra-mathbbbn-和-boolean-algebra-k-是不一样的&#34;&gt;Boole Algebra $(\mathbb{B^n})$ 和 Boolean Algebra $(K)$ 是不一样的
+&lt;/h2&gt;&lt;p&gt;想到0和1及它们的运算，最先能够联想到的（maybe）是 环 $\mathbb{Z}/2\mathbb{Z}$ 上的运算。我们就从 $\mathbb{Z}/2\mathbb{Z}$ 出发，不断加上结构，首先得到 Boole 代数，然后再得到 Boolean 代数，这也是历史上的发展顺序。&lt;/p&gt;
+&lt;h2 id=&#34;boole-algebra-mathbbbn&#34;&gt;Boole Algebra $(\mathbb{B^n})$
+&lt;/h2&gt;&lt;p&gt;简单起见，我们把 $\mathbb{Z}/2\mathbb{Z}$ 看作特征为2的有限域（而不是环，因为域上向量空间的性质好一点），并将其记作 $\mathbb{B}$:&lt;/p&gt;
+&lt;p&gt;$$
+\mathbb{B} \equiv { \bar{0}, \bar{1} }
+$$&lt;/p&gt;
+&lt;p&gt;（下文我们将省略 bar）&lt;/p&gt;
+&lt;p&gt;很容易验证 $\mathbb{B}$ 上的加法对应 XOR 运算，乘法对应 AND 运算。（从这个角度看，XOR 是比 OR 更fundamental的运算，因为XOR并不依赖任何的电子元件的特征，仅仅是从数学中自然而然引出的概念，即就是 $\mathbb{Z}/2\mathbb{Z}$ 上的加法，仅此而已）。&lt;/p&gt;
+&lt;p&gt;自然地，我们可以定义 coordinate space $\mathbb{B}^n$，其中的元素是 $n$-tuples of elements of $\mathbb{B}$，并且加法的数乘的定义是 component-wise 的。$\mathbb{B}^n$ 构成 $\mathbb{B}$ 上的向量空间，所以我们称 $\mathbb{B}^n$ 中的元素是一个 bit vector，比如：&lt;/p&gt;
+&lt;p&gt;$$
+\mathbb{B}^5 \ni \mathbf{b} := (1, 0, 1, 1, 0)
+$$&lt;/p&gt;
+&lt;p&gt;现在来研究 $\mathbb{B}^n$ 上线性组合、span、dimension 等概念。&lt;/p&gt;
+&lt;h2 id=&#34;boolean-algebra-k&#34;&gt;Boolean Algebra $(K)$
+&lt;/h2&gt;&lt;p&gt;下面给出 Boolean 代数的定义：&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Definition&lt;/strong&gt; 一个 Boolean 代数 $(K,\vee, \wedge, \bar{} \space)$ 是一个集合 $K$ equipped with 两个二元运算 $\vee$ 和 $\wedge$, 还有一个一元运算 $\space$ $\bar{}$ $\space$, 使得：&lt;/p&gt;
+&lt;p&gt;A1. $(K, \vee)$ 和 $(K, \wedge)$ 是交换幺半群&lt;/p&gt;
+&lt;p&gt;A2. $\vee$ 和 $\wedge$ 满足双侧分配律，且二者地位对等&lt;/p&gt;
+&lt;p&gt;A3. 存在元素 $0, 1 \in K$ 使得:
+&lt;img src=&#34;http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/boolean-def.jpg&#34;
+	width=&#34;1280&#34;
+	height=&#34;820&#34;
+	srcset=&#34;http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/boolean-def_hu15896879855589954061.jpg 480w, http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/boolean-def_hu14243650574475763826.jpg 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;156&#34;
+		data-flex-basis=&#34;374px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;A4. $\space$ $\bar{}$ $\space$ 运算由以下公理定义：&lt;/p&gt;
+&lt;p&gt;$$
+x \wedge \bar{x} = 0 \newline
+x \vee \bar{x} = 1
+$$&lt;/p&gt;
+&lt;p&gt;A1-A3 称为单调公理，A4 称为补公理。&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>一起造轮子!</title>
         <link>http://localhost:1313/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/</link>
         <pubDate>Sat, 07 Sep 2024 00:00:00 +0000</pubDate>
         
         <guid>http://localhost:1313/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/</guid>
-        <description>&lt;h2 id=&#34;简介&#34;&gt;简介
-&lt;/h2&gt;&lt;p&gt;造一个CPU&lt;/p&gt;
-&lt;h2 id=&#34;rust环境搭建macos&#34;&gt;rust环境搭建(MacOS)
-&lt;/h2&gt;&lt;p&gt;目的：用来写兼容自己指令集的汇编编译器，但是不是from scratch，已经有人写好了：&lt;a class=&#34;link&#34; href=&#34;https://github.com/hlorenzi/customasm&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+        <description>&lt;h2 id=&#34;前置要求&#34;&gt;前置要求
+&lt;/h2&gt;&lt;p&gt;热情passion.&lt;/p&gt;
+&lt;h2 id=&#34;一些环境&#34;&gt;一些环境
+&lt;/h2&gt;&lt;p&gt;为什么要环境（编译环境和可视化环境）？因为我们不是从头开始造轮子，我们将利用Yale N. Patt创造出的LC-3计算机的架构复现一遍。但是我们将站在一个发明者的视角。环境可以帮助我们学习和分析，并把我们头脑中的数据流动展现出来。我在MacOS上操作，但是其中的链接提供了其他操作系统的安装及使用方法。&lt;/p&gt;
+&lt;p&gt;我用到了以下环境：&lt;/p&gt;
+&lt;h3 id=&#34;lc3tools--现成的lc-3汇编编译器&#34;&gt;&lt;code&gt;lc3tools&lt;/code&gt;&amp;ndash;现成的LC-3汇编编译器
+&lt;/h3&gt;&lt;p&gt;有一个现成的编译器总会make out live easier，&lt;a class=&#34;link&#34; href=&#34;https://highered.mheducation.com/sites/0072467509/student_view0/lc-3_simulator.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;lc3tools&lt;/a&gt;。Unix上请按照README自行编译文件。&lt;/p&gt;
+&lt;p&gt;使用方法参考&lt;a class=&#34;link&#34; href=&#34;https://highered.mheducation.com/sites/0072467509/student_view0/lc-3_simulator_lab_manual.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;LC-3 Simulator Lab Manual&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;lc3tools&lt;/code&gt; 接受一个&lt;code&gt;.asm&lt;/code&gt;的文件，输出一个&lt;code&gt;.obj&lt;/code&gt;的二进制可执行文件，这将是直接烧录到Program memory中的内容。在造出实物之前，可以将它烧录到&lt;code&gt;lc3uarch&lt;/code&gt;中进行仿真和学习：&lt;/p&gt;
+&lt;h3 id=&#34;lc3uarch--data-path-模拟&#34;&gt;&lt;code&gt;lc3uarch&lt;/code&gt;&amp;ndash;Data path 模拟
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://sourceforge.net/projects/lc3uarch/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;lc3uarch&lt;/a&gt;，它接受一个&lt;code&gt;.obj&lt;/code&gt;的二进制可执行文件，输出一个单步执行和数据流动的过程：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/lc3uarch.png&#34;
+	width=&#34;2034&#34;
+	height=&#34;1480&#34;
+	srcset=&#34;http://localhost:1313/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/lc3uarch_hu4839427865254108013.png 480w, http://localhost:1313/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/lc3uarch_hu6854244350844045602.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;137&#34;
+		data-flex-basis=&#34;329px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;很酷吧！&lt;/p&gt;
+&lt;h3 id=&#34;customasm--自己的汇编编译器&#34;&gt;&lt;code&gt;customasm&lt;/code&gt;&amp;ndash;自己的汇编编译器！
+&lt;/h3&gt;&lt;p&gt;我们用&lt;code&gt;customasm&lt;/code&gt;工具来写自己的汇编编译器。但不是有现成的LC-3编译器了吗？是因为我们以后可能要自己设计指令集，所以需要用自己写的汇编编译器。但是我们不是from scratch，已经有人写好了：&lt;a class=&#34;link&#34; href=&#34;https://github.com/hlorenzi/customasm&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;customasm&lt;/a&gt;，下面就来安装这个工具。&lt;/p&gt;
-&lt;p&gt;用&lt;code&gt;Homebrew&lt;/code&gt;安装&lt;code&gt;rust&lt;/code&gt;环境：&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;customasm&lt;/code&gt;依赖&lt;code&gt;rust&lt;/code&gt;，先用&lt;code&gt;Homebrew&lt;/code&gt;安装&lt;code&gt;rust&lt;/code&gt;环境：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
 &lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1

@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="简介 造一个CPU rust环境搭建(MacOS) 目的：用来写兼容自己指令集的汇编编译器，但是不是from scratch，已经有人写好了：customasm，下面就来安装这个工具。 用Homebrew安装rust环境： 1 brew install rust 检测是否装好了： 1 2 rustc --version cargo --version 其中rustc是rust的编译器，Cargo是Rust的包管理器和构建工具，我们用它再安装customasm并配置环境变量： 1 2 3 4 cargo install customasm nano ~/.zshrc export PATH=&#34;$HOME/.cargo/bin:$PATH&#34; # Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor. source ~/.zshrc # apply changes 检测: 1 customasm --version 看这里学习如何使用customasm.">
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="前置要求 热情passion. 一些环境 为什么要环境（编译环境和可视化环境）？因为我们不是从头开始造轮子，我们将利用Yale N. Patt创造出的LC-3计算机的架构复现一遍。但是我们将站在一个发明者的视角。环境可以帮助我们学习和分析，并把我们头脑中的数据流动展现出来。我在MacOS上操作，但是其中的链接提供了其他操作系统的安装及使用方法。 我用到了以下环境： lc3tools&ndash;现成的LC-3汇编编译器 有一个现成的编译器总会make out live easier，lc3tools。Unix上请按照README自行编译文件。 使用方法参考LC-3 Simulator Lab Manual. lc3tools 接受一个.asm的文件，输出一个.obj的二进制可执行文件，这将是直接烧录到Program memory中的内容。在造出实物之前，可以将它烧录到lc3uarch中进行仿真和学习： lc3uarch&ndash;Data path 模拟 lc3uarch，它接受一个.obj的二进制可执行文件，输出一个单步执行和数据流动的过程： 很酷吧！ customasm&ndash;自己的汇编编译器！ 我们用customasm工具来写自己的汇编编译器。但不是有现成的LC-3编译器了吗？是因为我们以后可能要自己设计指令集，所以需要用自己写的汇编编译器。但是我们不是from scratch，已经有人写好了：customasm，下面就来安装这个工具。 customasm依赖rust，先用Homebrew安装rust环境： 1 brew install rust 检测是否装好了： 1 2 rustc --version cargo --version 其中rustc是rust的编译器，Cargo是Rust的包管理器和构建工具，我们用它再安装customasm并配置环境变量： 1 2 3 4 cargo install customasm nano ~/.zshrc export PATH=&#34;$HOME/.cargo/bin:$PATH&#34; # Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor.">
 <title>一起造轮子!</title>
 
 <link rel='canonical' href='http://localhost:1313/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/'>
 
 <link rel="stylesheet" href="/scss/style.min.0304c6baf04e01a8fe70693791cb744d56a3578a3120a8796cefc66825aa39c7.css"><meta property='og:title' content="一起造轮子!">
-<meta property='og:description' content="简介 造一个CPU rust环境搭建(MacOS) 目的：用来写兼容自己指令集的汇编编译器，但是不是from scratch，已经有人写好了：customasm，下面就来安装这个工具。 用Homebrew安装rust环境： 1 brew install rust 检测是否装好了： 1 2 rustc --version cargo --version 其中rustc是rust的编译器，Cargo是Rust的包管理器和构建工具，我们用它再安装customasm并配置环境变量： 1 2 3 4 cargo install customasm nano ~/.zshrc export PATH=&#34;$HOME/.cargo/bin:$PATH&#34; # Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor. source ~/.zshrc # apply changes 检测: 1 customasm --version 看这里学习如何使用customasm.">
+<meta property='og:description' content="前置要求 热情passion. 一些环境 为什么要环境（编译环境和可视化环境）？因为我们不是从头开始造轮子，我们将利用Yale N. Patt创造出的LC-3计算机的架构复现一遍。但是我们将站在一个发明者的视角。环境可以帮助我们学习和分析，并把我们头脑中的数据流动展现出来。我在MacOS上操作，但是其中的链接提供了其他操作系统的安装及使用方法。 我用到了以下环境： lc3tools&ndash;现成的LC-3汇编编译器 有一个现成的编译器总会make out live easier，lc3tools。Unix上请按照README自行编译文件。 使用方法参考LC-3 Simulator Lab Manual. lc3tools 接受一个.asm的文件，输出一个.obj的二进制可执行文件，这将是直接烧录到Program memory中的内容。在造出实物之前，可以将它烧录到lc3uarch中进行仿真和学习： lc3uarch&ndash;Data path 模拟 lc3uarch，它接受一个.obj的二进制可执行文件，输出一个单步执行和数据流动的过程： 很酷吧！ customasm&ndash;自己的汇编编译器！ 我们用customasm工具来写自己的汇编编译器。但不是有现成的LC-3编译器了吗？是因为我们以后可能要自己设计指令集，所以需要用自己写的汇编编译器。但是我们不是from scratch，已经有人写好了：customasm，下面就来安装这个工具。 customasm依赖rust，先用Homebrew安装rust环境： 1 brew install rust 检测是否装好了： 1 2 rustc --version cargo --version 其中rustc是rust的编译器，Cargo是Rust的包管理器和构建工具，我们用它再安装customasm并配置环境变量： 1 2 3 4 cargo install customasm nano ~/.zshrc export PATH=&#34;$HOME/.cargo/bin:$PATH&#34; # Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor.">
 <meta property='og:url' content='http://localhost:1313/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/'>
 <meta property='og:site_name' content='Marcobisky'>
 <meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='Verilog' /><meta property='article:published_time' content='2024-09-07T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2024-09-07T00:00:00&#43;00:00'/>
 <meta name="twitter:title" content="一起造轮子!">
-<meta name="twitter:description" content="简介 造一个CPU rust环境搭建(MacOS) 目的：用来写兼容自己指令集的汇编编译器，但是不是from scratch，已经有人写好了：customasm，下面就来安装这个工具。 用Homebrew安装rust环境： 1 brew install rust 检测是否装好了： 1 2 rustc --version cargo --version 其中rustc是rust的编译器，Cargo是Rust的包管理器和构建工具，我们用它再安装customasm并配置环境变量： 1 2 3 4 cargo install customasm nano ~/.zshrc export PATH=&#34;$HOME/.cargo/bin:$PATH&#34; # Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor. source ~/.zshrc # apply changes 检测: 1 customasm --version 看这里学习如何使用customasm.">
+<meta name="twitter:description" content="前置要求 热情passion. 一些环境 为什么要环境（编译环境和可视化环境）？因为我们不是从头开始造轮子，我们将利用Yale N. Patt创造出的LC-3计算机的架构复现一遍。但是我们将站在一个发明者的视角。环境可以帮助我们学习和分析，并把我们头脑中的数据流动展现出来。我在MacOS上操作，但是其中的链接提供了其他操作系统的安装及使用方法。 我用到了以下环境： lc3tools&ndash;现成的LC-3汇编编译器 有一个现成的编译器总会make out live easier，lc3tools。Unix上请按照README自行编译文件。 使用方法参考LC-3 Simulator Lab Manual. lc3tools 接受一个.asm的文件，输出一个.obj的二进制可执行文件，这将是直接烧录到Program memory中的内容。在造出实物之前，可以将它烧录到lc3uarch中进行仿真和学习： lc3uarch&ndash;Data path 模拟 lc3uarch，它接受一个.obj的二进制可执行文件，输出一个单步执行和数据流动的过程： 很酷吧！ customasm&ndash;自己的汇编编译器！ 我们用customasm工具来写自己的汇编编译器。但不是有现成的LC-3编译器了吗？是因为我们以后可能要自己设计指令集，所以需要用自己写的汇编编译器。但是我们不是from scratch，已经有人写好了：customasm，下面就来安装这个工具。 customasm依赖rust，先用Homebrew安装rust环境： 1 brew install rust 检测是否装好了： 1 2 rustc --version cargo --version 其中rustc是rust的编译器，Cargo是Rust的包管理器和构建工具，我们用它再安装customasm并配置环境变量： 1 2 3 4 cargo install customasm nano ~/.zshrc export PATH=&#34;$HOME/.cargo/bin:$PATH&#34; # Press Ctrl + O to write the changes, Enter to confirm, and Ctrl + X to exit the editor.">
   
 
 
@@ -283,8 +283,14 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#简介">简介</a></li>
-    <li><a href="#rust环境搭建macos">rust环境搭建(MacOS)</a></li>
+    <li><a href="#前置要求">前置要求</a></li>
+    <li><a href="#一些环境">一些环境</a>
+      <ol>
+        <li><a href="#lc3tools--现成的lc-3汇编编译器"><code>lc3tools</code>&ndash;现成的LC-3汇编编译器</a></li>
+        <li><a href="#lc3uarch--data-path-模拟"><code>lc3uarch</code>&ndash;Data path 模拟</a></li>
+        <li><a href="#customasm--自己的汇编编译器"><code>customasm</code>&ndash;自己的汇编编译器！</a></li>
+      </ol>
+    </li>
   </ol>
 </nav>
         </div>
@@ -364,12 +370,37 @@
     <section class="article-content">
     
     
-    <h2 id="简介">简介
-</h2><p>造一个CPU</p>
-<h2 id="rust环境搭建macos">rust环境搭建(MacOS)
-</h2><p>目的：用来写兼容自己指令集的汇编编译器，但是不是from scratch，已经有人写好了：<a class="link" href="https://github.com/hlorenzi/customasm"  target="_blank" rel="noopener"
+    <h2 id="前置要求">前置要求
+</h2><p>热情passion.</p>
+<h2 id="一些环境">一些环境
+</h2><p>为什么要环境（编译环境和可视化环境）？因为我们不是从头开始造轮子，我们将利用Yale N. Patt创造出的LC-3计算机的架构复现一遍。但是我们将站在一个发明者的视角。环境可以帮助我们学习和分析，并把我们头脑中的数据流动展现出来。我在MacOS上操作，但是其中的链接提供了其他操作系统的安装及使用方法。</p>
+<p>我用到了以下环境：</p>
+<h3 id="lc3tools--现成的lc-3汇编编译器"><code>lc3tools</code>&ndash;现成的LC-3汇编编译器
+</h3><p>有一个现成的编译器总会make out live easier，<a class="link" href="https://highered.mheducation.com/sites/0072467509/student_view0/lc-3_simulator.html"  target="_blank" rel="noopener"
+    >lc3tools</a>。Unix上请按照README自行编译文件。</p>
+<p>使用方法参考<a class="link" href="https://highered.mheducation.com/sites/0072467509/student_view0/lc-3_simulator_lab_manual.html"  target="_blank" rel="noopener"
+    >LC-3 Simulator Lab Manual</a>.</p>
+<p><code>lc3tools</code> 接受一个<code>.asm</code>的文件，输出一个<code>.obj</code>的二进制可执行文件，这将是直接烧录到Program memory中的内容。在造出实物之前，可以将它烧录到<code>lc3uarch</code>中进行仿真和学习：</p>
+<h3 id="lc3uarch--data-path-模拟"><code>lc3uarch</code>&ndash;Data path 模拟
+</h3><p><a class="link" href="https://sourceforge.net/projects/lc3uarch/"  target="_blank" rel="noopener"
+    >lc3uarch</a>，它接受一个<code>.obj</code>的二进制可执行文件，输出一个单步执行和数据流动的过程：</p>
+<p><img src="/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/lc3uarch.png"
+	width="2034"
+	height="1480"
+	srcset="/p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/lc3uarch_hu4839427865254108013.png 480w, /p/%E4%B8%80%E8%B5%B7%E9%80%A0%E8%BD%AE%E5%AD%90/lc3uarch_hu6854244350844045602.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="137"
+		data-flex-basis="329px"
+	
+></p>
+<p>很酷吧！</p>
+<h3 id="customasm--自己的汇编编译器"><code>customasm</code>&ndash;自己的汇编编译器！
+</h3><p>我们用<code>customasm</code>工具来写自己的汇编编译器。但不是有现成的LC-3编译器了吗？是因为我们以后可能要自己设计指令集，所以需要用自己写的汇编编译器。但是我们不是from scratch，已经有人写好了：<a class="link" href="https://github.com/hlorenzi/customasm"  target="_blank" rel="noopener"
     >customasm</a>，下面就来安装这个工具。</p>
-<p>用<code>Homebrew</code>安装<code>rust</code>环境：</p>
+<p><code>customasm</code>依赖<code>rust</code>，先用<code>Homebrew</code>安装<code>rust</code>环境：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -461,7 +492,7 @@
         
         
             <div class="article-image">
-                <img src="/p/macos%E6%90%AD%E5%BB%BArtl%E5%88%86%E6%9E%90%E6%A1%86%E6%9E%B6/cover.69c91f34520dfea2ead08ca0c85e0f41_hu13931430321854716478.png" 
+                <img src="/p/macos%E6%90%AD%E5%BB%BArtl%E5%88%86%E6%9E%90%E6%A1%86%E6%9E%B6/cover.69c91f34520dfea2ead08ca0c85e0f41.69c91f34520dfea2ead08ca0c85e0f41_hu13931430321854716478.png" 
                         width="250" 
                         height="150" 
                         loading="lazy"
