@@ -7,7 +7,161 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>en</language>
         <copyright>Marcobisky</copyright>
-        <lastBuildDate>Fri, 13 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 21 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Least Squares as Projection 最小二乘法的投影解释</title>
+        <link>http://localhost:1313/p/least-squares-as-projection-%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95%E7%9A%84%E6%8A%95%E5%BD%B1%E8%A7%A3%E9%87%8A/</link>
+        <pubDate>Sat, 21 Sep 2024 00:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/least-squares-as-projection-%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95%E7%9A%84%E6%8A%95%E5%BD%B1%E8%A7%A3%E9%87%8A/</guid>
+        <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction
+&lt;/h2&gt;&lt;p&gt;The goal is to find the linear model $y = \beta_0 + \beta_1 x$ such that the sum of squared errors between the predicted values and the actual data is minimized.&lt;/p&gt;
+&lt;h2 id=&#34;linear-model&#34;&gt;Linear Model
+&lt;/h2&gt;&lt;p&gt;The form of the linear model is:&lt;/p&gt;
+&lt;p&gt;$$
+y_i = \beta_0 + \beta_1 x_i + \epsilon_i
+$$&lt;/p&gt;
+&lt;p&gt;where $y_i$ is the observed value, $x_i$ is the independent variable, $\beta_0$ is the intercept, $\beta_1$ is the slope, and $\epsilon_i$ is the error term.&lt;/p&gt;
+&lt;p&gt;We wish to find $\beta_0$ and $\beta_1$ such that the predicted values $\hat{y}_i = \beta_0 + \beta_1 x_i$ minimize the sum of squared errors between $\hat{y}_i$ and the observed values $y_i$.&lt;/p&gt;
+&lt;h2 id=&#34;design-matrix-and-observation-vector&#34;&gt;Design Matrix and Observation Vector
+&lt;/h2&gt;&lt;p&gt;To make the problem more convenient, we represent it using vectors and matrices.&lt;/p&gt;
+&lt;h3 id=&#34;design-matrix&#34;&gt;Design Matrix
+&lt;/h3&gt;&lt;p&gt;Define the design matrix $\mathbf{X}$ as:&lt;/p&gt;
+&lt;p&gt;$$
+\mathbf{X} = \begin{bmatrix}
+1 &amp;amp; 1 \newline
+1 &amp;amp; 2 \newline
+1 &amp;amp; 3 \newline
+1 &amp;amp; 4
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;p&gt;The first column contains only 1s, representing the constant term $\beta_0$, and the second column contains the values of the independent variable $x_i$.&lt;/p&gt;
+&lt;h3 id=&#34;observation-vector&#34;&gt;Observation Vector
+&lt;/h3&gt;&lt;p&gt;Define the observation vector $\mathbf{y}$ as:&lt;/p&gt;
+&lt;p&gt;$$
+\mathbf{y} = \begin{bmatrix}
+2 \newline
+3 \newline
+5 \newline
+7
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;p&gt;This vector contains all the observed values $y_i$.&lt;/p&gt;
+&lt;h3 id=&#34;parameter-vector&#34;&gt;Parameter Vector
+&lt;/h3&gt;&lt;p&gt;Define the parameter vector $\boldsymbol{\beta} = \begin{bmatrix} \beta_0 \newline \beta_1 \end{bmatrix}$.&lt;/p&gt;
+&lt;h2 id=&#34;sum-of-squared-errors-objective-function&#34;&gt;Sum of Squared Errors Objective Function
+&lt;/h2&gt;&lt;p&gt;In regression, our goal is to find the parameters $\boldsymbol{\beta}$ such that the predicted values $\hat{\mathbf{y}} = \mathbf{X} \boldsymbol{\beta}$ are as close as possible to the observed values $\mathbf{y}$, by minimizing the sum of squared errors (SSE):&lt;/p&gt;
+&lt;p&gt;$$
+S(\beta_0, \beta_1) = \sum_{i=1}^n (y_i - \hat{y}_i)^2 = (\mathbf{y} - \mathbf{X} \boldsymbol{\beta})^T (\mathbf{y} - \mathbf{X} \boldsymbol{\beta})
+$$&lt;/p&gt;
+&lt;h2 id=&#34;deriving-the-normal-equation&#34;&gt;Deriving the Normal Equation
+&lt;/h2&gt;&lt;p&gt;The key idea of least squares is to find $\boldsymbol{\beta}$ such that the residual $\mathbf{y} - \mathbf{X} \boldsymbol{\beta}$ is minimized. Geometrically, this means that the residual should be orthogonal to the column space of the design matrix $\mathbf{X}$, which leads to the normal equation:&lt;/p&gt;
+&lt;p&gt;$$
+\mathbf{X}^T (\mathbf{y} - \mathbf{X} \hat{\boldsymbol{\beta}}) = 0
+$$&lt;/p&gt;
+&lt;p&gt;Expanding this:&lt;/p&gt;
+&lt;p&gt;$$
+\mathbf{X}^T \mathbf{y} = \mathbf{X}^T \mathbf{X} \hat{\boldsymbol{\beta}}
+$$&lt;/p&gt;
+&lt;p&gt;This is the normal equation, which can be solved to find the least squares estimate $\hat{\boldsymbol{\beta}}$.&lt;/p&gt;
+&lt;h2 id=&#34;solving-the-normal-equation&#34;&gt;Solving the Normal Equation
+&lt;/h2&gt;&lt;p&gt;Now, let&amp;rsquo;s compute the parts of the normal equation.&lt;/p&gt;
+&lt;h3 id=&#34;compute-mathbfxt-mathbfx&#34;&gt;Compute $\mathbf{X}^T \mathbf{X}$
+&lt;/h3&gt;&lt;p&gt;$$
+\mathbf{X}^T \mathbf{X} = \begin{bmatrix}
+1 &amp;amp; 1 &amp;amp; 1 &amp;amp; 1 \newline
+1 &amp;amp; 2 &amp;amp; 3 &amp;amp; 4
+\end{bmatrix}
+\begin{bmatrix}
+1 &amp;amp; 1 \newline
+1 &amp;amp; 2 \newline
+1 &amp;amp; 3 \newline
+1 &amp;amp; 4
+\end{bmatrix}
+= \begin{bmatrix}
+4 &amp;amp; 10 \newline
+10 &amp;amp; 30
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;h3 id=&#34;compute-mathbfxt-mathbfy&#34;&gt;Compute $\mathbf{X}^T \mathbf{y}$
+&lt;/h3&gt;&lt;p&gt;$$
+\mathbf{X}^T \mathbf{y} = \begin{bmatrix}
+1 &amp;amp; 1 &amp;amp; 1 &amp;amp; 1 \newline
+1 &amp;amp; 2 &amp;amp; 3 &amp;amp; 4
+\end{bmatrix}
+\begin{bmatrix}
+2 \newline
+3 \newline
+5 \newline
+7
+\end{bmatrix}
+= \begin{bmatrix}
+17 \newline
+50
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;h3 id=&#34;solve-the-normal-equation&#34;&gt;Solve the Normal Equation
+&lt;/h3&gt;&lt;p&gt;Now we solve the normal equation:&lt;/p&gt;
+&lt;p&gt;$$
+\begin{bmatrix}
+4 &amp;amp; 10 \newline
+10 &amp;amp; 30
+\end{bmatrix} \hat{\boldsymbol{\beta}} = \begin{bmatrix}
+17 \newline
+50
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;p&gt;To solve this, we first compute the inverse of $\mathbf{X}^T \mathbf{X}$:&lt;/p&gt;
+&lt;p&gt;$$
+(\mathbf{X}^T \mathbf{X})^{-1} = \frac{1}{(4)(30) - (10)(10)} \begin{bmatrix}
+30 &amp;amp; -10 \newline
+-10 &amp;amp; 4
+\end{bmatrix} = \frac{1}{20} \begin{bmatrix}
+30 &amp;amp; -10 \newline
+-10 &amp;amp; 4
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;p&gt;Next, we compute $\hat{\boldsymbol{\beta}}$:&lt;/p&gt;
+&lt;p&gt;$$
+\hat{\boldsymbol{\beta}} = (\mathbf{X}^T \mathbf{X})^{-1} \mathbf{X}^T \mathbf{y}
+$$&lt;/p&gt;
+&lt;p&gt;$$
+\hat{\boldsymbol{\beta}} = \frac{1}{20} \begin{bmatrix}
+30 &amp;amp; -10 \newline
+-10 &amp;amp; 4
+\end{bmatrix}
+\begin{bmatrix}
+17 \newline
+50
+\end{bmatrix}
+= \frac{1}{20} \begin{bmatrix}
+(30)(17) + (-10)(50) \newline
+(-10)(17) + (4)(50)
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;p&gt;$$
+\hat{\boldsymbol{\beta}} = \frac{1}{20} \begin{bmatrix}
+510 - 500 \newline
+-170 + 200
+\end{bmatrix}
+= \frac{1}{20} \begin{bmatrix}
+10 \newline
+30
+\end{bmatrix}
+= \begin{bmatrix}
+0.5 \newline
+1.5
+\end{bmatrix}
+$$&lt;/p&gt;
+&lt;h2 id=&#34;least-squares-estimate&#34;&gt;Least Squares Estimate
+&lt;/h2&gt;&lt;p&gt;By solving the normal equation, we find $\hat{\beta}_0 = 0.5$ and $\hat{\beta}_1 = 1.5$. Thus, the regression model is:&lt;/p&gt;
+&lt;p&gt;$$
+\hat{y} = 0.5 + 1.5x
+$$&lt;/p&gt;
+&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion
+&lt;/h2&gt;&lt;p&gt;Using the projection approach, we see that the least squares estimate is the projection of the observation vector $\mathbf{y}$ onto the space spanned by the columns of the design matrix $\mathbf{X}$. By solving the normal equation, we found the parameters $\hat{\beta}_0 = 0.5$ and $\hat{\beta}_1 = 1.5$, which minimize the sum of squared errors.&lt;/p&gt;
+</description>
+        </item>
+        <item>
         <title>Coding Theory 编码理论</title>
         <link>http://localhost:1313/p/coding-theory-%E7%BC%96%E7%A0%81%E7%90%86%E8%AE%BA/</link>
         <pubDate>Fri, 13 Sep 2024 00:00:00 +0000</pubDate>
@@ -173,11 +327,11 @@ $$&lt;/p&gt;
 </description>
         </item>
         <item>
-        <title>Boolean Algebra 布尔代数的本质</title>
-        <link>http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/</link>
+        <title>Boolean Algebra and Category of Lattices 布尔代数与格范畴</title>
+        <link>http://localhost:1313/p/boolean-algebra-and-category-of-lattices-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E4%B8%8E%E6%A0%BC%E8%8C%83%E7%95%B4/</link>
         <pubDate>Tue, 10 Sep 2024 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/</guid>
+        <guid>http://localhost:1313/p/boolean-algebra-and-category-of-lattices-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E4%B8%8E%E6%A0%BC%E8%8C%83%E7%95%B4/</guid>
         <description>&lt;h2 id=&#34;intro&#34;&gt;Intro
 &lt;/h2&gt;&lt;p&gt;首先我们提出研究布尔代数的动机，为啥要研究布尔代数？1和0的与、或、非运算是人都能算明白，简直显然到家，为啥还要花篇幅研究这个？首先请考虑以下问题：&lt;/p&gt;
 &lt;ul&gt;
@@ -229,10 +383,10 @@ $$&lt;/p&gt;
 &lt;p&gt;A1. $(K, \vee)$ 和 $(K, \wedge)$ 是交换幺半群&lt;/p&gt;
 &lt;p&gt;A2. $\vee$ 和 $\wedge$ 满足双侧分配律，且二者地位对等&lt;/p&gt;
 &lt;p&gt;A3. 存在元素 $0, 1 \in K$ 使得:
-&lt;img src=&#34;http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/boolean-def.jpg&#34;
+&lt;img src=&#34;http://localhost:1313/p/boolean-algebra-and-category-of-lattices-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E4%B8%8E%E6%A0%BC%E8%8C%83%E7%95%B4/boolean-def.jpg&#34;
 	width=&#34;1280&#34;
 	height=&#34;820&#34;
-	srcset=&#34;http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/boolean-def_hu15896879855589954061.jpg 480w, http://localhost:1313/p/boolean-algebra-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E7%9A%84%E6%9C%AC%E8%B4%A8/boolean-def_hu14243650574475763826.jpg 1024w&#34;
+	srcset=&#34;http://localhost:1313/p/boolean-algebra-and-category-of-lattices-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E4%B8%8E%E6%A0%BC%E8%8C%83%E7%95%B4/boolean-def_hu15896879855589954061.jpg 480w, http://localhost:1313/p/boolean-algebra-and-category-of-lattices-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E4%B8%8E%E6%A0%BC%E8%8C%83%E7%95%B4/boolean-def_hu14243650574475763826.jpg 1024w&#34;
 	loading=&#34;lazy&#34;
 	
 	
