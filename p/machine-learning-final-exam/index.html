@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="NOTE: 本文仅供个人的学习和参考使用 本文参考了UofG尊贵的祖传ppt &ldquo;Others&rdquo; 中的一般是要通过具体问题来进行学习和理解的部分 ML 需要大量的实践和数学上的理解，不可能靠本文学懂 ML，这些概念的罗列也只是某种形式教育之下的产物，不必沉迷。 Optimization 基本概念 三个要素：decision variables, objective functions and constraints. 任何优化问题先决定这三个分别具体是什么 Decision space (决策域) $\\mathbb{R}^n$ 和 Feasible Space (可行域) $X$: 有 $n$ 个 decision variables, decision space 的维数就是 $n$; 加上工程学限制，将 decision space 进一步缩小为 feasible space $X$ (比如天线集合参数所有可能的取值集合). Feasible Solution $x$: Feasible Space 中的一个点 $x \\in X$, 简称 solution. Objective functions (目标函数): 按 Objective space 分类： 单目标优化： $f(x): X \\to \\mathbb{R}$ 多目标优化 $f(x): X \\to \\mathbb{R}^m$ 按需求分类： Loss function：需要求最小化的一切函数 (最优化方法的默认约定).">
+<title>Machine Learning Final Exam</title>
+
+<link rel='canonical' href='http://localhost:1313/p/machine-learning-final-exam/'>
+
+<link rel="stylesheet" href="/scss/style.min.0304c6baf04e01a8fe70693791cb744d56a3578a3120a8796cefc66825aa39c7.css"><meta property='og:title' content="Machine Learning Final Exam">
+<meta property='og:description' content="NOTE: 本文仅供个人的学习和参考使用 本文参考了UofG尊贵的祖传ppt &ldquo;Others&rdquo; 中的一般是要通过具体问题来进行学习和理解的部分 ML 需要大量的实践和数学上的理解，不可能靠本文学懂 ML，这些概念的罗列也只是某种形式教育之下的产物，不必沉迷。 Optimization 基本概念 三个要素：decision variables, objective functions and constraints. 任何优化问题先决定这三个分别具体是什么 Decision space (决策域) $\\mathbb{R}^n$ 和 Feasible Space (可行域) $X$: 有 $n$ 个 decision variables, decision space 的维数就是 $n$; 加上工程学限制，将 decision space 进一步缩小为 feasible space $X$ (比如天线集合参数所有可能的取值集合). Feasible Solution $x$: Feasible Space 中的一个点 $x \\in X$, 简称 solution. Objective functions (目标函数): 按 Objective space 分类： 单目标优化： $f(x): X \\to \\mathbb{R}$ 多目标优化 $f(x): X \\to \\mathbb{R}^m$ 按需求分类： Loss function：需要求最小化的一切函数 (最优化方法的默认约定).">
+<meta property='og:url' content='http://localhost:1313/p/machine-learning-final-exam/'>
+<meta property='og:site_name' content='Marcobisky'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2024-12-30T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2024-12-30T00:00:00&#43;00:00'/>
+<meta name="twitter:title" content="Machine Learning Final Exam">
+<meta name="twitter:description" content="NOTE: 本文仅供个人的学习和参考使用 本文参考了UofG尊贵的祖传ppt &ldquo;Others&rdquo; 中的一般是要通过具体问题来进行学习和理解的部分 ML 需要大量的实践和数学上的理解，不可能靠本文学懂 ML，这些概念的罗列也只是某种形式教育之下的产物，不必沉迷。 Optimization 基本概念 三个要素：decision variables, objective functions and constraints. 任何优化问题先决定这三个分别具体是什么 Decision space (决策域) $\\mathbb{R}^n$ 和 Feasible Space (可行域) $X$: 有 $n$ 个 decision variables, decision space 的维数就是 $n$; 加上工程学限制，将 decision space 进一步缩小为 feasible space $X$ (比如天线集合参数所有可能的取值集合). Feasible Solution $x$: Feasible Space 中的一个点 $x \\in X$, 简称 solution. Objective functions (目标函数): 按 Objective space 分类： 单目标优化： $f(x): X \\to \\mathbb{R}$ 多目标优化 $f(x): X \\to \\mathbb{R}^m$ 按需求分类： Loss function：需要求最小化的一切函数 (最优化方法的默认约定).">
+  
+
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/profile_hu4958575492368904475.png" width="300"
+                            height="296" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">Marcobisky</a></h1>
+            <h2 class="site-description">Look for a new angle</h2>
+        </div>
+    </header><ol class="menu-social">
+            
+                <li>
+                    <a 
+                        href='https://space.bilibili.com/479299347?spm_id_from=333.337.0.0'
+                        target="_blank"
+                        title="Bilibili"
+                        rel="me"
+                    >
+                        
+                        
+                            <?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1725028876150" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="2284" data-darkreader-inline-fill="" xmlns:xlink="http://www.w3.org/1999/xlink" width="256" height="256"><path d="M306.005333 117.632L444.330667 256h135.296l138.368-138.325333a42.666667 42.666667 0 0 1 60.373333 60.373333L700.330667 256H789.333333A149.333333 149.333333 0 0 1 938.666667 405.333333v341.333334a149.333333 149.333333 0 0 1-149.333334 149.333333h-554.666666A149.333333 149.333333 0 0 1 85.333333 746.666667v-341.333334A149.333333 149.333333 0 0 1 234.666667 256h88.96L245.632 177.962667a42.666667 42.666667 0 0 1 60.373333-60.373334zM789.333333 341.333333h-554.666666a64 64 0 0 0-63.701334 57.856L170.666667 405.333333v341.333334a64 64 0 0 0 57.856 63.701333L234.666667 810.666667h554.666666a64 64 0 0 0 63.701334-57.856L853.333333 746.666667v-341.333334A64 64 0 0 0 789.333333 341.333333zM341.333333 469.333333a42.666667 42.666667 0 0 1 42.666667 42.666667v85.333333a42.666667 42.666667 0 0 1-85.333333 0v-85.333333a42.666667 42.666667 0 0 1 42.666666-42.666667z m341.333334 0a42.666667 42.666667 0 0 1 42.666666 42.666667v85.333333a42.666667 42.666667 0 0 1-85.333333 0v-85.333333a42.666667 42.666667 0 0 1 42.666667-42.666667z" p-id="2285" fill="#c1c1c1" data-darkreader-inline-fill="" style="--darkreader-inline-fill: #3b4042;"></path></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/Marcobisky'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/about/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-user" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="7" r="4" />
+  <path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
+</svg>
+
+
+
+                
+                <span>About</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+                    
+                        <li id="i18n-switch">  
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-language" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M4 5h7" />
+  <path d="M9 3v2c0 4.418 -2.239 8 -5 8" />
+  <path d="M5 9c-.003 2.144 2.952 3.908 6.7 4" />
+  <path d="M12 20l4 -9l4 9" />
+  <path d="M19.1 18h-6.2" />
+</svg>
+
+
+
+                            <select name="language" title="language" onchange="window.location.href = this.selectedOptions[0].value">
+                                
+                                    <option value="http://localhost:1313/" selected>English</option>
+                                
+                                    <option value="http://localhost:1313/zh-cn/" >中文</option>
+                                
+                            </select>
+                        </li>
+                    
+                
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>Dark Mode</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">Table of contents</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#optimization">Optimization</a>
+      <ol>
+        <li><a href="#基本概念">基本概念</a>
+          <ol>
+            <li><a href="#single-objective-optimization">Single-objective optimization</a></li>
+            <li><a href="#multi-objective-optimization">Multi-objective optimization</a></li>
+          </ol>
+        </li>
+        <li><a href="#metric-space-度量空间">Metric space 度量空间</a></li>
+        <li><a href="#others">Others</a></li>
+      </ol>
+    </li>
+    <li><a href="#ai-部分">AI 部分</a>
+      <ol>
+        <li><a href="#machine-learning-ml-general-concepts">Machine Learning (ML) General Concepts</a></li>
+        <li><a href="#supervised-learning">Supervised Learning</a>
+          <ol>
+            <li><a href="#definitions">Definitions</a></li>
+          </ol>
+        </li>
+        <li><a href="#unsupervised-learning">Unsupervised Learning</a>
+          <ol>
+            <li><a href="#definitions-1">Definitions</a></li>
+          </ol>
+        </li>
+        <li><a href="#reinforcement-learning">Reinforcement Learning</a>
+          <ol>
+            <li><a href="#definitions-2">Definitions</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/math/" style="background-color: #7734eb; color: #fff;">
+                Math
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/machine-learning-final-exam/">Machine Learning Final Exam</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">Dec 30, 2024</time>
+            </div>
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    3 minute read
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p><em>NOTE</em>:</p>
+<ul>
+<li>本文仅供个人的学习和参考使用</li>
+<li>本文参考了UofG尊贵的祖传ppt</li>
+<li>&ldquo;Others&rdquo; 中的一般是要通过具体问题来进行学习和理解的部分</li>
+<li>ML 需要大量的实践和数学上的理解，不可能靠本文学懂 ML，这些概念的罗列也只是<em>某种形式教育</em>之下的产物，不必沉迷。</li>
+</ul>
+<h2 id="optimization">Optimization
+</h2><h3 id="基本概念">基本概念
+</h3><ul>
+<li>
+<p>三个要素：decision variables, objective functions and constraints. 任何优化问题先决定这三个分别具体是什么</p>
+<ul>
+<li>
+<p><strong>Decision space</strong> (决策域) $\mathbb{R}^n$ 和 <strong>Feasible Space</strong> (可行域) $X$: 有 $n$ 个 decision variables, decision space 的维数就是 $n$; 加上工程学限制，将 decision space 进一步缩小为 feasible space $X$ (比如天线集合参数所有可能的取值集合).</p>
+<ul>
+<li><strong>Feasible Solution</strong> $x$: Feasible Space 中的一个点 $x \in X$, 简称 solution.</li>
+</ul>
+</li>
+<li>
+<p><strong>Objective functions</strong> (目标函数):</p>
+<ul>
+<li>按 Objective space 分类：
+<ul>
+<li>单目标优化： $f(x): X \to \mathbb{R}$</li>
+<li>多目标优化 $f(x): X \to \mathbb{R}^m$</li>
+</ul>
+</li>
+<li>按需求分类：
+<ul>
+<li><strong>Loss function</strong>：需要求最小化的一切函数 (最优化方法的默认约定).</li>
+<li><strong>utility function</strong>（效用）：需要求最大值的一切函数.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Objective space</strong> (目标空间): $f$ 的值所在的空间，$\mathbb{R}$ 或 $\mathbb{R}^n$</p>
+</li>
+</ul>
+</li>
+<li>
+<p>分类：</p>
+<ul>
+<li><strong>Constraint / Unconstraint</strong>: 无约束是有约束的特例</li>
+<li><strong>Single-objective / Multi-objective</strong>: 看下面</li>
+<li><strong>Unimodal (Convex) / Multimodal</strong>: 有一个最值 / 有多个极值</li>
+</ul>
+</li>
+</ul>
+<h4 id="single-objective-optimization">Single-objective optimization
+</h4><ul>
+<li>
+<p>定义：目标函数的值是标量（而不是向量）的问题</p>
+<p><img src="/p/machine-learning-final-exam/optimization_def.png"
+	width="2438"
+	height="914"
+	srcset="/p/machine-learning-final-exam/optimization_def_hu12949627818430624984.png 480w, /p/machine-learning-final-exam/optimization_def_hu9196538371009860556.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="266"
+		data-flex-basis="640px"
+	
+></p>
+</li>
+<li>
+<p>Solution的质量：</p>
+<ul>
+<li>Two feasible solutions: Loss function值越小的solution越好</li>
+<li>A feasible solution vs. an infeasible solution: 当然feasible solution更好</li>
+<li>Two infeasible solutions: 哪个超出可行域的程度更低更好</li>
+</ul>
+</li>
+<li>
+<p>分类：</p>
+<ul>
+<li>
+<p><strong>Combinational Optimization</strong></p>
+<ul>
+<li>定义：决策向量 $x$ 所在的集合是有限阶（离散）的</li>
+<li>Examples:
+<ul>
+<li>Traveling Salesman Problem (TSP): 你要从袁记云饺门店出发去五组团、八组团、六组团、格院楼送外卖，最后要回到袁记云饺门店，怎么走最近？
+<ul>
+<li>应用：Robot control：应按照哪种顺序使用机械臂才能最大限度地缩短钻孔时间？</li>
+</ul>
+</li>
+<li>Quadratic Assignment Problem (QAP): 教学楼有三处地点（有远有近），如何分配地点作为办公室、教室、乒乓球室能使总走路成本最低？（比如老师要经常从办公室到教室，不能太远）。命名为Quadratic的原因是该问题可以用一个二次型来描述。</li>
+<li>knapsack：你的包只能装20kg的东西，你要旅游只能用包装东西，有手机、拯救者电脑、烧水壶、水杯、卫生纸、杠铃，你带哪些？</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Continuous Optimization</strong></p>
+<ul>
+<li>定义：决策向量 $x$ 所在的集合是连续的</li>
+<li>Examples:
+<ul>
+<li>天线设计：确定天线的长度、宽度、高度等几何参数（在一定范围），使得他的 $S_{11}$ （理解为浪费的能量）Response 在工作波段 5.28 GHz – 5.72 GHz 尽可能小。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="multi-objective-optimization">Multi-objective optimization
+</h4><ul>
+<li>
+<p>定义：多目标优化也叫 Vector Optimization，因为目标函数的取值可看作一个向量</p>
+<p>$$
+\min_{x\in X}(f_{1}(x),f_{2}(x),\cdots ,f_{k}(x))
+$$</p>
+<p>where $X$ is the feasible space (一般就是 $\mathbb{R}^n$). $x \in X$ is a feasible solution</p>
+</li>
+<li>
+<p>但是往往会有 trade-off 情况：让哪个 $f$ 的值最大呢？但是有一种很显然的情况:</p>
+</li>
+<li>
+<p>Solution的质量：</p>
+<ul>
+<li>
+<p>$x_1^{*}$ <strong>Dominates</strong> $x_2^*$: 如果两个 feasible solution $x_1^{*}$ 和 $x_2^{*}$，如果 $x_1^{*}$ 能让所有的 $f$ 都要比用 $x_2^{*}$ 的更小 ( $\le$ )，那 $x_1^{*}$ 肯定优于 $x_2^{*}$，称 $x_1^{*}$ Dominates $x_2^{*}$. 如果是 $&lt;$，称 $x_1^{*}$ strictly dominates $x_2^{*}$.</p>
+</li>
+<li>
+<p>$x_1^{*}$, $x_1^{*}$ <strong>Cannot Compare</strong>: 如果相较于 $x_1^{*}$，$x_2^{*}$ 会让有些 $f$ 更小有些更大（而不是全部更小或者全部更大），则称 $x_1^{*}$ cannot compared with $x_2^{*}$.</p>
+</li>
+<li>
+<p>$x_1^{*}$ 和 $x_1^{*}$ 要么不能比较，要么一者优于另一者！</p>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>Pareto set</strong> 和 <strong>Pareto front</strong>:</p>
+<p><img src="/p/machine-learning-final-exam/Pareto_front.png"
+	width="1802"
+	height="1350"
+	srcset="/p/machine-learning-final-exam/Pareto_front_hu15069518061312468447.png 480w, /p/machine-learning-final-exam/Pareto_front_hu17854343704622216852.png 1024w"
+	loading="lazy"
+	
+		alt="$A$ and $B$ dominates $C$"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="133"
+		data-flex-basis="320px"
+	
+></p>
+<p><img src="/p/machine-learning-final-exam/PS_PF.png"
+	width="888"
+	height="1062"
+	srcset="/p/machine-learning-final-exam/PS_PF_hu14601109703247268178.png 480w, /p/machine-learning-final-exam/PS_PF_hu5305634759178065730.png 1024w"
+	loading="lazy"
+	
+		alt="Pareto set 在可行域中，而 Pareto front 在目标空间中"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="83"
+		data-flex-basis="200px"
+	
+></p>
+</li>
+</ul>
+<h3 id="metric-space-度量空间">Metric space 度量空间
+</h3><ul>
+<li>
+<p>Decision space $\mathbb{F}^n$ ($\mathbb{F}$ 是伽罗瓦域) 可被赋予一个特定的 Metric (如欧式距离、Taxi-cab 距离、Hamming 距离) 使之成为一个度量空间</p>
+</li>
+<li>
+<p>其他概念请自行阅读 Rudin 或 Terence Tao 的实分析教材，omitted here.</p>
+</li>
+</ul>
+<h3 id="others">Others
+</h3><ul>
+<li>将Engineering问题转化为 Optimization 的问题</li>
+</ul>
+<h2 id="ai-部分">AI 部分
+</h2><h3 id="machine-learning-ml-general-concepts">Machine Learning (ML) General Concepts
+</h3><ul>
+<li>
+<p>一句话概括ML：人先猜一个函数 $f$ 的样子，让机器算出这个函数里面的参数。</p>
+</li>
+<li>
+<p>ML 的分类</p>
+<p><img src="/p/machine-learning-final-exam/ML_class.png"
+	width="1954"
+	height="724"
+	srcset="/p/machine-learning-final-exam/ML_class_hu13302043225562044500.png 480w, /p/machine-learning-final-exam/ML_class_hu2690921056094842256.png 1024w"
+	loading="lazy"
+	
+		alt="ML的分类"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="269"
+		data-flex-basis="647px"
+	
+></p>
+</li>
+</ul>
+<h3 id="supervised-learning">Supervised Learning
+</h3><h4 id="definitions">Definitions
+</h4><ul>
+<li>
+<p><strong>Supervised learning</strong>: 数据集中有标签的学习.</p>
+<ul>
+<li><strong>data mining (preparation)</strong>: 数据集的收集过程</li>
+<li><strong>data cleaning</strong>: 筛选错误的数据的过程</li>
+<li><strong>Missing data</strong>: 对于丢失的数据，丢弃(Dropping)和填补(Imputing)都不太好，因为前者可能使有用的数据损失，后者可能引入偏差 (这ppt写的，无语╰(‵□′)╯)</li>
+</ul>
+</li>
+<li>
+<p><strong>(Labelled) Training set</strong> $\mathcal{D}$: 一个输入-输出的集合 $\mathcal{D}= {(\mathbf{x_i},y_i)}^N_{i=1}$，$\mathbf{x_i}$ 是输入（比如图片），$y_i$ 是输出（比如类别）</p>
+<ul>
+<li><strong>Feature Space</strong> $\mathcal{X}$: $\mathbf{x_i}$ 的取值集合
+<ul>
+<li><strong>Feature Selection</strong>: 选择你觉得相关的数据形式（比如生物学研究中，基因表达数据可能包含上万个基因特征，但只有少数基因与某种疾病相关，那就别把这些不相关的数据用来训练了）
+<img src="/p/machine-learning-final-exam/feature_selection.png"
+	width="1110"
+	height="760"
+	srcset="/p/machine-learning-final-exam/feature_selection_hu244886884879820385.png 480w, /p/machine-learning-final-exam/feature_selection_hu5238993921454423167.png 1024w"
+	loading="lazy"
+	
+		alt="Feature Section 的分类"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="146"
+		data-flex-basis="350px"
+	
+></li>
+</ul>
+</li>
+<li><strong>Label Space</strong> $\mathcal{Y}$: $y_i$ 的取值集合</li>
+</ul>
+</li>
+<li>
+<p>Supervised learning 解决的问题：</p>
+<ul>
+<li>
+<p><strong>Classification</strong> 问题（or <strong>Pattern recognition</strong>: $\mathcal{Y}$ 有限集， $\mathcal{Y} = {1, \ldots, C}$. (比如 {Male, Female})，$y_i$ 称作 <strong>categorical variable</strong></p>
+<ul>
+<li>Binary Classification: $C=2$</li>
+<li>Multiclass Classification: $C&gt;2$</li>
+<li>Multilabel Classification: $f$ 为多值映射</li>
+</ul>
+<p>举例：手写数字识别、图片分类</p>
+</li>
+<li>
+<p><strong>regression</strong> 问题: $y_i$ 取值于一个无限集 (比如 $\mathbb{R}$)</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="unsupervised-learning">Unsupervised Learning
+</h3><h4 id="definitions-1">Definitions
+</h4><ul>
+<li>
+<p><strong>Supervised learning</strong>: 数据集中没有标签的学习，机器需要自行发现 “interesting patterns” (称为 “knowledge discovery”)。</p>
+</li>
+<li>
+<p><strong>(Unlabelled) Training set</strong> $\mathcal{D}$: 一个只有输入的集合 $\mathcal{D}= {(\mathbf{x_i})}^N_{i=1}$，$\mathbf{x_i}$ 是输入（比如图片）。</p>
+</li>
+<li>
+<p>UnSupervised learning 解决的问题：</p>
+<ul>
+<li><strong>Clustering</strong>: 没有标签的分类问题
+<img src="/p/machine-learning-final-exam/clustering.png"
+	width="2054"
+	height="712"
+	srcset="/p/machine-learning-final-exam/clustering_hu5711183451677437300.png 480w, /p/machine-learning-final-exam/clustering_hu311243230497095402.png 1024w"
+	loading="lazy"
+	
+		alt="Clustering is Unlabelled Classification"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="288"
+		data-flex-basis="692px"
+	
+></li>
+<li><strong>Dimensionality reduction</strong>: 将数据点降维从而发现影响数据分布的少量几个本质因素(<strong>latent factors</strong>), 其实很像 Feature Reduction.
+<ul>
+<li>常见方法包括：PCA (principal components analysis), ICA (a variation of PCA)</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="reinforcement-learning">Reinforcement Learning
+</h3><h4 id="definitions-2">Definitions
+</h4><ul>
+<li><strong>Reinforcement Learning</strong>: 人类也学不会，或者说不清楚怎么学的问题让机器去学的机器学习方法。但是人类知道怎么给奖励或惩罚 (punishment or reward)，使得机器在试错和奖励中学到东西。</li>
+</ul>
+<p><img src="/p/machine-learning-final-exam/reinforcement.png"
+	width="1568"
+	height="918"
+	srcset="/p/machine-learning-final-exam/reinforcement_hu9903096740412477591.png 480w, /p/machine-learning-final-exam/reinforcement_hu6701565579191203966.png 1024w"
+	loading="lazy"
+	
+	
+		class="gallery-image" 
+		data-flex-grow="170"
+		data-flex-basis="409px"
+	
+></p>
+<ul>
+<li>方法：（没搞懂）
+<ul>
+<li>Policy-based RL uses a policy or deterministic strategy that maximises cumulative reward</li>
+<li>Value-based RL tries to maximise an arbitrary value function</li>
+<li>Model-based RL creates a virtual model for a certain environment and the
+agent learns to perform within those constraint</li>
+</ul>
+</li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+            ><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredClasses: ["gist"]
+        });})
+</script>
+    
+</article>
+
+    
+
+    
+
+<aside class="related-content--wrapper">
+    <h2 class="section-title">Related content</h2>
+    <div class="related-content">
+        <div class="flex article-list--tile">
+            
+                
+<article class="has-image">
+    <a href="/p/machine-learning-notes-updating/">
+        
+        
+            <div class="article-image">
+                <img src="/p/machine-learning-notes-updating/cover.e7d3fa468ead99de4e9596d86a07d154_hu419188046890188316.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Machine Learning Notes (Updating)"
+                        
+                        data-hash="md5-59P6Ro6tmd5OlZbYagfRVA==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Machine Learning Notes (Updating)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/least-squares-as-projection-%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95%E7%9A%84%E6%8A%95%E5%BD%B1%E8%A7%A3%E9%87%8A/">
+        
+        
+            <div class="article-image">
+                <img src="/p/least-squares-as-projection-%E6%9C%80%E5%B0%8F%E4%BA%8C%E4%B9%98%E6%B3%95%E7%9A%84%E6%8A%95%E5%BD%B1%E8%A7%A3%E9%87%8A/cover.d8af020ddca6b42eae430475b7f28529_hu1998183580962510260.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Least Squares as Projection 最小二乘法的投影解释"
+                        
+                        data-hash="md5-2K8CDdymtC6uQwR1t/KFKQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Least Squares as Projection 最小二乘法的投影解释</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/coding-theory-%E7%BC%96%E7%A0%81%E7%90%86%E8%AE%BA-%E4%BB%A5%E5%90%8E%E5%86%8D%E6%9B%B4/">
+        
+        
+            <div class="article-image">
+                <img src="/p/coding-theory-%E7%BC%96%E7%A0%81%E7%90%86%E8%AE%BA-%E4%BB%A5%E5%90%8E%E5%86%8D%E6%9B%B4/cover.6cbe6882c693ef220c44202dc71b395d_hu8738736852969389963.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Coding Theory 编码理论 (以后再更)"
+                        
+                        data-hash="md5-bL5ogsaT7yIMRCAtxxs5XQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Coding Theory 编码理论 (以后再更)</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="has-image">
+    <a href="/p/boolean-algebra-and-category-of-lattices-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E4%B8%8E%E6%A0%BC%E8%8C%83%E7%95%B4/">
+        
+        
+            <div class="article-image">
+                <img src="/p/boolean-algebra-and-category-of-lattices-%E5%B8%83%E5%B0%94%E4%BB%A3%E6%95%B0%E4%B8%8E%E6%A0%BC%E8%8C%83%E7%95%B4/cover.726a6bae54aafc4c23a21dec1e8e1bb1_hu10748519455957004098.png" 
+                        width="250" 
+                        height="150" 
+                        loading="lazy"
+                        alt="Featured image of post Boolean Algebra and Category of Lattices 布尔代数与格范畴"
+                        
+                        data-hash="md5-cmprrlSq/Ewjoh3sHo4bsQ==">
+                
+            </div>
+        
+
+        <div class="article-details">
+            <h2 class="article-title">Boolean Algebra and Category of Lattices 布尔代数与格范畴</h2>
+        </div>
+    </a>
+</article>
+
+            
+        </div>
+    </div>
+</aside>
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    <footer class="site-footer">
+    <section class="copyright">
+        &copy; 
+        
+            2020 - 
+        
+        2024 Marcobisky
+    </section>
+    
+    <section class="powerby">
+        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
+        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.26.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
+    </section>
+</footer>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
