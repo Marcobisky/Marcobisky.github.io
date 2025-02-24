@@ -1,0 +1,517 @@
+---
+author: Marcobisky
+title: RTL Analysis on MacOS under 300MB
+description: Wanna compile verilog on MacOS but without programing an FPGA, check this out!
+date: 2024-08-31
+image: cover.png
+categories:
+    - Awesome-Mac
+format:
+    html:
+        toc: true
+        self-contained: true
+        grid: 
+            margin-width: 350px
+---
+
+## Intro and Overview
+
+### References
+
+**CLAIM**: This article synthesizes conclusions and methods from multiple websites and is not pure original. 本文综合了多个网站的结论和方法，并非原创。
+
+You may find these websites useful:
+
+* [Workflow for FPGA development](https://nishtahir.com/a-mostly-free-fpga-development-workflow-for-macos/)
+* [Some open-source tools](https://hackernoon.com/getting-started-using-open-source-fpga-tools)
+* [IceStudio for M2 Mac](https://www.hackster.io/whitney-knitter/fpga-development-on-m2-mac-tinyfpga-with-icestudio-39c300)
+* [FPGA Toolchain](https://github.com/YosysHQ/fpga-toolchain?tab=readme-ov-file)
+* [VHDL compile chain on MacOS](https://www.reddit.com/r/VHDL/comments/12707lp/ghdl_on_mac_m1/)
+
+### Tools related
+
+* You need these:
+
+    * [gtkwave](https://saiankit.medium.com/how-to-simulate-verilog-models-on-macos-5a6f821b2c4f): main RTL wave creator
+    * [Icarus Verilog](https://github.com/steveicarus/iverilog), [and this manual](https://steveicarus.github.io/iverilog/usage/getting_started.html)
+    * [YoSYS](https://github.com/yosyshq/yosys): `.v` to `.json`
+    * [GHDL](https://github.com/ghdl/ghdl?tab=readme-ov-file): compile, link and simulation tool for VHDL
+    * [netlistsvg](https://github.com/nturley/netlistsvg?tab=readme-ov-file): `.json` to `.svg`
+
+* Not nessasarily required:
+
+    * [Pulseview](https://sigrok.org/doc/pulseview/unstable/manual.html#_mac_os_x): Logic Analyzer (Not required though)
+    * [Digital](https://github.com/hneemann/Digital/releases): Visual simulation
+
+* Useful vscode plugins:
+
+    * [Verilog Support](https://github.com/mshr-h/vscode-verilog-hdl-support): vscode verilog language highlighter
+    * [Wavetrace](https://marketplace.visualstudio.com/items?itemName=wavetrace.wavetrace&ref=nishtahir.com): A nice vscode plugin to replace gtkwave
+
+## First Project in Verilog
+
+### Install Icarus Verilog Compiler
+
+```
+brew install icarus-verilog
+```
+
+### Compilation and Simulation
+
+<!-- 新建文件夹`Verilog`，在其中新建两个测试文件：`GatedDLatch.v` and `GatedDLatch_tb.v`，前者为电路结构描述文件，后者为testbench文件，分别写入以下内容： -->
+Create new folder called `Verilog`, then create two test files named `GatedDLatch.v` and `GatedDLatch_tb.v`. The former is the description file of the circuit, the latter is for testbench. And write the following contents respectively:
+
+```verilog
+// in GatedDLatch.v
+module GatedDLatch (Data, WE, Out, OutBar);
+
+    input Data;
+    input WE;
+
+    output Out;
+    output OutBar;
+
+    // component name(output, input1, input2)
+    wire S;
+    wire R;
+    wire Dbar;
+    nand g1(S, Data, WE);
+    not g2(Dbar, Data);
+    nand g3(R, WE, Dbar);
+    nand g4(Out, S, OutBar);
+    nand g5(OutBar, R, Out);
+    
+
+endmodule
+```
+
+and 
+
+```verilog
+// in GatedDLatch_tb.v
+`timescale 1ns / 1ns // simulation time, time precision = 1ns
+//Import the main code into the testbench
+`include "GatedDLatch.v"
+
+module GatedDLatch_tb;
+//Inputs as registers
+reg Data;
+reg WE;
+
+//Outputs as wires
+wire Out;
+wire OutBar;
+
+//Initialisation
+GatedDLatch uut(Data, WE, Out, OutBar);
+
+initial begin
+    //Name of the graph file that gets generated after we run
+    $dumpfile("GatedDLatch_tb.vcd");
+    $dumpvars(0,GatedDLatch_tb);
+
+    Data = 0;
+    WE = 0;
+    #10;
+
+    Data = 1;
+    #4;
+    WE = 1;
+    #2;
+    WE = 0;
+    #4;
+
+    Data = 0;
+    #4;
+    WE = 1;
+    #2;
+    WE = 0;
+    #4;
+
+    $display("Test complete");
+end
+endmodule
+```
+
+<!-- 终端运行： -->
+Run this in the terminal:
+
+```
+iverilog -o GatedDLatch_tb.vvp GatedDLatch_tb.v
+```
+
+<!-- 将产生的二进制临时文件 `GatedDLatch_tb.vvp` 用 `vvp` 命令转换为 `GatedDLatch_tb.vcd`  waveform file: -->
+Use `vvp` command to convert the binary temperary file `GatedDLatch_tb.vvp` to `GatedDLatch_tb.vcd`  waveform file:
+
+```
+vvp GatedDLatch_tb.vvp
+```
+
+<!-- 安装 [Wavetrace](https://marketplace.visualstudio.com/items?itemName=wavetrace.wavetrace&ref=nishtahir.com) 插件后即可查看波形： -->
+Install [Wavetrace](https://marketplace.visualstudio.com/items?itemName=wavetrace.wavetrace&ref=nishtahir.com) in vscode to view the waveform:
+
+![Display the waveform in vscode](wave-in-vscode.png)
+
+<!-- 也可以用 [gtkwave](https://saiankit.medium.com/how-to-simulate-verilog-models-on-macos-5a6f821b2c4f) 软件内查看波形： -->
+You can also install [gtkwave](https://saiankit.medium.com/how-to-simulate-verilog-models-on-macos-5a6f821b2c4f) to view the waveform.
+
+```
+brew install gtkwave
+gtkwave GatedDLatch_tb.vcd
+```
+
+![Before imported](gtkwave1.png)
+
+<!-- 下拉 GatedDLatch_tb 列表可显示波形： -->
+Expand GatedDLatch_tb list to display the waveform:
+
+![Displaying waveform](gtkwave2.png)
+
+### Synthesis and Visualization
+
+<!-- 我们需要将画出来的电路拓扑可视化（产生Schematics），首先用 `YoSYS` 将 Verilog 代码转化为数字逻辑电路的门级网表 (gate-level netlist)，先安装 `YoSYS`: -->
+We can also visualize the circuit topology (called generating schematics). First, use `YoSYS` to convert the verilog code into gate-level netlist. Of course you should install the command line tool `YoSYS`:
+
+```
+brew install yosys
+yosys -V # Verify Yosys installation
+```
+
+<!-- `YoSYS` 可将电路结构文件 `GatedDLatch.v` 转换为一个 `json` 文件： -->
+`YoSYS` will first convert the circuit structure description file `GatedDLatch.v` into a `json` file:
+
+```
+yosys -p "prep -top GatedDLatch; write_json GatedDLatch.json" GatedDLatch.v
+```
+
+<!-- 然后我们再安装 `netlistsvg` 工具: -->
+Then we install another tool called `netlistsvg`:
+
+```
+# Install Node.js (if not already installed)
+brew install node
+
+# Install netlistsvg globally using npm
+npm install -g netlistsvg
+
+# Verify netlistsvg installation
+netlistsvg --version
+```
+
+<!-- 用 `netlistsvg` 工具将 `GatedDLatch.json` 转换为 `GatedDLatch.svg`: -->
+Using the `netlistsvg` tool to convert `GatedDLatch.json` to `GatedDLatch.svg`:
+```
+netlistsvg GatedDLatch.json -o GatedDLatch.svg
+```
+
+<!-- 预览 `GatedDLatch.svg` 可得电路结构图： -->
+Previewing GatedDLatch.svg will give you the circuit schematic:
+
+![`GatedDLatch.svg`](GatedDLatch.png)
+
+### Makefile Work Flow
+
+<!-- 可见整个流程分为上述独立的两大块： -->
+The entire workflow can be divided into two major independent parts:
+
+<!-- * 编译、仿真
+    * `iverilog` (Compilation)
+    * `vvp` (Simulation)
+* 合成、电路结构可视化
+    * `yosys` (Synthesis)
+    * `netlistsvg` (Visualization) -->
+
+* Compilation and Simulation:
+	* `iverilog` (Compilation)
+	* `vvp` (Simulation)
+* Synthesis and Circuit Structure Visualization:
+	* `yosys` (Synthesis)
+	* `netlistsvg` (Visualization)
+
+<!-- 我们用 Makefile 自动化这个过程（确保你装了Make有关组件）：在之前建的 `Verilog` 文件夹下创建一个 `Makefile` 文件，加入以下内容： -->
+We use a Makefile to automate this process (ensure that Make and related components are installed): Create a `Makefile` file in the previously created `Verilog` folder and add the following content:
+
+```makefile
+# Description: Makefile for GatedDLatch
+CIRCUIT_STRUCT = GatedDLatch
+
+# Directories
+BUILD_DIR = build
+
+# Ensure the build directory exists
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+# Compilation: iverilog compilation
+iverilog: $(CIRCUIT_STRUCT).v $(CIRCUIT_STRUCT)_tb.v | $(BUILD_DIR)
+	iverilog -o $(BUILD_DIR)/$(CIRCUIT_STRUCT)_tb.vvp $(CIRCUIT_STRUCT)_tb.v
+
+# Simulation: generate waveform (.vcd)
+vvp: $(BUILD_DIR)/$(CIRCUIT_STRUCT)_tb.vvp
+	vvp $(BUILD_DIR)/$(CIRCUIT_STRUCT)_tb.vvp
+
+# Synthesis: generate circuit structure configuration file (.json)
+YOSYS: $(CIRCUIT_STRUCT).v | $(BUILD_DIR)
+	yosys -p "prep -top $(CIRCUIT_STRUCT); write_json $(BUILD_DIR)/$(CIRCUIT_STRUCT).json" $(CIRCUIT_STRUCT).v
+
+# Visualization: generate human readable (.svg) from .json
+NETLISTSVG: $(BUILD_DIR)/$(CIRCUIT_STRUCT).json | $(BUILD_DIR)
+	netlistsvg $(BUILD_DIR)/$(CIRCUIT_STRUCT).json -o $(BUILD_DIR)/$(CIRCUIT_STRUCT).svg
+
+# Schematic diagram only: Synthesis then Visualization
+schematic: YOSYS NETLISTSVG
+
+# Run all steps
+run_all: iverilog vvp schematic
+
+# Clean build directory
+clean:
+	rm -rf $(BUILD_DIR)
+	rm -f $(CIRCUIT_STRUCT)_tb.vcd
+```
+
+<!-- 每次改变文件后只需执行： -->
+After modifying the files, simply execute:
+
+```
+make clean
+make run_all
+```
+
+<!-- 即可生成所有相关文件： -->
+This will generate all the relevant files:
+
+![Project File Structure](inside-verilog.png)
+
+## First Project in VHDL
+
+
+### Install GHDL Compiler
+
+<!-- 和 Verilog 一样，VHDL 也是一种硬件描述语言。编译它需要另一个工具：[GHDL](https://github.com/ghdl/ghdl?tab=readme-ov-file). 在MacOS上安装它有几个坑，以下步骤在M2 Mac上实测有效（截止2024-09-01）： -->
+Similar to Verilog, VHDL is also a hardware description language. Compiling it requires another tool: [GHDL](https://github.com/ghdl/ghdl?tab=readme-ov-file). Installing it on macOS can be tricky. The following steps have been tested on an M2 Mac (as of 2024-09-01):
+
+<!-- 用 `brew` 安装`vhdl`: -->
+Install `vhdl` using `brew`:
+
+```
+brew install vhdl
+```
+
+<!-- `vhdl` 有两个版本：LLVM和mcode，LLVM版本在Mac上有点问题，而brew下载的正是这个版本，所以我们从[这里](https://github.com/ghdl/ghdl/releases/tag/nightly)手动下载mcode的组件，我下的是 `ghdl-macos-11-mcode.tgz`。 -->
+`vhdl` has two versions: LLVM and mcode. The LLVM version has some issues on macOS, and the brew-installed version uses LLVM, so we manually download the mcode version from [here](https://github.com/ghdl/ghdl/releases/tag/nightly). I downloaded ghdl-macos-11-mcode.tgz.
+
+Extract it by double-clicking, and you will get three files:
+
+![GHDL-mcode package](ghdl-package.png)
+
+<!-- 将这三个文件复制粘贴到这个路径：`/opt/homebrew/Caskroom/ghdl/4.1.0`: -->
+Copy and paste these three files to the following path: `/opt/homebrew/Caskroom/ghdl/4.1.0`:
+
+![Copy and Paste](copy-and-paste.png)
+
+In the terminal, type:
+
+```
+ghdl --version
+```
+
+<!-- 如果有安全性提示，到系统设置 Privacy & Security 中允许即可: -->
+If you encounter security prompts, go to System Settings > Privacy & Security to allow access:
+
+![Allow Access in Privacy & Security](settings.png)
+
+### Compilation, Linking and Simulation
+
+<!-- 与Verilog不同，VHDL多了一步Linking，就是将component声明和其实体文件 (testbench) 链接在一起。Verilog为什么不要这一步？因为testbench文件中包含了声明的内容 (`include "GatedDLatch.v" `)，可自动链接。 -->
+Unlike Verilog, VHDL requires an additional Linking step, which connects the component declarations with their implementation files (testbench). Why doesn’t Verilog require this? Because the testbench file in Verilog includes the declaration contents (`include "GatedDLatch.v"`), so it links automatically.
+
+
+<!-- Verilog 中我们用了两中不同的工具 (`iverilog`, `vvp`) 来完成编译和仿真。而VHDL只用一个工具：`GHDL`. -->
+In Verilog, we used two separate tools (`iverilog` and `vvp`) for compilation and simulation. However, for VHDL, we only need one tool: `GHDL`.
+
+<!-- 新建文件夹`VHDLDemo`，在其中新建两个测试文件：`demo.vhdl` and `demo_tb.vhdl`，前者为电路结构描述文件，后者为testbench文件 (也可用`.vhd`为后缀)，分别写入以下内容： -->
+Create a new folder `VHDLDemo`, and within it, create two files: `demo.vhdl` and `demo_tb.vhdl`. The former describes the circuit structure, and the latter serves as the testbench file (you can also use `.vhd` as the suffix). Add the following content to the respective files:
+
+```vhdl
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity demo is
+    port (
+        A : in  STD_LOGIC;
+        B : in  STD_LOGIC;
+        O : out STD_LOGIC
+    );
+end demo;
+
+architecture Behavioral of demo is
+begin
+    O <= not (A and B); -- NAND gate
+end Behavioral;
+```
+
+and
+
+```vhdl
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity demo_tb is
+end demo_tb;
+
+architecture Behavioral of demo_tb is
+    signal A : STD_LOGIC := '0';
+    signal B : STD_LOGIC := '0';
+    signal O : STD_LOGIC;
+
+    -- Instantiate the unit under test (UUT)
+    component demo
+        port (
+            A : in  STD_LOGIC;
+            B : in  STD_LOGIC;
+            O : out STD_LOGIC
+        );
+    end component;
+begin
+    UUT: demo port map (
+        A => A,
+        B => B,
+        O => O
+    );
+
+    -- Test process
+    process
+    begin
+        -- Test case 1: A = 0, B = 0
+        A <= '0';
+        B <= '0';
+        wait for 10 ns;
+        
+        -- Test case 2: A = 0, B = 1
+        A <= '0';
+        B <= '1';
+        wait for 10 ns;
+
+        -- Test case 3: A = 1, B = 0
+        A <= '1';
+        B <= '0';
+        wait for 10 ns;
+
+        -- Test case 4: A = 1, B = 1
+        A <= '1';
+        B <= '1';
+        wait for 10 ns;
+
+        -- End of simulation
+        wait;
+    end process;
+end Behavioral;
+```
+
+<!-- 再建立一个 `Makefile` 文件实现自动化： -->
+Create a `Makefile` to automate the process:
+
+```makefile
+# Description: Makefile for VHDLDemo
+CIRCUIT = demo
+TB = demo_tb
+BUILD_DIR = build
+
+# Ensure the build directory exists
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+# Compilation: compile the design and testbench
+ghdl_compile: $(BUILD_DIR)
+	ghdl -a --workdir=$(BUILD_DIR) $(CIRCUIT).vhdl
+	ghdl -a --workdir=$(BUILD_DIR) $(TB).vhdl
+
+# Linking: Elaborate the design and testbench
+ghdl_elab: ghdl_compile
+	ghdl -e --workdir=$(BUILD_DIR) $(TB)
+
+# Simulation: simulate the testbench
+ghdl_simulate: ghdl_elab
+	ghdl -r --workdir=$(BUILD_DIR) $(TB) --vcd=$(BUILD_DIR)/$(TB).vcd
+
+### These cannot work for now##############################################
+# # Synthesis: generate circuit structure configuration file (.json), you should have ghdl plugin installed for yosys, but I have error: "ERROR: No such command: ghdl" or "dyld[5264]: missing symbol called", possible solution could be to install yosys from source, but not sure
+# YOSYS: $(CIRCUIT).vhdl | $(BUILD_DIR)
+# 	yosys -p "ghdl $(CIRCUIT); prep -top $(CIRCUIT); write_json -compat-int $(BUILD_DIR)/$(CIRCUIT).json" $(CIRCUIT).vhdl
+
+# # Visualization: generate human readable (.svg) from .json
+# NETLISTSVG: $(BUILD_DIR)/$(CIRCUIT).json  | $(BUILD_DIR)
+# 	netlistsvg $(BUILD_DIR)/$(CIRCUIT).json -o $(BUILD_DIR)/$(CIRCUIT).svg
+
+# # Schematic diagram only: Synthesis then Visualization
+# schematic: YOSYS NETLISTSVG
+
+# # Run all steps
+# run_all: ghdl_compile ghdl_elab ghdl_simulate YOSYS NETLISTSVG
+### These cannot work for now##############################################
+
+# Run compilation, linking and simulation
+run_cls: ghdl_compile ghdl_elab ghdl_simulate
+
+# Clean build directory
+clean:
+	rm -rf $(BUILD_DIR)
+	rm -f $(TB)
+
+# Experiment: Run testbench without the design file
+run_tb_only: $(BUILD_DIR)
+	ghdl -a --workdir=$(BUILD_DIR) $(TB).vhdl
+	ghdl -r --workdir=$(BUILD_DIR) $(TB) --vcd=$(BUILD_DIR)/$(TB)_no_design.vcd
+```
+
+<!-- 运行过程自行理解。命令行执行： -->
+The running process is very clear. In the command line, execute:
+
+```
+make clean
+make run_cls
+```
+
+<!-- 即可。 -->
+This will complete the process.
+
+<!-- 如果你要看如果不编译链接 design file (`demo.vhdl`) 会出来什么，可以运行： -->
+If you want to see what happens if you skip compiling and linking the design file (`demo.vhdl`), run:
+
+```
+make clean # Cannot omitted!
+make run_tb_only
+```
+
+<!-- 你可以在vscode中或用gtkwave对比两次生成的 `.vcd` 文件，它们是有区别的。 -->
+You can compare the two `.vcd` files generated in VSCode or using GTKWave; they are different as expected.
+
+
+
+### No Synthesis and Visualization Plan
+
+
+<!-- 注意这个 `Makefile` 没有包括画schematic diagram, 因为 `yosys` 需要装 `ghdl` 插件，目前适配不是很好，具体可参考 [ghdl-yosys-plugin](https://github.com/ghdl/ghdl-yosys-plugin?tab=readme-ov-file), [building-ghdl](https://ghdl.github.io/ghdl/development/building/index.html), 前者提到的方法在M2 Mac上已经试过，会报错： -->
+Note that this `Makefile` does not include steps to generate a schematic diagram because `yosys` requires a `ghdl` plugin. Currently, the integration is not very stable. You can refer to [ghdl-yosys-plugin](https://github.com/ghdl/ghdl-yosys-plugin?tab=readme-ov-file) and [building-ghdl](https://ghdl.github.io/ghdl/development/building/index.html) for more details. However, the suggested methods have been tested on M2 Mac and result in errors:
+
+```bash
+ /----------------------------------------------------------------------------\
+ |  yosys -- Yosys Open SYnthesis Suite                                       |
+ |  Copyright (C) 2012 - 2024  Claire Xenia Wolf <claire@yosyshq.com>         |
+ |  Distributed under an ISC-like license, type "license" to see terms        |
+ \----------------------------------------------------------------------------/
+ Yosys 0.44 (git sha1 80ba43d26, clang++ 15.0.0 -fPIC -O3)
+
+-- Running command `ghdl demo_tb.vhdl -e demo_tb; prep -top demo_tb; write_json demo.json' --
+
+1. Executing GHDL.
+dyld[5264]: missing symbol called
+zsh: abort      yosys -m ghdl -p
+```
+
+<!-- 这个问题在 [ghdl-yosys-plugin](https://github.com/ghdl/ghdl-yosys-plugin?tab=readme-ov-file) 的 Issues 里面也有人问了，没答案。 -->
+This issue has also been mentioned in the Issues section of [ghdl-yosys-plugin](https://github.com/ghdl/ghdl-yosys-plugin?tab=readme-ov-file), but there is no solution yet.
+
+<!-- 可能的解决方法是从[源文件](https://github.com/YosysHQ/yosys)自行编译安装`yosys`，或者 `yosys` 或 `ghdl` 的版本不对，或缺少了[工具链](https://github.com/YosysHQ/fpga-toolchain)中的某个工具。或者用某个工具将 `VHDL` 转成 `Verilog` 后再合成 Schematics. -->
+Possible solutions might include compiling and installing yosys from [source](https://github.com/YosysHQ/yosys), ensuring the correct versions of `yosys` and `ghdl`, or checking if any component of the FPGA [Toolchain](https://github.com/YosysHQ/fpga-toolchain) is missing. Alternatively, you could try converting `VHDL` to `Verilog` using some tool (like GPT) and then synthesizing the schematics.
