@@ -1,0 +1,317 @@
+[
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "My posts",
+    "section": "",
+    "text": "JK Flip-flop not Behavioral (VHDL version)\n\n\n\n\n\n\nHardware\n\n\n\nEasy to write a behavioral description of JK-FF in VHDL, what about writing it in terms of gates?\n\n\n\n\n\nDec 8, 2024\n\n\nMarcobisky\n\n\n\n\n\n\n\n\n\n\n\n\n在 ios 下载第三方应用\n\n\n\n\n\n\nAwesome-Mac\n\n\n\n会闪退, 散了吧(´･_･`)\n\n\n\n\n\nOct 29, 2024\n\n\nMarcobisky\n\n\n\n\n\n\n\n\n\n\n\n\nLeast Squares as Projection 最小二乘法的投影解释\n\n\n\n\n\n\nAlgebra\n\n\n\nThinking least squares in this way really helps!\n\n\n\n\n\nSep 21, 2024\n\n\nMarcobisky\n\n\n\n\n\n\n\n\n\n\n\n\njava项目导入Launchpad方案 MacOS\n\n\n\n\n\n\nAwesome-Mac\n\n\n\n\n\n\n\n\n\nSep 11, 2024\n\n\nMarcobisky\n\n\n\n\n\n\n\n\n\n\n\n\nRTL Analysis on MacOS under 300MB\n\n\n\n\n\n\nAwesome-Mac\n\n\n\nWanna compile verilog on MacOS but without programing an FPGA, check this out!\n\n\n\n\n\nAug 31, 2024\n\n\nMarcobisky\n\n\n\n\n\n\n\n\n\n\n\n\nCreate your own website using Hugo on MacOS\n\n\n\n\n\n\nCS\n\n\n\nHugo + GitHub Pages\n\n\n\n\n\nAug 31, 2024\n\n\nMarcobisky\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Jinming Ren",
+    "section": "",
+    "text": "Hi! I’m an third-year undergrad student at University of Electronic Science and Technology of China (UESTC) and University of Glasgow (UofG). I majored in electronic and communication engineering.\nI’m looking for a PhD position in wireless communication or ML in 2026, I’m open to other directions as well. See my CV here.\nOn this site I also keep a partial list of blogs.\n\n\n\n\n📧 Email: 3191293752@qq.com | marcobisky@outlook.com\n\n📞 Phone: +86 17882004164"
+  },
+  {
+    "objectID": "index.html#bio",
+    "href": "index.html#bio",
+    "title": "Jinming Ren",
+    "section": "",
+    "text": "Hi! I’m an third-year undergrad student at University of Electronic Science and Technology of China (UESTC) and University of Glasgow (UofG). I majored in electronic and communication engineering.\nI’m looking for a PhD position in wireless communication or ML in 2026, I’m open to other directions as well. See my CV here.\nOn this site I also keep a partial list of blogs."
+  },
+  {
+    "objectID": "index.html#contact",
+    "href": "index.html#contact",
+    "title": "Jinming Ren",
+    "section": "",
+    "text": "📧 Email: 3191293752@qq.com | marcobisky@outlook.com\n\n📞 Phone: +86 17882004164"
+  },
+  {
+    "objectID": "posts/jk-ff/index.html",
+    "href": "posts/jk-ff/index.html",
+    "title": "JK Flip-flop not Behavioral (VHDL version)",
+    "section": "",
+    "text": "Most online VHDL descriptions of JK flip-flops (FF) are based on “processes” or circuit functionality (behavioral). Is it possible to simulate them only by constructing the circuit structure of the JK flip-flop?"
+  },
+  {
+    "objectID": "posts/jk-ff/index.html#intro",
+    "href": "posts/jk-ff/index.html#intro",
+    "title": "JK Flip-flop not Behavioral (VHDL version)",
+    "section": "",
+    "text": "Most online VHDL descriptions of JK flip-flops (FF) are based on “processes” or circuit functionality (behavioral). Is it possible to simulate them only by constructing the circuit structure of the JK flip-flop?"
+  },
+  {
+    "objectID": "posts/jk-ff/index.html#jk-ff-review",
+    "href": "posts/jk-ff/index.html#jk-ff-review",
+    "title": "JK Flip-flop not Behavioral (VHDL version)",
+    "section": "JK FF Review",
+    "text": "JK FF Review\nThe circuit structure is JK FF is very familiar to everybody, which is: \nThe corresponding truth table is shown below:\n\n\n\nC\nJ\nK\nQ\nQ̅\n\n\n\n\n↑\n0\n0\nlatch\nlatch\n\n\n↑\n0\n1\n0\n1\n\n\n↑\n1\n0\n1\n0\n\n\n↑\n1\n1\ntoggle\ntoggle\n\n\nx\n0\n0\nlatch\nlatch\n\n\nx\n0\n1\nlatch\nlatch\n\n\nx\n1\n0\nlatch\nlatch\n\n\nx\n1\n1\nlatch\nlatch\n\n\n\nwhere “latch” represent the Q output remembers whatever the last stored value was. “Toggle” means to flip Q, i.e. 0 -&gt; 1, 1 -&gt; 0. “↑” means the clock signal in a leading edge."
+  },
+  {
+    "objectID": "posts/jk-ff/index.html#problem",
+    "href": "posts/jk-ff/index.html#problem",
+    "title": "JK Flip-flop not Behavioral (VHDL version)",
+    "section": "Problem",
+    "text": "Problem\n\nFirst try\nWrite the following content in JKFF.vhdl:\nlibrary IEEE;\nuse IEEE.STD_LOGIC_1164.ALL;\n\nentity JKFF_nodelay is\n    Port (\n        J : in STD_LOGIC;     -- J input\n        K : in STD_LOGIC;     -- K input\n        clk : in STD_LOGIC;   -- Clock input\n        Q : out STD_LOGIC;    -- Output Q\n        QN : out STD_LOGIC    -- Output QN (complement of Q)\n    );\nend JKFF_nodelay;\n\narchitecture Structural of JKFF_nodelay is\n    -- Internal signals for latch and clock gating\n    signal S, R : STD_LOGIC;    -- Set and Reset inputs for the latch\n    signal Q_int, QN_int : STD_LOGIC := '0'; -- Internal Q and QN for feedback\n\nbegin\n    S &lt;= (J and clk) and QN_int;\n    R &lt;= (K and clk) and Q_int;\n\n    -- NOR gate-based latch\n    Q_int &lt;= not (R or QN_int);\n    QN_int &lt;= not (S or Q_int);\n\n    -- Outputs\n    Q &lt;= Q_int;    -- Main output\n    QN &lt;= QN_int;  -- Complementary output\nend Structural;\nThen write a testbench file to test the behavior of this circuit, you will find it will not work well.\n\n\nReason\nThe reason (probably, only personal view) is that JK FF have two layers of feedback (instead of SR FF, which just have one), since we loop our output Q not only to the NOR gates, but also AND to our initial inputs J and K. This confuse the compiler because the resultant signal changes so fast and maybe not have a stable consequence, so the compiler do not know how to respond to this kind of feedback.\nSo we introduce some delay in the gates to simulate the reality closer."
+  },
+  {
+    "objectID": "posts/jk-ff/index.html#solution",
+    "href": "posts/jk-ff/index.html#solution",
+    "title": "JK Flip-flop not Behavioral (VHDL version)",
+    "section": "Solution",
+    "text": "Solution\n\nAdding delay in the gates\nWe write the following content in another file JKFF.vhdl:\nlibrary IEEE;\nuse IEEE.STD_LOGIC_1164.ALL;\n\nentity JKFF is\n    Port (\n        J : in STD_LOGIC;     -- J input\n        K : in STD_LOGIC;     -- K input\n        clk : in STD_LOGIC;   -- Clock input\n        Q : out STD_LOGIC;    -- Output Q\n        QN : out STD_LOGIC    -- Output QN (complement of Q)\n    );\nend JKFF;\n\narchitecture Structural of JKFF is\n    -- Internal signals for latch and clock gating\n    signal S, R : STD_LOGIC;    -- Set and Reset inputs for the latch\n    signal Q_int, QN_int : STD_LOGIC := '0'; -- Internal Q and QN for feedback\n\nbegin\n    S &lt;= (J and clk) and QN_int after 0.1 ns;\n    R &lt;= (K and clk) and Q_int after 0.1 ns;\n\n    -- NOR gate-based latch\n    Q_int &lt;= not (R or QN_int) after 0.2 ns;\n    QN_int &lt;= not (S or Q_int) after 0.2 ns;\n\n    -- Outputs\n    Q &lt;= Q_int;    -- Main output\n    QN &lt;= QN_int;  -- Complementary output\nend Structural;\nAnd run the following JKFF_tb.vhdl:\nlibrary IEEE;\nuse IEEE.STD_LOGIC_1164.ALL;\n\nentity JKFF_tb is\n-- No ports for testbench\nend JKFF_tb;\n\narchitecture Behavioral of JKFF_tb is\n    -- Component declaration\n    component JKFF\n        Port (\n            J : in STD_LOGIC;\n            K : in STD_LOGIC;\n            clk : in STD_LOGIC;\n            Q : out STD_LOGIC;\n            QN : out STD_LOGIC\n        );\n    end component;\n\n    -- Signals to connect to the JKFF\n    signal J, K, clk : STD_LOGIC := '0';\n    signal Q, QN : STD_LOGIC;\n\nbegin\n    -- Instantiate the JK Flip-Flop\n    uut: JKFF\n        Port Map (\n            J =&gt; J,\n            K =&gt; K,\n            clk =&gt; clk,\n            Q =&gt; Q,\n            QN =&gt; QN\n        );\n\n    -- Clock generation process\n    clk_gen: process\n    begin\n        for i in 0 to 9 loop -- Generate 10 clock cycles\n            clk &lt;= '0';\n            wait for 9 ns; -- Low for 5 ns\n            clk &lt;= '1';\n            wait for 1 ns; -- High for 5 ns\n        end loop;\n        wait; -- End simulation after clock finishes\n    end process;\n\n    -- Stimulus process to apply test cases\n    stimulus: process\n    begin\n        -- Test Case 1: Hold state (J = 0, K = 0)\n        J &lt;= '0'; K &lt;= '0';\n        wait for 20 ns;\n\n        -- Test Case 2: Set state (J = 1, K = 0)\n        J &lt;= '1'; K &lt;= '0';\n        wait for 20 ns;\n\n        -- Test Case 3: Reset state (J = 0, K = 1)\n        J &lt;= '0'; K &lt;= '1';\n        wait for 20 ns;\n\n        -- Test Case 4: Toggle state (J = 1, K = 1)\n        J &lt;= '1'; K &lt;= '1';\n        wait for 40 ns;\n\n        -- Return to Hold state\n        J &lt;= '0'; K &lt;= '0';\n        wait for 20 ns;\n\n        wait; -- End simulation\n    end process;\nend Behavioral;\n\n\nResults\nWe will get the following waveform:\n\nThere are several strange things happen here:\n\nWhat happen before around 30 ns?\nThe Q and QN oscillates at the same pace. Why? It’s because both J and K are zero. For a JK FF, this means to remember the last value. But the last value of Q and QN are both zero (we initialize them in the JKFF.vhdl file):\nsignal Q_int, QN_int : STD_LOGIC := '0'; -- Internal Q and QN for feedback\nThis is invalid and unstable! So they oscillates with a period of 0.2 ns, which is exactly the delay time of the NOR gates.\n\n\n\nLocally zoomed in\n\n\nOK, if instead we initialize the Q and QN a valid value, say Q_int=0 and QN_int=1 like this (in JKFF.vhdl file):\nsignal Q_int : STD_LOGIC := '0'; -- Internal Q for feedback\nsignal QN_int : STD_LOGIC := '1'; -- Internal QN for feedback\nSince they are valid, hence stable, Q and QN will not oscillates as expected:\n\n\n\nWhy not toggle successfully?\nAt around \\(t = 70\\) ns, both J and K are 1. This means at the leading edge of the clock signal clk, Q and QN should both flipped! But according to the waveform, they tried but failed, with a tiny pulse around that time.\nI tried several clk pulse width and analysed the JK circuit in “slow-motion” carefully (Try this! Very surprising!). Finally I figured it out:\nIt’s because JK FF don’t want the clk signal be high for too long. This is because if the clk line hold high for a sufficient long period, the signal at Q and QN will “backpropagate” (Haha just borrow the term) to the inputs, continue to control whether or not the J and K signal should come in. If we increase the so-called “duty-ratio” of the clk signal, we will see these:\n\n\n\nDuty ratio = 0.20\n\n\n\n\n\nDuty ratio = 0.30\n\n\n\n\n\nDuty ratio = 0.40\n\n\n\n\n\nDuty ratio = 0.65\n\n\nSome value of duty ratio (e.g. 0.65) happen to toggle the Q successfully, while others do not.\nYou can think of what value could the duty ratio be? (Given the clock cycle and the propagation delay of all gates) This is a very intereting yet tedious problem to consider. But as long as you understand why Q oscillates, you understand this.\nTherefore people say that there are no “JK latches”."
+  },
+  {
+    "objectID": "posts/jk-ff/index.html#conclusion",
+    "href": "posts/jk-ff/index.html#conclusion",
+    "title": "JK Flip-flop not Behavioral (VHDL version)",
+    "section": "Conclusion",
+    "text": "Conclusion\nThe VHDL realization of a JK FF can be achieved by introducing propagation delay to the gates."
+  },
+  {
+    "objectID": "posts/side-ios/index.html",
+    "href": "posts/side-ios/index.html",
+    "title": "在 ios 下载第三方应用",
+    "section": "",
+    "text": "CLAIM: 更新(2-22-2025), SideStore在iPhone上会闪退!! 以下操作无法保证稳定运行!"
+  },
+  {
+    "objectID": "posts/side-ios/index.html#说明",
+    "href": "posts/side-ios/index.html#说明",
+    "title": "在 ios 下载第三方应用",
+    "section": "说明",
+    "text": "说明\n下面的操作已在欧版iphone 16 pro ios 18.1上测试成功，但我个人感觉这个操作跟欧版iPhone没有什么关系，其他版本的iPhone大概率应该也可以，但是不保证。\n本文参考链接：\n\nlist of tools\nsideloadly\nsidestore"
+  },
+  {
+    "objectID": "posts/side-ios/index.html#what-is-side-downloading",
+    "href": "posts/side-ios/index.html#what-is-side-downloading",
+    "title": "在 ios 下载第三方应用",
+    "section": "What is side-downloading",
+    "text": "What is side-downloading\nios系统不像安卓系统，只能在iOS store里面下载app。为了打破这点，有两种方法：越狱(jail breaking)或使用side-downloading。本文介绍后者。\nSide-downloading 指通过不越狱的方法将 iOS 应用程序直接安装到 Apple 设备上，而不需要通过 App Store。有很多工具可以实现这点，具体参考list of tools。\n其中 Scarlet 和 Signulous 的方法我没试过，另外三种 AltStore 需要你手机是欧版的、app地区是欧洲、你人也要在欧洲，所以没戏。最后两种 Sideloadly 和 Sidestore，后者下载软件需要连电脑，并且一般 side-downloading 的软件是要“续约(renew)”的，一般每周都要，而且 Sideloadly 这种方法还要连电脑 renew，不方便。所以我们采用最后一种 SideStore（只需要第一次的时候连电脑，后面在手机上下载和 renew）。当然我们也会用 sideloadly 下几个看看，毕竟这种比较简单。"
+  },
+  {
+    "objectID": "posts/side-ios/index.html#sideloadly",
+    "href": "posts/side-ios/index.html#sideloadly",
+    "title": "在 ios 下载第三方应用",
+    "section": "Sideloadly",
+    "text": "Sideloadly\n在 windows 或 mac 上下载安装 sideloadly，图标如下：\n\n（可能要在 settings 中授权这个应用）\n这个只是个将软件下载到 iPhone 中的工具，而软件在哪里获取呢？我们需要 .ipa 后缀的文件，可以在这里搜索你要的软件，如果没有就在google上搜，最好注意下安全性问题。\n然后打开 sideloadly, 左侧选择你的 .ipa 文件，iDevice选择你的 iPhone（要用线将手机连到mac），输入你的Apple id（要记住这个ID，以后都用这个）和密码，点击start。（start 左边那个按钮是用来 renew 的，将来软件过期的时候就用同样的操作来 renew）"
+  },
+  {
+    "objectID": "posts/side-ios/index.html#sidestore",
+    "href": "posts/side-ios/index.html#sidestore",
+    "title": "在 ios 下载第三方应用",
+    "section": "Sidestore",
+    "text": "Sidestore\n直接按照这里的指示下载安装即可：sidestore。\n其中有一步要产生一个配对文件，记得要将mac连上手机后再运行。如果mac上一直运行不出来，在 terminal 当前文件夹中输入：\nsudo ./jitterbugpair\n输入密码即可生成"
+  },
+  {
+    "objectID": "posts/digital-analysis-mac/index.html",
+    "href": "posts/digital-analysis-mac/index.html",
+    "title": "RTL Analysis on MacOS under 300MB",
+    "section": "",
+    "text": "CLAIM: This article synthesizes conclusions and methods from multiple websites and is not pure original. 本文综合了多个网站的结论和方法，并非原创。\nYou may find these websites useful:\n\nWorkflow for FPGA development\nSome open-source tools\nIceStudio for M2 Mac\nFPGA Toolchain\nVHDL compile chain on MacOS\n\n\n\n\n\nYou need these:\n\ngtkwave: main RTL wave creator\nIcarus Verilog, and this manual\nYoSYS: .v to .json\nGHDL: compile, link and simulation tool for VHDL\nnetlistsvg: .json to .svg\n\nNot nessasarily required:\n\nPulseview: Logic Analyzer (Not required though)\nDigital: Visual simulation\n\nUseful vscode plugins:\n\nVerilog Support: vscode verilog language highlighter\nWavetrace: A nice vscode plugin to replace gtkwave"
+  },
+  {
+    "objectID": "posts/digital-analysis-mac/index.html#intro-and-overview",
+    "href": "posts/digital-analysis-mac/index.html#intro-and-overview",
+    "title": "RTL Analysis on MacOS under 300MB",
+    "section": "",
+    "text": "CLAIM: This article synthesizes conclusions and methods from multiple websites and is not pure original. 本文综合了多个网站的结论和方法，并非原创。\nYou may find these websites useful:\n\nWorkflow for FPGA development\nSome open-source tools\nIceStudio for M2 Mac\nFPGA Toolchain\nVHDL compile chain on MacOS\n\n\n\n\n\nYou need these:\n\ngtkwave: main RTL wave creator\nIcarus Verilog, and this manual\nYoSYS: .v to .json\nGHDL: compile, link and simulation tool for VHDL\nnetlistsvg: .json to .svg\n\nNot nessasarily required:\n\nPulseview: Logic Analyzer (Not required though)\nDigital: Visual simulation\n\nUseful vscode plugins:\n\nVerilog Support: vscode verilog language highlighter\nWavetrace: A nice vscode plugin to replace gtkwave"
+  },
+  {
+    "objectID": "posts/digital-analysis-mac/index.html#first-project-in-verilog",
+    "href": "posts/digital-analysis-mac/index.html#first-project-in-verilog",
+    "title": "RTL Analysis on MacOS under 300MB",
+    "section": "First Project in Verilog",
+    "text": "First Project in Verilog\n\nInstall Icarus Verilog Compiler\nbrew install icarus-verilog\n\n\nCompilation and Simulation\n\nCreate new folder called Verilog, then create two test files named GatedDLatch.v and GatedDLatch_tb.v. The former is the description file of the circuit, the latter is for testbench. And write the following contents respectively:\n// in GatedDLatch.v\nmodule GatedDLatch (Data, WE, Out, OutBar);\n\n    input Data;\n    input WE;\n\n    output Out;\n    output OutBar;\n\n    // component name(output, input1, input2)\n    wire S;\n    wire R;\n    wire Dbar;\n    nand g1(S, Data, WE);\n    not g2(Dbar, Data);\n    nand g3(R, WE, Dbar);\n    nand g4(Out, S, OutBar);\n    nand g5(OutBar, R, Out);\n    \n\nendmodule\nand\n// in GatedDLatch_tb.v\n`timescale 1ns / 1ns // simulation time, time precision = 1ns\n//Import the main code into the testbench\n`include \"GatedDLatch.v\"\n\nmodule GatedDLatch_tb;\n//Inputs as registers\nreg Data;\nreg WE;\n\n//Outputs as wires\nwire Out;\nwire OutBar;\n\n//Initialisation\nGatedDLatch uut(Data, WE, Out, OutBar);\n\ninitial begin\n    //Name of the graph file that gets generated after we run\n    $dumpfile(\"GatedDLatch_tb.vcd\");\n    $dumpvars(0,GatedDLatch_tb);\n\n    Data = 0;\n    WE = 0;\n    #10;\n\n    Data = 1;\n    #4;\n    WE = 1;\n    #2;\n    WE = 0;\n    #4;\n\n    Data = 0;\n    #4;\n    WE = 1;\n    #2;\n    WE = 0;\n    #4;\n\n    $display(\"Test complete\");\nend\nendmodule\n\nRun this in the terminal:\niverilog -o GatedDLatch_tb.vvp GatedDLatch_tb.v\n\nUse vvp command to convert the binary temperary file GatedDLatch_tb.vvp to GatedDLatch_tb.vcd waveform file:\nvvp GatedDLatch_tb.vvp\n\nInstall Wavetrace in vscode to view the waveform:\n\n\n\nDisplay the waveform in vscode\n\n\n\nYou can also install gtkwave to view the waveform.\nbrew install gtkwave\ngtkwave GatedDLatch_tb.vcd\n\n\n\nBefore imported\n\n\n\nExpand GatedDLatch_tb list to display the waveform:\n\n\n\nDisplaying waveform\n\n\n\n\nSynthesis and Visualization\n\nWe can also visualize the circuit topology (called generating schematics). First, use YoSYS to convert the verilog code into gate-level netlist. Of course you should install the command line tool YoSYS:\nbrew install yosys\nyosys -V # Verify Yosys installation\n\nYoSYS will first convert the circuit structure description file GatedDLatch.v into a json file:\nyosys -p \"prep -top GatedDLatch; write_json GatedDLatch.json\" GatedDLatch.v\n\nThen we install another tool called netlistsvg:\n# Install Node.js (if not already installed)\nbrew install node\n\n# Install netlistsvg globally using npm\nnpm install -g netlistsvg\n\n# Verify netlistsvg installation\nnetlistsvg --version\n\nUsing the netlistsvg tool to convert GatedDLatch.json to GatedDLatch.svg:\nnetlistsvg GatedDLatch.json -o GatedDLatch.svg\n\nPreviewing GatedDLatch.svg will give you the circuit schematic:\n\n\n\nGatedDLatch.svg\n\n\n\n\nMakefile Work Flow\n\nThe entire workflow can be divided into two major independent parts:\n\n\nCompilation and Simulation:\n\niverilog (Compilation)\nvvp (Simulation)\n\nSynthesis and Circuit Structure Visualization:\n\nyosys (Synthesis)\nnetlistsvg (Visualization)\n\n\n\nWe use a Makefile to automate this process (ensure that Make and related components are installed): Create a Makefile file in the previously created Verilog folder and add the following content:\n# Description: Makefile for GatedDLatch\nCIRCUIT_STRUCT = GatedDLatch\n\n# Directories\nBUILD_DIR = build\n\n# Ensure the build directory exists\n$(BUILD_DIR):\n    mkdir -p $(BUILD_DIR)\n\n# Compilation: iverilog compilation\niverilog: $(CIRCUIT_STRUCT).v $(CIRCUIT_STRUCT)_tb.v | $(BUILD_DIR)\n    iverilog -o $(BUILD_DIR)/$(CIRCUIT_STRUCT)_tb.vvp $(CIRCUIT_STRUCT)_tb.v\n\n# Simulation: generate waveform (.vcd)\nvvp: $(BUILD_DIR)/$(CIRCUIT_STRUCT)_tb.vvp\n    vvp $(BUILD_DIR)/$(CIRCUIT_STRUCT)_tb.vvp\n\n# Synthesis: generate circuit structure configuration file (.json)\nYOSYS: $(CIRCUIT_STRUCT).v | $(BUILD_DIR)\n    yosys -p \"prep -top $(CIRCUIT_STRUCT); write_json $(BUILD_DIR)/$(CIRCUIT_STRUCT).json\" $(CIRCUIT_STRUCT).v\n\n# Visualization: generate human readable (.svg) from .json\nNETLISTSVG: $(BUILD_DIR)/$(CIRCUIT_STRUCT).json | $(BUILD_DIR)\n    netlistsvg $(BUILD_DIR)/$(CIRCUIT_STRUCT).json -o $(BUILD_DIR)/$(CIRCUIT_STRUCT).svg\n\n# Schematic diagram only: Synthesis then Visualization\nschematic: YOSYS NETLISTSVG\n\n# Run all steps\nrun_all: iverilog vvp schematic\n\n# Clean build directory\nclean:\n    rm -rf $(BUILD_DIR)\n    rm -f $(CIRCUIT_STRUCT)_tb.vcd\n\nAfter modifying the files, simply execute:\nmake clean\nmake run_all\n\nThis will generate all the relevant files:\n\n\n\nProject File Structure"
+  },
+  {
+    "objectID": "posts/digital-analysis-mac/index.html#first-project-in-vhdl",
+    "href": "posts/digital-analysis-mac/index.html#first-project-in-vhdl",
+    "title": "RTL Analysis on MacOS under 300MB",
+    "section": "First Project in VHDL",
+    "text": "First Project in VHDL\n\nInstall GHDL Compiler\n\nSimilar to Verilog, VHDL is also a hardware description language. Compiling it requires another tool: GHDL. Installing it on macOS can be tricky. The following steps have been tested on an M2 Mac (as of 2024-09-01):\n\nInstall vhdl using brew:\nbrew install vhdl\n\nvhdl has two versions: LLVM and mcode. The LLVM version has some issues on macOS, and the brew-installed version uses LLVM, so we manually download the mcode version from here. I downloaded ghdl-macos-11-mcode.tgz.\nExtract it by double-clicking, and you will get three files:\n\n\n\nGHDL-mcode package\n\n\n\nCopy and paste these three files to the following path: /opt/homebrew/Caskroom/ghdl/4.1.0:\n\n\n\nCopy and Paste\n\n\nIn the terminal, type:\nghdl --version\n\nIf you encounter security prompts, go to System Settings &gt; Privacy & Security to allow access:\n\n\n\nAllow Access in Privacy & Security\n\n\n\n\nCompilation, Linking and Simulation\n\nUnlike Verilog, VHDL requires an additional Linking step, which connects the component declarations with their implementation files (testbench). Why doesn’t Verilog require this? Because the testbench file in Verilog includes the declaration contents (include \"GatedDLatch.v\"), so it links automatically.\n\nIn Verilog, we used two separate tools (iverilog and vvp) for compilation and simulation. However, for VHDL, we only need one tool: GHDL.\n\nCreate a new folder VHDLDemo, and within it, create two files: demo.vhdl and demo_tb.vhdl. The former describes the circuit structure, and the latter serves as the testbench file (you can also use .vhd as the suffix). Add the following content to the respective files:\nlibrary IEEE;\nuse IEEE.STD_LOGIC_1164.ALL;\n\nentity demo is\n    port (\n        A : in  STD_LOGIC;\n        B : in  STD_LOGIC;\n        O : out STD_LOGIC\n    );\nend demo;\n\narchitecture Behavioral of demo is\nbegin\n    O &lt;= not (A and B); -- NAND gate\nend Behavioral;\nand\nlibrary IEEE;\nuse IEEE.STD_LOGIC_1164.ALL;\n\nentity demo_tb is\nend demo_tb;\n\narchitecture Behavioral of demo_tb is\n    signal A : STD_LOGIC := '0';\n    signal B : STD_LOGIC := '0';\n    signal O : STD_LOGIC;\n\n    -- Instantiate the unit under test (UUT)\n    component demo\n        port (\n            A : in  STD_LOGIC;\n            B : in  STD_LOGIC;\n            O : out STD_LOGIC\n        );\n    end component;\nbegin\n    UUT: demo port map (\n        A =&gt; A,\n        B =&gt; B,\n        O =&gt; O\n    );\n\n    -- Test process\n    process\n    begin\n        -- Test case 1: A = 0, B = 0\n        A &lt;= '0';\n        B &lt;= '0';\n        wait for 10 ns;\n        \n        -- Test case 2: A = 0, B = 1\n        A &lt;= '0';\n        B &lt;= '1';\n        wait for 10 ns;\n\n        -- Test case 3: A = 1, B = 0\n        A &lt;= '1';\n        B &lt;= '0';\n        wait for 10 ns;\n\n        -- Test case 4: A = 1, B = 1\n        A &lt;= '1';\n        B &lt;= '1';\n        wait for 10 ns;\n\n        -- End of simulation\n        wait;\n    end process;\nend Behavioral;\n\nCreate a Makefile to automate the process:\n# Description: Makefile for VHDLDemo\nCIRCUIT = demo\nTB = demo_tb\nBUILD_DIR = build\n\n# Ensure the build directory exists\n$(BUILD_DIR):\n    mkdir -p $(BUILD_DIR)\n\n# Compilation: compile the design and testbench\nghdl_compile: $(BUILD_DIR)\n    ghdl -a --workdir=$(BUILD_DIR) $(CIRCUIT).vhdl\n    ghdl -a --workdir=$(BUILD_DIR) $(TB).vhdl\n\n# Linking: Elaborate the design and testbench\nghdl_elab: ghdl_compile\n    ghdl -e --workdir=$(BUILD_DIR) $(TB)\n\n# Simulation: simulate the testbench\nghdl_simulate: ghdl_elab\n    ghdl -r --workdir=$(BUILD_DIR) $(TB) --vcd=$(BUILD_DIR)/$(TB).vcd\n\n### These cannot work for now##############################################\n# # Synthesis: generate circuit structure configuration file (.json), you should have ghdl plugin installed for yosys, but I have error: \"ERROR: No such command: ghdl\" or \"dyld[5264]: missing symbol called\", possible solution could be to install yosys from source, but not sure\n# YOSYS: $(CIRCUIT).vhdl | $(BUILD_DIR)\n#   yosys -p \"ghdl $(CIRCUIT); prep -top $(CIRCUIT); write_json -compat-int $(BUILD_DIR)/$(CIRCUIT).json\" $(CIRCUIT).vhdl\n\n# # Visualization: generate human readable (.svg) from .json\n# NETLISTSVG: $(BUILD_DIR)/$(CIRCUIT).json  | $(BUILD_DIR)\n#   netlistsvg $(BUILD_DIR)/$(CIRCUIT).json -o $(BUILD_DIR)/$(CIRCUIT).svg\n\n# # Schematic diagram only: Synthesis then Visualization\n# schematic: YOSYS NETLISTSVG\n\n# # Run all steps\n# run_all: ghdl_compile ghdl_elab ghdl_simulate YOSYS NETLISTSVG\n### These cannot work for now##############################################\n\n# Run compilation, linking and simulation\nrun_cls: ghdl_compile ghdl_elab ghdl_simulate\n\n# Clean build directory\nclean:\n    rm -rf $(BUILD_DIR)\n    rm -f $(TB)\n\n# Experiment: Run testbench without the design file\nrun_tb_only: $(BUILD_DIR)\n    ghdl -a --workdir=$(BUILD_DIR) $(TB).vhdl\n    ghdl -r --workdir=$(BUILD_DIR) $(TB) --vcd=$(BUILD_DIR)/$(TB)_no_design.vcd\n\nThe running process is very clear. In the command line, execute:\nmake clean\nmake run_cls\n\nThis will complete the process.\n\nIf you want to see what happens if you skip compiling and linking the design file (demo.vhdl), run:\nmake clean # Cannot omitted!\nmake run_tb_only\n\nYou can compare the two .vcd files generated in VSCode or using GTKWave; they are different as expected.\n\n\nNo Synthesis and Visualization Plan\n\nNote that this Makefile does not include steps to generate a schematic diagram because yosys requires a ghdl plugin. Currently, the integration is not very stable. You can refer to ghdl-yosys-plugin and building-ghdl for more details. However, the suggested methods have been tested on M2 Mac and result in errors:\n /----------------------------------------------------------------------------\\\n |  yosys -- Yosys Open SYnthesis Suite                                       |\n |  Copyright (C) 2012 - 2024  Claire Xenia Wolf &lt;claire@yosyshq.com&gt;         |\n |  Distributed under an ISC-like license, type \"license\" to see terms        |\n \\----------------------------------------------------------------------------/\n Yosys 0.44 (git sha1 80ba43d26, clang++ 15.0.0 -fPIC -O3)\n\n-- Running command `ghdl demo_tb.vhdl -e demo_tb; prep -top demo_tb; write_json demo.json' --\n\n1. Executing GHDL.\ndyld[5264]: missing symbol called\nzsh: abort      yosys -m ghdl -p\n\nThis issue has also been mentioned in the Issues section of ghdl-yosys-plugin, but there is no solution yet.\n\nPossible solutions might include compiling and installing yosys from source, ensuring the correct versions of yosys and ghdl, or checking if any component of the FPGA Toolchain is missing. Alternatively, you could try converting VHDL to Verilog using some tool (like GPT) and then synthesizing the schematics."
+  },
+  {
+    "objectID": "posts/least-squares-as-projection/index.html",
+    "href": "posts/least-squares-as-projection/index.html",
+    "title": "Least Squares as Projection 最小二乘法的投影解释",
+    "section": "",
+    "text": "The goal is to find the linear model \\(y = \\beta_0 + \\beta_1 x\\) such that the sum of squared errors between the predicted values and the actual data is minimized."
+  },
+  {
+    "objectID": "posts/least-squares-as-projection/index.html#introduction",
+    "href": "posts/least-squares-as-projection/index.html#introduction",
+    "title": "Least Squares as Projection 最小二乘法的投影解释",
+    "section": "",
+    "text": "The goal is to find the linear model \\(y = \\beta_0 + \\beta_1 x\\) such that the sum of squared errors between the predicted values and the actual data is minimized."
+  },
+  {
+    "objectID": "posts/least-squares-as-projection/index.html#linear-model",
+    "href": "posts/least-squares-as-projection/index.html#linear-model",
+    "title": "Least Squares as Projection 最小二乘法的投影解释",
+    "section": "Linear Model",
+    "text": "Linear Model\nThe form of the linear model is:\n\\[\ny_i = \\beta_0 + \\beta_1 x_i + \\epsilon_i\n\\]\nwhere \\(y_i\\) is the observed value, \\(x_i\\) is the independent variable, \\(\\beta_0\\) is the intercept, \\(\\beta_1\\) is the slope, and \\(\\epsilon_i\\) is the error term.\nWe wish to find \\(\\beta_0\\) and \\(\\beta_1\\) such that the predicted values \\(\\hat{y}_i = \\beta_0 + \\beta_1 x_i\\) minimize the sum of squared errors between \\(\\hat{y}_i\\) and the observed values \\(y_i\\)."
+  },
+  {
+    "objectID": "posts/least-squares-as-projection/index.html#design-matrix-and-observation-vector",
+    "href": "posts/least-squares-as-projection/index.html#design-matrix-and-observation-vector",
+    "title": "Least Squares as Projection 最小二乘法的投影解释",
+    "section": "Design Matrix and Observation Vector",
+    "text": "Design Matrix and Observation Vector\nTo make the problem more convenient, we represent it using vectors and matrices.\n\nDesign Matrix\nDefine the design matrix \\(\\mathbf{X}\\) as:\n\\[\n\\mathbf{X} = \\begin{bmatrix}\n1 & 1 \\\\\n1 & 2 \\\\\n1 & 3 \\\\\n1 & 4\n\\end{bmatrix}\n\\]\nThe first column contains only 1s, representing the constant term \\(\\beta_0\\), and the second column contains the values of the independent variable \\(x_i\\).\n\n\nObservation Vector\nDefine the observation vector \\(\\mathbf{y}\\) as:\n\\[\n\\mathbf{y} = \\begin{bmatrix}\n2 \\\\\n3 \\\\\n5 \\\\\n7\n\\end{bmatrix}\n\\]\nThis vector contains all the observed values \\(y_i\\).\n\n\nParameter Vector\nDefine the parameter vector \\(\\boldsymbol{\\beta} = \\begin{bmatrix} \\beta_0 \\\\ \\beta_1 \\end{bmatrix}\\)."
+  },
+  {
+    "objectID": "posts/least-squares-as-projection/index.html#sum-of-squared-errors-objective-function",
+    "href": "posts/least-squares-as-projection/index.html#sum-of-squared-errors-objective-function",
+    "title": "Least Squares as Projection 最小二乘法的投影解释",
+    "section": "Sum of Squared Errors Objective Function",
+    "text": "Sum of Squared Errors Objective Function\nIn regression, our goal is to find the parameters \\(\\boldsymbol{\\beta}\\) such that the predicted values \\(\\hat{\\mathbf{y}} = \\mathbf{X} \\boldsymbol{\\beta}\\) are as close as possible to the observed values \\(\\mathbf{y}\\), by minimizing the sum of squared errors (SSE):\n\\[\nS(\\beta_0, \\beta_1) = \\sum_{i=1}^n (y_i - \\hat{y}_i)^2 = (\\mathbf{y} - \\mathbf{X} \\boldsymbol{\\beta})^T (\\mathbf{y} - \\mathbf{X} \\boldsymbol{\\beta})\n\\]"
+  },
+  {
+    "objectID": "posts/least-squares-as-projection/index.html#deriving-the-normal-equation",
+    "href": "posts/least-squares-as-projection/index.html#deriving-the-normal-equation",
+    "title": "Least Squares as Projection 最小二乘法的投影解释",
+    "section": "Deriving the Normal Equation",
+    "text": "Deriving the Normal Equation\nThe key idea of least squares is to find \\(\\boldsymbol{\\beta}\\) such that the residual \\(\\mathbf{y} - \\mathbf{X} \\boldsymbol{\\beta}\\) is minimized. Geometrically, this means that the residual should be orthogonal to the column space of the design matrix \\(\\mathbf{X}\\), which leads to the normal equation:\n\\[\n\\mathbf{X}^T (\\mathbf{y} - \\mathbf{X} \\hat{\\boldsymbol{\\beta}}) = 0\n\\]\nExpanding this:\n\\[\n\\mathbf{X}^T \\mathbf{y} = \\mathbf{X}^T \\mathbf{X} \\hat{\\boldsymbol{\\beta}}\n\\]\nThis is the normal equation, which can be solved to find the least squares estimate \\(\\hat{\\boldsymbol{\\beta}}\\)."
+  },
+  {
+    "objectID": "posts/least-squares-as-projection/index.html#solving-the-normal-equation",
+    "href": "posts/least-squares-as-projection/index.html#solving-the-normal-equation",
+    "title": "Least Squares as Projection 最小二乘法的投影解释",
+    "section": "Solving the Normal Equation",
+    "text": "Solving the Normal Equation\nNow, let’s compute the parts of the normal equation.\n\nCompute \\(\\mathbf{X}^T \\mathbf{X}\\)\n\\[\n\\mathbf{X}^T \\mathbf{X} = \\begin{bmatrix}\n1 & 1 & 1 & 1 \\\\\n1 & 2 & 3 & 4\n\\end{bmatrix}\n\\begin{bmatrix}\n1 & 1 \\\\\n1 & 2 \\\\\n1 & 3 \\\\\n1 & 4\n\\end{bmatrix}\n= \\begin{bmatrix}\n4 & 10 \\\\\n10 & 30\n\\end{bmatrix}\n\\]\n\n\nCompute \\(\\mathbf{X}^T \\mathbf{y}\\)\n\\[\n\\mathbf{X}^T \\mathbf{y} = \\begin{bmatrix}\n1 & 1 & 1 & 1 \\\\\n1 & 2 & 3 & 4\n\\end{bmatrix}\n\\begin{bmatrix}\n2 \\\\\n3 \\\\\n5 \\\\\n7\n\\end{bmatrix}\n= \\begin{bmatrix}\n17 \\\\\n50\n\\end{bmatrix}\n\\]\n\n\nSolve the Normal Equation\nNow we solve the normal equation:\n\\[\n\\begin{bmatrix}\n4 & 10 \\\\\n10 & 30\n\\end{bmatrix} \\hat{\\boldsymbol{\\beta}} = \\begin{bmatrix}\n17 \\\\\n50\n\\end{bmatrix}\n\\]\nTo solve this, we first compute the inverse of \\(\\mathbf{X}^T \\mathbf{X}\\):\n\\[\n(\\mathbf{X}^T \\mathbf{X})^{-1} = \\frac{1}{(4)(30) - (10)(10)} \\begin{bmatrix}\n30 & -10 \\\\\n-10 & 4\n\\end{bmatrix} = \\frac{1}{20} \\begin{bmatrix}\n30 & -10 \\\\\n-10 & 4\n\\end{bmatrix}\n\\]\nNext, we compute \\(\\hat{\\boldsymbol{\\beta}}\\):\n\\[\n\\hat{\\boldsymbol{\\beta}} = (\\mathbf{X}^T \\mathbf{X})^{-1} \\mathbf{X}^T \\mathbf{y}\n\\]\n\\[\n\\hat{\\boldsymbol{\\beta}} = \\frac{1}{20} \\begin{bmatrix}\n30 & -10 \\\\\n-10 & 4\n\\end{bmatrix}\n\\begin{bmatrix}\n17 \\\\\n50\n\\end{bmatrix}\n= \\frac{1}{20} \\begin{bmatrix}\n(30)(17) + (-10)(50) \\\\\n(-10)(17) + (4)(50)\n\\end{bmatrix}\n\\]\n\\[\n\\hat{\\boldsymbol{\\beta}} = \\frac{1}{20} \\begin{bmatrix}\n510 - 500 \\\\\n-170 + 200\n\\end{bmatrix}\n= \\frac{1}{20} \\begin{bmatrix}\n10 \\\\\n30\n\\end{bmatrix}\n= \\begin{bmatrix}\n0.5 \\\\\n1.5\n\\end{bmatrix}\n\\]"
+  },
+  {
+    "objectID": "posts/least-squares-as-projection/index.html#least-squares-estimate",
+    "href": "posts/least-squares-as-projection/index.html#least-squares-estimate",
+    "title": "Least Squares as Projection 最小二乘法的投影解释",
+    "section": "Least Squares Estimate",
+    "text": "Least Squares Estimate\nBy solving the normal equation, we find \\(\\hat{\\beta}_0 = 0.5\\) and \\(\\hat{\\beta}_1 = 1.5\\). Thus, the regression model is:\n\\[\n\\hat{y} = 0.5 + 1.5x\n\\]"
+  },
+  {
+    "objectID": "posts/least-squares-as-projection/index.html#conclusion",
+    "href": "posts/least-squares-as-projection/index.html#conclusion",
+    "title": "Least Squares as Projection 最小二乘法的投影解释",
+    "section": "Conclusion",
+    "text": "Conclusion\nUsing the projection approach, we see that the least squares estimate is the projection of the observation vector \\(\\mathbf{y}\\) onto the space spanned by the columns of the design matrix \\(\\mathbf{X}\\). By solving the normal equation, we found the parameters \\(\\hat{\\beta}_0 = 0.5\\) and \\(\\hat{\\beta}_1 = 1.5\\), which minimize the sum of squared errors."
+  },
+  {
+    "objectID": "posts/create-first-web/index.html",
+    "href": "posts/create-first-web/index.html",
+    "title": "Create your own website using Hugo on MacOS",
+    "section": "",
+    "text": "Building a generic website from scratch is a tough work. However, personal websites for blogs, a special type of website, is actually programmatic. Hugo provides a convenient building templates for that. To make a new blog in Hugo, one could only just create a new folder, write a markdown file (in a specific format) and that’s it. You don’t need ANY knowledge about HTML or CSS. Well do you need to buy a domain name for everyone to see your posts? Well, GitHub Pages is a free service where you just push some contents in a repository of your own with some extremely easy command line, you created your sites of names like yourname.github.io."
+  },
+  {
+    "objectID": "posts/create-first-web/index.html#introduction-and-overview",
+    "href": "posts/create-first-web/index.html#introduction-and-overview",
+    "title": "Create your own website using Hugo on MacOS",
+    "section": "",
+    "text": "Building a generic website from scratch is a tough work. However, personal websites for blogs, a special type of website, is actually programmatic. Hugo provides a convenient building templates for that. To make a new blog in Hugo, one could only just create a new folder, write a markdown file (in a specific format) and that’s it. You don’t need ANY knowledge about HTML or CSS. Well do you need to buy a domain name for everyone to see your posts? Well, GitHub Pages is a free service where you just push some contents in a repository of your own with some extremely easy command line, you created your sites of names like yourname.github.io."
+  },
+  {
+    "objectID": "posts/create-first-web/index.html#tools-needed",
+    "href": "posts/create-first-web/index.html#tools-needed",
+    "title": "Create your own website using Hugo on MacOS",
+    "section": "Tools needed",
+    "text": "Tools needed\n\nHomebrew (Packet Manager)\nWe will use a packet manager called Homebrew to install Hugo. Follow the commands here to download Homebrew first, or you can execute:\n/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"\nOnce downloaded, if you don’t get any error by entering this in the terminal in any folder, you installed it properly (Install testing):\nbrew --version\n\n\nGit (Version Control System)\nYou can use Homebrew to install Git:\nbrew install git\ngit --version # install testing"
+  },
+  {
+    "objectID": "posts/create-first-web/index.html#install-hugo",
+    "href": "posts/create-first-web/index.html#install-hugo",
+    "title": "Create your own website using Hugo on MacOS",
+    "section": "Install Hugo",
+    "text": "Install Hugo\nRun this in any folder:\nbrew install hugo\nInstall testing:\nhugo version"
+  },
+  {
+    "objectID": "posts/create-first-web/index.html#run-example-theme",
+    "href": "posts/create-first-web/index.html#run-example-theme",
+    "title": "Create your own website using Hugo on MacOS",
+    "section": "Run Example Theme",
+    "text": "Run Example Theme\n\nCreate Framework\nEnter the terminal in any folder, you will be creating another main folder called mysite in it. Folder mysite will contain all the contents that are relevant to your website:\nhugo new site mysite\ncd mysite\nFolder mysite should look like this:\n\n\n\nInside mysite folder\n\n\nwith most folders in it empty. This is the framework.\n\n\nChoose Theme\nThe themes folder is empty, now we will add some code representing a theme inside it. Now choose a template here and downlaod its source code folder inside the themes folder. I use Stack\ncd themes/\ngit clone https://github.com/CaiJimmy/hugo-theme-stack.git # Replace as needed\n\n\nRun Theme\nNow there should be a folder inside themes. Now copy all the things inside a folder like exampleSite into the main mysite folder (‘’replace’’).\n\n\n\nCopy the contents in exampleSite into mysite\n\n\nGo to the main mysite folder and remove the original hugo.tomal file, or you can do:\npwd # should be in \"mysite\"\nrm hugo.tomal\nThen (in mysite folder), run:\nhugo server -D\nit will prompt something like:\nBuilt in 865 ms\nEnvironment: \"development\"\nServing pages from disk\nRunning in Fast Render Mode. For full rebuilds on change: hugo server --disableFastRender\nWeb Server is available at http://localhost:53844/ (bind address 127.0.0.1) \nPress Ctrl+C to stop\nEnter the link provided (http://localhost:53844/). You are done!"
+  },
+  {
+    "objectID": "posts/create-first-web/index.html#play-around",
+    "href": "posts/create-first-web/index.html#play-around",
+    "title": "Create your own website using Hugo on MacOS",
+    "section": "Play Around",
+    "text": "Play Around\nThis is easy, just compare the contents in each folder and the website and modify things a little."
+  },
+  {
+    "objectID": "posts/create-first-web/index.html#publish-your-website",
+    "href": "posts/create-first-web/index.html#publish-your-website",
+    "title": "Create your own website using Hugo on MacOS",
+    "section": "Publish your website",
+    "text": "Publish your website\nNote the link (http://localhost:53844/) is private and cannot be visited on other devices. So follow these steps to publish it:\n\nCreate GitHub Repository\nGo to your GitHub page and click ‘+’ on the right upper corner, choose New repository and name it like this:\n\n\n\nName of your repository\n\n\ni.e., yourname.github.io, which will be your own domain name.\n\n\nPush Contents\nRun this:\nhugo --theme=hugo-theme-stack --baseURL=\"https://yourname.github.io/\" --buildDrafts\nThen push the contents in your folder public on it by:\ncd public\ngit init\ngit remote add origin https://github.com/yourname/yourname.github.io.git # change as needed\ngit add .\ngit commit -m \"Initial commit\"\ngit push -u origin main\nYou can access your website on https://yourname.github.io/ within several minutes.\n\n\nNotes\nAfter you change contents locally, the contents on https://yourname.github.io/ will not change automatically, you will have to push it on GitHub again:\ncd public\ngit add .\ngit commit -m \"Add something new\"\ngit push origin main\nAlso the public website will not update instantly, you will have to wait several minutes."
+  },
+  {
+    "objectID": "posts/java-to-launchpad/index.html",
+    "href": "posts/java-to-launchpad/index.html",
+    "title": "java项目导入Launchpad方案 MacOS",
+    "section": "",
+    "text": "我想在launchpad上面启动一个 java 项目，但是application只支持启动 .app 文件，怎么办？"
+  },
+  {
+    "objectID": "posts/java-to-launchpad/index.html#intro",
+    "href": "posts/java-to-launchpad/index.html#intro",
+    "title": "java项目导入Launchpad方案 MacOS",
+    "section": "",
+    "text": "我想在launchpad上面启动一个 java 项目，但是application只支持启动 .app 文件，怎么办？"
+  },
+  {
+    "objectID": "posts/java-to-launchpad/index.html#解决方案",
+    "href": "posts/java-to-launchpad/index.html#解决方案",
+    "title": "java项目导入Launchpad方案 MacOS",
+    "section": "解决方案",
+    "text": "解决方案\nspotlight 搜索 Automator，打开 Automator，按 command+W 关闭弹出的窗口：\n\n在导航栏中再次打开 Automator，选择 Application：\n\n搜索栏中搜索 Run AppleScript，拖拽到右侧的空白区域:\n\n加入以下内容：\non run {input, parameters}\n    set p to POSIX path of (path to me)\n    do shell script \"java -jar \" & p & \"/Contents/Java/YOURJARFILE.jar\"\n \nend run\n记得替换 YOURJARFILE.jar 为你的 jar 文件名。但是此时 \"/Contents/Java/ 这个路径是不存在的，而且 YOURJARFILE.jar 也没有在这个路径下，所以以后我们需要创建这个路径。但是首先我们先保存(Command+S)这个文件为一个 .app 文件，路径为 /Application，文件名为你期待这个app的名字，如：YOURJARFILE.app。\n进入 /Application/YOURJARFILE.app，右键点击 Show Package Contents，在 Contents 文件夹下创建 java 文件夹，将你的 YOURJARFILE.jar 拷贝放入这个文件夹。\n\n然后你就可以通过 launchpad .app 文件启动你的 java 项目了。"
+  },
+  {
+    "objectID": "posts/java-to-launchpad/index.html#改图标",
+    "href": "posts/java-to-launchpad/index.html#改图标",
+    "title": "java项目导入Launchpad方案 MacOS",
+    "section": "改图标",
+    "text": "改图标\n还是在 Contents 文件夹下，把这个 .icns 文件换成你自己的图标文件，比如可以把 png 文件转换成 icns 文件，然后替换这个文件(文件名不变)。\n\n然后 Refresh the Icon Cache (if necessary):\ntouch /path/to/YOURJARFILE.app\nkillall Dock\nFinish!"
+  },
+  {
+    "objectID": "posts/java-to-launchpad/index.html#references",
+    "href": "posts/java-to-launchpad/index.html#references",
+    "title": "java项目导入Launchpad方案 MacOS",
+    "section": "References",
+    "text": "References\n\nHow to convert .jar to .app on Mac - a Java tutorial\nLaunching a jar file as an app on Mac (from the dock)"
+  },
+  {
+    "objectID": "cv/index.html",
+    "href": "cv/index.html",
+    "title": "Marcobisky",
+    "section": "",
+    "text": "RV32I CPU Core for Education  (Jan 2025 — Present)\n\nMain tools: verilog, VHDL, Digital, Kicad, iCESuger FPGA\nSimulate an entire RISC-V 32 bit CPU in verilog and Digital Software.\nSupport basic peripherals such as GPIOs, IIC, UART, VGA, etc.\nSimple boot ROM in assembly, minimal interrupt service for running a Linux kernel.\nComplete PCB design in Kicad (Not finished).\n\nAME Source Coding (Oct 2024 — Nov 2024)\n\nMain tools: python, matlab\nFinal project of Information Theory Course.\nDeveloped a method (Second-order Markov Adapative Approximation, AME) to perform source coding for the Game of Thrones. The performance of Huffman and Fano coding was also evaluated.\n\nCNN for Mbed (Feb 2024 — May 2024)\n\nMain tools: python, C++\nIntegrated a Convolutional Neural Network (CNN) into an MCU for smart fall detection for the elderly.\nRealized functions include smart fall detection, body temperature monitoring and real-time data visualization.\n\nA Study of Generalized Fields and Extension to Higher Dimensions (Oct 2023 — Feb 2024)\n\nA theoretical study of generalized natural fields and behaviours in higher dimensions.\nLargely motivated by my tutor Mr. Yidong Liu and my friends and complete by myself.\n\nHuman Voice Recognition Smart Car (Sept 2023 — Dec 2023)\n\nMain tools: C++, STM32F103C8T6 MCU, etc.\nLed a team of a group of 4 people.\nBuilt a car with recognition of pre-defined English words to control the movements of a small car. Basic operations include moving forwards and backwards, turning or sliding left and right, etc.\n\nAuto Door Opener for Dormitory (Sept 2023 — Oct 2023)\n\nMain tools: C++, Nucleo L432KC MCU, Mbed library, OLED screen, etc.\nThis was the final project of the Microelectronic System course.\nRealized opening our dormitory door by simply entering password from a keyboard outside the room (instead of using physical keys). Basic functions include setting up password manually, automatically lock if wrong password is entered over 5 times, display messages on an OLED screen, etc.\n\n“XinTong Cup” Electronic Design Competition: Electronic Keyboard Music Player (Sept 2022 — Oct 2022)\n\nMain tools: Keil C51, STC89C52RC MCU, etc.\nLed a small team of a group of 3 people.\nSuccessfully built a simplified keyboard music player with 8 keys using an 8-bit MCU by ST company and Keil C51 language for register-based development.\nFunctionality of the keyboard music player consists: Single note playing, chord playing, recording ability, replay and rewind capability, etc."
+  },
+  {
+    "objectID": "cv/index.html#engaged-projects",
+    "href": "cv/index.html#engaged-projects",
+    "title": "Marcobisky",
+    "section": "",
+    "text": "RV32I CPU Core for Education  (Jan 2025 — Present)\n\nMain tools: verilog, VHDL, Digital, Kicad, iCESuger FPGA\nSimulate an entire RISC-V 32 bit CPU in verilog and Digital Software.\nSupport basic peripherals such as GPIOs, IIC, UART, VGA, etc.\nSimple boot ROM in assembly, minimal interrupt service for running a Linux kernel.\nComplete PCB design in Kicad (Not finished).\n\nAME Source Coding (Oct 2024 — Nov 2024)\n\nMain tools: python, matlab\nFinal project of Information Theory Course.\nDeveloped a method (Second-order Markov Adapative Approximation, AME) to perform source coding for the Game of Thrones. The performance of Huffman and Fano coding was also evaluated.\n\nCNN for Mbed (Feb 2024 — May 2024)\n\nMain tools: python, C++\nIntegrated a Convolutional Neural Network (CNN) into an MCU for smart fall detection for the elderly.\nRealized functions include smart fall detection, body temperature monitoring and real-time data visualization.\n\nA Study of Generalized Fields and Extension to Higher Dimensions (Oct 2023 — Feb 2024)\n\nA theoretical study of generalized natural fields and behaviours in higher dimensions.\nLargely motivated by my tutor Mr. Yidong Liu and my friends and complete by myself.\n\nHuman Voice Recognition Smart Car (Sept 2023 — Dec 2023)\n\nMain tools: C++, STM32F103C8T6 MCU, etc.\nLed a team of a group of 4 people.\nBuilt a car with recognition of pre-defined English words to control the movements of a small car. Basic operations include moving forwards and backwards, turning or sliding left and right, etc.\n\nAuto Door Opener for Dormitory (Sept 2023 — Oct 2023)\n\nMain tools: C++, Nucleo L432KC MCU, Mbed library, OLED screen, etc.\nThis was the final project of the Microelectronic System course.\nRealized opening our dormitory door by simply entering password from a keyboard outside the room (instead of using physical keys). Basic functions include setting up password manually, automatically lock if wrong password is entered over 5 times, display messages on an OLED screen, etc.\n\n“XinTong Cup” Electronic Design Competition: Electronic Keyboard Music Player (Sept 2022 — Oct 2022)\n\nMain tools: Keil C51, STC89C52RC MCU, etc.\nLed a small team of a group of 3 people.\nSuccessfully built a simplified keyboard music player with 8 keys using an 8-bit MCU by ST company and Keil C51 language for register-based development.\nFunctionality of the keyboard music player consists: Single note playing, chord playing, recording ability, replay and rewind capability, etc."
+  },
+  {
+    "objectID": "cv/index.html#academic-record",
+    "href": "cv/index.html#academic-record",
+    "title": "Marcobisky",
+    "section": "ACADEMIC RECORD",
+    "text": "ACADEMIC RECORD\n\nDetailed scores of core courses (GPA: 3.88)\n\n\n\n\n\n\n\nYear\nSubject\nScore\n\n\n\n\nYear 1\nCalculus I/II   Linear Algebra   C Programming   Physics I  \n91/92   84   95   88  \n\n\nYear 2\nPhysics II   Signal and Systems   Probability and Statistics   Microelectronic Systems   Embedded Processors   Circuit Analysis and Design   Computer Network   Academic English  \n96   91   92   92   95   95   94   89  \n\n\nYear 3\nInformation Theory   Principles of Communication   Digital Circuit Design   Machine Learning   Stochastic Signal Analysis  \n91   95   86   86   82"
+  },
+  {
+    "objectID": "cv/index.html#relevant-skills",
+    "href": "cv/index.html#relevant-skills",
+    "title": "Marcobisky",
+    "section": "RELEVANT SKILLS",
+    "text": "RELEVANT SKILLS\n\nIT Skills: Latex, (Quarto) Markdown, Typst, Manim, Github, Microsoft Office.\nComputer Programming: C/C++, Matlab, Python.\nEmbedded System Programming: RISCV asm, STM89C5x (Standard lib), Keil C51.\nTeam Work: Zoom meeting, Notion team, Microsoft team.\nLanguage: No problem in understanding English lectures, fluent Chinese."
+  },
+  {
+    "objectID": "cv/index.html#others",
+    "href": "cv/index.html#others",
+    "title": "Marcobisky",
+    "section": "OTHERS",
+    "text": "OTHERS\n\nLearn Everything: I’m open to think and learn everything exist or non-exist on earth.\nClassical Music Enthusiast: Violin player in university symphony orchestra, votary of Gustav Mahler and Johann Sebastian Bach.\nPure Math Lover: Pure math (especially Algebraic Geometry and addictive puzzles) occupies me most of the time. Absolute beauty!\nBadminton Lover: Sports always refreshes me at any time.\nVolunteer Work: Love helping others, over 15 hours of volunteering."
+  }
+]
