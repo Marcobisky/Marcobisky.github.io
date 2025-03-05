@@ -1,0 +1,129 @@
+---
+author: Marcobisky
+title: "Q&A: Why $e_i$ is exactly the same as $\\frac{\\partial}{\\partial x^i}$?"
+description: Basis vectors are exactly the same as partial derivative operator?
+date: 2025-03-04
+image: cover.png
+categories:
+    - Differential-Geometry
+format: 
+    html:
+        toc: true
+        self-contained: true
+        grid: 
+            margin-width: 350px
+    pdf: default
+html-math-method: mathjax
+reference-location: margin
+citation-location: margin
+---
+
+## Question
+
+In differential geometry, we usually see a vector $v$ is written as:
+$$
+v = v^i \frac{\partial }{\partial x^i} \bigg\rvert_p.
+$$
+
+Why does a vector *naturally* relates to partial derivatives?
+
+<!-- ----------------------------------------- -->
+::: {.callout-warning icon=false collapse=true}
+## One-line Solution
+$$
+T_p (\mathbb{R}^n) \cong \text{Der}_p (C^\infty(\mathbb{R}^n))
+$$
+:::
+<!-- ----------------------------------------- -->
+
+
+## Solution -- From Derivative to Derivation
+
+### Directional derivative
+
+We know from multivariable calculus that in high dimensions, we could not say the "derivative", but the *directional derivative* of a function[^function]. The directional derivative is a measure of how quickly the function value vary when we step a tiny nudge along a vector $v$. Imagine we are at $p$ in $\mathbb{R}^3$ and temperature is different everywhere. We are curiously about how this temperature field $f$ changes in different directions. we move a tiny proportion[^proportion] along $v$ (say $\epsilon = 0.01 \%$) and we feel the temperature changes by $\Delta f = f(p+\epsilon v)-f(p)$. So we define the directional derivative of $f$ along $v$ is
+$$
+D_{v} f |_p := \lim_{\epsilon \to 0} \frac{\Delta f}{\epsilon}.
+$$
+
+
+[^function]: "Scalar field" in fancier term. A scalar field in $\mathbb{R}^n$ is a map from $\mathbb{R}^n$ to $\mathbb{R}$.
+
+[^proportion]: This is important! We are NOT moving a tiny *bit* but a tiny *proportion*, which means the length of $v$ matters. Because if we move $0.01 \%$ on $v$ and $2 v$, $f$ will vary $\Delta f$ and $2\Delta f$ and therefore the directional derivative of $f$ along $2v$ would be doubled! In some books, you will see we force $v$ to be unit length, so we will not have this problem. But for me it's unnecessary.
+
+It turns out that there is an explicit formula for directional derivatives:
+$$
+D_{v} f = \langle\nabla f, v\rangle,
+$$
+i.e., the inner product between the gradient of $f$ and $v$. The direction of the $\nabla f$ is the steepest ascend of $f$ at $p$. In $\mathbb{R}^3$, this can be written as[^indices]
+$$
+\begin{aligned}
+    D_v f &= \langle \frac{\partial f}{\partial x^1} e_1 + \frac{\partial f}{\partial x^2} e_2 +\frac{\partial f}{\partial x^3} e_3, v^1 e_1 + v^2 e_2 + v^3 e_3 \rangle \\
+    &= v^1 \frac{\partial f}{\partial x^1} + v^2 \frac{\partial f}{\partial x^2} + v^3 \frac{\partial f}{\partial x^3} \\
+    &= \sum_i v^i \frac{\partial f}{\partial x^i} \\
+    &=: v^i \frac{\partial f}{\partial x^i}.
+\end{aligned}
+$${#eq-dvf}
+
+
+[^indices]: We use upper indices to represent coordinate components and lower indices to represent basis vectors, so @eq-dvf in usually notation is just
+$$
+D_v f = \langle \frac{\partial f}{\partial x} \hat{\imath} + \frac{\partial f}{\partial y} \hat{\jmath} +\frac{\partial f}{\partial z} \hat{k}, v_1 \hat{\imath} + v_2 \hat{\jmath} + v_3 \hat{k} \rangle.
+$$
+
+The last step in @eq-dvf where we drop the summation notation is a convention called [Einstein notation](https://en.wikipedia.org/wiki/Einstein_notation). 
+
+**We could view $D_v f$ as $v$ acts on $f$.** Some textbook uses $v[f]$ to represent this action, i.e.,
+$$
+v[f] := D_v f.
+$$
+
+### Derivation
+
+We know a normal derivative satisfy so-called chain rule:
+$$
+\frac{\mathrm{d}}{\mathrm{d}x}(fg) = \frac{\mathrm{d}f}{\mathrm{d}x} g + f \frac{\mathrm{d}g}{\mathrm{d}x}.
+$$
+
+We extract this property and define abstractly the ***derivation*** operator on an algebra as follows:
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Derivation on an Algebra
+::: {#def-derivation .callout-def}
+Let $A$ be an algebra over field $\mathbb{F}$, a ***derivation*** is a linear map $D: A \to A$ s.t.,
+$$
+D(ab) = D(a)b + aD(b).
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+It's obvious that every $v$ induces such a derivation on the algebra $C^\infty_p$ by a map $\phi: v \mapsto D_v$. The question is: **Does every derivation necessarily induced by a vector?**
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Vectors are Derivations
+::: {#thm-iso .callout-thm}
+The space of all vectors emanating at $p$ is isomorphic to the space of all derivations
+$$
+T_p (\mathbb{R}^n) \cong \text{Der}_p (C^\infty(\mathbb{R}^n)).
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+In other words, every possible derivations on the algebra $C^\infty(\mathbb{R}^n)$ is some directional derivative along $v \in T_p (\mathbb{R}^n)$. Under this isomorphism, the basis vectors $e_i$ is mapped to the partial derivative operator $\frac{\partial }{\partial x^i}$!
+
+In a general manifold $M$, the concept of *derivations* remain while *vectors* is hard to define. So we will actually use derivations to define ***tangent vector*** in a manifold[^tubook]:
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Tangent Vector in a manifold
+::: {#def-tangent .callout-def}
+A tangent vector at a point $p$ in a manifold $M$ is a derivation at $p$.
+:::
+:::
+<!-- ----------------------------------------- -->
+
+[^tubook]: [Tu's book](https://www.amazon.sg/Introduction-Manifolds-Loring-W-Tu/dp/1441973990) is a very good book of differential geometry for beginners, check it out!

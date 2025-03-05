@@ -1,0 +1,292 @@
+---
+author: Marcobisky
+title: What is symmetry?
+description: Symmetry is group action!
+date: 2025-3-3
+image: cover.png
+categories:
+    - Algebra
+format: 
+    html:
+        toc: true
+        self-contained: true
+        grid: 
+            margin-width: 350px
+    pdf: default
+html-math-method: mathjax
+reference-location: margin
+citation-location: margin
+---
+
+## Discover Symmetry {#sec-sec1}
+
+You may have noticed these concepts:
+
+### (Additive) Even/Odd Functions
+
+::: {.callout-tip icon=false}
+## Even/odd complex-valued function
+::: {#def-complex .callout-def}
+
+A function $f: \mathbb{R}^n \to \mathbb{C}$ is called
+
+- ***conjugate symmetric*** $:\iff f(-\mathbf{v}) = \overline{f(\mathbf{v})}, \forall \mathbf{v} \in \mathbb{R}^n$,
+- ***conjugate anti-symmetric*** $:\iff -f(-\mathbf{v}) = \overline{f(\mathbf{v})}, \forall \mathbf{v} \in \mathbb{R}^n$
+:::
+:::
+
+
+
+::: {#note-special .callout-note}
+## Special cases of @def-complex
+
+::: {.callout-tip icon=false}
+## Even/odd real function
+::: {#def-real}
+A function $f: \mathbb{R} \to \mathbb{R}$ is called
+
+- ***even*** $:\iff f(-x) = f(x), \forall x \in \mathbb{R}$,
+- ***odd*** $:\iff -f(-x) = f(x), \forall x \in \mathbb{R}$
+:::
+:::
+
+
+::: {.callout-tip icon=false}
+## Even/odd multivariate real function
+::: {#def-realMulti}
+A function $f: \mathbb{R}^n \to \mathbb{R}$ is called
+
+- ***even*** $:\iff f(-\mathbf{v}) = f(\mathbf{v}), \forall \mathbf{v} \in \mathbb{R}^n$,
+- ***odd*** $:\iff -f(-\mathbf{v}) = f(\mathbf{v}), \forall \mathbf{v} \in \mathbb{R}^n$
+:::
+:::
+
+:::
+
+
+
+
+::: {.callout-tip icon=false}
+## Decomposition Property
+::: {#thm-Decom .callout-thm}
+Any function $f: \mathbb{R}^n \to \mathbb{C}$ can be decomposed[^knowLater] into a symmetric part $Sf$ and a anti-symmetric part $Af$:
+$$
+f = \frac{Sf + Af}{2},
+$$
+$$
+Sf := f(\mathbf{v})+\overline{f(-\mathbf{v})},
+$$
+$$
+Af := f(\mathbf{v})-\overline{f(-\mathbf{v})}.
+$$
+
+In fancier language,
+$$
+\mathbb{C}^{\mathbb{R}^n} = S\mathbb{C}^{\mathbb{R}^n} \oplus A\mathbb{C}^{\mathbb{R}^n}.
+$$
+
+[^knowLater]: The reason why I do NOT define $Sf = (f(\mathbf{v})+\overline{f(-\mathbf{v})})/2$ will be clear later.
+:::
+:::
+
+
+
+::: {#note-specialthm .callout-note}
+As a special case of @thm-Decom, any function $f: \mathbb{R} \to \mathbb{R}$ is a sum of an even and an odd function:
+$$
+f = \frac{(f(x) + f(-x))+(f(x) - f(-x))}{2}.
+$$
+:::
+
+
+### (Multiplicative) Even/Odd Functions
+
+There are also multiplicative version of @def-complex and @thm-Decom:
+
+
+::: {.callout-tip icon=false}
+## Multiplicative version of @def-complex
+::: {#def-complexMul}
+
+A function $f: (\mathbb{R}^{\times})^n \to \mathbb{C}$ is called[^crossdef]
+
+- ***Multiplicative conjugate symmetric*** $:\iff f(\frac{1}{\mathbf{v}}) = \overline{f(\mathbf{v})}, \forall \mathbf{v} \in \mathbb{R}^n$,
+
+- ***conjugate anti-symmetric*** $:\iff \frac{1}{f(\frac{1}{\mathbf{v}})} = \overline{f(\mathbf{v})}, \forall \mathbf{v} \in \mathbb{R}^n,$
+
+where $\frac{1}{\mathbf{v}}$ is another vector in $(\mathbb{R}^{\times})^n$ whose components are the reciprocal of those of $\mathbf{v}$.
+
+[^crossdef]: $\mathbb{R}^{\times} := \mathbb{R} \backslash \{0\}$.
+:::
+:::
+
+
+::: {.callout-tip icon=false}
+## Multiplicative version of Decomposition Property
+::: {#thm-DecomMul .callout-thm}
+Any function $f: (\mathbb{R}^{\times})^n \to \mathbb{C}$ can be decomposed into a symmetric part $S^{\bullet}f$ and a anti-symmetric part $A^{\bullet}f$:
+$$
+f = \sqrt{S^{\bullet}f \cdot A^{\bullet}f},
+$$
+$$
+S^{\bullet}f := f(\mathbf{v}) \cdot \overline{f(\mathbf{v}^{-1})},
+$$
+$$
+A^{\bullet}f := \frac{f(\mathbf{v})}{\overline{f(\mathbf{v}^{-1})}}.
+$$
+:::
+:::
+
+
+### Symmetric/Alternating Tensor
+
+::: {.callout-tip icon=false}
+## Symmetric/Alternating Tensor
+::: {#def-symtensor .callout-def}
+A symmetric rank-$k$ tensor $f: V^k \to \mathbb{R}$ is ***symmetric*** iff
+$$
+f(v_{\sigma(1)}, \dots, v_{\sigma(k)}) = f(v_1, \dots, v_k)
+$$
+for all permutations $\sigma \in S_k$. 
+
+It is ***alternating*** iff
+$$
+f(v_{\sigma(1)}, \dots, v_{\sigma(k)}) = (\operatorname{sgn} \sigma) f(v_1, \dots, v_k)
+$$
+for all permutations $\sigma \in S_k$.
+:::
+:::
+
+Though generally we cannot decompose an arbitrary tensor into a symmetric and alternating part, we could build them by introducing two operators:
+
+::: {.callout-tip icon=false}
+## Symmetric/Alternating Operator for Tensors
+::: {#def-symop .callout-def}
+Given $\forall f: V^k \to \mathbb{R}$, the operator $S$ and $A$ defined below always give a symmetric and alternating tensor[^sigmadef]:
+$$
+Sf := \sum_{\sigma \in S_k} \sigma f,
+$$
+$$
+Af := \sum_{\sigma \in S_k} \operatorname{sgn}(\sigma) \sigma f.
+$$
+
+[^sigmadef]: $\sigma f$ is defined by $(\sigma f)(v_1, v_2, \ldots, v_k) := f(v_{\sigma(1)}, v_{\sigma(2)}, \ldots, v_{\sigma(k)}).$
+
+:::
+:::
+
+### Matrix
+
+::: {.callout-tip icon=false}
+## Self-adjoint and Skew-adjoint Matrices
+::: {#def-adjoint .callout-def}
+A linear operator $\phi \in \operatorname{Hom}(V)$ is called ***self-adjoint*** iff
+$$
+\phi^H = \phi,
+$$
+and ***skew-adjoint*** iff
+$$
+\phi^H = -\phi.
+$$
+:::
+:::
+
+## Symmetry as Group Action
+
+### Problem
+
+Is there any way to unify these seemingly "symmetric" concepts? What kind of mathematical object can be symmetrize and and alternate? When does the object itself expressible by only its symmetrized and and alternated ones?
+
+### Important Observation
+
+The common thing of the above examples in @sec-sec1 is that the domain of the objects (functions, tensors, matrices[^ex]) could be manipulated by some kind of actions:
+
+[^ex]: This is left as an exercise.
+
+- $f: \mathbb{R}^n \to \mathbb{C}$: additive inversion,
+- $f: (\mathbb{R}^{\times})^n \to \mathbb{C}$: multiplicative inversion,
+- $f: V^k \to \mathbb{R}$: permutation.
+
+The first two can be viewed as the 2-element *group* $S_2$ *acts* on the domain of $f$, where $S_2$ is the group generated by the operation of "taking inverse":
+$$
+S_2 := \langle\cdot^{-1}\rangle = \{e, \cdot^{-1}\},
+$$
+or equivalently, the [permutation group](https://en.wikipedia.org/wiki/Permutation_group) on two letters:
+$$
+S_2 = \{e, (12)\}.
+$$
+
+Therefore, in the first two cases, we could define a $S_2$-action:
+$$
+(\sigma f)(\mathbf{v}) := \overline{f(\mathbf{v}^{-1})},
+$$
+where $\mathbf{v}^{-1}$ is either $-\mathbf{v}$ (additive inverse) or $1/\mathbf{v}$ (multiplicative inverse).
+
+Therefore, the definition of the operator $S$ and $A$ in @def-symop also applies for the first two cases:
+$$
+Sf 
+:= \sum_{\sigma \in S_2} \sigma f 
+= f(\mathbf{v}) + \overline{f(-\mathbf{v})} \quad (\text{or } f(\mathbf{v})\cdot \overline{f(-\mathbf{v})}),
+$$
+$$
+Af 
+:= \sum_{\sigma \in S_k} \operatorname{sgn}(\sigma) \sigma f 
+= f(\mathbf{v}) - \overline{f(-\mathbf{v})} \quad (\text{or } \frac{f(\mathbf{v})}{\overline{f(\mathbf{v}^{-1})}}).
+$$
+
+
+### When Decomposable?
+
+In the first two cases, $f$ can be expressed purely by $Sf$ and $Af$:
+$$
+f = \frac{Sf + Af}{2} \quad (\text{or } \sqrt{Sf \cdot Af}),
+$$
+which is just the *average* of them! (Arithmetic average and geometric average respectively)
+
+But we don't have this relationship for tensors, i.e., not every rank $k$ tensor can be purely expressed using $Sf$ and $Af$ -- apart from the case when $k = 2$:
+$$
+f(v_1, v_2) = \frac{(f(v_1, v_2)+f(v_2, v_1))+(f(v_1, v_2)-f(v_2, v_1))}{2} = \frac{Sf + Af}{2}.
+$$
+
+What happened when $k \ge 3$?
+
+Let $f: V^3 \to \mathbb{R}$, we have
+$$
+Sf = f(v_1, v_2, v_3) + f(v_2, v_3, v_1) + f(v_3, v_1, v_2) + f(v_2, v_1, v_3) + f(v_1, v_3, v_2) + f(v_3, v_2, v_1),
+$$
+$$
+Af = f(v_1, v_2, v_3) + f(v_2, v_3, v_1) + f(v_3, v_1, v_2) - f(v_2, v_1, v_3) - f(v_1, v_3, v_2) - f(v_3, v_2, v_1).
+$$
+
+![Visualize group action](visual-group-action.png)
+
+The result
+$$
+\frac{Sf + Af}{2} = f(v_1, v_2, v_3) + f(v_2, v_3, v_1) + f(v_3, v_1, v_2) = \sum_{\sigma \in A_3} \sigma f \neq f,
+$$
+where $A_3$ is the [alternating group](https://en.wikipedia.org/wiki/Alternating_group) (the group of even permutations) on three letters.
+
+
+### Try Yourself!
+
+::: {#exr-try .callout-exr}
+## $S$ and $A$ operator for matrices $\phi$
+
+Let $\phi \in \operatorname{Hom} (\mathbb{C}^{n \times n})$, derive the definition of $S\phi$ and $A \phi$.
+:::
+
+
+::: {.callout-warning icon=false collapse=true}
+## Solution
+$$
+S \phi := \frac{\phi + \phi^H}{2},
+$$
+$$
+A \phi := \frac{\phi - \phi^H}{2}.
+$$
+
+We also have
+$$
+\phi = \frac{S \phi + A \phi}{2}.
+$$
+:::
