@@ -1,0 +1,282 @@
+---
+author: Marcobisky
+title: "Three ways to Understand the Mixed Product of Vectors!"
+description: When it comes to $a \cdot (b \times c)$, what's in your head?
+date: 2025-3-09
+image: cover.png
+categories:
+    - Differential-Geometry
+format: 
+    html:
+        toc: true
+        self-contained: true
+        grid: 
+            margin-width: 350px
+    pdf:
+        include-in-header:
+            text: |
+                \usepackage{esint, amssymb}
+html-math-method: katex
+reference-location: margin
+citation-location: margin
+---
+
+## Hello!
+
+This property of vector operation bother me for a loooooong time:
+
+**Mixed product**[^scalar-triple-product]:
+$$
+\boxed{
+a \cdot (b \times c) = b \cdot (c \times a) = c \cdot (a \times b).
+}
+$${#eq-scalar}
+
+This says nothing but the mixed product is unchanged under a circular shift.
+
+[^scalar-triple-product]: Also known as "scalar triple product".
+
+You will understand it in this article!
+
+## Three Approaches to the Mixed Product
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Lemma
+::: {#lem-determinant .callout-lem}
+Let $a, b, c \in \mathbb{R}^3$, then
+$$
+a \cdot (b \times c) = 
+\begin{vmatrix}
+| & | & | \\
+a & b & c \\
+| & | & | 
+\end{vmatrix}
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+Once this is established, we can use the fact that:
+$$
+\begin{vmatrix}
+| & | & | \\
+a & b & c \\
+| & | & | 
+\end{vmatrix} = 
+\begin{vmatrix}
+| & | & | \\
+b & c & a \\
+| & | & | 
+\end{vmatrix} = 
+\begin{vmatrix}
+| & | & | \\
+c & a & b \\
+| & | & | 
+\end{vmatrix}
+$$
+to prove @eq-scalar. 
+
+Now let's understand @lem-determinant in three different ways!
+
+### Geometric Approach
+
+See @fig-determinant-geometric, dot product make the slanted black box straight but maintains its volume.
+
+![Geometric proof of @lem-determinant](determinant-geometric.png){#fig-determinant-geometric}
+
+### 3b1b Approach
+
+I called this "3b1b Approach" because this method is inspired by a great mathematician Grant Sanderson. "3b1b" is the name of [his Youtube channel](https://www.youtube.com/@3blue1brown).
+
+In a [video](https://www.youtube.com/watch?v=BaM7OCEm3G0) created by him, there is a very interesting function $f: \mathbb{R}^3 \to \mathbb{R}$:
+$$
+f(x) = 
+\begin{vmatrix}
+| & | & | \\
+x & v & w \\
+| & | & | 
+\end{vmatrix}
+$${#eq-nice-function}
+which takes in a vector in $\mathbb{R}^3$ and output a number in $\mathbb{R}$ ($v$ and $w$ are predefined and fixed).[^functional] Now I claim that:
+
+[^functional]: Functions from a vector space to a scalar is often referred to as a ***functional***.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Claim
+::: {#thm-claim .callout-thm}
+The functional $f$ in @eq-nice-function is *linear*, i.e., 
+$$
+f(x + y) = f(x) + f(y), \forall x, y \in \mathbb{R}^3
+$$
+and
+$$
+f(\alpha x) = \alpha f(x), \forall \alpha \in \mathbb{R}.
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+This is trivial.
+
+There is another theorem[^bilibili]:
+
+[^bilibili]: There is a [video](https://www.bilibili.com/video/BV1AterevErt/?spm_id_from=333.1387.list.card_archive.click&vd_source=42579e22289b6144ba0b2bdcf99834e3) created by myself that explains this in detail.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Riesz Representation Theorem (reduced version)
+::: {#thm-riesz .callout-thm}
+Every linear functional in $\mathbb{R}^n$ induces a vector $p \in \mathbb{R}^n$ such that
+$$
+f(x) = x \cdot p, \forall x \in \mathbb{R}^n.
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+
+Therefore, @eq-nice-function becomes
+$$
+\boxed{
+x \cdot p = 
+\begin{vmatrix}
+| & | & | \\
+x & v & w \\
+| & | & | 
+\end{vmatrix}
+}
+$${#eq-x-dot-p}
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## Mnemonic device inspired by @eq-x-dot-p
+The @eq-x-dot-p gives us a way to write the cross product in a more "dot-product" way:
+$$
+v \times w =
+\begin{vmatrix}
+\hat{\imath} & v_1 & w_1 \\
+\hat{\jmath} & v_2 & w_2 \\
+\hat{k} & v_3 & w_3
+\end{vmatrix}
+$$
+because the result $v \times w = (v_2w_3 - v_3w_2)\hat{\imath} + (v_3w_1 - v_1w_3)\hat{\jmath} + (v_1w_2 - v_2w_1)\hat{k}$ is very much like a dot product!
+
+If you feel uncomfortable with this notation, there is more:
+$$
+\operatorname{curl} F 
+\equiv \nabla \times F =
+\begin{vmatrix}
+\hat{\imath} & \frac{\partial}{\partial x} & F_x \\
+\hat{\jmath} & \frac{\partial}{\partial y} & F_y \\
+\hat{k} & \frac{\partial}{\partial z} & F_z
+\end{vmatrix}
+$$
+where we treat $\nabla$ like a vector! The first column is just an indicator that the result should be interpreted as a vector not a dot product. I took long time to think $\nabla$ as a kind of special vector, but I failed. Feel free to ignore the notation $\nabla \times F$ if you don't like it!
+:::
+<!-- ----------------------------------------- -->
+
+
+What is $p$ then? Well, **$p$ is a special vector in $\mathbb{R}^3$ such that the dot product with *any* vector $x$ gives a number that is equal to the volume of a box spaned by $x$, $v$, and $w$.** This is a little bit mouthful, but we can see immediately from @fig-determinant-geometric that $p$ is just the blue vector, which is $v \times w$ in this case! So @eq-x-dot-p becomes:
+$$
+x \cdot (v \times w) = \begin{vmatrix}
+| & | & | \\
+x & v & w \\
+| & | & | 
+\end{vmatrix}
+$$
+
+We are done!
+
+
+### Tensor Approach
+
+Now this explanation requires some knowledge about tensors[^tensors]. But once you understand it, **you will completely change your view on *determinants***! (If you did not respect them at all in the past anyway.)
+
+[^tensors]: Just a quick joke, tensors are exactly linear functionals but we allow multiple vectors to be the input (instead of one).
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Proposition
+::: {#prp-alternating .callout-prp}
+The mapping $g(a, b, c) := a \cdot (b \times c)$ and $\det$ are both alternating 3-tensor, i.e.,
+$$
+g, \det \in \bigwedge\nolimits^{\!3} \left(\mathbb{R}^3\right).
+$${#eq-g-det}
+:::
+:::
+<!-- ----------------------------------------- -->
+
+
+
+We also have this theorem:
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Uniqueness of volume form
+::: {#thm-dimension-1 .callout-thm}
+The dimension of the vector space of $k$-tensors on $\mathbb{R}^n$[^volume] is ${n \choose k}$:
+$$
+\operatorname{dim} \bigwedge\nolimits^{\!k} \left(\mathbb{R}^n\right) = {n \choose k}.
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+[^volume]: This type of tensor is also called "volume form".
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## Demonstration of @thm-dimension-1
+
+Pick $n = 3$ and $k = 2$. This is because in order to get the result of a $2$-tensor[^bilinear-form] $B$ acting on *any* two vectors of dimension $3$, we would only need to specify the values of $B$ acting on any $2$ of the three basis vectors ($e_x, e_y, e_z$). How many numbers do we need? Well, only ${3 \choose 2} = 3$ numbers:
+$$
+B(e_x, e_y) = a_{12}, B(e_y, e_z) = a_{23}, B(e_z, e_x) = a_{31}.
+$$
+
+[^bilinear-form]: This is also called an alternating bilinear form.
+
+These are the "basis" of the space $\bigwedge\nolimits^{\!2} \left(\mathbb{R}^3\right)$. So its dimension is $3$. Then we just use the bilinear and alternating property of $B$ to calculate the result of *any* two input vectors say $x = 2e_x + e_y - e_z$ and $y = -e_x + 3e_z$:
+$$
+\begin{aligned}
+B(x, y) 
+&= B(2e_x + e_y - e_z, -e_x + 3e_z) \\
+&= B(2e_x + e_y - e_z, -e_x) + B(2e_x + e_y - e_z, 3e_z) \\
+&= -2B(e_x, e_x) - B(e_y, e_x) + B(e_z, e_x) \\
+&+ 6B(e_x, e_z) + 3B(e_y, e_z) - 3B(e_z, e_z) \\
+&= 0 - (-a_{12}) + a_{31} \\
+&+ 6(-a_{31}) + 3a_{23} - 0 \\
+&= a_{12} + 3a_{23} - 5a_{31}.
+\end{aligned}
+$$
+:::
+<!-- ----------------------------------------- -->
+
+
+As a special case when $n = k = 3$, we have:
+$$
+\boxed{
+\operatorname{dim} \bigwedge\nolimits^{\!3} \left(\mathbb{R}^3\right) = {3 \choose 3} = 1.
+}
+$$
+
+Let's think about what this means. **The determinant is a very special object that *every* volume form in $n$ dimension is just a scalar multiple of it! In other words, *every* alternating $n$-tensor in $\mathbb{R}^n$ must be the determinant (up to a scalar)!** So with @eq-g-det, both $g$ and $\det$ are volume forms! So $g$ must be a scalar multiple of $\det$:
+$$
+g = k \det.
+$$
+
+We can evaluate $k$ by choosing a very special set of $a, b, c \in \mathbb{R}^3$, say $a = e_x, b = e_y, c = e_z$:
+$$
+g(e_x, e_y, e_z) = e_x \cdot (e_y \times e_z) = e_x \cdot e_x = 1,
+$$
+$$
+\det(e_x, e_y, e_z) =
+\begin{vmatrix}
+1 & 0 & 0 \\
+0 & 1 & 0 \\
+0 & 0 & 1
+\end{vmatrix} = 1.
+$$
+
+Therefore, $k = 1$ and $g = \det$. We are done!
