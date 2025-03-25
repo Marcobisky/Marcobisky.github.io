@@ -1,0 +1,507 @@
+---
+author: Marcobisky
+title: "Control Case Study: LQR for Inverted Pendulum!"
+description: Complete guide for building a linear feedback control system for an inverted pendulum in MATLAB.
+date: 2025-3-25
+image: src/cover.gif
+categories:
+    - Control-Theory
+format: 
+    html:
+        toc: true
+        toc-expand: true
+        self-contained: true
+        grid: 
+            margin-width: 350px
+    # pdf: default
+html-math-method: mathjax
+reference-location: margin
+
+bibliography: refs.bib
+bibliographystyle: ieee
+nocite: |
+    @*
+---
+
+## Intro
+
+![Control block diagram](control-block-diagram.png){width=70%}
+
+The objective of this article is to provide a self-contained guide to building a linear feedback control system for the classical inverted pendulum problem in MATLAB, i.e., to design a controller by applying a force to the cart $M$ to balance the pendulum at the upright position (shown in @fig-cartpend). We will use the following standard equations of a control system:
+$$
+\begin{aligned}
+    \dot{\mathbf{x}} &= A \mathbf{x} + B \mathbf{u} \\
+    \mathbf{y} &= C \mathbf{x} + D \mathbf{u} \\
+    \mathbf{u} &= -K \mathbf{y}.
+\end{aligned}
+$$
+
+A brief description of the symbols and their physical interpretation is given in the following table. If you have difficulty understanding their meanings, don't worry, feel free to scan the next section.
+
+| Symbol | Description                        | This Article |
+|--------|------------------------------------|--------------|
+| $\mathbf{x} \in TM$ | System state vector in the tangent bundle of dimension $n$. | $\mathbf{x} = [x, \dot{x}, \theta, \dot{\theta}]^t \in T(\mathbb{R}^1 \times \mathbb{S}^2)$ |
+| $\mathbf{u} \in TM_c$ | The values control knobs ("actuators") in a space of dimension $q$ ($q < n$). | Force on the cart $\mathbf{u} = \mathbf{F} \in \mathbb{R}$. |
+| $\mathbf{y} \in TM_o$ | The observable output vector of the system (the values that we can measure) in a space of dimension $p$ ($p < n$). | All dimension of $\mathbf{x}$ is observable $\mathbf{y} = \mathbf{x}$. |
+| $A^{n \times n}$ | The linear infinitesimal generator of the system. | Modelling and linearization needed, see @eq-linearized-matrix. |
+| $B^{n \times q}$ | How the control knobs affect the state vector. | Force analyzing needed, see @eq-linearized-matrix-B. |
+| $C^{p \times n}$ | Convert the state vector to what we can actually measure. | $C = I$. |
+| $D^{p \times q}$ | Sometimes the control knobs affect the system observable output directly. | Applying the force has no direct effect on the observable $D = 0$. |
+| $K^{q \times p}$ | The linear feedback matrix. The observable $\mathbf{y}$ is mapped linearly to the control knobs. | We use LQR to optimize this matrix. |
+
+
+## Physics Model
+
+In this section, we will derive the equations of motion for the cart-pendulum system using Lagrangian Mechanics. I hope @fig-cartpend will be enough to explain the notations used in this article.
+
+![Cart-pendulum Model](cartpend.png){width=70% #fig-cartpend}
+
+The dynamics of the system can be computed using Lagrangian Mechanics:
+
+$$
+\boxed{
+\frac{\mathrm{d}}{\mathrm{d}t}\frac{\partial L}{\partial q_i} - \frac{\partial L}{\partial q_i} = Q_i^{\text{non-conservative}},
+}
+$${#eq-lagrangian}
+where $q_i$ is either $x$ or $\theta$ in our case. The lagrangian $L$ is system kinetic energy minus potential energy:
+$$
+L = T - V.
+$$
+
+### Kinetic Energy
+
+The total kinetic energy of the system is the sum of the kinetic energy of the cart and the kinetic energy of the pendulum:
+$$
+T = T_M + T_m.
+$$
+
+First we compute the position of $m$:
+$$
+\mathbf{r}_m = \begin{bmatrix} x + \ell \sin \theta \\ -\ell \cos \theta \end{bmatrix}.
+$$
+
+Therefore,
+$$
+\begin{aligned}
+    T_m &= \frac{1}{2} m \dot{\mathbf{r}}_m^T \dot{\mathbf{r}}_m \\
+    &= \frac{1}{2} m \left[(\dot{x} + \ell \dot{\theta} \cos \theta)^2 + (\ell \dot{\theta} \sin \theta)^2\right] \\
+    &= \frac{1}{2} m \left[ \dot{x}^2 + \ell^2 \dot{\theta}^2 + 2 \ell \dot{x} \dot{\theta} \cos \theta \right].
+\end{aligned}
+$$
+
+The kinetic energy of $M$ is easy:
+$$
+T_M = \frac{1}{2} M \dot{x}^2.
+$$
+
+The total kinetic energy is:
+$$
+T = \frac{1}{2} (M + m) \dot{x}^2 + \frac{1}{2} m \ell^2 \dot{\theta}^2 + m \ell \dot{x} \dot{\theta} \cos \theta.
+$$
+
+### Potential Energy
+
+Only the pendulum has potential energy:
+$$
+V = - m g \ell \cos \theta.
+$$
+
+### Euler-Lagrange Equation
+
+The lagrangian of the system is:
+$$
+\begin{aligned}
+    L &= T - V \\
+    &= \frac{1}{2} (M + m) \dot{x}^2 + \frac{1}{2} m \ell^2 \dot{\theta}^2 + m \ell \dot{x} \dot{\theta} \cos \theta + m g \ell \cos \theta.
+\end{aligned}
+$$
+
+#### Euler-Lagrange in $x$
+
+For $q_1 = x$:
+$$
+\begin{aligned}
+    \frac{\partial L}{\partial \dot{x}} &= (M + m) \dot{x} + m \ell \dot{\theta} \cos \theta \\
+    \frac{\mathrm{d}}{\mathrm{d}t} \left( \frac{\partial L}{\partial \dot{x}} \right) &= (M + m) \ddot{x} + m \ell (-\sin \theta \dot{\theta}^2 + \cos \theta \ddot{\theta}) \\
+    \frac{\partial L}{\partial x} &= 0 \\
+    Q_x^{\text{non-conservative}} &= F - b \dot{x}.
+\end{aligned}
+$$
+
+By @eq-lagrangian, we have:
+$$
+(M + m) \ddot{x} + m \ell (-\sin \theta \dot{\theta}^2 + \cos \theta \ddot{\theta}) = F - b \dot{x}.
+$${#eq-lagrangian-x}
+
+#### Euler-Lagrange in $\theta$
+
+For $q_2 = \theta$:
+$$
+\begin{aligned}
+    \frac{\partial L}{\partial \dot{\theta}} &= m \ell^2 \dot{\theta} + m \ell \dot{x} \cos \theta \\
+    \frac{\mathrm{d}}{\mathrm{d}t} \left( \frac{\partial L}{\partial \dot{\theta}} \right) &= m \ell^2 \ddot{\theta} + m \ell (\ddot{x} \cos \theta - \dot{x} \sin \theta \dot{\theta}) \\
+    \frac{\partial L}{\partial \theta} &= - m g \ell \sin \theta - m \ell \dot{x} \sin \theta \dot{\theta} \\
+    Q_{\theta}^{\text{non-conservative}} &= 0.
+\end{aligned}
+$$
+
+By @eq-lagrangian, we have:
+$$
+m \ell \ddot{x} \cos \theta + m \ell^2 \ddot{\theta} + m g \ell \sin \theta = 0.
+$${#eq-lagrangian-theta}
+
+#### Matrix Form
+
+Write @eq-lagrangian-x and @eq-lagrangian-theta in matrix form:
+$$
+\begin{bmatrix}
+    M + m & m \ell \cos \theta \\
+    m \ell \cos \theta & m \ell^2
+\end{bmatrix}
+\begin{bmatrix}
+    \ddot{x} \\ \ddot{\theta}
+\end{bmatrix}
+=
+\begin{bmatrix}
+    F - b \dot{x} + m \ell \sin \theta \dot{\theta}^2 \\
+    - m g \ell \sin \theta
+\end{bmatrix}.
+$${#eq-lagrangian-matrix-form}
+
+### Matlab Code
+
+The following function computes the state-space model of the inverted pendulum:
+
+```{.matlab filename="invpend.m"}
+{{< include src/invpend.m >}}
+```
+
+The following function simulates the motion of the system without damping and external force:
+
+```{.matlab filename="simulation_invpend.m"}
+{{< include src/simulation_invpend.m >}}
+```
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## invpend_plot() function
+```matlab
+{{< include src/invpend_plot.m >}}
+```
+:::
+<!-- ----------------------------------------- -->
+
+![Simulation result of `simulation_invpend.m`](src/simulation_invpend.gif){width=70%}
+
+## Linearized Phase Space Model
+
+### Linearization of the original dynamics
+
+In this section, we build the linear version of the original system (without control) in the phase space.
+
+First of all, the state of the system can be described in a vector:
+$$
+\mathbf{x} = \begin{bmatrix}
+x \\ \dot{x} \\ \theta \\ \dot{\theta}
+\end{bmatrix}
+\in T (\mathbb{R}^1 \times \mathbb{S}^1)
+$$
+
+Now we want to use a linear model $\dot{\mathbf{x}} = \mathbf{Ax}$ to analyze the system at $\theta = 0$, i.e., we want to find matrix $A \in \mathbb{C}^{4 \times 4}$ s.t.,
+$$
+\frac{\mathrm{d}}{\mathrm{d}t}
+\begin{bmatrix}
+    x \\ \dot{x} \\ \theta \\ \dot{\theta}
+\end{bmatrix}
+=
+\overbrace{
+\begin{bmatrix}
+    \dot{x} \\ \ddot{x} \\ \dot{\theta} \\ \ddot{\theta}
+\end{bmatrix}
+}^{\dot{\mathbf{x}}}
+=
+\overbrace{
+\begin{bmatrix}
+    0 & 1 & 0 & 0 \\
+    ? & ? & ? & ? \\
+    0 & 0 & 0 & 1 \\
+    ? & ? & ? & ?
+\end{bmatrix}
+}^{A}
+\overbrace{
+\begin{bmatrix}
+    x \\ \dot{x} \\ \theta \\ \dot{\theta}
+\end{bmatrix}
+}^{\mathbf{x}}
+$$
+
+Note the the first and third row are trivial identities, we only need to derive the second and fourth row of $A$. We already solved @eq-lagrangian-matrix-form in `invpend.m`. But now we have to solve it explicitly to derive the partial derivatives for the jacobian:
+$$
+\begin{bmatrix}
+    \ddot{x} \\ \ddot{\theta}
+\end{bmatrix}
+=
+\phi (x, \dot{x}, \theta, \dot{\theta})
+=
+\begin{bmatrix}
+    \frac{F - b \dot{x} + m \ell \sin \theta \dot{\theta}^2 - mg \cos \theta \sin \theta}{M + m \sin^2 \theta} \\
+    \frac{- \cos \theta \left(F - b \dot{x} + m \ell \sin \theta \dot{\theta}^2\right) + (M+m) g \ell \sin \theta}{M \ell + m \ell \sin^2 \theta}
+\end{bmatrix}.
+$$
+
+Now obviously the function $\phi$ is non-linear. Its jacobian[^jacobian] at phase point $\mathbf{x}_{\text{up}} = [x, 0, 0, 0]^t$ is:
+$$
+\begin{aligned}
+    [J]
+    &=
+    \begin{bmatrix}
+    \frac{\partial \phi_1}{\partial x} & \frac{\partial \phi_1}{\partial \dot{x}} & \frac{\partial \phi_1}{\partial \theta} & \frac{\partial \phi_1}{\partial \dot{\theta}} \\
+    \frac{\partial \phi_2}{\partial x} & \frac{\partial \phi_2}{\partial \dot{x}} & \frac{\partial \phi_2}{\partial \theta} & \frac{\partial \phi_2}{\partial \dot{\theta}}
+    \end{bmatrix}_{\mathbf{x} = \mathbf{x}_{\text{up}}} \\
+    &=
+    \begin{bmatrix}
+    0 & -\frac{b}{M} & -\frac{mg}{M} & 0 \\
+    0 & -\frac{b}{M \ell} & -\frac{(m + M)g}{M \ell} & 0
+    \end{bmatrix}.
+\end{aligned}
+$$
+
+[^jacobian]: Just to refresh, the *Jacobian* $J$ of a (non-linear) function $\phi: \mathbb{R}^n \to \mathbb{R}^m$ at point $p \in \mathbb{R}^n$ can be viewed as the local transformation from the neighborhood of $p$ to the neighborhood of $\phi(p)$. $\mathbb{R}^n$ and $\mathbb{R}^m$ are not viewed as vector spaces but manifolds. In our case it's a little wired to compute the jacobian of $A$ since $A$ defines a vector field, not mapping between manifolds. Or it is? $A$ *is* indeed a mapping between manifolds! Because vector field themselves are a section of the tangent bundle.     By the way, this jacobian actually takes me a lot of effort to compute.
+
+Therefore,
+$$
+A =
+\begin{bmatrix}
+    0 & 1 & 0 & 0 \\
+    0 & -\frac{b}{M} & -\frac{mg}{M} & 0 \\
+    0 & 0 & 0 & 1 \\
+    0 & -\frac{b}{M \ell} & -\frac{(m + M)g}{M \ell} & 0
+\end{bmatrix}.
+$${#eq-linearized-matrix}
+
+### Deriving matrix $B$ for control
+
+The only control knob is $\mathbf{u} = \mathbf{F}$, the force on the cart.
+
+![The control knob $\mathbf{F}$ affects $\dot{x}$ and $\dot{\theta}$](deriving-B.png){width=70%}
+
+By Newton's second law, it's obvious that
+$$
+B \mathbf{u} = 
+\begin{bmatrix}
+    0 \\ \frac{1}{M} \\ 0 \\ -\frac{1}{M \ell}
+\end{bmatrix} F.
+$${#eq-linearized-matrix-B}
+
+Each entry of $B$ in @eq-linearized-matrix-B is explained in the following table:
+
+| Entry | Explanation |
+|-------|-------------|
+| `B(1,1)` = 0 | The velocity $\dot{x}$ of the cart $M$ will not suddenly change due to the force $F$. |
+| `B(2,1)` = $\frac{1}{M}$ | The acceleration $\ddot{x}$ flash to $\frac{F}{M}$ due to $F$. |
+| `B(3,1)` = 0 | The angular velocity $\dot{\theta}$ of the pendulum $m$ will not suddenly change due to the force  $F$. |
+| `B(4,1)` = $-\frac{1}{M \ell}$ | The angular acceleration $\ddot{\theta}$ of the pendulum $m$ flash to $-\frac{F}{M \ell}$ due to $F$. The pendulum is moving backward relative to the cart, hence the negative sign. |
+
+
+## Controllability of the system
+
+### Original system stability
+
+From intuition, the system where $\theta = 0$ is unstable. How to know that from @eq-linearized-matrix? We know that **the system $\dot{\mathbf{x}} = A \mathbf{x}$ is stable iff all the eigenvalues of $A$ are rigorously negative**. The instability of the system can be verified by the following Matlab code:
+
+```{.matlab filename="original_system_stability.m"}
+{{< include src/original_system_stability.m >}}
+```
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## Result of `original_system_stability.m`
+```matlab
+ans =
+         0
+   -4.1883
+   -0.6157
+    3.8040
+```
+Since there is a positive eigenvalue, the system is unstable.
+:::
+<!-- ----------------------------------------- -->
+
+### Controllability
+
+One great thing about feedback is that we can change the **fundamental dynamics** of the system, changing its eigenvalues[^eigenvalues] to make it stable (as shown in @fig-feedback-change-dynamics).
+
+[^eigenvalues]: Also called **poles** for historical reasons.
+
+![Feedback control change the underlying dynamics of the system](feedback-change-dynamics.png){#fig-feedback-change-dynamics}
+
+The system with linear feedback is:
+$$
+\begin{aligned}
+    \dot{\mathbf{x}} &= A \mathbf{x} + B \mathbf{u} \\
+    \mathbf{u} &= -K \mathbf{x},
+\end{aligned}
+$$
+or
+$$
+\dot{\mathbf{x}} = (A - B K) \mathbf{x},
+$$
+whose dynamics could be very different from the original system $\dot{\mathbf{x}} = A \mathbf{x}$.
+
+We want to take full control of the system, i.e., does there exist some $\mathbf{F} = \mathbf{u}(t)$ to drive the system state point to anywhere in the phase space? In other words, is the system controllable?
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Controllability
+::: {#thm-controllability .callout-thm}
+The following statements are equivalent:
+
+1. The system is controllable.
+
+2. Its controllability matrix $\mathcal{C}$ is full rank,
+$$
+\mathcal{C} := 
+\begin{bmatrix}
+    B & AB & A^2 B & \cdots & A^{n-1} B
+\end{bmatrix}.
+$$
+
+3. The poles of the system can be placed arbitrarily[^pole-place], i.e., the matrix $A - B K$ could have arbitrary eigenvalues.
+
+[^pole-place]: In fact, there is a built-in Matlab function `K = place(A, B, desired_eigs_vec)` to help you place the poles of the system to any desired locations.
+
+4. The reachability space $\mathcal{R}$ is the full phase space,
+$$
+\mathcal{R} := \{\mathbf{\xi} \in TM: \exists \text{ input } \mathbf{u}(t) \text{ s.t. } \mathbf{x}(t) = \mathbf{\xi}\}
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+By @thm-controllability, the system is controllable iff `ctrb(A, B)` has rank $4$. In fact, the following Matlab code can verify this.
+
+```{.matlab filename="sys_controllability.m"}
+{{< include src/sys_controllability.m >}}
+```
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## Result of `sys_controllability.m`
+```matlab
+ans =
+     4
+```
+Since $\mathcal{C}=$ `ctrb(A, B)` has full rank $4$, the system $\dot{\mathbf{x}} = (A - B K) \mathbf{x}$ is controllable.
+:::
+<!-- ----------------------------------------- -->
+
+
+## Finding the feedback matrix $K$
+
+### Random pole placement
+
+For controllable systems, @thm-controllability also guarantees that we can place the poles of the system to any desired locations, say `desired_eigs_vec = [-3; -4; -5; -6]`, just randomly some numbers in the left half of the complex plane, to ensure the stability of the system. We use `place()` in Matlab to find such $K$ and use that $K$ to simulate the control effect of the system.
+
+```{.matlab filename="simulation_linear_control.m"}
+{{< include src/simulation_linear_control.m >}}
+```
+
+![Simulation result of `simulation_linear_control.m`](src/simulation_linear_control.gif){width=70% #fig-simulation-linear-control}
+
+We can see in @fig-simulation-linear-control, the inverted pendulum is able to be stabilized at the status $\mathbf{x} = [1, 0, 0, 0]^t$. 
+
+By changing the desired eigenvalues, we can adjust the convergent speed of the system.
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## Matlab code for changing the desired eigenvalues
+```matlab
+{{< include src/convergence_speed.m >}}
+```
+:::
+<!-- ----------------------------------------- -->
+
+::: {layout-nrow=2}
+![`desired_eigs_vec_1 = [-1; -2; -3; -4]`](src/convergence_speed_1.gif)
+
+![`desired_eigs_vec_2 = [-2; -3; -4; -5]`](src/convergence_speed_2.gif)
+
+![`desired_eigs_vec_3 = [-3; -4; -5; -6]`](src/convergence_speed_3.gif)
+
+![`desired_eigs_vec_4 = [-4; -5; -6; -7]`](src/convergence_speed_4.gif)
+:::
+
+We can see that more negative eigenvalues lead to faster convergence, at the risk of breaking the linearity limit and making the system less robust. So we need to make a trade-off between the convergence speed and the robustness (convergence speed is usually limited by the power of the control). Or we may want to change the convergence style: whether to make the cart move as quickly as possible, or save as much energy as much as possible as long as the pendulum is inverted? Thankfully there is a way to find the required and "optimal" (in a sense) eigenvalues -- the Linear Quadratic Regulator (LQR).
+
+### Linear Quadratic Regulator (LQR)
+
+The idea is to define a metric (or "loss function" in optimization) to measure the badness of the eigenvalues (either too less robust or cost a lot to control), and then minimize that metric. Someone came up with this wired @eq-lqr-loss-function:
+
+$$
+\tilde{J} := \int_0^\infty (\mathbf{x}^t Q \mathbf{x} + \mathbf{u}^t R \mathbf{u}) \ \mathrm{d}t,
+$${#eq-lqr-loss-function}
+where $Q^{n \times n}$ and $R^{q \times q}$ are symmetric, positive-definite matrices, which typically are diagonal. In our example, we could choose
+$$
+Q = 
+\begin{bmatrix}
+    1 & 0 & 0 & 0 \\
+    0 & 1 & 0 & 0 \\
+    0 & 0 & 5 & 0 \\
+    0 & 0 & 0 & 70
+\end{bmatrix},
+\quad
+R = 0.5,
+$$
+which we put bigger penalties on $\theta$ and $\dot{\theta}$ because we want them to converge to their expected value quickly. For the position $x$ and velocity $\dot{x}$, we don't care much, so we put a small penalty on them. Also we put a penalty on the control input $F$ since our control device is able to provide large enough instantaneous force and we don't care the expenditure of energy.
+
+Therefore, $\tilde{J}$ will be:
+$$
+\tilde{J} = \int_0^\infty (x^2 + \dot{x}^2 + 5 \theta^2 + 70 \dot{\theta}^2 + 0.5 F^2) \  \mathrm{d}t.
+$$
+
+Now we are using **L**inear feedback to **R**egulate a system to minimize a **Q**uadratic loss function, hence the name **Linear Quadratic Regulator (LQR)**.
+
+The solution to this LQR problem deserves a separate lecture, the solution is given by the [Algebraic Riccati Equation](https://en.wikipedia.org/wiki/Algebraic_Riccati_equation). But in Matlab, there is a one-line command we can use to solve the corresponding $K$ matrix:
+
+```{.matlab}
+K = lqr(A, B, Q, R)
+```
+
+### Simulation by changing Q matrix
+
+We simulate the dynamics result with different $Q$ matrices are fixed $R = 0.01$:
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## Matlab code for comparing different Q matrices
+```matlab
+{{< include src/simulation_lqr.m >}}
+```
+:::
+<!-- ----------------------------------------- -->
+
+::: {layout-nrow=1}
+![$Q = \operatorname{diag}(400, 50, 1, 1)$: Fast](src/simulation_lqr_1.gif)
+
+![$Q = \operatorname{diag}(20, 400, 1, 1)$: Smooth](src/simulation_lqr_2.gif)
+
+![$Q = \operatorname{diag}(4, 4, 500, 50)$: Straight up](src/simulation_lqr_3.gif)
+:::
+
+### Simulation by changing R values
+
+We simulate @brunton_2019_datadriven the dynamics result with fixed $Q - \operatorname{diag} (20, 400, 1, 1)$ matrix and different $R$ values:
+
+::: {layout-nrow=3}
+![$R = 0.001$: More control power](src/simulation_lqr_4.gif){width=80%}
+
+![$R = 1.5$: Median control power](src/simulation_lqr_5.gif){width=80%}
+
+![$R = 5$: Least control power](src/simulation_lqr_6.gif){width=80%}
+:::
+
+
+## References
+
+::: {#refs}
+:::
