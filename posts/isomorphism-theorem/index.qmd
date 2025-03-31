@@ -1,0 +1,416 @@
+---
+author: Marcobisky
+title: Understanding Isomorphism Theorems for Groups
+description: If you struggle to have a clear mental picture of the isomorphism theorems, I hope this helps.
+date: 2025-3-31
+# image: cover.png
+categories:
+    - Algebra
+format: 
+    html:
+        toc: true
+        toc-expand: true
+        self-contained: true
+        grid: 
+            margin-width: 350px
+html-math-method: mathjax
+reference-location: margin
+citation-location: margin
+---
+
+**Prerequisites**: *Quotient group, group homomorphism, normal subgroup, at least 5 examples of groups, basic category theory*.
+
+Apologize for the handwriting, since it's hard for quarto to support tikz-cd package.
+
+## Takeaways
+
+- You gotta think of a homomorphism whenever there is a quotient.
+- Homomorphisms are WAAAAY more important than groups themselves!
+- The first isomorphism theorem: Universal property of quotients.
+- The second isomorphism theorem: How subgroups behave under projections.
+- The third isomorphism theorem: Just a diagram commutes.
+
+## Normal Subgroup $\iff$ Kernel
+
+In this section, I will introduce to you a very important mathematical habit: always think of a homomorphism whenever there is a quotient. This helps me a lot in not only understanding the three isomorphism theorems, but also in various topics such as projective geometry, cohomology, etc. First, let's look at some concepts, if you are familiar with them, you can skip this section.
+
+### Center and Centralizer
+
+There are two very similar concepts: center of a group and conjugation operation. Center can be generalized to the concept of a centralizer. Conjugation is related to the concept of a normal subgroup and normalizer.
+
+We know that not every group is abelian, but there are *some* elements in a group that commute with *every* other element in the group. We collect them to form a set. In fact, not only a set, but also a subgroup, called the **center** of the group.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Center
+::: {#def-center .callout-def}
+The center $Z(G)$ of a group $G$ is:
+$$
+\begin{aligned}
+Z(G) :=& \{ z \in G \mid \forall g \in G, zg = gz \} \\
+=& \{ z \in G \mid \forall g \in G, z = gzg^{-1} \}.
+\end{aligned}
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+Here are some properties of the center, you can think about them yourself:
+- $Z(G) \trianglelefteq G$. (See @def-normal-subgroup for the definition of normal subgroup.)
+- $Z(G) = G$ iff $G$ is abelian.
+- $Z(G)$ is itself abelian.
+
+If we do not want to make it commutes with *every* element in the group, but only with some elements in a set $S$ (not necessarily a subgroup[^subgroup-notation] of $G$), this generalize to the definition of the **centralizer** of $S$ in $G$:
+
+[^subgroup-notation]: $S \le G$ means $S$ is a subgroup of $G$. $S \subseteq G$ means $S$ is a subset of $G$.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Centralizer
+::: {#def-centralizer .callout-def}
+The **centralizer** $C_G(S)$ of a set $S$ $(S \subseteq G)$ of group $G$ is:
+$$
+\begin{aligned}
+C_G(S) :=& \{ c \in G \mid \forall s \in S, cs = sc \} \\
+=& \{ c \in G \mid \forall s \in S, c = scs^{-1} \}.
+\end{aligned}
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## Proof: $C_G(S) \le G$
+1. Closure: 
+
+    Let $a, b \in C_G(S)$, i.e., $\forall s \in S, as = sa, bs = sb$. We want to show that $ab \in C_G(S)$:
+    $$
+    (ab)s = a(bs) = a(sb) = (as)b = (sa)b = s(ab) \implies ab \in C_G(S), \forall s \in S.
+    $$
+
+2. Associativity: Inherited from $G$.
+
+3. Identity: $e_G \in C_G(S)$ because $\forall s \in S, es = se = s$.
+
+4. Inverse: Let $a \in C_G(S)$, i.e., $\forall s \in S, as = sa$. We want to show that $a^{-1} \in C_G(S)$:
+    $$
+    \begin{aligned}
+    as = sa & \implies a^{-1}as = a^{-1}sa \\
+    & \implies s = a^{-1}sa \\
+    & \implies sa^{-1} = a^{-1}saa^{-1} \\
+    & \implies sa^{-1} = a^{-1}s \\
+    & \implies a^{-1} \in C_G(S).
+    \end{aligned}
+    $$
+:::
+<!-- ----------------------------------------- -->
+
+
+Clearly, the center is a special case of the centralizer:
+$$
+Z(G) = C_G(G).
+$$
+
+### Conjugation
+
+The sandwich operation $gzg^{-1}$ in @def-center pops out frequenctly in math[^sandwidth-example]. We give it a name: **conjugation** of $z$ by $g$.
+
+[^sandwidth-example]: Similar matrices, quarternion representation of 3D rotation, etc.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Conjugation
+::: {#def-conjugation .callout-def}
+$a, b \in G$ **conjugate** $:\iff$ $\exists g \in G$ such that $a = gbg^{-1}$.
+:::
+:::
+<!-- ----------------------------------------- -->
+
+It's easy to show that conjugation defines an equivalence relation on $G$:
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## Proof: Conjugation is an Equivalence Relation
+To show conjugation defined in @def-conjugation is an equivalence relation $\sim$, we need to show it is reflexive, symmetric, and transitive.
+
+1. Reflexive: $\exists e \in G, a = eae^{-1}$, hence $a \sim a$.
+
+2. Symmetric: 
+$$
+\begin{aligned}
+a \sim b & \iff \exists g \in G, a = gbg^{-1} \\
+& \iff \exists g^{-1} \in G, b = g^{-1}ag \\
+& \iff b \sim a.
+\end{aligned}
+$$
+
+3. Transitive: 
+$$
+\begin{aligned}
+a \sim b, b \sim c & \iff \exists g, h \in G, a = gbg^{-1}, b = hch^{-1} \\
+& \iff \exists g, h \in G, a = ghch^{-1}g^{-1} \\
+& \iff \exists gh \in G, a = (gh)c(gh)^{-1} \\
+& \iff a \sim c.
+\end{aligned}
+$$
+:::
+<!-- ----------------------------------------- -->
+
+
+### Normal Subgroup and Normalizer
+
+In fact, we could weaken the condition of $z = gzg^{-1}$ in @def-center and $c = scs^{-1}$ in @def-centralizer to $N = gNg^{-1}$ and $S = gSg^{-1}$ to get the definition of a **normal subgroup** $N$ and a **normalizer** $N_G(S)$ respectively. This is different, because we no longer need pointwise commutativity but only commutativity as a set. In other words, the element after conjugation does not need to be itself necessarily as long as it remains in some set.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Normal Subgroup
+::: {#def-normal-subgroup .callout-def}
+A subgroup $N$ of a group $G$ is **normal** (denoted $N \trianglelefteq G$), iff $\forall g \in G, N = gNg^{-1}$, i.e.,
+$$
+\forall g \in G, \exists n \in N, \forall m \in N, gmg^{-1} = n,
+$$
+i.e., normal subgroups are invariant under any conjugation.
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Normalizer
+::: {#def-normalizer .callout-def}
+The **normalizer** $N_G(S)$ of a set $S$ $(S \subseteq G)$ of group $G$ is:
+$$
+\begin{aligned}
+N_G(S) :=& \{ g \in G \mid gS = Sg \} \\
+=& \{ g \in G \mid S = gSg^{-1} \}.
+\end{aligned}
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+Their relationship is: If $S \trianglelefteq G$, then $N_G(S) = G$.
+
+The following two results are important:
+
+### Kernels are normal
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Kernel of a homomorphism is normal
+::: {#def-kernel-is-normal .callout-def}
+Let $G, H$ be groups and $\varphi \in \operatorname{Hom}(G, H)$. Then $\ker(\varphi) \trianglelefteq G$, $\operatorname{im}(\varphi) \le H$.
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## Proof: Kernel of a homomorphism is normal
+We just need to show that $\forall k \in \ker(\varphi)$, the conjugate of $k (gkg^{-1})$ is also in $\ker(\varphi)$, i.e.,
+$$
+\varphi(gkg^{-1}) = e.
+$$
+This is trivial.
+:::
+<!-- ----------------------------------------- -->
+
+
+### Normal subgroups are kernels
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Every normal subgroup is the kernel of a homomorphism
+::: {#def-normal-is-kernel .callout-def}
+Let $N \trianglelefteq G$. Then $\exists \varphi \in \operatorname{Hom}(G, H)$ s.t. $N = \ker(\varphi)$.
+:::
+:::
+<!-- ----------------------------------------- -->
+
+HINT: Take $\varphi: G \to G/N$, the natural projection from $G$ to the group of cosets (called the quotient group $G/N$).
+
+![All homomorphisms factors uniquely through the quotient](quotient.png){width=80% #fig-quotient}
+
+As shown in @fig-quotient, any group homomorphism $\varphi: G \to H$ factors uniquely through the quotient group $G/N$, where $N = \ker(\varphi)$. The unique embedding $\bar{\varphi}$ implies the universal property of the quotient group (the pair $(G/N, \pi)$ could be viewed as a *initial object* of a coslice category[^coslice]).
+
+[^coslice]: A coslice category is the dual of a slice category, which is a special case of a [comma category](https://en.wikipedia.org/wiki/Comma_category#Coslice_category).
+
+So we have establish the fact that quotients and group homomorphisms are equivalent!
+
+## Isomorphism Theorem I
+
+@fig-quotient could be viewed as part of the **canonical decomposition** of a group homomorphism:
+
+![The red box in the canonical decomposition is exactly the first isomorphism theorem](first-iso.png){width=80% #fig-canonical-decomposition}
+
+The red box in @fig-canonical-decomposition is exactly the first isomorphism theorem:
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## First Isomorphism Theorem
+::: {#thm-iso1 .callout-thm}
+Let $G$ and $H$ be groups and let $\varphi: G \to H$ be a homomorphism. Then:
+$$
+G/\ker(\varphi) \simeq \operatorname{im}(\varphi)
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+The rest of the isomorphism theorems largely relies on this first theorem.
+
+## Isomorphism Theorem II
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Some lemmas
+::: {#lem-iso2 .callout-lem}
+Let $G$ be a group and $N \trianglelefteq G$, $S \le G$. Then:
+$$
+N \trianglelefteq SN \le G \ge S \trianglerighteq S \cap N.
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=false}
+## Proof
+1. $SN \le G$:
+    - Nonempty: Trivial.
+    - Closure: Let $s_1n_1, s_2n_2 \in SN$, we want to show that $(s_1n_1)(s_2n_2) \in SN$:
+        $$
+        (s_1n_1)(s_2n_2) = s_1(n_1s_2)n_2.
+        $$
+        How to deal with the middle term? Since $N \trianglelefteq G$, we have $n_1s_2 = sn_1$ for some $s \in N$. Then:
+        $$
+        s_1(n_1s_2)n_2 = s_1(sn_1)n_2 = (s_1s)(n_1n_2) \in SN.
+        $$
+    - Inverses: Let $sn \in SN$, we want to show that $(sn)^{-1} = n^{-1}s^{-1} \in SN$. Again use the fact that $N \trianglelefteq G$:
+        $$
+        \exists s' \in N, n^{-1}s^{-1} = s'n^{-1} \in SN.
+        $$
+
+2. The rest can be proved by this diagram:
+
+    ![Proof of the isomorphism theorem 2](second-iso-proof.png){width=80% #fig-second-iso-proof}
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Second Isomorphism Theorem
+::: {#thm-iso2 .callout-thm}
+Let $G$ be a group and $N \trianglelefteq G$, $S \le G$. Then:
+$$
+\frac{SN}{N} \simeq \frac{S}{S \cap N}
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=false}
+## Proof
+As shown in @fig-second-iso-proof, we have:
+
+- $N \trianglelefteq SN$, since $N = \ker(\varphi|_{SN})$. By the first isomorphism theorem, we have $\frac{SN}{N} \simeq \varphi (SN)$.
+- $S \cap N \trianglelefteq S$, since $S \cap N = \ker(\varphi|_{S})$. By the first isomorphism theorem, we have $\frac{S}{S \cap N} \simeq \varphi (S)$.
+
+Plus, $\varphi (SN) = \varphi(S)$, therefore:
+$$
+\frac{SN}{N} \simeq \varphi (SN) = \varphi(S) \simeq \frac{S}{S \cap N},
+$$
+i.e.,
+$$
+\frac{SN}{N} \simeq \frac{S}{S \cap N}.
+$$
+:::
+<!-- ----------------------------------------- -->
+
+
+## Isomorphism Theorem III
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Third Isomorphism Theorem
+::: {#thm-iso3 .callout-thm}
+Let $G$ be a group and $N \trianglelefteq G$, $K \trianglelefteq G$, $N \subset K$. Then $N \trianglelefteq K$ and
+$$
+\frac{G/N}{K/N} \simeq \frac{G}{K}
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+To prove this theorem, we need to prove a lemma:
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## The image of normal subgroup is normal
+::: {#lem-image-normal .callout-lem}
+Let $G$ be a group, $K \trianglelefteq G$, $\varphi \in \operatorname{Hom}(G, H)$. The image of $K$ under $\varphi$ is normal in $H$, i.e., 
+$$
+\varphi(K) \trianglelefteq \operatorname{im} \varphi
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## Proof
+We need to show $\forall h \in \operatorname{im} \varphi$ and $\forall k \in K$, $h\varphi(k)h^{-1} \in \varphi(K)$.
+
+Let:
+
+- $h \in \operatorname{im}(\varphi)$, so there exists $g \in G$ such that $h = \varphi(g)$,
+- $k \in K$, so $\varphi(k) \in \varphi(K)$
+
+Now compute:
+$$
+h \varphi(k) h^{-1} = \varphi(g) \varphi(k) \varphi(g)^{-1}
+= \varphi(g k g^{-1}) \quad \text{(since \( \varphi \) is a homomorphism)}
+$$
+
+But since $ K \trianglelefteq G $, we know $g k g^{-1} \in K$, so:
+$$
+\varphi(g k g^{-1}) \in \varphi(K).
+$$
+Therefore:
+$$
+h \varphi(k) h^{-1} \in \varphi(K).
+$$
+
+So $\varphi(K)$ is closed under conjugation by elements of $\operatorname{im}(\varphi)$, i.e.,
+
+$$
+\varphi(K) \trianglelefteq \operatorname{im}(\varphi).
+$$
+:::
+<!-- ----------------------------------------- -->
+
+Now the proof of the third isomorphism theorem can be proved by this diagram:
+
+![Commutative diagram of groups](comm-groups.png){width=80% #fig-comm-groups}
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=false}
+## Proof of the third isomorphism theorem
+@fig-comm-groups can be visually represented by this cartoon:
+
+![Visual demo of the proof of the third isomorphism theorem](third-iso-proof.png){width=80% #fig-third-iso-proof}
+
+
+by the first isomorphism theorem, we have:
+$$
+G/N \simeq \sigma_1 (G) \triangleright \sigma_1 (K) \simeq K/N.
+$$
+Therefore,
+$$
+\frac{G/N}{K/N} = \frac{\sigma_1 (G)}{\sigma_1 (K)} \simeq \sigma_2 \circ \sigma_1 (G) =: \sigma (G) \simeq \frac{G}{K}.
+$$
+:::
+<!-- ----------------------------------------- -->
+

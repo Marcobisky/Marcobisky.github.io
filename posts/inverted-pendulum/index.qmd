@@ -266,7 +266,7 @@ $$
 \end{aligned}
 $$
 
-[^jacobian]: Just to refresh, the *Jacobian* $J$ of a (non-linear) function $\phi: \mathbb{R}^n \to \mathbb{R}^m$ at point $p \in \mathbb{R}^n$ can be viewed as the local transformation from the neighborhood of $p$ to the neighborhood of $\phi(p)$. $\mathbb{R}^n$ and $\mathbb{R}^m$ are not viewed as vector spaces but manifolds. In our case it's a little wired to compute the jacobian of $A$ since $A$ defines a vector field, not mapping between manifolds. Or it is? $A$ *is* indeed a mapping between manifolds! Because vector field themselves are a section of the tangent bundle.     By the way, this jacobian actually takes me a lot of effort to compute.
+[^jacobian]: Just to refresh, the *Jacobian* $J$ of a (non-linear) function $\phi: \mathbb{R}^n \to \mathbb{R}^m$ at point $p \in \mathbb{R}^n$ can be viewed as the local transformation from the neighborhood of $p$ to the neighborhood of $\phi(p)$. $\mathbb{R}^n$ and $\mathbb{R}^m$ are not viewed as vector spaces but manifolds. In our case it's a little weird to compute the jacobian of $A$ since $A$ defines a vector field, not mapping between manifolds. Or it is? $A$ *is* indeed a mapping between manifolds! Because vector field themselves are a section of the tangent bundle.     By the way, this jacobian actually takes me a lot of effort to compute.
 
 Therefore,
 $$
@@ -323,7 +323,7 @@ ans =
    -0.6157
     3.8040
 ```
-Since there is a positive eigenvalue, the system is unstable.
+Since there are two non-negative eigenvalues, the system is unstable.
 :::
 <!-- ----------------------------------------- -->
 
@@ -431,11 +431,11 @@ By changing the desired eigenvalues, we can adjust the convergent speed of the s
 ![`desired_eigs_vec_4 = [-4; -5; -6; -7]`](src/convergence_speed_4.gif)
 :::
 
-We can see that more negative eigenvalues lead to faster convergence, at the risk of breaking the linearity limit and making the system less robust. So we need to make a trade-off between the convergence speed and the robustness (convergence speed is usually limited by the power of the control). Or we may want to change the convergence style: whether to make the cart move as quickly as possible, or save as much energy as much as possible as long as the pendulum is inverted? Thankfully there is a way to find the required and "optimal" (in a sense) eigenvalues -- the Linear Quadratic Regulator (LQR).
+We can see that more negative eigenvalues lead to faster convergence, at the risk of breaking the linearity limit and making the system less robust. So we need to make a trade-off between the convergence speed and the robustness (convergence speed is usually limited by the power of the control). Also, we may want to change the convergence style: whether to make the cart move as quickly as possible, or save as much energy as much as possible as long as the pendulum is inverted? Thankfully there is a way to find the required and "optimal" (in a sense) eigenvalues -- the Linear Quadratic Regulator (LQR).
 
 ### Linear Quadratic Regulator (LQR)
 
-The idea is to define a metric (or "loss function" in optimization) to measure the badness of the eigenvalues (either too less robust or cost a lot to control), and then minimize that metric. Someone came up with this wired @eq-lqr-loss-function:
+The idea is to define a metric ("loss function" in optimization jargon) to measure the badness of the eigenvalues (either too less robust or cost a lot to control), and then minimize that metric. Someone came up with this weird @eq-lqr-loss-function:
 
 $$
 \tilde{J} := \int_0^\infty (\mathbf{x}^t Q \mathbf{x} + \mathbf{u}^t R \mathbf{u}) \ \mathrm{d}t,
@@ -469,7 +469,7 @@ K = lqr(A, B, Q, R)
 
 ### Simulation by changing Q matrix
 
-We simulate the dynamics result with different $Q$ matrices are fixed $R = 0.01$:
+We simulate the dynamics result with different $Q$ matrices and fixed $R = 0.01$:
 
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=false collapse=true}
@@ -481,16 +481,16 @@ We simulate the dynamics result with different $Q$ matrices are fixed $R = 0.01$
 <!-- ----------------------------------------- -->
 
 ::: {layout-nrow=1}
-![$Q = \operatorname{diag}(400, 50, 1, 1)$: Fast](src/simulation_lqr_1.gif)
+![$Q = \operatorname{diag}(400, 50, 1, 1)$: Fast lock in](src/simulation_lqr_1.gif)
 
-![$Q = \operatorname{diag}(20, 400, 1, 1)$: Smooth](src/simulation_lqr_2.gif)
+![$Q = \operatorname{diag}(20, 400, 1, 1)$: Smooth cart movement](src/simulation_lqr_2.gif)
 
-![$Q = \operatorname{diag}(4, 4, 500, 50)$: Straight up](src/simulation_lqr_3.gif)
+![$Q = \operatorname{diag}(4, 4, 500, 50)$: Keep straight up](src/simulation_lqr_3.gif)
 :::
 
 ### Simulation by changing R values
 
-We simulate @brunton_2019_datadriven the dynamics result with fixed $Q - \operatorname{diag} (20, 400, 1, 1)$ matrix and different $R$ values:
+We simulate the dynamics result with fixed $Q - \operatorname{diag} (20, 400, 1, 1)$ matrix and different $R$ values:
 
 ::: {layout-nrow=3}
 ![$R = 0.001$: More control power](src/simulation_lqr_4.gif){width=80%}
