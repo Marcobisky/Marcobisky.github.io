@@ -18,17 +18,17 @@ reference-location: margin
 citation-location: margin
 ---
 
-**Prerequisites**: *Quotient group, group homomorphism, normal subgroup, at least 5 examples of groups, basic category theory*.
+**Prerequisites**: *Quotient group, kernel of a homomorphism, normal subgroup, basic category theory*.
 
-Apologize for the handwriting, since it's hard for quarto to support tikz-cd package.
+Apologize for the handwriting, since it's hard for quarto to support `tikz-cd` package.
 
 ## Takeaways
 
 - You gotta think of a homomorphism whenever there is a quotient.
 - Homomorphisms are WAAAAY more important than groups themselves!
-- The first isomorphism theorem: Universal property of quotients.
-- The second isomorphism theorem: How subgroups behave under projections.
-- The third isomorphism theorem: Just a diagram commutes.
+- **First isomorphism theorem**: Universal property of quotients, most important.
+- **Second isomorphism theorem**: How subgroups behave under projections.
+- **Third isomorphism theorem**: Just a diagram commutes.
 
 ## Normal Subgroup $\iff$ Kernel
 
@@ -56,6 +56,7 @@ $$
 <!-- ----------------------------------------- -->
 
 Here are some properties of the center, you can think about them yourself:
+
 - $Z(G) \trianglelefteq G$. (See @def-normal-subgroup for the definition of normal subgroup.)
 - $Z(G) = G$ iff $G$ is abelian.
 - $Z(G)$ is itself abelian.
@@ -82,18 +83,18 @@ $$
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=false collapse=true}
 ## Proof: $C_G(S) \le G$
-1. Closure: 
+1. **Closure**: 
 
     Let $a, b \in C_G(S)$, i.e., $\forall s \in S, as = sa, bs = sb$. We want to show that $ab \in C_G(S)$:
     $$
     (ab)s = a(bs) = a(sb) = (as)b = (sa)b = s(ab) \implies ab \in C_G(S), \forall s \in S.
     $$
 
-2. Associativity: Inherited from $G$.
+2. **Associativity**: Inherited from $G$.
 
-3. Identity: $e_G \in C_G(S)$ because $\forall s \in S, es = se = s$.
+3. **Identity**: $e_G \in C_G(S)$ because $\forall s \in S, es = se = s$.
 
-4. Inverse: Let $a \in C_G(S)$, i.e., $\forall s \in S, as = sa$. We want to show that $a^{-1} \in C_G(S)$:
+4. **Inverse**: Let $a \in C_G(S)$, i.e., $\forall s \in S, as = sa$. We want to show that $a^{-1} \in C_G(S)$:
     $$
     \begin{aligned}
     as = sa & \implies a^{-1}as = a^{-1}sa \\
@@ -157,6 +158,91 @@ $$
 :::
 <!-- ----------------------------------------- -->
 
+### A Natural Homomorphism
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Conjugation Homomorphism
+::: {#prp-conj-hom .callout-prp}
+Let $G$ be a group and $f \in \operatorname{Hom}(G, \operatorname{Aut}(G))$, where $f(g)$ is defined by conjugation by $g$. Then
+$$
+\ker f = Z(G).
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false collapse=true}
+## Proof of @prp-conj-hom
+1. Conjugation by $g$ (denoted $\operatorname{conj}_g$) is in $\operatorname{Aut}(G)$.
+
+    We need to check that $\operatorname{conj}_g$ gives an isomorphism from $G$ to itself.
+
+    - **Claim**: $\forall g \in G, f(g) \in \operatorname{End}(G)$.
+
+        $$
+        f(g)(h h') = g(h h')g^{-1} = ghg^{-1}gh'g^{-1} = f(g)(h) f(g)(h').
+        $$
+    
+    - **Claim**: $f(g)$ is bijective.
+
+        $$
+        f^{-1}(g) = f(g^{-1}).
+        $$
+
+2. $f$ is indeed a homomorphism.
+
+    Take $\forall g, g' \in G$, then:
+    $$
+    \begin{aligned}
+    f(g g')(h) &= gg'h(gg')^{-1} \\
+    &= gg'hg'^{-1}g^{-1} \\
+    &= f(g) \circ f(g')(h).
+    \end{aligned}
+    $$
+
+3. $\ker f = Z(G)$.
+
+    $$
+    \begin{aligned}
+    \ker f &= \{g \in G : \forall h \in G, ghg^{-1} = h\} \\
+    &= \{g \in G : gh = hg \text{ for all } h \in G\} \\
+    &= Z(G).
+    \end{aligned}
+    $$
+:::
+<!-- ----------------------------------------- -->
+
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Inner and Outer Automorphisms
+::: {#prp-inn-out .callout-prp}
+Under the condition in @prp-conj-hom,
+$$
+\operatorname{im} f \triangleleft \operatorname{Aut}(G).
+$$
+
+Define the **inner automorphism group** to be:
+$$
+\operatorname{Inn}(G) := \operatorname{im} f,
+$$
+and naturally the **Outer automorphism group** to be:
+$$
+\operatorname{Out}(G) := \frac{\operatorname{Aut}(G)}{\operatorname{Inn}(G)}.
+$$
+Then we have the following exact sequence:
+$$
+1 \xrightarrow[]{} Z(G) \hookrightarrow G \xrightarrow[]{f} \operatorname{Aut}(G) \twoheadrightarrow \operatorname{Out}(G) \xrightarrow[]{} 1.
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+We omitted the proof, but visually,
+
+![Relation between $Z(G)$, $\operatorname{Inn}(G)$, $\operatorname{Out}(G)$](z-inn-out.png){width=80% #fig-z-inn-out}
 
 ### Normal Subgroup and Normalizer
 
@@ -278,8 +364,8 @@ $$
 ::: {.callout-note icon=false collapse=false}
 ## Proof
 1. $SN \le G$:
-    - Nonempty: Trivial.
-    - Closure: Let $s_1n_1, s_2n_2 \in SN$, we want to show that $(s_1n_1)(s_2n_2) \in SN$:
+    - **Nonempty**: Trivial.
+    - **Closure**: Let $s_1n_1, s_2n_2 \in SN$, we want to show that $(s_1n_1)(s_2n_2) \in SN$:
         $$
         (s_1n_1)(s_2n_2) = s_1(n_1s_2)n_2.
         $$
@@ -287,7 +373,7 @@ $$
         $$
         s_1(n_1s_2)n_2 = s_1(sn_1)n_2 = (s_1s)(n_1n_2) \in SN.
         $$
-    - Inverses: Let $sn \in SN$, we want to show that $(sn)^{-1} = n^{-1}s^{-1} \in SN$. Again use the fact that $N \trianglelefteq G$:
+    - **Inverses**: Let $sn \in SN$, we want to show that $(sn)^{-1} = n^{-1}s^{-1} \in SN$. Again use the fact that $N \trianglelefteq G$:
         $$
         \exists s' \in N, n^{-1}s^{-1} = s'n^{-1} \in SN.
         $$
