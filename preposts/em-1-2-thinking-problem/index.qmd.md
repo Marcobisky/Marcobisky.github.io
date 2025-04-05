@@ -7,18 +7,11 @@ date: 2025-3-25
 categories:
     - Physics
 format: 
-    html:
-        toc: true
-        self-contained: true
-        grid: 
-            margin-width: 350px
+    html: default
     pdf:
         include-in-header:
             text: |
                 \usepackage{esint, amssymb}
-html-math-method: katex
-reference-location: margin
-citation-location: margin
 ---
 
 ## Takeaway

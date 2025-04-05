@@ -1,0 +1,79 @@
+---
+author: Marcobisky
+title: 2D Electrostatics and Complex Analysis
+description: None
+date: 2025-4-5
+# image: cover.png
+categories:
+    - Algebra
+format: 
+    html:
+        engine: observable
+        # execute:
+        #     echo: false
+---
+
+## Takeaways {.unnumbered}
+
+## Test
+
+``` {ojs}
+//| panel: sidebar
+//| echo: false
+//| layout-ncol: 2
+
+// User manually enters expression for function 1
+viewof func1 = Inputs.text({
+  label: "Function 1",
+  placeholder: "e.g. 1/z",
+  value: "1/z"
+})
+
+// User manually enters expression for function 2
+viewof func2 = Inputs.text({
+  label: "Function 2",
+  placeholder: "e.g. z^2",
+  value: "1/z^2"
+})
+```
+
+
+``` {ojs}
+//| code-fold: true
+//| label: "Interactive Vector Fields"
+//| fig-cap: "Choose complex functions to visualize"
+//| layout-ncol: 2
+
+import {PolyaField} from "@vinicius-mello/polya-vector-field"
+import {ℂ} from "@vinicius-mello/complex"
+import {fz} from "@vinicius-mello/complex"
+import {d3} from "@vinicius-mello/polya-vector-field"
+
+// Plot 1: reactive to func1
+viewof plot1 = {
+  const node = PolyaField(fz(func1), {
+    particleCount: 1000,
+    tau: 0.4,
+    fadeFillStyle: "rgba(0,0,0, 0.98)",
+    view: {xl: -2, yb: -2, unit: 150}
+  });
+
+  node.style.width = "400px";
+  node.style.height = "400px";
+  return node;
+}
+
+// Plot 2: reactive to func2
+viewof plot2 = {
+  const node = PolyaField(fz(func2), {
+    particleCount: 1000,
+    tau: 0.4,
+    fadeFillStyle: "rgba(0,0,0, 0.98)",
+    view: {xl: -2, yb: -2, unit: 150}
+  });
+
+  node.style.width = "400px";
+  node.style.height = "400px";
+  return node;
+}
+```

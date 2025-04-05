@@ -7,14 +7,8 @@ date: 2025-3-25
 categories:
     - Control-Theory
 format: 
-    html:
-        toc: true
-        self-contained: true
-        grid: 
-            margin-width: 350px
+    html: default
     pdf: default
-html-math-method: mathjax
-reference-location: margin
 citation-location: margin
 ---
 
