@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.41">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Marcobisky">
+<meta name="dcterms.date" content="2025-04-14">
+<meta name="description" content="None">
+
+<title>Understanding Fourier Transform</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-48ffa3e5b9d089919c6712c39e5b00f2.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Understanding Fourier Transform</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Analysis</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    None
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Marcobisky </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 14, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="takeaway" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="takeaway">Takeaway</h2>
+</section>
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>We will discuss and understand these 4 types of Fourier transforms in engineering in the following sections:</p>
+<div id="fig-fourier-types" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-fourier-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="FT-types.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fourier-types-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Four types of fourier transforms and their underlying vector spaces
+</figcaption>
+</figure>
+</div>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Claim and Convention
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>This blog is not a rigorous mathematical treatment of Fourier theory!</strong></p>
+<ol type="1">
+<li><strong>“Series” and “Transform”</strong>:
+<ul>
+<li>Series – Discrete in frequency domain.</li>
+<li>Transform – Continuous in frequency domain.</li>
+</ul></li>
+<li></li>
+</ol>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+<section id="structures-in-signal-spaces" class="level2">
+<h2 class="anchored" data-anchor-id="structures-in-signal-spaces">Structures in Signal Spaces</h2>
+<section id="vector-space-structure" class="level3">
+<h3 class="anchored" data-anchor-id="vector-space-structure">Vector space structure</h3>
+<p><em>Signals</em> are just another name for <em>functions</em>. It’s natural to collect different types of signals into different sets, and then endow as many structures as possible. One of the most natural structures is <em>linear structure</em> – we view each of the signals as vectors in some vector spaces<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> (<span class="math inline">\(V\)</span> for the general name) over the field <span class="math inline">\(\mathbb{C}\)</span> (<span class="math inline">\(V\)</span> could be <span class="math inline">\(\mathbb{C}^N\)</span>, <span class="math inline">\(\mathcal{L}^2(\mathbb{S}^1)\)</span>, <span class="math inline">\(\mathcal{L}^2(\mathbb{Z})\)</span>, or <span class="math inline">\(\mathcal{S}'(\mathbb{R})\)</span> as shown below).</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 15%">
+<col style="width: 22%">
+<col style="width: 20%">
+<col style="width: 15%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Vector Space (Time)</th>
+<th>Correponding Mapping</th>
+<th>Description</th>
+<th>Mental Picture<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></th>
+<th>Transform Type</th>
+<th>Space after FT (Frequency)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathbb{C}^N\)</span></td>
+<td><span class="math inline">\(\mathbb{Z}/N\mathbb{Z} \to \mathbb{C}\)</span></td>
+<td>Discrete signals on <span class="math inline">\(\mathbb{S}^1\)</span><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></td>
+<td><img src="mental-picture-discrete-circle.png" class="img-fluid"></td>
+<td>DTFS</td>
+<td><span class="math inline">\(\mathbb{C}^N\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathcal{L}^2(\mathbb{S}^1)\)</span></td>
+<td><span class="math inline">\(\mathbb{S}^1 \to \mathbb{C}\)</span></td>
+<td>Square-integrable signals on <span class="math inline">\(\mathbb{S}^1\)</span></td>
+<td><img src="mental-picture-continuous-circle.png" class="img-fluid"></td>
+<td>CTFS</td>
+<td><span class="math inline">\(\ell^2(\mathbb{Z})\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathcal{L}^2(\mathbb{Z})\)</span></td>
+<td><span class="math inline">\(\mathbb{Z} \to \mathbb{C}\)</span></td>
+<td>Square-integrable signals on <span class="math inline">\(\mathbb{Z}\)</span></td>
+<td><img src="mental-picture-discrete-Z.png" class="img-fluid"></td>
+<td>DTFT</td>
+<td><span class="math inline">\(\mathcal{L}^2(\mathbb{S}^1)\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathcal{S}'(\mathbb{R})\)</span></td>
+<td><span class="math inline">\(\mathbb{R} \to \mathbb{C}\)</span></td>
+<td>Tempered distributions<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> on <span class="math inline">\(\mathbb{R}\)</span></td>
+<td><img src="mental-picture-continuous-R.png" class="img-fluid"></td>
+<td>CTFT</td>
+<td><span class="math inline">\(\mathcal{S}'(\mathbb{R})\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>All the analysis below are based on the above vector spaces.</p>
+</section>
+<section id="sec-inner-product-struct" class="level3">
+<h3 class="anchored" data-anchor-id="sec-inner-product-struct">Inner product structure</h3>
+<p>We can natually define an inner product structure<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> on the above vector spaces respectively:</p>
+<p><span class="math display">\[
+\begin{align*}
+\langle x_1, x_2 \rangle &amp;:= \sum_{n \in \mathbb{Z}_N} x_1[n] \overline{x_2[n]}, &amp; x_1, x_2 &amp;\in \mathbb{C}^N \\
+\langle x_1, x_2 \rangle &amp;:= \int_{\mathbb{S}^1} x_1(t) \overline{x_2(t)}\ \mathrm{d}t, &amp; x_1, x_2 &amp;\in \mathcal{L}^2(\mathbb{S}^1) \\
+\langle x_1, x_2 \rangle &amp;:= \sum_{n \in \mathbb{Z}} x_1[n] \overline{x_2[n]}, &amp; x_1, x_2 &amp;\in \mathcal{L}^2(\mathbb{Z}) \\
+\langle x_1, x_2 \rangle &amp;:= \int_{\mathbb{R}} x_1(t) \overline{x_2(t)}\ \mathrm{d}t. &amp; x_1, x_2 &amp;\in \mathcal{L}^2(\mathbb{R}) \subset \mathcal{S}'(\mathbb{R})
+\end{align*}
+\]</span></p>
+</section>
+<section id="induced-norm" class="level3">
+<h3 class="anchored" data-anchor-id="induced-norm">Induced Norm</h3>
+<p>The inner product structure in <a href="#sec-inner-product-struct" class="quarto-xref">Section&nbsp;2.2</a> naturally induces an Euclidean 2-norm<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a> on each of them: <span class="math display">\[
+\begin{align*}
+\|x\|^2 &amp;:= \langle x, x \rangle \\
+&amp;= \sum_{n \in \mathbb{Z}_N} |x[n]|^2, &amp; x &amp;\in \mathbb{C}^N \\
+&amp;= \int_{\mathbb{S}^1} |x(t)|^2\ \mathrm{d}t, &amp; x &amp;\in \mathcal{L}^2(\mathbb{S}^1) \\
+&amp;= \sum_{n \in \mathbb{Z}} |x[n]|^2, &amp; x &amp;\in \mathcal{L}^2(\mathbb{Z}) \\
+&amp;= \int_{\mathbb{R}} |x(t)|^2\ \mathrm{d}t, &amp; x &amp;\in \mathcal{L}^2(\mathbb{R}) \subset \mathcal{S}'(\mathbb{R})
+\end{align*}
+\]</span></p>
+</section>
+<section id="algebraic-structures" class="level3">
+<h3 class="anchored" data-anchor-id="algebraic-structures">Algebraic structures</h3>
+<p>There are two important algebraic structures<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a> on the above vector spaces (<span class="math inline">\(V\)</span> s): <strong>Convolution</strong> and <strong>pointwise multiplication</strong>. These two structures makes them into more interesting mathematical object – commutative algebras over the field <span class="math inline">\(\mathbb{C}\)</span>. We will see later that they can be converted from each other beautifully by the convolution theorem! This is <em>the</em> piece of math that blew my mind when I first learned it!</p>
+<section id="sec-pointwise-multiplication" class="level4">
+<h4 class="anchored" data-anchor-id="sec-pointwise-multiplication">Pointwise multiplication</h4>
+<p>This is trivial<a href="#fn8" class="footnote-ref" id="fnref8" role="doc-noteref"><sup>8</sup></a>, the codomain of all types of signals is <span class="math inline">\(\mathbb{C}\)</span> (viewed as a <a href="https://en.wikipedia.org/wiki/Monoid">monoid</a>). The four signal spaces naturally inherit this monoid structure, forming a commutative algebra over <span class="math inline">\(\mathbb{C}\)</span>.</p>
+</section>
+<section id="convolution" class="level4">
+<h4 class="anchored" data-anchor-id="convolution">Convolution</h4>
+<p>We can also define <strong>convolution</strong><a href="#fn9" class="footnote-ref" id="fnref9" role="doc-noteref"><sup>9</sup></a> on the above vector spaces to make them become algebras (different from <a href="#sec-pointwise-multiplication" class="quarto-xref">Section&nbsp;2.4.1</a>):</p>
+<p><span id="eq-convolution"><span class="math display">\[
+\begin{align*}
+\text{Circular convolution: } &amp; (x_1 * x_2)[n] := \sum_{m \in \mathbb{Z}_N} x_1[m] x_2[n - m], &amp; x_1, x_2 &amp;\in \mathbb{C}^N \\
+&amp; (x_1 * x_2)(t) := \int_{\mathbb{S}^1} x_1(\tau) x_2(t - \tau)\ \mathrm{d}\tau, &amp; x_1, x_2 &amp;\in \mathcal{L}^2(\mathbb{S}^1) \\
+\text{Linear convolution: } &amp; (x_1 * x_2)[n] := \sum_{m \in \mathbb{Z}} x_1[m] x_2[n - m], &amp; x_1, x_2 &amp;\in \mathcal{L}^2(\mathbb{Z}) \\
+&amp; (x_1 * x_2)(t) := \int_{\mathbb{R}} x_1(\tau) x_2(t - \tau)\ \mathrm{d}\tau, &amp; x_1, x_2 &amp;\in \mathcal{L}^2(\mathbb{R}) \subset \mathcal{S}'(\mathbb{R})
+\end{align*}
+\tag{1}\]</span></span></p>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Minus sign in <a href="#eq-convolution" class="quarto-xref">Equation&nbsp;1</a>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>The “minus” operations take place in the domain of the signals, which have different group structures for different types of signals! “minus” in general means take the inverse element, then do the group operation. For example, in the first equation in <a href="#eq-convolution" class="quarto-xref">Equation&nbsp;1</a>, suppose the domain of the signals is <span class="math inline">\(\mathbb{Z}/5\mathbb{Z}\)</span>, <span class="math display">\[
+(x_1 * x_2)[2] = x_1[0] x_2[2] + x_1[1] x_2[1] + x_1[2] x_2[0] + x_1[3] x_2[4] + x_1[4] x_2[3].
+\]</span></p>
+<p>Also, it’s worth noting that the convolution in <span class="math inline">\(\mathbb{C}^N\)</span> is intimitely connected to the convolution in <span class="math inline">\(\mathcal{L}^2(\mathbb{Z})\)</span> in the sense when one of two signals in <span class="math inline">\(\mathbb{C}^N\)</span> is mapped to <span class="math inline">\(\mathcal{L}^2(\mathbb{Z})\)</span> through <strong>periodic extension</strong> and another through <strong>zero padding</strong>, their convolution outcome in their respective space (defined in <a href="#eq-convolution" class="quarto-xref">Equation&nbsp;1</a>) can be <strong>periodic extended</strong> to one another (as shown in <a href="#fig-convolution-equiv" class="quarto-xref">Figure&nbsp;2</a>)! For this reason, some textbook define two different convolutions on <span class="math inline">\(\mathcal{L}^2(\mathbb{Z})\)</span>: Native convolution and periodic convolution. However, periodic convolution is borrowed from <span class="math inline">\(\mathbb{C}^N\)</span>.</p>
+<div id="fig-convolution-equiv" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-convolution-equiv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="convolution-equiv.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-convolution-equiv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Convolution in <span class="math inline">\(\mathbb{C}^N\)</span> happens to be equivalent to convolution in <span class="math inline">\(\mathcal{L}^2(\mathbb{Z})\)</span> in this way
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<p>Convolution also makes the above four vector spaces (commutative) <strong>algebras</strong><a href="#fn10" class="footnote-ref" id="fnref10" role="doc-noteref"><sup>10</sup></a> over <span class="math inline">\(\mathbb{C}\)</span>.</p>
+</section>
+</section>
+</section>
+<section id="complete-orthonormal-basis-in-v" class="level2">
+<h2 class="anchored" data-anchor-id="complete-orthonormal-basis-in-v">Complete Orthonormal Basis in <span class="math inline">\(V\)</span></h2>
+<section id="standard-basis" class="level3">
+<h3 class="anchored" data-anchor-id="standard-basis">Standard basis</h3>
+<p>When it comes to <span class="math inline">\(\mathbb{R}^3\)</span>, the (complete orthonormal<a href="#fn11" class="footnote-ref" id="fnref11" role="doc-noteref"><sup>11</sup></a>) basis <span class="math inline">\(\begin{pmatrix} 1 \\ 0 \\ 0 \end{pmatrix}\)</span>, <span class="math inline">\(\begin{pmatrix} 0 \\ 1 \\ 0 \end{pmatrix}\)</span>, and <span class="math inline">\(\begin{pmatrix} 0 \\ 0 \\ 1 \end{pmatrix}\)</span> will appear subconsciously in your mind. What’s their analog in <span class="math inline">\(V\)</span>? (Shown in <a href="#fig-standard-basis" class="quarto-xref">Figure&nbsp;3</a>)</p>
+<div id="fig-standard-basis" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-standard-basis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="standard-basis.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-standard-basis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Standard basis in different signal spaces <span class="math inline">\(V\)</span>
+</figcaption>
+</figure>
+</div>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Orthonormality and Completeness
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p><strong>Orthogonality</strong>: Trivial.</p></li>
+<li><p><strong>Normality</strong>: Trivial in <span class="math inline">\(\mathbb{C}^N\)</span> and <span class="math inline">\(\mathcal{L}^2(\mathbb{Z})\)</span>,</p></li>
+<li><p><strong>Completeness</strong>:</p></li>
+</ol>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+<section id="exponentials-on-mathbbc" class="level3">
+<h3 class="anchored" data-anchor-id="exponentials-on-mathbbc">Exponentials on <span class="math inline">\(\mathbb{C}\)</span></h3>
+<p>Exponentials are very special in the sense that they form a closed set under two operations: Differentiation and translation:</p>
+<div id="fig-exp-closed" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-exp-closed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exp-closed.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exp-closed-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Exponential family is closed under differentiation and translation
+</figcaption>
+</figure>
+</div>
+<p>Don’t forget sinusoidals are also exponentials (“complex version”)! In fact, we can define the family of exponentials as: <span id="eq-exp-on-c"><span class="math display">\[
+\mathcal{E}_\mathbb{C} := \{ e^{\lambda t} : \lambda \in \mathbb{C} \},
+\tag{2}\]</span></span> where <span class="math inline">\(t\)</span> is just a symbol in <span class="math inline">\(\mathbb{R}\)</span>. It’s easy to see:</p>
+<ul>
+<li><p><span class="math inline">\((\mathcal{E}_\mathbb{C}, \cdot)\)</span> forms a group and <span class="math inline">\((\mathcal{E}_\mathbb{C}, \cdot) \simeq (\mathbb{C}, +)\)</span>.</p></li>
+<li><p>Define the family of real exponentials: <span class="math display">\[
+  \mathcal{E}_\mathbb{R} := \{ e^{a t} : a \in \mathbb{R} \}
+  \]</span> and the family of “winding” exponentials (most important exponentials): <span class="math display">\[
+  \mathcal{E}_{i\mathbb{R}} := \{ e^{i \omega t} : \omega \in \mathbb{R} \}.
+  \]</span> We have <span class="math display">\[
+  \mathcal{E}_\mathbb{R} \simeq \mathcal{E}_{i\mathbb{R}} \simeq \mathbb{R} &lt; \mathcal{E}.
+  \]</span></p>
+<div id="fig-exp-combine" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-exp-combine-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exp-combine.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exp-combine-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Combine real exponentials and “winding” exponentials to get elements in <span class="math inline">\(\mathcal{E}\)</span>
+</figcaption>
+</figure>
+</div>
+<div id="fig-exp-combine-iso" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-exp-combine-iso-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="exp-combine-iso.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exp-combine-iso-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Viewing <a href="#fig-exp-combine" class="quarto-xref">Figure&nbsp;5</a> in their isomorphic spaces are straightforward
+</figcaption>
+</figure>
+</div></li>
+</ul>
+</section>
+<section id="exponentials-on-mathbbzmmathbbz" class="level3">
+<h3 class="anchored" data-anchor-id="exponentials-on-mathbbzmmathbbz">Exponentials on <span class="math inline">\(\mathbb{Z}/m\mathbb{Z}\)</span></h3>
+<p>Exponentials on groups other than <span class="math inline">\(\mathbb{C}\)</span> are also interesting. Substituting <span class="math inline">\(\mathbb{C}\)</span> with <span class="math inline">\(\mathbb{Z}/m\mathbb{Z}\)</span> in <a href="#eq-exp-on-c" class="quarto-xref">Equation&nbsp;2</a>, we have: <span id="eq-exp-on-znz"><span class="math display">\[
+\mathcal{E}_{\mathbb{Z}_m} := \{ e^{i \frac{2\pi}{N}n} : N \in \mathbb{Z}/m\mathbb{Z} \},
+\tag{3}\]</span></span> where <span class="math inline">\(n\)</span> is just a symbol in <span class="math inline">\(\mathbb{Z}/m\mathbb{Z}\)</span>.</p>
+</section>
+<section id="orthogonality-of-exponentials" class="level3">
+<h3 class="anchored" data-anchor-id="orthogonality-of-exponentials">Orthogonality of Exponentials</h3>
+<p>Elements in <span class="math inline">\(\mathcal{E}_{i\mathbb{R}}\)</span> and <span class="math inline">\(\mathcal{E}_{\mathbb{Z}_m}\)</span> are also elements in</p>
+</section>
+</section>
+<section id="change-of-basis-and-linear-transformations" class="level2">
+<h2 class="anchored" data-anchor-id="change-of-basis-and-linear-transformations">Change of Basis and Linear Transformations</h2>
+<p>The whole story of Fourier theory for engineers starts with the change of basis in a particular vector space <span class="math inline">\(V\)</span>. Basis appeared in the context of <strong>vector spaces</strong>, so it’s exteremely important to keep the underlying vector space in the back of our mind (shown in <a href="#fig-fourier-types" class="quarto-xref">Figure&nbsp;1</a>) when doing Fourier analysis.</p>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>They are also <em>Hilbert spaces</em> because they are complete inner product spaces. But <span class="math inline">\(\mathcal{S}'(\mathbb{R})\)</span> is a different beast, not even an inner product space! So we would pretend to work in <span class="math inline">\(\mathcal{L}^2(\mathbb{R})\)</span> when we use the notation <span class="math inline">\(\langle x(t), e^{j\omega t} \rangle\)</span>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The blue objects actually live in <span class="math inline">\(\mathbb{C}\)</span> not <span class="math inline">\(\mathbb{R}\)</span>, just to remind you.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Also called discrete <em>periodic</em> signals (think about why!). These signals live exactly in <span class="math inline">\(N\)</span>-dimensional complex space!<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>We could instead, use the space <span class="math inline">\(\mathcal{L}^2(\mathbb{R})\)</span> for continuous time signals. But this space fails to include common signals such as the heaviside function, Dirac delta function and their derivatives, impulse trains, etc. But mathematically define the space that includes these signals is tedious. To prevent get into the dark side of analysis, we introduce the space of <em>tempered distributions</em> <span class="math inline">\(\mathcal{S}'(\mathbb{R})\)</span> without defining it. This space includes all above signals and those that are “nice” enough to be Fourier transformed.<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>The conjugation can be either on <span class="math inline">\(x_1\)</span> (physics convention) or <span class="math inline">\(x_2\)</span> (math convention). We follow the math convention here.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>The 2-norm, <em>squared</em>!, has physical meaning: The <em>total energy</em> of the signal!<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn7"><p>Apart from Convolution and pointwise multiplication, <strong>correlation</strong> is also an algebraic structure. Does <strong>pointwise addition</strong> count? No! It’s already been the vector space structure.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn8"><p>Just to get a little interesting: Although it’s trivial, the reason why sometimes the extensions of some structures on a category to another is “natural” is due to <strong><a href="https://en.wikipedia.org/wiki/Yoneda_lemma">Yoneda lemma</a></strong>.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn9"><p>Convolution arises naturally in the context of linear systems. If you are confused with the motivation of convolution, refer to the linear systems course. As for the notation, <span class="math inline">\(x_1(t) * x_2(t)\)</span> is a contradiction to my eyes, because the objects doing convolution are functions <span class="math inline">\((x_1 * x_2)\)</span> not function values!<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn10"><p>Surprise: Convolution is commutative! i.e., <span class="math inline">\(f*g = g*f\)</span>. This is not obvious at all, but we will make it inevitable, very very soon, that it’s exactly because the <em>pointwise multiplication</em> is commutative!<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>“Complete” means the basis spans the whole space <span class="math inline">\(V\)</span>; “Orthonormal” means any two basis vectors are orthogonal and have unit 2-norm. By the way, sometimes orthonormal matrices are confusingly called “orthogonal matrices”.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

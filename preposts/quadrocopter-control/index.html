@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.41">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Marcobisky">
+<meta name="dcterms.date" content="2025-04-07">
+<meta name="description" content="test">
+
+<title>Quadrocopter Control</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting-48ffa3e5b9d089919c6712c39e5b00f2.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content page-columns page-full" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Quadrocopter Control</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Control-Theory</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    test
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Marcobisky </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">April 7, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="basic-rigid-body-dynamics" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="basic-rigid-body-dynamics">Basic Rigid Body Dynamics</h2>
+<section id="attitude-representation" class="level3">
+<h3 class="anchored" data-anchor-id="attitude-representation">Attitude Representation</h3>
+<blockquote class="blockquote">
+<p>One attitude of a quadrocopter can be represented by either an <span class="math inline">\(R \in SO(3)\)</span> or two quaternions <span class="math inline">\(\pm q \in U(\mathbb{H})\)</span>.</p>
+</blockquote>
+<p>Every possible attitude of a quadrocopter corresponds an element in <span class="math inline">\(SO(3)\)</span> uniquely. We also know that the space of unit quaternions <span class="math inline">\(U(\mathbb{H})\)</span> double covers <span class="math inline">\(SO(3)\)</span>: <span id="eq-double-cover"><span class="math display">\[
+U(\mathbb{H}) \overset{2:1} \twoheadrightarrow SO(3).
+\tag{1}\]</span></span></p>
+<p>This means one rotation can also be expressed by <em>two different</em> unit quaternions, <span class="math inline">\(q\)</span> and <span class="math inline">\(-q\)</span>.</p>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+How do unit quaternions represent rotations?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>A rotation around an axies <span class="math inline">\(\mathbf{v} \in \mathbb{S}^2\)</span> by an angle <span class="math inline">\(\theta\)</span> can be represented by a quaternion <span class="math inline">\(q\)</span>: <span class="math display">\[
+q = \cos\left(\frac{\theta}{2}\right) + \sin\left(\frac{\theta}{2}\right) \mathbf{v}.
+\]</span></p>
+<p>Therefore, <span class="math inline">\(\forall q \in U(\mathbb{H})\)</span>, <span class="math display">\[
+\begin{aligned}
+q &amp;= q_0 + q_1 \mathbf{i} + q_2 \mathbf{j} + q_3 \mathbf{k} \\
+&amp;\equiv q_0 + \mathbf{u} \\
+&amp;= \underbrace{q_0}_{\cos \frac{\theta}{2}} + \underbrace{\lVert\mathbf{u}\rVert}_{\sin \frac{\theta}{2}} \cdot \underbrace{\frac{1}{\lVert\mathbf{u}\rVert} (q_1 \mathbf{i} + q_2 \mathbf{j} + q_3 \mathbf{k})}_{\text{rotation axies}}.
+\end{aligned}
+\]</span> i.e., <strong>the imaginary part of <span class="math inline">\(q\)</span> encodes the rotation axis and the real part encodes the rotation angle</strong>.</p>
+<p>Compare this with how the <em>angular velocity vector</em> <span class="math inline">\(\boldsymbol{\Omega}\)</span> encodes the rotation information: <a href="#fig-angular-velocity" class="quarto-xref">Figure&nbsp;3</a>.</p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Quick proof on the double covering
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>We will approach <a href="#eq-double-cover" class="quarto-xref">Equation&nbsp;1</a> from the following simple steps:</p>
+<ol type="1">
+<li><p>Mental picture for the manifold <span class="math inline">\(SO(3)\)</span>: Three dimensional solid ball modulo the antipodal points on its surface: <span class="math display">\[
+SO(3) \simeq D^3/\sim
+\]</span></p>
+<div id="fig-d3-modulo-antipodal" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-d3-modulo-antipodal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="d3-modulo-antipodal.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-d3-modulo-antipodal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Every point on <span class="math inline">\(D^3/\sim\)</span> represent a rotation
+</figcaption>
+</figure>
+</div></li>
+<li><p>Unit quaternions sits bijectively on the 3-sphere <span class="math inline">\(S^3\)</span>: <span class="math display">\[
+U(\mathbb{H}) \simeq \mathbb{S}^3.
+\]</span></p>
+<p>This is easy to see from the definition of unit quaternions: <span class="math display">\[
+\begin{aligned}
+U(\mathbb{H}) &amp;:= \{ q \in \mathbb{H} : |q| = 1 \} \\
+&amp;\simeq \{ (a, b, c, d) \in \mathbb{R}^4 : a^2 + b^2 + c^2 + d^2 = 1 \} \\
+&amp;=: \mathbb{S}^3
+\end{aligned}
+\]</span> where <span class="math inline">\(q = a + b\mathbf{i} + c \mathbf{j} + d \mathbf{k}\)</span>.</p></li>
+<li><p>Natural double cover projection from sphere to the equator plate: <span class="math display">\[
+\mathbb{S}^3 \overset{2:1} \twoheadrightarrow \frac{\mathbb{S}^3}{\sim} \simeq \frac{D^3}{\sim}.
+\]</span></p>
+<p>Just have a look at 2-dimensional case:</p>
+<div id="fig-2d-covering" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-2d-covering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="2d-covering.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-2d-covering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 2-dimensional case of the natural double covering
+</figcaption>
+</figure>
+</div></li>
+<li><p>From the above, we derived <a href="#eq-double-cover" class="quarto-xref">Equation&nbsp;1</a>.</p></li>
+</ol>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+<section id="kinematics-of-rigid-body-quaternions-version" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="kinematics-of-rigid-body-quaternions-version">Kinematics of rigid body: Quaternions version</h3>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-angular-velocity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-angular-velocity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="angular-velocity.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-angular-velocity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: How <span class="math inline">\(\boldsymbol{\Omega}(t)\)</span> encodes the rotation axis and angular velocity
+</figcaption>
+</figure>
+</div>
+</div></div><div class="page-columns page-full"><blockquote class="blockquote">
+<p>The time evolution of the attitude of a quadrocopter <span class="math inline">\(q(t)\)</span> and the angular velocity vector<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span class="math inline">\(\boldsymbol{\Omega}(t)\)</span> satisfy<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>: <span id="eq-kinematics-quat"><span class="math display">\[\dot{q} = \frac{1}{2} q \cdot \Omega. \tag{2}\]</span></span></p>
+</blockquote><div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;The angular velocity vector (shown in <a href="#fig-angular-velocity" class="quarto-xref">Figure&nbsp;3</a>) <span class="math inline">\(\boldsymbol{\Omega}(t_1) \in \mathbb{R}^3\)</span> encodes the rotation axis (<span class="math inline">\(\boldsymbol{\hat{\Omega}}\)</span>) and the angular velocity around that axis (<span class="math inline">\(\lVert\boldsymbol{\Omega}\rVert\)</span>).</p></div><div id="fn2"><p><sup>2</sup>&nbsp;You may be confused by how a quaternion could multiplied with a vector. It’s just because every vector <span class="math inline">\(v = v^1 \mathbf{i} + v^2 \mathbf{j} + v^3 \mathbf{k} \in \mathbb{R}^3\)</span> naturally embedded into <span class="math inline">\(\mathbb{H}\)</span> by a map <span class="math inline">\(p: \mathbb{R}^3 \to \mathbb{H}\)</span>, <span class="math inline">\(p(v) := 0 + v^1 \mathbf{i} + v^2 \mathbf{j} + v^3 \mathbf{k}\)</span>. <a href="#eq-kinematics-quat" class="quarto-xref">Equation&nbsp;2</a> is actually <span class="math inline">\(\dot{q} = \frac{1}{2} q \cdot p(\boldsymbol{\Omega})\)</span>.</p></div></div></div>
+<div id="fig-path-in-d3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-path-in-d3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="path-in-d3.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-path-in-d3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Attitude of the quadrocopter as a path in <span class="math inline">\(D^3/\sim\)</span>
+</figcaption>
+</figure>
+</div>
+<p>In other words, the attitude <span class="math inline">\(q(t)\)</span> of a quadrocopter can be represented as a path in <span class="math inline">\(D^3 / \sim\)</span> (shown in <a href="#fig-path-in-d3" class="quarto-xref">Figure&nbsp;4</a>), how to know the angular velocity vector <span class="math inline">\(\mathbf{\Omega}(t)\)</span> at a time <span class="math inline">\(t_0\)</span>? <a href="#eq-kinematics-quat" class="quarto-xref">Equation&nbsp;2</a> tells us just take the tangent vector (actually a quaternion <span class="math inline">\(\dot{q}\)</span>) of the path at time <span class="math inline">\(t_0\)</span>, multiplied by 2 then divide by <span class="math inline">\(q\)</span>.</p>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Proof of <a href="#eq-kinematics-quat" class="quarto-xref">Equation&nbsp;2</a>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>If both the attitude of the quadrocopter and the angular velocity vector is given at time <span class="math inline">\(t\)</span>, then the <em>attitude</em> configuration at time <span class="math inline">\(t + \Delta t\)</span> can be determined and can be considered as the composition of two consecutive <em>rotations</em>:</p>
+<ul>
+<li>First, rotate the quadrocopter by <span class="math inline">\(q(t)\)</span>.</li>
+<li>Second, rotate the quadrocopter by a quaternion <span class="math inline">\(r(t)\)</span> defined by <span class="math inline">\(\boldsymbol{\Omega}(t)\)</span> and <span class="math inline">\(\Delta t\)</span>, which represents a small rotation (where <span class="math inline">\(\Delta \theta\)</span> is a small angle around the axis <span class="math inline">\(\hat{\Omega}(t)\)</span>): <span class="math display">\[
+\begin{aligned}
+r(t) &amp;= \cos\left(\frac{\Delta \theta}{2}\right) + \sin\left(\frac{\Delta \theta}{2}\right) \hat{\Omega}(t) \\
+&amp;= \cos\left(\frac{\lVert\boldsymbol{\Omega}(t)\rVert \Delta t}{2}\right) + \sin\left(\frac{\lVert\boldsymbol{\Omega}(t)\rVert \Delta t}{2}\right) \hat{\Omega}(t).
+\end{aligned}
+\]</span></li>
+</ul>
+<p>Therefore, the attitude at time <span class="math inline">\(t + \Delta t\)</span> can be expressed as<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>: <span class="math display">\[
+\begin{align*}
+   &amp;\begin{aligned}
+   q(t + \Delta t) &amp;= q(t) \cdot r(t) \\
+   &amp;= q(t) \cdot \left( \cos\left(\frac{\lVert\boldsymbol{\Omega}(t)\rVert \Delta t}{2}\right) + \sin\left(\frac{\lVert\boldsymbol{\Omega}(t)\rVert \Delta t}{2}\right) \hat{\Omega}(t) \right) \\
+   &amp;= q(t) \cdot \left( 1 + \frac{\lVert\boldsymbol{\Omega}(t)\rVert \Delta t}{2} \frac{\Omega(t)}{\lVert\boldsymbol{\Omega}(t)\rVert} \right)  + o(\Delta t) \quad \text{(First order approximation)}
+   \end{aligned} \\
+   \implies\quad &amp; \frac{q(t + \Delta t) - q(t)}{\Delta t} \approx \frac{1}{2} q(t) \cdot \Omega(t) \\
+   \implies\quad &amp; \dot{q}(t) = \frac{1}{2} q(t) \cdot \Omega(t).
+\end{align*}
+\]</span></p>
+<p>We are done!</p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<!-- ----------------------------------------- -->
+<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;In this post, <span class="math inline">\(q \cdot p\)</span> reads from left to right, i.e., <span class="math inline">\(q\)</span> is rotated first and then <span class="math inline">\(p\)</span>.</p></div></div><div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Q&amp;A for <a href="#eq-kinematics-quat" class="quarto-xref">Equation&nbsp;2</a>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p><strong>Q1</strong>: The attitude of the quadrocopter can be represented by two quaternions <span class="math inline">\(\pm q \in U(\mathbb{H})\)</span>, but there’s only one possible <span class="math inline">\(\mathbf{\Omega}(t)\)</span> at a given time. Why?</p>
+<p><strong>A1</strong>: Both <span class="math inline">\(q\)</span> and <span class="math inline">\(-q\)</span> satisfy <a href="#eq-kinematics-quat" class="quarto-xref">Equation&nbsp;2</a> with the same <span class="math inline">\(\mathbf{\Omega}(t)\)</span>: <span class="math display">\[
+\begin{aligned}
+\frac{\mathrm{d}}{\mathrm{d} t} q &amp;= \frac{1}{2} q \cdot \Omega \\
+\frac{\mathrm{d}}{\mathrm{d} t} (-q) &amp;= \frac{1}{2} (-q) \cdot \Omega
+\end{aligned}
+\]</span></p></li>
+<li><p><strong>Q2</strong>: Given <em>any</em> path<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a> <span class="math inline">\(q(t)\)</span> in <span class="math inline">\(D^3/\sim\)</span>, the angular velocity vector can be computed by: <span class="math display">\[
+\Omega = 2 \frac{\dot{q}}{q}.
+\]</span> Does this result <span class="math inline">\(\Omega\)</span> guaranteed to be purely imaginary? (Because angular velocity vector must be purely imaginary).</p>
+<p><strong>A2</strong>: Yes. We give the following theorems first:</p></li>
+</ol>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Quaternion product rule
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div id="thm-quaternion-product-rule" class="callout-thm theorem">
+<p><span class="theorem-title"><strong>Theorem 1</strong></span> Let quaternions <span class="math display">\[
+\begin{aligned}
+p &amp;\equiv a + \mathbf{u}, \\
+q &amp;\equiv b + \mathbf{v}.
+\end{aligned}
+\]</span></p>
+<p>Their product is given by: <span class="math display">\[
+p \cdot q = ab - \mathbf{u} \cdot \mathbf{v} + a \mathbf{v} + b \mathbf{u} + \mathbf{u} \times \mathbf{v}.
+\]</span></p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Inner product in <span class="math inline">\(\mathbb{H}\)</span>
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div id="thm-inner-product-in-H" class="callout-thm theorem">
+<p><span class="theorem-title"><strong>Theorem 2</strong></span> Since <span class="math inline">\(\mathbb{H} \simeq \mathbb{R}^4\)</span> as vector spaces, we can borrow the inner product structure on <span class="math inline">\(\mathbb{R}^4\)</span> to <span class="math inline">\(\mathbb{H}\)</span>. Let <span class="math inline">\(p, q \in \mathbb{H}\)</span>, define: <span class="math display">\[
+\langle p, q \rangle = \sum_{i=0}^3 p_i q_i.
+\]</span> Also we have: <span class="math display">\[
+\Re(p \cdot q) = \langle p, \bar{q} \rangle = \langle \bar{p}, q \rangle.
+\]</span></p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Proof of <a href="#thm-inner-product-in-H" class="quarto-xref">Theorem&nbsp;2</a>
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>By <a href="#thm-quaternion-product-rule" class="quarto-xref">Theorem&nbsp;1</a>, <span class="math display">\[
+\begin{aligned}
+\Re(p \cdot q) &amp;= \Re(\overbrace{ab - \mathbf{u} \cdot \mathbf{v}}^{\text{scalar}} + \overbrace{a \mathbf{v} + b \mathbf{u} + \mathbf{u} \times \mathbf{v}}^{\text{vector}}) \\
+&amp;= ab - \mathbf{u} \cdot \mathbf{v} \\
+&amp;= p_0 q_0 - p_1 q_1 - p_2 q_2 - p_3 q_3 \\
+&amp;= \langle p, \bar{q} \rangle \\
+&amp;= \langle \bar{p}, q \rangle.
+\end{aligned}
+\]</span></p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<p>Remember <span class="math inline">\(q(t)\)</span> also lives on the surface <span class="math inline">\(\mathbb{S}^3\)</span>, so: <span class="math display">\[
+   \frac{\dot{q}}{q} = \dot{q} \bar{q}.
+   \]</span></p>
+<p>Since <span class="math inline">\(\dot{q}(t)\)</span> is a tangent vector to the surface <span class="math inline">\(\mathbb{S}^3\)</span>, <span class="math inline">\(\dot{q} \perp q\)</span> as vectors in <span class="math inline">\(\mathbb{R}^4\)</span>, i.e., <span class="math display">\[
+   \langle \dot{q}, q \rangle = 0.
+   \]</span> By <a href="#thm-inner-product-in-H" class="quarto-xref">Theorem&nbsp;2</a>, <span class="math display">\[
+   \langle \dot{q}, q \rangle = \Re (\dot{q} \cdot \bar{q}) = 0,
+   \]</span> i.e., <span class="math display">\[
+   \Re (\Omega) = 0.
+   \]</span></p>
+<p>So <span class="math inline">\(\Omega\)</span> is purely imaginary. Done!</p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;<em>Any</em> path in <span class="math inline">\(D^3/\sim\)</span> is a legitimate attitude change of the quadrocopter.</p></div></div></section>
+</section>
+<section id="model" class="level2">
+<h2 class="anchored" data-anchor-id="model">Model</h2>
+</section>
+
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
