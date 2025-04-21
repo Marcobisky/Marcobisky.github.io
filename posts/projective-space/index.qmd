@@ -1,0 +1,602 @@
+---
+author: Marcobisky
+title: Basics of Projective Space and Projective Linear Group 射影空间与射影线性群
+description: Projective spaces, unit quaternions, $SU(2), SO(3)$, 3-sphere, Möbius transformations, double cover, etc.
+date: 2025-4-21
+image: cover.gif
+categories:
+    - Algebra
+    - Differential-Geometry
+format: 
+    html: default
+bibliography: refs.bib
+bibliographystyle: ieee
+csl: diabetologia.csl #https://github.com/citation-style-language/styles
+---
+
+## Projective Space
+
+### Intuition
+
+> The projective space of a vector space is **the set of all lines**[^lines] through the origin with some extra structures.
+
+[^lines]: Or "1-dimensional subspaces".
+
+### Definition
+
+This can be formally defined by identifying some elements in a vector space $V$, or classifying the vectors in $V$ according to the spaces they span. This is exactly the idea of "quotients" in math.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Definition of Projective Space
+::: {#def-projective-space .callout-def}
+Let $V$ be a vector space over field $\mathbb{F}$, define a equivalence relation $\sim$ on $V$ as[^F-star]:
+$$
+\forall x, y \in V, x \sim y :\iff \exists \lambda \in \mathbb{F}^*, x = \lambda y.
+$$
+Then we can define projective space $\mathbb{P}(V)$ as:
+$$
+\mathbb{P}(V) := \frac{V - \{0_V\}}{\sim}.
+$$
+
+[^F-star]: $\mathbb{F}^* := \mathbb{F} - \{0_\mathbb{F}\}$, i.e., the non-zero elements of the field $\mathbb{F}$.
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## Projective space as a special case of the Grassmannian manifold
+All $1$-dimensional subspaces form the projective space. What about $n$-dimensional subspaces? They form the so-called Grassmannian manifold!
+
+![Projective spaces are special case of Grassmannian manifolds](projective-space-as-grassmannian.png){#fig-projective-space-as-grassmannian}
+:::
+<!-- ----------------------------------------- -->
+
+### Canonical projection {#sec-canonical-projection}
+
+There is a (surjective) canonical projection
+$$
+\begin{aligned}
+\pi: V - \{0_V\} &\twoheadrightarrow \mathbb{P}(V) \\
+x &\mapsto [x]_{\sim}
+\end{aligned}
+$$
+that maps each non-zero vector to its equivalence class (as shown in @fig-projective-space-pi).
+
+![The mental picture of $\pi$ for $V = \mathbb{R}^3$](projective-space-pi.png){#fig-projective-space-pi width=80%}
+
+In the following post, we will only consider the case where $\mathbb{F} \in \{\mathbb{R}, \mathbb{C}\}$ and $V = \mathbb{F}^n$ since they are the most common cases that we will encounter. It's necessary to have a clear mental picture of each of the example in the following sections.
+
+## Real Projective Space $\mathbb{RP}^n$
+
+When $V = \mathbb{R}^n$, we will denote $\mathbb{P}(\mathbb{R}^n)$ by $\mathbb{RP}^{n-1}$, where the upper index indicates the dimension of the projective space (actually a manifold of dimension $n-1$). 
+
+The "shape" of $\mathbb{RP}^n$ can be understood by @eq-iso-chain.
+
+$$
+\boxed{
+\mathbb{RP}^n \simeq \frac{\mathbb{S}^n}{\mathbb{Z}_2} \simeq \frac{H^n}{\sim} \simeq \frac{D^n}{\sim}.
+}
+$${#eq-iso-chain}
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=true collapse=true}
+## Note for @eq-iso-chain
+
+1. This is a diffeomorphism in the category of smooth manifolds.
+
+2. The notations in @eq-iso-chain are defined below:
+
+    - $\mathbb{S}^n$ is the $n$-dimensional sphere:
+    $$
+    \mathbb{S}^n := \{x \in \mathbb{R}^{n+1} : \|x\| = 1\}.
+    $$
+    - $H^n$ is the upper hemisphere:
+    $$
+    H^n := \{x \in \mathbb{R}^{n+1} : \|x\| = 1, x_j \geq 0\},
+    $$
+    where $j$ can be any coordinate index of $x$.
+
+    - $D^n$ is the closed $n$-disk:
+    $$
+    D^n := \{x \in \mathbb{R}^{n} : \|x\| \leq 1\}.
+    $$
+
+3. $\mathbb{S}^n/\mathbb{Z}_2$ means:
+
+    $$
+    \mathbb{S}^n/\text{\{antipodal points\}}
+    $$
+    Let the group $\mathbb{Z}/2\mathbb{Z} = \{\bar{0}, \bar{1}\}$ acts on $\mathbb{S}^n$ by taking the antipodal point:
+    $$
+    \bar{1} \cdot x = -x, \quad \forall x \in \mathbb{S}^n.
+    $$
+    This action defines the equivalence relation (See wiki [here](https://en.wikipedia.org/wiki/Group_action#Orbits_and_stabilizers)):
+    $$
+    \forall x \in \mathbb{S}^n, x \sim y :\iff \exists \lambda \in \mathbb{Z}_2, y = \lambda x.
+    $$
+
+4. The equivalence relation $\sim$ on $H^n$ is defined as:
+    $$
+    \forall x, y \in H^n, x \sim y :\iff x = y \text{ or }
+    \begin{cases} x, y \in \partial H^n = \mathbb{S}^{n-1}, \\ x=-y.  \end{cases}
+    $$
+
+5. The equivalence relation $\sim$ on $D^n$ is defined as:
+    $$
+    \forall x, y \in D^n, x \sim y :\iff x = y \text{ or }
+    \begin{cases} x, y \in \partial D^n = \mathbb{S}^{n-1}, \\ x=-y.  \end{cases}
+    $$
+:::
+<!-- ----------------------------------------- -->
+
+
+
+This is explained in detail below.
+
+### Real Projective line[^why-not-RP-0] $\mathbb{RP}^1$ {#sec-RP1}
+
+[^why-not-RP-0]: The projective space for $V = \mathbb{R}^1$ is too trivial, since everything in $\mathbb{R}$ is in one equivalence class. Therefore, $\mathbb{RP}^0 = \{e\}$.
+
+Let $V = \mathbb{R}^2$, then[^R-hat]:
+$$
+\mathbb{RP}^1 \simeq \frac{\mathbb{S}^1}{\mathbb{Z}_2} \simeq \frac{H^1}{\sim} \simeq \frac{D^1}{\sim} \simeq \mathbb{S}^1 \simeq \mathbb{\hat{R}}.
+$${#eq-iso-RP1}
+
+[^R-hat]: $\mathbb{\hat{R}} := \mathbb{R} \cup \{\infty\}$ is called the **projectively extended real line**. Distinguish it from the **extended real line** $\overline{\mathbb{R}} := \mathbb{R} \cup \{-\infty, +\infty\}$.
+
+Visually speaking[^blue-arrow],
+
+![Visual demonstration of @eq-iso-RP1](projective-space-RP1.png){#fig-projective-space-RP1}
+
+[^blue-arrow]: The blue curly arrow in @fig-projective-space-RP1 indicates that the two points are equivalent. One can be immediately transported to the other side by this arrow.
+
+Note that in @eq-iso-RP1, $D^1/{\sim}$ happens to be $\mathbb{S}^1$ again, which is very special and not general for $n > 1$.
+
+Instead of let a line intersects the unit circle at the origin (as shown in the first isomorphism in @eq-iso-RP1), there are different graphical representations of $\mathbb{RP}^1$:
+
+![Visual demonstration of $\mathbb{RP}^1 \simeq \mathbb{\hat{R}}$](alternative-projection-space-RP1.png){#fig-alternative-projection-space-RP1}
+
+The horizontal line in @fig-alternative-projection-space-RP1 does not intersect the blue line. We thus define it belongs to the equivalent class $\{\infty\}$.
+
+### Real Projective plane $\mathbb{RP}^2$
+
+Let $V = \mathbb{R}^3$, then:
+$$
+\mathbb{RP}^2 \simeq \frac{\mathbb{S}^2}{\mathbb{Z}_2} \simeq \frac{H^2}{\sim} \simeq \frac{D^2}{\sim}.
+$${#eq-iso-RP2}
+
+Visually speaking,
+
+![Visual demonstration of @eq-iso-RP2](projective-space-RP2.png){#fig-projective-space-RP2}
+
+Note that we cannot glue the opposite points on $H^2$ nor $D^2$ in $\mathbb{R}^3$ without a self-intersection. So we ended up at $D^2/{\sim}$. This structure is often expressed using [**fundamental polygon**](https://en.wikipedia.org/wiki/Fundamental_polygon#Examples_of_Fundamental_Polygons_Generated_by_Parallelograms). @fig-projective-space-RP2-immersed @tu_2011_an is what you get if you force to glue the opposite points on the equator of $H^2$ together.
+
+![$H^2/{\sim}$ immersed as a cross-cap in $\mathbb{R}^3$](projective-space-RP2-immersed.png){#fig-projective-space-RP2-immersed}
+
+Instead of let a line intersects the unit sphere at the origin (as shown in the first isomorphism in @eq-iso-RP2), there are a different graphical representation of $\mathbb{RP}^2$:
+
+![Infinity in $\mathbb{RP}^2$ is not unique](alternative-projection-space-RP2.png){#fig-alternative-projection-space-RP2}
+
+The lines in the $xy$ plane in @fig-alternative-projection-space-RP2 do not intersect the blue plane. We thus define them to "intersect with *the circle at infinity*". The right figure of @fig-alternative-projection-space-RP2 is NOT true since there is only one infinity, so it cannot tell the difference of the lines in the $xy$ plane. So notably,
+$$
+\begin{aligned}
+\mathbb{RP}^2 &\simeq \mathbb{R}^2 \cup \{\text{circle at infinity}\} \\
+&\not\simeq \mathbb{R}^2 \cup \{\infty\}.
+\end{aligned}
+$$
+
+### Real Projective space $\mathbb{RP}^3$
+
+Let $V = \mathbb{R}^4$, one could prove that @eq-iso-chain is still symbolically true:
+$$
+\mathbb{RP}^3 \simeq \frac{\mathbb{S}^3}{\mathbb{Z}_2} \simeq \frac{H^3}{\sim} \simeq \frac{D^3}{\sim}.
+$${#eq-iso-RP3}
+
+However this time, the only object in @eq-iso-RP3 that can be visualized is $D^3/{\sim}$:
+
+![Every point on this *solid* ball (with antipodal points glued) represents an element in $\mathbb{RP}^3$](projective-space-RP3.png){#fig-projective-space-RP3 width=80%}
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=false}
+## $\mathbb{RP}^3, \mathbb{S}^3, SO(3), SU(2)$ and the unit quaternions $U(\mathbb{H})$
+
+Their relations are:
+$$
+\boxed{
+\text{Spin}(3) \simeq SU(2) \simeq \mathbb{S}^3 \simeq U(\mathbb{H}) \overset{2:1} \twoheadrightarrow \mathbb{RP}^3 \simeq SO(3)
+}
+$$
+
+1. $SU(2) \simeq \mathbb{S}^3$: Rotation in $\mathbb{C}^2$ sits bijectively on the surface of the 3-sphere $S^3$.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false collapse=true}
+## Proof 1
+An element in $SU(2)$ has the form:
+$$
+U = \begin{pmatrix} \alpha & \gamma \\ \beta & \delta \\\end{pmatrix} \in SU(2)
+$$
+with constraints:
+$$
+U^H = U^{-1}, \det U = 1.
+$$
+Therefore,
+$$
+\begin{pmatrix} \bar{\alpha} & \bar{\beta} \\ \bar{\gamma} & \bar{\delta} \\\end{pmatrix}
+=
+\frac{1}{\det U} \begin{pmatrix} \delta & -\gamma \\ -\beta & \alpha \\\end{pmatrix}
+=
+\begin{pmatrix} \delta & -\gamma \\ -\beta & \alpha \\\end{pmatrix}.
+$$
+Thus, $U$ must look like:
+$$
+\begin{align*}
+& U = \begin{pmatrix} \alpha & -\beta \\ \beta & \bar{\alpha} \\\end{pmatrix}, \text{ with } \det U = 1 \\
+\implies\quad & \alpha \bar{\alpha} + \beta \bar{\beta} = 1 \\
+\implies\quad & |\alpha|^2 + |\beta|^2 = 1 \\
+\implies\quad & |a + bi|^2 + |c + di|^2 = 1 \\
+\implies\quad & a^2 + b^2 + c^2 + d^2 = 1.
+\end{align*}
+$$
+So,
+$$
+\forall U \in SU(2), U \in \mathbb{S}^3.
+$$
+:::
+<!-- ----------------------------------------- -->
+
+2. $\mathbb{S}^3 \simeq U(\mathbb{H})$: Unit quaternions live on the 3-sphere.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false collapse=true}
+## Proof 2
+This is easy to see from the definition of unit quaternions:
+$$
+\begin{aligned}
+U(\mathbb{H}) &:= \{ q \in \mathbb{H} : |q| = 1 \} \\
+&\simeq \{ (a, b, c, d) \in \mathbb{R}^4 : a^2 + b^2 + c^2 + d^2 = 1 \} \\
+&=: \mathbb{S}^3
+\end{aligned}
+$$
+where $q = a + b\mathbf{i} + c \mathbf{j} + d \mathbf{k}$.
+:::
+<!-- ----------------------------------------- -->
+
+3. $\mathbb{RP}^3 \simeq SO(3)$: If you look around in $\mathbb{R}^4$, what you see is rotations in $\mathbb{R}^3$!
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false collapse=true}
+## Proof 3 (Not rigorous)
+An element $R \in SO(3)$ is specified by the *rotation axis* and the *rotation angle*. We could encode these two information by a single vector in a solid ball of radius $\pi$, where the length of $V$ is the rotation angle and the direction of $V$ is the rotation axis. However, we soon realize that antipodal points on the surface of $D^3$ represent the same rotation since rotating by $\pi$ does not care about the rotation direction. So we end up with the quotient space $D^3/{\sim}$ (shown in @fig-d3-modulo-antipodal).
+
+![How elements in $SO(3)$ live in $D^3/{\sim}$](d3-modulo-antipodal.png){#fig-d3-modulo-antipodal}
+
+But @fig-d3-modulo-antipodal is also the space of $\mathbb{RP}^3$, so we get:
+$$
+\mathbb{RP}^3 \simeq SO(3).
+$$
+:::
+<!-- ----------------------------------------- -->
+
+4. $\mathbb{S}^3 \overset{2:1}{\twoheadrightarrow} SO(3)$: A rotation in $\mathbb{R}^3$ is represented by two points on the 3-sphere.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false collapse=true}
+## Proof 4
+This is easy since we know:
+$$
+\mathbb{S}^3 \overset{2:1}{\twoheadrightarrow} \frac{\mathbb{S}^3}{\mathbb{Z}_2},
+$$
+and @eq-iso-RP3 gives:
+$$
+\mathbb{RP}^3 \simeq \frac{\mathbb{S}^3}{\mathbb{Z}_2}.
+$$
+We've just shown:
+$$
+\mathbb{RP}^3 \simeq SO(3).
+$$
+:::
+<!-- ----------------------------------------- -->
+
+5. $\text{Spin}(3) \simeq \mathbb{S}^3$: [Spin group](https://en.wikipedia.org/wiki/Spin_group) double covers the rotation group.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false collapse=true}
+## Proof 5
+
+$\text{Spin}(3)$ could be *defined* to be the universal cover of $SO(3)$, which is $\mathbb{S}^3$.
+:::
+<!-- ----------------------------------------- -->
+
+:::
+<!-- ----------------------------------------- -->
+
+
+## Complex Projective Space $\mathbb{CP}^n$
+
+We don't have a formula like @eq-iso-chain for $\mathbb{CP}^n$ by the way. We will only focus on one case where $V = \mathbb{C}^2$.
+
+### Complex projective line[^why-not-CP-0] $\mathbb{CP}^1$
+
+[^why-not-CP-0]: The projective space for $V = \mathbb{C}^1$ is too trivial, since everything in $\mathbb{C}$ is in one equivalence class. Therefore, $\mathbb{CP}^0 = \{e\}$.
+
+Let $V = \mathbb{C}^2$. Although it's impossible to have a mental picture of $\mathbb{C}^2$, we could have a legit imagination for $\mathbb{CP}^1$ using **homogeneous coordinates**:
+$$
+\mathbb{C}^2 - \{0\} \ni \begin{pmatrix} z_1 \\ z_2 \\\end{pmatrix}
+\xmapsto{\pi} \left[\frac{z_1}{z_2} : 1\right]
+\equiv \left[a+bi : 1\right]
+\simeq \mathbb{C}.
+$${#eq-homogeneous-coordinates-CP1}
+
+According to @eq-homogeneous-coordinates-CP1, one would need only one complex number to specify an element in $\mathbb{CP}^1$. Does it implies that $\mathbb{CP}^1$ is just the complex line[^complex-line]? No! We missed the case where $z_2 = 0$! Similar to @sec-RP1, we define the line $\begin{pmatrix} z_1 \\ 0 \\\end{pmatrix} \in \mathbb{C}^2 - \{0\}$ belongs to the equivalence class denoted by the symbol $\infty$:
+$$
+\begin{pmatrix} z_1 \\ 0 \\\end{pmatrix}
+:\xmapsto{\pi} \left[1 : 0\right]
+\equiv \{\infty\}
+$$
+
+
+[^complex-line]: $\mathbb{C}$ has different dimension as a real or complex vector space: $$\operatorname{dim}_{\mathbb{R}} \mathbb{C} = 2, \operatorname{dim}_{\mathbb{C}} \mathbb{C} = 1.$$ We consider $\mathbb{C}$ as a complex vector space here, so we call it the *complex line* instead of the *complex plane*.
+
+Therefore, we would need one complex number plus only one extra symbol $\infty$ (together called the *projectively extended complex number* $\mathbb{\hat{C}}$) to specify an element in $\mathbb{CP}^1$:
+$$
+\mathbb{CP}^1 \simeq \mathbb{C} \cup \{\infty\} \equiv \mathbb{\hat{C}}.
+$$
+
+We could also put a 2-sphere across or above $\mathbb{\hat{C}}$ (as shown in @fig-projective-space-CP1) and construct a bijective correspondence (called the **Stereographic projection**) between the points on the sphere and the points on $\mathbb{\hat{C}}$. This sphere is a compact, connected, 1-dimensional complex manifold, called the **Riemann sphere**. We have the isomorphism:
+$$
+\mathbb{CP}^1 \simeq \mathbb{S}^2.
+$$
+
+![$\mathbb{CP}^1$ as a Riemann sphere](projective-space-CP1.png){#fig-projective-space-CP1}
+
+
+
+## Homography
+
+Whenever mathematicians define a new object, they will soon talk about the *morphisms* between them, i.e., the mappings that preserve the structures of the objects. We are interested specifically in *bijective* morphisms between projective spaces, which are called **homography**. Just like the general linear group $\text{GL}(V)$, all homographies form a group called the **projective linear group** $\text{PGL}(V)$.
+
+> Homography is an isomorphism between projective spaces induced by bijective linear transformations of vector spaces. $$\text{PGL}(V) \equiv \operatorname{Aut}(\mathbb{P}(V))$$
+
+The canonical projection $\pi$ in @sec-canonical-projection not only project vector spaces but also the linear transformations between vector spaces. So it could be viewed as a functor from the category of vector spaces (v.s.) to the category of projective spaces (p.s.):
+
+![Canonical projection $\pi$ as a functor](canonical-projection-functor.png){#fig-canonical-projection-functor}
+
+We first give two examples of homography in the case of $V \in \{\mathbb{R}^2, \mathbb{C}^2\}$ before dealing with the case of abstract $V$.
+
+### Homography on $\mathbb{RP}^1$ {#sec-homography-RP1}
+
+Let $V = \mathbb{R}^2, A \in \text{GL}(V)$, what is $A$ under the functor $\pi$?
+
+![Homography on $\mathbb{RP}^1$](homography-RP1.png){#fig-homography-RP1}
+
+$A$ could be represented by a $2 \times 2$ non-singular matrix multiplied by a non-zero vector $v$:
+$$
+\begin{aligned}
+A: \mathbb{R}^2 &\xrightarrow[]{\sim} \mathbb{R}^2 \\
+\begin{pmatrix} x_0 \\ y_0 \\\end{pmatrix}
+&\mapsto
+\begin{pmatrix} a & c \\ b & d \\\end{pmatrix}
+\begin{pmatrix} x_0 \\ y_0 \\\end{pmatrix}\\
+\begin{pmatrix} x \\ 1 \\\end{pmatrix}
+&\mapsto
+\begin{pmatrix} a & c \\ b & d \\\end{pmatrix}
+\begin{pmatrix} x \\ 1 \\\end{pmatrix}
+=
+\begin{pmatrix} ax + c \\ bx + d \\\end{pmatrix}
+\end{aligned}
+$$
+where $x \in \mathbb{\hat{R}}$, $x_0, y_0, a, b, c, d \in \mathbb{R}$ and $ad-bc \neq 0$. By definition, $\pi(A)$ should map the equivalence class $[x : 1]$ to $[ax + c : bx + d]$:
+$$
+\begin{aligned}
+\pi(A): \mathbb{RP}^1 &\xrightarrow[]{\sim} \mathbb{RP}^1 \\
+[x : 1] &\mapsto \left[\frac{ax+c}{bx+d} : 1\right] \\
+\end{aligned}
+$${#eq-homography-RP1}
+
+Note that $\pi(A)$ maps $\infty$ to $\frac{a}{b}$.
+
+### Möbius transformations -- Homography on $\mathbb{CP}^1$
+
+> Homographies on $\mathbb{CP}^1$ are called **Möbius transformations**. The object $\text{PGL}(\mathbb{C}^2)$ is called the **Möbius group**.
+
+Let $V = \mathbb{C}^2, A \in \text{GL}(V)$. We could simply write @eq-homography-RP1 as its complex version:
+$$
+\begin{aligned}
+\pi(A): \mathbb{CP}^1 &\xrightarrow[]{\sim} \mathbb{CP}^1 \\
+[z : 1] &\mapsto \left[\frac{az+c}{bz+d} : 1\right] \\
+\end{aligned}
+$$
+where $z \in \mathbb{\hat{C}}$, $a, b, c, d \in \mathbb{C}$ and $ad-bc \neq 0$. Also, $\pi(A)$ maps $\infty$ to $\frac{a}{b}$.
+
+There is an astounding fact @siliciano_2017_constructing that the elements in the Möbius group correspond bijectively to the rigid motions of the Riemann sphere.
+
+![Möbius transformations are rigid motions of the Riemann sphere [@the_2015_what]](rigid-motion.gif){#fig-rigid-motion}
+
+However, this does NOT mean that $\text{PGL}(\mathbb{C}^2) \simeq SO(3)$ as *groups*. In fact, one can show that the Möbius group is isomorphic to the so-called **Lorenz group**:
+$$
+\text{PGL}(\mathbb{C}^2) \simeq SO^+(1, 3).
+$$ 
+
+## Projective Linear group
+
+The projective space is a classification of vectors in a vector space. Similarly, we will define the **projective linear group** $\text{PGL}(V)$ as a classification of isomorphisms in the general linear group $\text{GL}(V)$ in this section.
+
+### Definition
+
+It's obvious that some linear transformations are equivalent when we view them projectively. For example in @fig-matrix-equivalence-scalar-multiples, a matrix $A \in \text{GL}(\mathbb{R}^2)$ looks the same as its scalar multiples $kA$ for $k \in \mathbb{R}^*$ under the functor $\pi$:
+
+![A matrix is equivalent to its scalar multiples projectively](matrix-equivalence-scalar-multiples.png){#fig-matrix-equivalence-scalar-multiples width=80%}
+
+It turns out its converse is also true: All equivalent matrices are scalar multiples of each other! We have:
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Equivalent matrices $\iff$ Scalar multiples
+::: {#thm-equivalent-matrices .callout-thm}
+Let $V$ be a vector space over field $\mathbb{F}$ and $A, B \in \text{GL}(V)$, then:
+$$
+\pi(A) = \pi(B) \iff \exists \lambda \in \mathbb{F}^*, A = \lambda B.
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## Proof of @thm-equivalent-matrices
+$(\impliedby)$ is trivial. We only show the direction $(\implies)$ here:
+
+$\pi(A) = \pi(B)$ implies:
+$$
+\forall v \in V - \{0\}, \pi(Av) = \pi(Bv)
+$$
+
+By the definition of projective space, $Av$ and $Bv$ must be scalar multiple $\lambda$ of each other and that scalar may depend on $v$ (We will show that $\lambda$ is actually independent of $v$ later):
+$$
+\exists \lambda(v) \in \mathbb{F}^*, Av = \lambda(v)Bv.
+$${#eq-Av-lambda-Bv}
+
+Pick a basis $\{e_1, e_2, \cdots, e_n\}$ of $V$ and take $v$ to be each of the basis:
+$$
+Ae_i = \lambda(e_i)Be_i, \forall i = 1, 2, \cdots, n.
+$${#eq-Ae-ei}
+
+$\forall v \in V$ is a linear combination of the basis: $v = \sum \alpha_i e_i$. Multiply $A$ both sides and from @eq-Ae-ei, we have:
+$$
+\begin{aligned}
+Av &= \sum \alpha_i Ae_i = \sum \alpha_i \underbrace{\lambda(e_i) Be_i}_{Ae_i} \\
+&= \sum \lambda(e_i) \alpha_i Be_i
+\end{aligned}
+$${#eq-Av-lambda-Be}
+
+But @eq-Av-lambda-Bv tells us:
+$$
+Av = \lambda(v)Bv = \lambda(v) \sum \alpha_i Be_i.
+$${#eq-Av-lambda-Be-2}
+
+Compare @eq-Av-lambda-Be and @eq-Av-lambda-Be-2, all $\lambda$ s must be the same:
+$$
+\lambda(v) = \lambda(e_1) = \lambda(e_2) = \cdots = \lambda(e_n) \equiv \lambda = \text{const}.
+$$
+
+Therefore, @eq-Av-lambda-Bv implies:
+$$
+\forall v \in V - \{0\}, Av = \lambda Bv \implies A = \lambda B.
+$$
+:::
+<!-- ----------------------------------------- -->
+
+
+We can define the projective linear group $\text{PGL}(V)$ according to the classification of matrices "up to scalar":
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Definition of $\text{PGL}(V)$
+::: {#def-pgl-v .callout-def}
+Let $V$ be a vector space over field $\mathbb{F}$, then the projective linear group $\text{PGL}(V)$ is defined as:
+$$
+\text{PGL}(V) := \frac{\text{GL}(V)}{\mathbb{F}^* I},
+$$
+where $I$ is the identity in $\text{GL}(V)$.
+:::
+:::
+<!-- ----------------------------------------- -->
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=false}
+## $\text{PGL}(V)$ as the inner automorphism group of $\text{GL}(V)$
+
+We know from [here](https://math.stackexchange.com/questions/960342/center-of-general-linear-group) that the center of $\text{GL}(V)$ is exactly $\mathbb{F}^* I$:
+$$
+\text{ZGL}(V) \equiv Z(\text{GL}(V)) = \mathbb{F}^* I.
+$$
+
+We know from [this post](../isomorphism-theorem/index.qmd#sec-natural-hom) that for any group $G$,
+$$
+1 \xrightarrow[]{} Z(G) \hookrightarrow G \twoheadrightarrow \operatorname{Inn}(G) \xrightarrow[]{} 1,
+$$
+where $\text{Inn}(G)$ = $G/{Z(G)}$. Let $G = \text{GL}(V)$, then we have:
+$$
+1 \xrightarrow[]{} \text{ZGL}(V) \hookrightarrow \text{GL}(V) \twoheadrightarrow \operatorname{PGL}(V) \xrightarrow[]{} 1,
+$$
+where 
+$$
+\text{Inn}(\text{GL}(V)) = \frac{\text{GL}(V)}{\text{ZGL}(V)} = \text{PGL}(V)
+$$
+:::
+<!-- ----------------------------------------- -->
+
+### Grid of short exact sequence about projective linear groups
+
+The general linear group $\text{GL}(V)$, special linear group $\text{SL}(V)$, their centers $\text{ZGL}(V)$ and $\text{ZSL}(V)$, and their projective linear groups $\text{PGL}(V)$ and $\text{PSL}(V)$ form the following grid of short exact sequence:
+
+::: {#fig-commutative-diagram}
+<center>
+<img src="https://i.upmath.me/svg/%0A%5Cbegin%7Btikzcd%7D%0A%09%26%201%20%26%201%20%26%201%20%5C%5C%0A%091%20%26%20%7B%5Ctext%7BZSL%7D(V)%7D%20%26%20%7B%5Ctext%7BSL%7D(V)%7D%20%26%20%7B%5Ctext%7BPSL%7D(V)%7D%20%26%201%20%5C%5C%0A%091%20%26%20%7B%5Ctext%7BZGL%7D(V)%7D%20%26%20%7B%5Ctext%7BGL%7D(V)%7D%20%26%20%7B%5Ctext%7BPGL%7D(V)%7D%20%26%201%20%5C%5C%0A%091%20%26%20%7B(%5Cmathbb%7BC%7D%5E%7B%5Ctimes%7D)%5En%7D%20%26%20%7B%5Cmathbb%7BC%7D%5E%7B%5Ctimes%7D%7D%20%26%20%7B%5Cmathbb%7BZ%7D%2Fn%5Cmathbb%7BZ%7D%7D%20%26%201%20%5C%5C%0A%09%26%201%20%26%201%20%26%201%0A%09%5Carrow%5Bfrom%3D1-2%2C%20to%3D2-2%5D%0A%09%5Carrow%5Bfrom%3D1-3%2C%20to%3D2-3%5D%0A%09%5Carrow%5Bfrom%3D1-4%2C%20to%3D2-4%5D%0A%09%5Carrow%5Bfrom%3D2-1%2C%20to%3D2-2%5D%0A%09%5Carrow%5Bhook%2C%20from%3D2-2%2C%20to%3D2-3%5D%0A%09%5Carrow%5Bhook%2C%20from%3D2-2%2C%20to%3D3-2%5D%0A%09%5Carrow%5B%22%5Cpi%22%2C%20two%20heads%2C%20from%3D2-3%2C%20to%3D2-4%5D%0A%09%5Carrow%5Bhook%2C%20from%3D2-3%2C%20to%3D3-3%5D%0A%09%5Carrow%5Bfrom%3D2-4%2C%20to%3D2-5%5D%0A%09%5Carrow%5Bhook%2C%20from%3D2-4%2C%20to%3D3-4%5D%0A%09%5Carrow%5Bfrom%3D3-1%2C%20to%3D3-2%5D%0A%09%5Carrow%5Bhook%2C%20from%3D3-2%2C%20to%3D3-3%5D%0A%09%5Carrow%5B%22%7B%5Ctext%7Bdet%7D%7D%22'%2C%20two%20heads%2C%20from%3D3-2%2C%20to%3D4-2%5D%0A%09%5Carrow%5B%22%5Cpi%22%2C%20two%20heads%2C%20from%3D3-3%2C%20to%3D3-4%5D%0A%09%5Carrow%5B%22%7B%5Ctext%7Bdet%7D%7D%22'%2C%20two%20heads%2C%20from%3D3-3%2C%20to%3D4-3%5D%0A%09%5Carrow%5Bfrom%3D3-4%2C%20to%3D3-5%5D%0A%09%5Carrow%5Btwo%20heads%2C%20from%3D3-4%2C%20to%3D4-4%5D%0A%09%5Carrow%5Bfrom%3D4-1%2C%20to%3D4-2%5D%0A%09%5Carrow%5Bhook%2C%20from%3D4-2%2C%20to%3D4-3%5D%0A%09%5Carrow%5Bfrom%3D4-2%2C%20to%3D5-2%5D%0A%09%5Carrow%5Btwo%20heads%2C%20from%3D4-3%2C%20to%3D4-4%5D%0A%09%5Carrow%5Bfrom%3D4-3%2C%20to%3D5-3%5D%0A%09%5Carrow%5Bfrom%3D4-4%2C%20to%3D4-5%5D%0A%09%5Carrow%5Bfrom%3D4-4%2C%20to%3D5-4%5D%0A%5Cend%7Btikzcd%7D%E2%88%82%0A" alt="
+\begin{tikzcd}
+	&amp; 1 &amp; 1 &amp; 1 \\
+	1 &amp; {\text{ZSL}(V)} &amp; {\text{SL}(V)} &amp; {\text{PSL}(V)} &amp; 1 \\
+	1 &amp; {\text{ZGL}(V)} &amp; {\text{GL}(V)} &amp; {\text{PGL}(V)} &amp; 1 \\
+	1 &amp; {(\mathbb{C}^{\times})^n} &amp; {\mathbb{C}^{\times}} &amp; {\mathbb{Z}/n\mathbb{Z}} &amp; 1 \\
+	&amp; 1 &amp; 1 &amp; 1
+	\arrow[from=1-2, to=2-2]
+	\arrow[from=1-3, to=2-3]
+	\arrow[from=1-4, to=2-4]
+	\arrow[from=2-1, to=2-2]
+	\arrow[hook, from=2-2, to=2-3]
+	\arrow[hook, from=2-2, to=3-2]
+	\arrow[&quot;\pi&quot;, two heads, from=2-3, to=2-4]
+	\arrow[hook, from=2-3, to=3-3]
+	\arrow[from=2-4, to=2-5]
+	\arrow[hook, from=2-4, to=3-4]
+	\arrow[from=3-1, to=3-2]
+	\arrow[hook, from=3-2, to=3-3]
+	\arrow[&quot;{\text{det}}&quot;', two heads, from=3-2, to=4-2]
+	\arrow[&quot;\pi&quot;, two heads, from=3-3, to=3-4]
+	\arrow[&quot;{\text{det}}&quot;', two heads, from=3-3, to=4-3]
+	\arrow[from=3-4, to=3-5]
+	\arrow[two heads, from=3-4, to=4-4]
+	\arrow[from=4-1, to=4-2]
+	\arrow[hook, from=4-2, to=4-3]
+	\arrow[from=4-2, to=5-2]
+	\arrow[two heads, from=4-3, to=4-4]
+	\arrow[from=4-3, to=5-3]
+	\arrow[from=4-4, to=4-5]
+	\arrow[from=4-4, to=5-4]
+\end{tikzcd}∂
+" width="700"/>
+</center>
+:::
+
+Each row and column in @fig-commutative-diagram is a short exact sequence[^cx-notation]. Everything would be clear if you stare at the cartoon in @fig-illustration-commutative-diagram for a moment.
+
+[^cx-notation]: $(\mathbb{C}^{\times})^n$ here means $\{z^n: z \in \mathbb{C}^{\times }\}$, not $\mathbb{C}^{\times} \times \cdots \times \mathbb{C}^{\times}$. $\mathbb{C}^{\times}$ is the same as $\mathbb{C}^*$, which represents the multiplicative group of non-zero complex numbers.
+
+![Illustration of the commutative diagram in @fig-commutative-diagram](illustration-commutative-diagram.png){#fig-illustration-commutative-diagram width=70%}
+
+
+<!-- 
+We will explain some of the non-trivial parts:
+
+#### $\text{ZSL}(V)$ as the intersection of $\text{ZGL}(V)$ and $\text{SL}(V)$
+
+1. First, let's consider what is $\text{ZGL}(V) \cap \text{SL}(V)$?
+
+    This is the subset of scalar matrices that lie in $\mathrm{SL}(V)$. So we ask: Which $\lambda I$ have determinant 1?
+    $$
+    \det (\lambda I) = \lambda^n = 1.
+    $$
+
+    So:
+    $$
+    \mathrm{SL}(V) \cap Z(\mathrm{GL}(V)) = \{ \lambda I : \lambda \in \mathbb{F}^*, \lambda^n = 1 \}.
+    $${@eq-intersection-ZGL-SL}
+
+2. Next, we need to show that @eq-intersection-ZGL-SL is exactly $\text{ZSL}(V)$.
+
+    By the definition of center of a group, we ask: What are the matrices in $\mathrm{SL}(V)$ that commute with all elements of $\mathrm{SL}(V)$?
+
+     -->
