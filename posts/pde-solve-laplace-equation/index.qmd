@@ -1,0 +1,345 @@
+---
+author: Marcobisky
+title: Solving Laplace's Equation using Separation of Variables
+description: Learn how to solve stationary heat distribution problem under specific boundary conditions
+date: 2025-5-1
+image: cover.gif
+categories:
+    - Differential-Equation
+format: 
+    html: default
+---
+
+## Takeaway {.unnumbered}
+
+## Problem Formulation
+
+Suppose we have a rectangular sheet of steel sized $p \times q$. We somehow force the temperature on the boundary of the sheet to be some deterministic function $f, g, h, w$ shown in @fig-problem-formulation. When the system settles stablely, what is the temperature distribution $v(x, y)$ inside the sheet?
+
+![How to solve the temperature distribution given boundary condition?](problem-formulation.png){#fig-problem-formulation width=70%}
+
+Since the steady heat distribution is governed by the Laplace's equation. The problem is basically to:
+
+> Solve the Laplace's equation given a (Dirichlet) boundary condition[^bc] (temperature functions):$$ \nabla^2 v = 0. $$
+
+[^bc]: See [here](https://en.wikipedia.org/wiki/Boundary_value_problem#Examples) for different types of boundary conditions.
+
+## Existence and uniqueness of solutions
+
+It's good habit to always check the **existence** and **uniqueness** of a mathematical object.
+
+1. **Existence**: Does the solution exist?
+    
+    In this case, one can guess by life experience that the solution exists since no matter how we force the temperature on the boundary, there must be a temperature distribution inside the sheet.
+
+2. **Uniqueness**: Does the temperature distribution settles to a unique solution?
+    
+    This is not immediately obvious[^uniqueness]. Could there exist two different stable temperature distributions? The answer is no.
+
+[^uniqueness]: Not every PDE has a unique solution. For example, the uniqueness of the famous [*Navier-Stokes equation*](https://en.wikipedia.org/wiki/Navier–Stokes_existence_and_smoothness) is still unsolved.
+
+
+## Linearity simplifies the problem
+
+Stare @fig-linearity-simplifies for a while, you will find we just need to solve the steady heat distribution $F(x, y)$ with an easier boundary condition:
+$$
+\begin{align}
+F(0, y) &= 0, & y \in [0, q] \tag{BC1} \\
+F(0, y) &= 0, & y \in [0, q] \tag{BC2} \\
+F(x, 0) &= 0, & x \in [0, p] \tag{BC3} \\
+F(x, q) &= f(x), & x \in [0, p] \tag{BC4}
+\end{align}
+$${#eq-BC}
+
+![Linearity of Laplace's equation simplifies the boundary condition](linearity-simplifies.png){#fig-linearity-simplifies}
+
+![[Simulate](https://visualpde.com/sim/?options=N4IgRgqiBcIMYHsC2YEgDTgE4xABgDoAmDeAZylgCEEAXW5aAAgBEBLLNuACwBsBTWkwC8TPAG4mAGX4AzWs3aceAoaIlMASmwDm3Baw5c+gkWMkAVBAAdFRladEBmAFQAKQgBYXZNgDs3azYXAA8mAHomAFYASiYAWjFiH383byDQiOi4xMIARhSAgA4XDLDI2KYAaiSiQrc8gDZS4PLsmPFSABMIShA87oA1Qdw8boB1cdHuvpJMLrJcKO7aGEI8PCJMOD6xzCR-AA1pzD8YPNOLc8xrXABhAFcyBiRSaywEMH4AMQez2CuNw+Xxkfh0tG4MCcG0wWF2pCwI1gexAWCmyNIZFuyIIeU8nkx-xAgJAADcYABtUAAQywHwA7ncELwEA8cNBGlEok4ophaQyWPw-L5aABPNYEXkgfkIemg8HcACy1JCuAGfLpsoAynBqQJcNSHgxSDL6cdYFIAPohcJEBJMVUahkATVwVtFtvt4r5RoQWsETJZbM01LB-Bgsj1ZH422pSH4WGpFm4gmpULwsfjiYACtw2OnMwnqQAtBDICVFbbM1lYJDU7EgWhs1CkRBBrBgWkRqMx+AIPwMNmLaCR3jRqsDmuBmtrCeDrAAUWsvhZ-3WFz7k7ZADkHq9oFK4E8Xlq2ZG4OGRz3MPwUAgyMPR+OQLfUA+AIIoNhC1bQQhS197zIdhZFkJ5L0IRobzvB9c3zaA8klAB2PBKxfGCyC1PM-HFBCM3Qt9MKQMsIT8fgHwlLYCKArVrH4I9eC7P9iGgwjk1TCUkKKKJPEwWReDYaw6K6ac2TrbEn17ASyPGNgughRUHl4a4QDrEJRMRPUHkvfoCBRA4-A0wYtJ09ZSAQUkE0Y3DJMwCyrOpUUNNnEB7KwaylxXfsJQ2KU3I8kJ3jVczLPcxypH8fhZPkpUlJU6wWVoCxRTo3AEtDcMgU+fwdG7Mde3eT4fj+XASUKkEhQVdN8PK-hktS2B-FofgdETZSsq+c18DeYF+FdDFMDIM9qQvX4iRRCEsH4fgWAACX4XR9B1PUIIIJDMEsuAGCwb5v14Lo8ufeluGpJKEGzRLStIPw4x0gASCw7pAABfdAaU1RlqzZGBOW5KVTUFYU2DFCV-o++UFJVUY9IJJ1tV1fVYCmxjaDYSyTQ+rr4gsa0MZdXBsctb1pV9f1aA0kMw0O3tdSzJMU1oNNoGhQsczzAt4FuxNS3LZi0LbGtxNwCEEzrdq+3bTt2Vszd50fa9ZanL72XwxAt0XZc2FXHyNzV+dd33Q9j2QU8sHPS8ZcAiir3y1igM-MBvwHUG7YfECwOjCUoOo2D2YQ5DUNdzDsNwvJ8KtoiSO4MjrcIKiI9o+ilKYuOg-YxnOO43iQH4wThI0oXoFoLBtMwaSorkhS4oQ-YVSMky1T00gDPr3htOhlF-Mc6m7NC6znL-XuHNFTyte85jfKHsKR8C9l+hC4eIpkyvYuUmuQASuh6p09KyJ67KwR7jferGq6Ov4CHIWZmFj6K7fcCalq2v3zqTlvr5+u6wbhtGkqBsbbgU0ZrzUWrQZaiNCDrTJPRbau1+D7RgMXUuIBjqnSsBdOgZ8QA3XjLgB6d0mChi6EwO6AAdUhN0wCMSYI9F6ABdTA9IDoAlIPSBsJJfBIAsMDRGIB5qnSYPwAAjg8U6bBvLPSAA) the subproblem](cover.gif)
+
+## Separation of variables (SoV)
+
+Suppose $F(x,y)$ could be written as:
+$$
+F(x,y) = A(x)B(y)
+$${#eq-SoV}
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Uniqueness legitimize seperation of variables!
+::: {#def-uniqueness-importance .callout-def}
+@eq-SoV is such a bold and unreasonable assumption. Why is that??
+
+> It *literally* doesn't make any sense, until it indeed gives a solution!
+
+The seperation of variables is just a guess. You will later find that if we continue reasoning using this assumption, we will eventually arrive at a solution that satisfies both the Laplace's equation and the boundary condition.
+
+Here is the point: The **uniqueness** theorem guarantees that the solution is unique!, which means the solution we just got is the only solution, though we have no fluent logic to derive it! This is sort of like:
+
+Imagine your primary school teacher ask you to solve the equation:
+$$
+2x + 3 = 1.
+$${#eq-2x31}
+
+You have no idea how to solve it, but you guess that $x$ satisfies:
+$$
+x + 1 = 0,
+$$
+and you get $x = -1$, which indeed satisfies @eq-2x31. By [**Fundamental theorem of algebra**](https://en.wikipedia.org/wiki/Fundamental_theorem_of_algebra#:~:text=The%20fundamental%20theorem%20of%20algebra,at%20least%20one%20complex%20root.), @eq-2x31 has and only has one solution. Therefore, its solution is $x = -1$. This is a valid reasoning!!
+:::
+:::
+<!-- ----------------------------------------- -->
+
+Then we plugin @eq-SoV into the Laplace's equation:
+$$
+\begin{align*}
+&\nabla^2 (AB) = 0 \\
+\implies\quad &\frac{\partial^2 (AB)}{\partial x^2} + \frac{\partial^2 (AB)}{\partial y^2} = 0 \\
+\implies\quad &A_{xx}(x)B(y) + A(x)B_{yy}(y) = 0 \\
+\implies\quad &\underbrace{\frac{A_{xx}(x)}{A(x)}}_{\text{function of }x} = \underbrace{-\frac{B_{yy}(y)}{B(y)}}_{\text{function of }y}, \quad \forall (x, y) \in [0, p] \times [0, q].
+\end{align*}
+$$
+
+Now here is a very important step, for all point in the rectangle, a function of $x$ equals a function of $y$, always. This means they must be constant functions as shown in @fig-function-of-x-equals-function-of-y.
+
+$$
+\boxed{
+\frac{A_{xx}(x)}{A(x)} = -\frac{B_{yy}(y)}{B(y)} = \text{const} \equiv \lambda.
+}
+$${#eq-lambda}
+
+If we denote the constant as $\lambda$, **this is actually problematic** because $\lambda$ could be different numbers as long as $A_{xx}(x)/A(x)$ and $-B_{yy}(y)/B(y)$ are equal. We will later see that there are countably $\lambda$ values that are available and we shall use **series** to represent the solution.
+
+![A function of $x$ equals a function of $y$ pointwise forces them constant functions](function-of-x-equals-function-of-y.png){#fig-function-of-x-equals-function-of-y}
+
+Now we get two ODEs from @eq-lambda:
+$$
+\begin{cases} A_{xx} = \lambda A \\ 
+B_{yy} = -\lambda B
+\end{cases}
+$${#eq-system-of-ODEs}
+
+Refer to @sec-2nd-order-ode-refresh for the solution of this kind of ODE.
+
+
+## Boundary conditions applied
+
+### Determine the sign of $\lambda$
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false}
+## Claim
+::: {#prp-lambda-claim .callout-prp}
+We claim that:
+$$
+\lambda \le 0.
+$$
+:::
+
+This is because if $\lambda > 0$, 
+$$
+A(x) \in \operatorname{span}_\mathbb{R}\{\cosh(\sqrt{\lambda} x), \sinh(\sqrt{\lambda} x)\}.
+$$
+But hyperbolic functions look like the right graph of @fig-trig-hyp, there is no element in $\operatorname{span}_\mathbb{R}\{\cosh(\sqrt{\lambda} x), \sinh(\sqrt{\lambda} x)\}$ that equals $0$ at both ends of the rectangle. Only periodic sinusoidal functions can do that. 
+
+:::
+<!-- ----------------------------------------- -->
+
+From @prp-lambda-claim, @eq-system-of-ODEs implies
+$$
+\begin{cases} A(x) \in \operatorname{span}_\mathbb{R}\{\cos(\omega x), \sin(\omega x)\} \cup \{\alpha_1 x + \beta_1\} \\
+B(y) \in \operatorname{span}_\mathbb{R}\{\cosh(\omega y), \sinh(\omega y)\} \cup \{\alpha_2 y + \beta_2\}
+\end{cases}
+$${#eq-system-of-ODEs-solution}
+where $-\lambda = \omega^2$
+
+### Determine valid $\lambda$ values
+
+#### Left and right boundary conditions
+
+Let's start with the easier boundary conditions @BC1 and @BC2. 
+
+$A(x)$ in @eq-system-of-ODEs-solution are just sinusoidal functions or linear functions. If we force it to be zero on the edges, all of a sudden $\alpha_1$ and $\beta_1$ should be both zero, and the coefficients before $\cos(\omega x)$ also must be zero, otherwise the function will never be zero at the line $x=0$. Also the horizontal length $p$ must be integer multiple of half period of $\sin(\omega x)$, i.e.,
+$$
+n \cdot \frac{\pi}{\omega} = p, \quad n = 1, 2, 3, \cdots.
+$$
+
+Therefore, there are only countably many valid $\omega$, hence countably many valid $\lambda$:
+$$
+\lambda = -\omega^2 \in \left\{ -\frac{n^2 \pi^2}{p^2} \right\}_{n=1}^\infty.
+$$
+
+So $A(x)$ in @eq-system-of-ODEs-solution is in a subspace:
+$$
+\boxed{
+A(x) \in \operatorname{span}_\mathbb{R}\left\{\sin\left(\frac{n \pi}{p} x\right)\right\}}
+$$
+
+As shown in @fig-mental-picture-A-B, $A(x)$ is like the **harmonics** on a string.
+
+![Mental picture for $A(x)$ and $B(y)$](mental-picture-A-B.png){#fig-mental-picture-A-B}
+
+
+#### Top and bottom boundary conditions
+
+On top and bottom edges, we have the boundary condition (BC3) and (BC4) in @eq-BC. 
+
+$B(y)$ in @eq-system-of-ODEs-solution must obey these boundary conditions. (BC3) in @eq-BC forces $\beta_2 = 0$, and the coefficients before $\cosh(\omega y)$ to be zero. So $B(y)$ in @eq-system-of-ODEs-solution is in a subspace:
+$$
+\boxed{
+B(y) \in \operatorname{span}_\mathbb{R}\left\{\sinh\left(\frac{n \pi}{p} y\right)\right\} \cup \{\alpha_2 y\}}
+$$
+
+### Fourier series for the undetermined coefficients
+
+We have not used the boundary condition (BC4) in @eq-BC yet. Actually, it leads to the introduction to **Fourier series**! Let's write what does $F(x,y)$ looks like up to now:
+$$
+\begin{aligned}
+F(x, y) &= A(x)B(y) \\
+&= c \sin\left(\frac{n \pi}{p} x\right) \sinh\left(\frac{n \pi}{p} y\right) \\
+\text{or } &= c' 0 \cdot y
+\end{aligned}
+$${#eq-Fxy}
+where $c$ depends on the choice of $n$, $n$ can be any positive integer. Now we have a very important claim:
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=false}
+## Claim
+::: {#prp-sum-claim .callout-prp}
+If we add these valid $F$ together, the sum is still valid:
+$$
+\boxed{
+F(x,y) = \sum_{n=1}^\infty c_n \sin\left(\frac{n \pi}{p} x\right) \sinh\left(\frac{n \pi}{p} y\right).}
+$${#eq-Fxy-sum}
+:::
+
+Think about why!? 
+
+Each solution in @eq-Fxy is a solution to the Laplace's equation, right? By the superposition principle, their sum is also a solution to the Laplace's equation!
+:::
+<!-- ----------------------------------------- -->
+
+Here is the most beautiful part: We plugin (BC4) in @eq-BC into @eq-Fxy-sum:
+$$
+F(x, q) = \sum_{n=1}^\infty \underbrace{c_n \sinh\left(\frac{n \pi}{p} q\right)}_{\mathclap{\scriptsize \text{Fourier coefficients of }f(x)}} \sin\left(\frac{n \pi}{p} x\right) = f(x).
+$${#eq-Fxy-BC4}
+
+The $c_n \sinh(n \pi q/p)$ are just constants, which is exactly the **Fourier coefficients** of the function $f(x)$! 
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## Deriving $c_n$ through Fourier analysis
+We know that a real-valued function $f(x)$ of period $T$ could be decomposed as:
+$$
+f(x) = a_0 + \sum_{n=1}^\infty a_n \cos(n \omega_0 x) + \sum_{n=1}^\infty b_n \sin(n \omega_0 x),
+$${#eq-Fourier-series}
+where
+$$
+\begin{cases}
+a_n &= \frac{2}{T} \langle f, \cos(n \omega_0 x) \rangle \\
+b_n &= \frac{2}{T} \langle f, \sin(n \omega_0 x) \rangle \\
+a_0 &= \frac{1}{T} \langle f, 1 \rangle.
+\end{cases}
+$${#eq-real-fourier-coefficients}
+
+We consider the function $f(x)$ to be a periodic function with period $T=2p$ (not $p$) since we need
+$$
+\omega_0 = \frac{\pi}{p}.
+$$ 
+
+Now we know that all $a_n = 0$. Compare @eq-real-fourier-coefficients with @eq-Fxy-BC4,
+$$
+b_n = \frac{2}{2p} \left\langle f, \sin\left(\frac{n \pi}{p}x\right) \right\rangle = c_n \sinh\left(\frac{n \pi}{p} q\right).
+$$
+Solve for $c_n$:
+$$
+\begin{aligned}
+c_n &= \frac{1}{p \sinh\left(\frac{n \pi}{p} q\right)} \left\langle f, \sin\left(\frac{n \pi}{p}x\right) \right\rangle \\
+&= \frac{1}{p \sinh\left(\frac{n \pi}{p} q\right)} \int_0^{2p} f(x) \sin\left(\frac{n \pi}{p}x\right) \mathrm{d}x \\
+&= \frac{2}{p \sinh\left(\frac{n \pi}{p} q\right)} \int_0^{p} f(x) \sin\left(\frac{n \pi}{p}x\right) \mathrm{d}x.
+\end{aligned}
+$$
+
+:::
+<!-- ----------------------------------------- -->
+
+## Conclusion
+
+The solution to the simplified boundary condition subproblem is:
+$$
+F(x,y) = \sum_{n=1}^\infty c_n \sin\left(\frac{n \pi}{p} x\right) \sinh\left(\frac{n \pi}{p} y\right),
+$${#eq-Fxy-solution}
+
+where $c_n$ satisfies:
+$$
+c_n = \frac{2}{p \sinh\left(\frac{n \pi}{p} q\right)} \int_0^{p} f(x) \sin\left(\frac{n \pi}{p}x\right) \mathrm{d}x.
+$$
+
+By the superposition principle (shown in @fig-linearity-simplifies), the solution to the original problem is the linear combination of the solutions in the form of @eq-Fxy-solution.
+
+## 2nd-order ODE Refresh {.appendix #sec-2nd-order-ode-refresh}
+
+### Complex domain solution
+
+Consider the following 2nd-order ODE:
+$$
+\ddot{x} = \lambda x,
+$${#eq-2nd-order-ode}
+where $x(t) \in \mathbb{C}, \lambda \in \mathbb{R}$. What function satisfies this special property that if we differentiate it twice, we get itself up to a constant? Exponentials! So we guess:
+$$
+x(t) = e^{rt}
+$$
+with
+$$
+r = \pm \sqrt{\lambda}.
+$$
+
+Therefore, the general solution to @eq-2nd-order-ode is:
+$$
+x(t) = c_1 e^{\sqrt{\lambda} t} + c_2 e^{-\sqrt{\lambda} t},
+$${#eq-complex-solution}
+where $c_1, c_2 \in \mathbb{C}$ are constants. Done!
+
+We can use different notation according to the sign of $\lambda$:
+
+1. $\lambda < 0$: Let $-\lambda = \omega^2$, then @eq-complex-solution can also be written as:
+    $$
+    x(t) = c_1' \cos(\omega t) + c_2' \sin(\omega t) \quad (c_1', c_2' \in \mathbb{C})
+    $${#eq-sol-trig}
+    since
+    $$
+    \operatorname{span}_\mathbb{C}\{e^{i\omega t}, e^{-i\omega t}\} = \operatorname{span}_\mathbb{C}\{\cos(\omega t), \sin(\omega t)\}
+    $$
+
+2. $\lambda > 0$: Let $\lambda = a^2$, then @eq-complex-solution can also be written as:
+    $$
+    x(t) = c_1'' \cosh(at) + c_2'' \sinh(at) \quad (c_1'', c_2'' \in \mathbb{C})
+    $${#eq-sol-hyp}
+    since
+    $$
+    \operatorname{span}_\mathbb{C}\{e^{at}, e^{-at}\} = \operatorname{span}_\mathbb{C}\{\cosh(at), \sinh(at)\}.
+    $$
+
+3. $\lambda = 0$: 
+
+$$
+\begin{align*}
+&\ddot{x} = 0 \\
+\implies\quad &\dot{x} = \alpha \\
+\implies\quad &x(t) = \alpha x + \beta
+\end{align*}
+$$
+
+
+![The graph of trigonometric and hyperbolic functions](trig-hyp.png){#fig-trig-hyp}
+
+### Real domain solution
+
+The solution of @eq-2nd-order-ode when $x(t)$ is confined to $\mathbb{R}$ is very simple. One just need to confine $c_1', c_2'$ in @eq-sol-trig and $c_1'', c_2''$ in @eq-sol-hyp to $\mathbb{R}$:
+$$
+x(t) = c_1 \cos(\omega t) + c_2 \sin(\omega t) \quad (\lambda < 0, -\lambda = \omega^2, c_1, c_2 \in \mathbb{R})
+$$
+and
+$$
+x(t) = c_1 \cosh(at) + c_2 \sinh(at) \quad (\lambda > 0, \lambda = a^2, c_1, c_2 \in \mathbb{R}).
+$$
+
+<!-- <iframe title="VisualPDE simulation" style="border:0;width:100%;height:100%;" src="https://visualpde.com/sim/?options=N4IgRgqiBcIMYHsC2YEgDTgE4xABgDoAmDeAZylgCEEAXW5aAAgBEBLLNuACwBsBTWkwC8TPAG4mAGX4AzWs3aceAoaIlMASmwDm3Baw5c+gkWMkAVBAAdFRladEBmAFQAKQgBYXZNgDs3azYXAA8mAHomAFYASiYAWjFiH383byDQiOi4xMIARhSAgA4XDLDI2KYAaiSiQrc8gDZS4PLsmPFSABMIShA87oA1Qdw8boB1cdHuvpJMLrJcKO7aGEI8PCJMOD6xzCR-AA1pzD8YPNOLc8xrXABhAFcyBiRSaywEMH4AMQez2CuNw+Xxkfh0tG4MCcG0wWF2pCwI1gexAWCmyNIZFuyIIeU8nkx-xAgJAADcYABtUAAQywHwA7ncELwEA8cNBGlEok4ophaQyWPw-L5aABPNYEXkgfkIemg8HcACy1JCuAGfLpsoAynBqQJcNSHgxSDL6cdYFIAPohcJEBJMVUahkATVwVtFtvt4r5RoQWsETJZbM01LB-Bgsj1ZH422pSH4WGpFm4gmpULwsfjiYACtw2OnMwnqQAtBDICVFbbM1lYJDU7EgWhs1CkRBBrBgWkRqMx+AIPwMNmLaCR3jRqsDmuBmtrCeDrAAUWsvhZ-3WFz7k7ZADkHq9oFK4E8Xlq2ZG4OGRz3MPwUAgyMPR+OQLfUA+AIIoNhC1bQQhS197zIdhZFkJ5L0IRobzvB9c3zaA8klAB2PBKxfGCyC1PM-HFBCM3Qt9MKQMsIT8fgHwlLYCKArVrH4I9eC7P9iGgwjk1TCUkKKKJPEwWReDYaw6K6ac2TrbEn17ASyPGNgughRUHl4a4QDrEJRMRPUHkvfoCBRA4-A0wYtJ09ZSAQUkE0Y3DJMwCyrOpUUNNnEB7KwaylxXfsJQ2KU3I8kJ3jVczLPcxypH8fhZPkpUlJU6wWVoCxRTo3AEtDcMgU+fwdG7Mde3eT4fj+XASUKkEhQVdN8PK-hktS2B-FofgdETZSsq+c18DeYF+FdDFMDIM9qQvX4iRRCEsH4fgWAACX4XR9B1PUIIIJDMEsuAGCwb5v14Lo8ufeluGpJKEGzRLStIPw4x0gASCw7pAABfdAaU1RlqzZGBOW5KVTUFYU2DFCV-o++UFJVUY9IJJ1tV1fVYCmxjaDYSyTQ+rr4gsa0MZdXBsctb1pV9f1aA0kMw0O3tdSzJMU1oNNoGhQsczzAt4FuxNS3LZi0LbGtxNwCEEzrdq+3bTt2Vszd50fa9ZanL72XwxAt0XZc2FXHyNzV+dd33Q9j2QU8sHPS8ZcAiir3y1igM-MBvwHUG7YfECwOjCUoOo2D2YQ5DUNdzDsNwvJ8KtoiSO4MjrcIKiI9o+ilKYuOg-YxnOO43iQH4wThI0oXoFoLBtMwaSorkhS4oQ-YVSMky1T00gDPr3htOhlF-Mc6m7NC6znL-XuHNFTyte85jfKHsKR8C9l+hC4eIpkyvYuUmuQASuh6p09KyJ67KwR7jferGq6Ov4CHIWZmFj6K7fcCalq2v3zqTlvr5+u6wbhtGkqBsbbgU0ZrzUWrQZaiNCDrTJPRbau1+D7RgMXUuIBjqnSsBdOgZ8QA3XjLgB6d0mChi6EwO6AAdUhN0wCMSYI9F6ABdTA9IDoAlIPSBsJJfBIAsMDRGIB5qnSYPwAAjg8U6bBvLPSAA" frameborder="0"></iframe> -->

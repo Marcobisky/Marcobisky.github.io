@@ -137,7 +137,16 @@ Convolution also makes the above four vector spaces (commutative) **algebras**[^
 
 
 
-## Complete Orthonormal Basis in $V$
+## Complete Orthonormal Basis in $V$ {#sec-complete-orthonormal-basis}
+
+There are two types of basis in $V$: **Standard basis** and **exponential basis**. 
+
+| Vector Space (Time) | Standard Basis $\{e_k\}$ | Exponential Basis $\{\hat{e}_k\}$ |
+|---------------------------|---------------------------------|--------------------------------------------------|
+| $\mathbb{C}^N$           | $\{\delta_k\}_{k=0}^N$ | $\{\frac{1}{\sqrt{N}}e^{i \frac{2\pi}{N}k}\}_{k=0}^{N-1}$ |
+| $\mathcal{L}^2(\mathbb{S}^1)$ | $\mathbb{S}^1 \to \mathbb{C}$ | Square-integrable signals on $\mathbb{S}^1$ |
+| $\mathcal{L}^2(\mathbb{Z})$  | $\mathbb{Z} \to \mathbb{C}$ | Square-integrable signals on $\mathbb{Z}$ |
+| $\mathcal{S}'(\mathbb{R})$   | $\mathbb{R} \to \mathbb{C}$ | Tempered distributions on $\mathbb{R}$ |
 
 ### Standard basis
 
@@ -208,7 +217,71 @@ Elements in $\mathcal{E}_{i\mathbb{R}}$ and $\mathcal{E}_{\mathbb{Z}_m}$ are als
 
 ## Change of Basis and Linear Transformations
 
-The whole story of Fourier theory for engineers starts with the change of basis in a particular vector space $V$. Basis appeared in the context of **vector spaces**, so it's extremely important to keep the underlying vector space at the back of our mind (shown in @fig-fourier-types) when doing Fourier analysis.
+Having discussed the two kinds of basis (standard basis and exponential basis) in $V$, we are ready to find the coordinates of a signal $x \in V$ with respect to the two kinds of basis. The switch between them is exactly the **Fourier transform**[^fourier-transform]. 
 
+[^fourier-transform]: The whole story of Fourier theory for engineers starts with the change of basis in a particular vector space $V$. Basis appeared in the context of **vector spaces**, so it's extremely important to keep the underlying vector space at the back of our mind (shown in @fig-fourier-types) when doing Fourier analysis.
 
+### DTFS $(\mathbb{C}^N \leftrightarrow \mathbb{C}^N)$
 
+Suppose $x \in V=\mathbb{C}^N$, it can be written in two ways:
+$$
+x_0 e_0 + x_1 e_1 + x_2 e_2 + \cdots + x_{N-1} e_{N-1} = \hat{x}_0 \hat{e}_0 + \hat{x}_1 \hat{e}_1 + \hat{x}_2 \hat{e}_2 + \cdots + \hat{x}_{N-1} \hat{e}_{N-1}.
+$${#eq-dtfs}
+
+In matrix notation,
+$$
+\begin{aligned}
+\begin{pmatrix}
+| & | & \cdots & | \\
+| & | & \cdots & | \\
+e_0 & e_1 & \cdots & e_{N-1} \\
+| & | & \cdots & | \\
+| & | & \cdots & |
+\end{pmatrix}
+\begin{pmatrix}
+x_0 \\ x_1 \\ x_2 \\ \vdots \\ x_{N-1}
+\end{pmatrix}
+&=
+\begin{pmatrix}
+| & | & \cdots & | \\
+| & | & \cdots & | \\
+\hat{e}_0 & \hat{e}_1 & \cdots & \hat{e}_{N-1} \\
+| & | & \cdots & | \\
+| & | & \cdots & |
+\end{pmatrix}
+\begin{pmatrix}
+\hat{x}_0 \\ \hat{x}_1 \\ \hat{x}_2 \\ \vdots \\ \hat{x}_{N-1}
+\end{pmatrix} \\
+
+\begin{pmatrix}
+1 & 0 & 0 & \cdots & 0 \\ 
+0 & 1 & 0 & \cdots & 0 \\
+0 & 0 & 1 & \cdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & 0 & 0 & \cdots & 1
+\end{pmatrix}
+\begin{pmatrix}
+x_0 \\ x_1 \\ x_2 \\ \vdots \\ x_{N-1}
+\end{pmatrix}
+&=
+\frac{1}{\sqrt{N}}
+\begin{pmatrix}
+1 & 1 & 1 & \cdots & 1 \\
+1 & (\zeta^1)^1 & (\zeta^2)^1 & \cdots & (\zeta^{N-1})^1 \\
+1 & (\zeta^1)^2 & (\zeta^2)^2 & \cdots & (\zeta^{N-1})^2 \\
+\vdots & \vdots & \vdots & \ddots & \vdots \\
+1 & (\zeta^1)^{N-1} & (\zeta^2)^{N-1} & \cdots & (\zeta^{N-1})^{N-1}
+\end{pmatrix}
+\begin{pmatrix}
+\hat{x}_0 \\ \hat{x}_1 \\ \hat{x}_2 \\ \vdots \\ \hat{x}_{N-1}
+\end{pmatrix}
+\end{aligned}
+$$
+where $\zeta = e^{i \frac{2\pi}{N}}$ is the $N$-th root of unity. 
+
+### CTFS $(\mathcal{L}^2(\mathbb{S}^1) \leftrightarrow \ell^2(\mathbb{Z}))$
+
+Suppose $x \in V=\mathcal{L}^2(\mathbb{S}^1)$, similar to @eq-dtfs, we have
+$$
+x(\theta) = \sum_{k \in \mathbb{Z}} \hat{x}[k] e^{i k \theta} = \sum_{k \in \mathbb{Z}} x[k] e_k(\theta).
+$${#eq-ctfs}
