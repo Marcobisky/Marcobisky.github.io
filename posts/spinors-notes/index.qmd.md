@@ -71,15 +71,15 @@ The set of all Pauli vectors is denoted by $\text{Herm}_0(2, \mathbb{C})$. Whatâ
 
 The correspondence is given in the 
 
-|| $\mathbb{R}^3$ | $\text{Herm}_0(2, \mathbb{C})$| $\Im(\mathbb{H})$ |
-|----------------------|----------------------------------------------|-------------------------------------------------|----------------------|
-| **Decomposition** | $v = v^ie_i$ | $H_v = v^i \sigma_i$ | $q_v = v^1 \mathbf{i} + v^2 \mathbf{j} + v^3 \mathbf{k}$ |
-| **Basis vectors** | $\{e_i\}=\left\{ \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} \right\}$ | $\{\sigma_i\}=\left\{\begin{pmatrix} 0 & 1 \\ 1 & 0 \\\end{pmatrix},\begin{pmatrix} 0 & -i \\ i & 0 \\\end{pmatrix},\begin{pmatrix} 1 & 0 \\ 0 & -1 \\\end{pmatrix} \right\}$ | $\{\mathbf{i}, \mathbf{j}, \mathbf{k}\}$ |
-| **Norm** | $\lVert v \rVert = \sqrt{v_1^2 + v_2^2 + v_3^2}$ | $\lVert H_v \rVert = \sqrt{ \frac{1}{2} \mathrm{Tr}(H_v^2) }$ | $\lVert q \rVert = q\bar{q}$ |
-| **Inner product** | $\langle \vec{v}, \vec{w} \rangle = v^iw^i$ | $\langle H_v, H_w \rangle = \frac{1}{2} \mathrm{Tr}(H_vH_w)$ | $\langle q_v, q_w \rangle = -\Re(q_vq_w)$ |
-| **Lie bracket** | $\vec{v} \times \vec{w}$ | $[H_v, H_w] := -i(H_vH_w - H_wH_v)$ | $\Im(q_vq_w)$ |
-| **Lie bracket on basis** | $e_i \times e_j = \epsilon_{ijk} e_k$ | $[\sigma_i, \sigma_j] = 2i\epsilon_{ijk} \sigma_k$ | $\mathbf{i} \times \mathbf{j} = \mathbf{k}$ |
-| **Rotation** | $v \mapsto \underbrace{\begin{bmatrix} && \\ & SO(3) &\\&& \\\end{bmatrix}}_{\mathclap{\text{\scriptsize columns: new basis coor.}}} v$ | $H_v \mapsto \underbrace{\biggl(SU(2)\biggl)}_{\mathclap{\scriptsize \pm \left(\cos \frac{\theta}{2} I+i\sin \frac{\theta}{2} (H_{\text{axis}})\right)}} H_v \biggl(SU(2)\biggl)^\dagger$ | $q_v \mapsto \underbrace{u}_{\mathclap{\scriptsize \pm \left(\cos \frac{\theta}{2} + \sin \frac{\theta}{2} (q_{\text{axis}}) \right)}} q_v \bar{u}, u \in U(\mathbb{H})$ |
+|| $\mathbb{R}^3$ | $\text{Herm}_0(2, \mathbb{C})$| $\mathfrak{su}(2)$ | $\Im(\mathbb{H})$ | $\mathfrak{so}(3)$ |
+|----------------------|----------------------------------------------|-------------------------------------------------|----------------------|-------------------|-------------------|
+| **Decomposition** | $v = v^ie_i$ | $H_v = v^i \sigma_i$ | | $q_v = v^1 \mathbf{i} + v^2 \mathbf{j} + v^3 \mathbf{k}$ |
+| **Basis vectors** | $\{e_i\}=\left\{ \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 1 \\ 0 \end{bmatrix}, \begin{bmatrix} 0 \\ 0 \\ 1 \end{bmatrix} \right\}$ | $\{\sigma_i\}=\left\{\begin{pmatrix} 0 & 1 \\ 1 & 0 \\\end{pmatrix},\begin{pmatrix} 0 & -i \\ i & 0 \\\end{pmatrix},\begin{pmatrix} 1 & 0 \\ 0 & -1 \\\end{pmatrix} \right\} \\ \text{(Pauli matrices)}$ | $\{u_i\}=\left\{\begin{pmatrix} 0 & i \\ i & 0 \\\end{pmatrix},\begin{pmatrix} 0 & -1 \\ 1 & 0 \\\end{pmatrix},\begin{pmatrix} i & 0 \\ 0 & -i \\\end{pmatrix} \right\}$ | $\{\mathbf{i}, \mathbf{j}, \mathbf{k}\}$ |
+| **Norm** | $\lVert v \rVert = \sqrt{v_1^2 + v_2^2 + v_3^2}$ | $\lVert H_v \rVert = \sqrt{ \frac{1}{2} \mathrm{Tr}(H_v^2) }$ | | $\lVert q \rVert = q\bar{q}$ |
+| **Inner product** | $\langle \vec{v}, \vec{w} \rangle = v^iw^i$ | $\langle H_v, H_w \rangle = \frac{1}{2} \mathrm{Tr}(H_vH_w)$ | | $\langle q_v, q_w \rangle = -\Re(q_vq_w)$ |
+| **Lie bracket** | $\vec{v} \times \vec{w}$ | $[H_v, H_w] := -i(H_vH_w - H_wH_v)$ | | $\Im(q_vq_w)$ |
+| **Lie bracket on basis** | $e_i \times e_j = \epsilon_{ijk} e_k$ | $[\sigma_i, \sigma_j] = 2i\epsilon_{ijk} \sigma_k$ | | $\mathbf{i} \times \mathbf{j} = \mathbf{k}$ |
+| **Rotation** | $v \mapsto \underbrace{\begin{bmatrix} && \\ & SO(3) &\\&& \\\end{bmatrix}}_{\mathclap{\text{\scriptsize columns: new basis coor.}}} v$ | $H_v \mapsto \underbrace{\biggl(SU(2)\biggl)}_{\mathclap{\scriptsize \pm \left(\cos \frac{\theta}{2} I+i\sin \frac{\theta}{2} (H_{\text{axis}})\right)}} H_v \biggl(SU(2)\biggl)^\dagger$ | | $q_v \mapsto \underbrace{u}_{\mathclap{\scriptsize \pm \left(\cos \frac{\theta}{2} + \sin \frac{\theta}{2} (q_{\text{axis}}) \right)}} q_v \bar{u}, u \in U(\mathbb{H})$ |
 
 
 

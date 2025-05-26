@@ -51,3 +51,14 @@ From our experience in [hyperlinks], an introduction to *fields* could make it m
     \mathbf{\hat{F}} &= \operatorname{sign}(q) \mathbf{\hat{v}} \times \mathbf{\hat{B}}.
     \end{aligned}
     $$
+
+
+$$
+\mathbf{P} = \lim_{V_0 \to 0} \frac{\int_{V_0} \rho \mathbf{r} \mathrm{d}V}{V_0}
+$$
+
+$$
+\operatorname{div} \mathbf{P} = \lim_{V_0 \to 0} \frac{\int_{V_0} \rho \operatorname{div}\mathbf{r} \mathrm{d}V}{V_0}
+$$
+
+$M = \mathbb{R}^n$ and $S^1$
