@@ -55,13 +55,6 @@ div.csl-indent {
 <script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="index_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
-<script>
-  MathJax = {
-    tex: {
-      tags: 'ams'  // should be 'ams', 'none', or 'all'
-    }
-  };
-</script>
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
@@ -106,6 +99,7 @@ window.Quarto = {
 <h1 class="title">Electromagnetism 速成笔记</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Physics</div>
+    <div class="quarto-category">Crash-Course</div>
   </div>
   </div>
 
@@ -140,12 +134,18 @@ window.Quarto = {
 </header>
 
 
+<blockquote class="blockquote">
+<p>本笔记是本人电子科技大学格院大三《电磁场与波》课程的期末考试复习笔记, 遵循个人学习习惯与轨迹, 不保证严谨性和绝对正确性.</p>
+</blockquote>
 <section id="vector-analysis-向量分析" class="level2">
 <h2 class="anchored" data-anchor-id="vector-analysis-向量分析">Vector Analysis 向量分析</h2>
 <section id="vector-operations-向量运算" class="level3">
 <h3 class="anchored" data-anchor-id="vector-operations-向量运算">Vector operations 向量运算</h3>
 <ul>
-<li><p>三叉乘 BAC-CAB rule: <span class="math display">\[
+<li><p><strong>Mixed product 混合积</strong>: <span class="math display">\[
+  \mathbf{a} \cdot (\mathbf{b} \times \mathbf{c}) = \mathbf{b} \cdot (\mathbf{c} \times \mathbf{a}) = \mathbf{c} \cdot (\mathbf{a} \times \mathbf{b})
+  \]</span></p></li>
+<li><p><strong>BAC-CAB rule 三叉乘 BACK-CAB 规则</strong>: <span class="math display">\[
 \begin{aligned}
   \mathbf{a} \times (\mathbf{b} \times \mathbf{c}) &amp;= \mathbf{b} (\mathbf{a} \cdot \mathbf{c}) - \mathbf{c} (\mathbf{a} \cdot \mathbf{b}) \\
   \nabla \times (\nabla \times \mathbf{A}) &amp;= \nabla (\nabla \cdot \mathbf{A}) - \nabla^2 \mathbf{A} \\
@@ -154,6 +154,41 @@ window.Quarto = {
 <ul>
 <li><p><span class="math inline">\(\mathbf{a} \times (\mathbf{b} \times \mathbf{c})\)</span> 的结果在 <span class="math inline">\(\mathbf{a}\)</span> 和 <span class="math inline">\(\mathbf{b}\)</span> 的平面内.</p></li>
 <li><p>三叉乘操作等价于先投影 <span class="math inline">\(\mathbf{a}\)</span> 再旋转 <span class="math inline">\(90^\circ\)</span>: <img src="bac-cab.png" id="fig-bac-cab" class="img-fluid" style="width:50.0%"></p></li>
+<li><p><span class="math inline">\(\nabla^2 \neq \nabla \times \nabla\)</span>: 当 <span class="math inline">\(\nabla^2\)</span> 作用在向量场时, 约定为作用在向量场的每个分量上.</p></li>
+<li><p>为什么引入 <span class="math inline">\(\nabla^2\)</span> 对向量场的作用? 因为 <span class="math inline">\(\nabla^2\)</span> 是<strong>二阶导</strong>的自然高维推广 而不是 <span class="math inline">\(\nabla \times \nabla\)</span>. 用 <span class="math inline">\(\nabla^2\)</span> 列出的方程的每个分量一般就是二阶 PDE.</p></li>
+</ul></li>
+</ul>
+</section>
+<section id="sec-vector-fields" class="level3">
+<h3 class="anchored" data-anchor-id="sec-vector-fields">Vector fields 向量场</h3>
+<ul>
+<li><p><strong>约定</strong>: 标量场是 <span class="math inline">\(0\)</span>-form, 向量场是 <span class="math inline">\(1\)</span>-form, 只考虑三维向量场 <span class="math inline">\(\omega: \mathbb{R}^3 \to \mathbb{R}^3\)</span>.</p></li>
+<li><p><strong>Gradient, curl, divergence 梯度, 旋度, 散度</strong>: 都可看作某种导数:「外微分算子」. <img src="exterior-derivative.png" class="img-fluid"></p>
+<ul>
+<li>旋度计算: 用 symbolic 叉乘 (掐头去尾取中间)</li>
+</ul></li>
+<li><p>外微分算子的 <strong>Exact 正和性</strong> 与 <strong>Poincaré’s lemma 庞加莱引理</strong>:</p>
+<ul>
+<li><p><strong>Exact 正和性</strong> <span class="math inline">\(\mathrm{d}^2 = 0\)</span>: <strong>梯度无旋, 旋度无散</strong>. <img src="long-exact-sequence.png" class="img-fluid" alt="外微分算子的长正和列"></p></li>
+<li><p><strong>Poincaré’s lemma 庞加莱引理</strong>: <strong>闭形式一定是恰当形式</strong>, 即无旋场一定是梯度场, 无散场一定是旋度场.</p></li>
+<li><p><strong>Potential 势函数</strong>:</p>
+<ul>
+<li>若恰当形式 <span class="math inline">\(\alpha = \mathrm{d}\beta\)</span>, 则称 <span class="math inline">\(\beta\)</span> 是 <span class="math inline">\(\alpha\)</span> 的 <strong>(矢)势</strong> (比如磁场, <span class="math inline">\(\alpha = \mathbf{B}\)</span>, <span class="math inline">\(\beta = \mathbf{A}\)</span>)</li>
+<li>若恰当形式 <span class="math inline">\(\alpha = -\mathrm{d}\beta\)</span>, 则称 <span class="math inline">\(\beta\)</span> 是 <span class="math inline">\(\alpha\)</span> 的 <strong>(标量)势</strong> (比如电场, <span class="math inline">\(\alpha = \mathbf{E}\)</span>, <span class="math inline">\(\beta = \varphi\)</span>)</li>
+</ul></li>
+<li><p><strong>恰当形式是不唯一的</strong>, 不同的恰当形式之间相差一个 <strong>Gauge</strong>:</p>
+<ul>
+<li>若 <span class="math inline">\(\mathbf{B} = \nabla \times \mathbf{A}\)</span>, 则 <span class="math inline">\(\mathbf{A} + \nabla \psi\)</span> 也是 <span class="math inline">\(\mathbf{B}\)</span> 的磁势.</li>
+<li>若 <span class="math inline">\(\mathbf{E} = -\nabla \varphi\)</span>, 则 <span class="math inline">\(\varphi + c\)</span> 也是 <span class="math inline">\(\mathbf{E}\)</span> 的电势.</li>
+<li>不同的 <span class="math inline">\(\psi\)</span> 和 <span class="math inline">\(c\)</span> 称为不同的 <strong>Gauge</strong> (e.g.&nbsp;Coulomb gauge, Lorenz gauge).</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Stokes’ theorem 广义斯托克斯定理</strong>: 即 <strong>Newton–Leibniz theorem 牛顿-莱布尼茨定理</strong> 的推广, <span class="math inline">\(\omega\)</span> 在流形 <span class="math inline">\(M\)</span> 边界上的积分等于 <span class="math inline">\(\mathrm{d}\omega\)</span> 在 <span class="math inline">\(M\)</span> 内部的积分: <span class="math display">\[
+  \int_{\partial M} \omega = \int_M \mathrm{d}\omega
+  \]</span></p>
+<ul>
+<li>特例: <strong>Gauss’s 定理</strong> 和 <strong>Green’s 定理</strong>.</li>
+<li>Stokes’ 定理可从积分形式的 Maxwell 方程推导出其微分形式, 反之亦然.</li>
 </ul></li>
 </ul>
 </section>
@@ -163,7 +198,9 @@ window.Quarto = {
 <section id="conduction-current-传导电流" class="level3">
 <h3 class="anchored" data-anchor-id="conduction-current-传导电流">Conduction current 传导电流</h3>
 <ul>
-<li><p>因电荷运动产生的电流. 每秒通过指定截面的电荷量 <span class="math display">\[I := \frac{\mathrm{d}q}{\mathrm{d}t}.\]</span></p></li>
+<li>因电荷运动产生的电流. 每秒通过指定截面的电荷量<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> <span class="math display">\[I = \frac{\mathrm{d}q}{\mathrm{d}t}.\]</span></li>
+</ul>
+<ul>
 <li><p><strong>Current density 电流密度</strong>: 每秒通过单位截面的电荷量 <span class="math display">\[|\mathbf{j}| := \frac{I}{A}.\]</span></p></li>
 <li><p>传导电流产生静磁场, 可由以下关系描述:</p>
 <p><span class="math display">\[
@@ -184,7 +221,7 @@ window.Quarto = {
 <li><p>两种完全不同的机制 <a href="#fig-faraday" class="quarto-xref">Figure&nbsp;1</a> <span class="citation" data-cites="griffiths_2017_introduction">[<a href="#ref-griffiths_2017_introduction" role="doc-biblioref">1</a>]</span>:</p>
 <ul>
 <li><ol type="a">
-<li><strong>Lorentz force 洛伦兹力</strong> (“切割磁感线”): <span class="math display">\[
+<li><strong>Lorentz force 洛伦兹力</strong> (「切割磁感线」): <span class="math display">\[
   \begin{aligned}
   \mathbf{F} &amp;= q \mathbf{v} \times \mathbf{B} \\
   &amp;= q \mathbf{E} \\
@@ -208,7 +245,7 @@ Figure&nbsp;1: 法拉第做的三个实验
 </figcaption>
 </figure>
 </div></li>
-<li><p>但这两种机制都产生了 <strong>EMF</strong>, 且都可以用磁通量的变化来描述: <span class="math display">\[\mathcal{E} = \operatorname{Flow}_C (\mathbf{E}) = -\frac{\mathrm{d}\Phi}{\mathrm{d}t}.\]</span> 这个巧合直接导致了<strong>狭义相对论</strong>的出现!</p></li>
+<li><p>但这两种机制都产生了 <strong>EMF</strong>, 且都可以用「磁通量的变化」来描述: <span class="math display">\[\mathcal{E} = \operatorname{Flow}_C (\mathbf{E}) = -\frac{\mathrm{d}\Phi}{\mathrm{d}t}.\]</span> 这个巧合直接导致了<strong>狭义相对论</strong>的出现!</p></li>
 </ul>
 </section>
 </section>
@@ -216,12 +253,15 @@ Figure&nbsp;1: 法拉第做的三个实验
 <h2 class="anchored" data-anchor-id="maxwells-equations-麦克斯韦方程组">Maxwell’s Equations 麦克斯韦方程组</h2>
 <section id="without-magnetic-monopoles-没有磁单极子" class="level3">
 <h3 class="anchored" data-anchor-id="without-magnetic-monopoles-没有磁单极子">Without magnetic monopoles 没有磁单极子</h3>
-<p><span class="math display">\[\begin{align}
-    \nabla \cdot \mathbf{D} &amp;= \rho_f \label{eq:1} \\
-    \nabla \cdot \mathbf{B} &amp;= 0 \label{eq:2} \\
-    \nabla \times \mathbf{E} &amp;= -\frac{\partial \mathbf{B}}{\partial t} \label{eq:3} \\
-    \nabla \times \mathbf{H} &amp;= \mathbf{j}_f + \frac{\partial \mathbf{D}}{\partial t} \label{eq:4} \\
-\end{align}\]</span></p>
+<p><span id="eq-maxwell-1"><span class="math display">\[
+\nabla \cdot \mathbf{D} = \rho_f
+\tag{1}\]</span></span> <span id="eq-maxwell-2"><span class="math display">\[
+\nabla \cdot \mathbf{B} = 0
+\tag{2}\]</span></span> <span id="eq-maxwell-3"><span class="math display">\[
+\nabla \times \mathbf{E} = -\frac{\partial \mathbf{B}}{\partial t}
+\tag{3}\]</span></span> <span id="eq-maxwell-4"><span class="math display">\[
+\nabla \times \mathbf{H} = \mathbf{j}_f + \frac{\partial \mathbf{D}}{\partial t}
+\tag{4}\]</span></span></p>
 </section>
 <section id="with-magnetic-monopoles-有磁单极子" class="level3">
 <h3 class="anchored" data-anchor-id="with-magnetic-monopoles-有磁单极子">With magnetic monopoles 有磁单极子</h3>
@@ -233,29 +273,191 @@ Figure&nbsp;1: 法拉第做的三个实验
     \nabla \times \mathbf{H} &amp;= \mathbf{j}_f + \frac{\partial \mathbf{D}}{\partial t} \\
 \end{cases}
 \]</span></p>
+<ul>
+<li><span class="math inline">\(\rho_{mf}\)</span>: 自由磁荷密度, <span class="math inline">\(\mathbf{j}_{mf}\)</span>: 自由磁流密度</li>
+</ul>
 </section>
 <section id="potential-functions-势函数的麦克斯韦方程组" class="level3">
 <h3 class="anchored" data-anchor-id="potential-functions-势函数的麦克斯韦方程组">Potential functions 势函数的麦克斯韦方程组</h3>
-<p>sdfsdfsd fs df s d fs dfsd</p>
-<p>sd f ds</p>
-<p>sdfsd</p>
-<p>sd fs df sd f sd fsd f sd</p>
-<p>sd</p>
-<p>sd fs d s d f d fs d</p>
-<p>s d fs</p>
-<p>s s</p>
-<p>s</p>
-<p>s s s</p>
-<p>See Equation <span class="math inline">\(\eqref{eq:1}\)</span> to <span class="math inline">\(\eqref{eq:4}\)</span>.</p>
+<ul>
+<li><p>我们希望通过引入<strong>势函数</strong>来将 Maxwell 方程变成只有两个.</p></li>
+<li><p>由 <span class="math inline">\(\mathbf{B}\)</span> 的无散性 (<a href="#eq-maxwell-2" class="quarto-xref">Equation&nbsp;2</a>) 可引入<strong>磁势</strong> <span class="math inline">\(\mathbf{A}\)</span>, 代入到 <a href="#eq-maxwell-3" class="quarto-xref">Equation&nbsp;3</a> 由 <span class="math inline">\(\mathbf{E}+\frac{\partial \mathbf{A}}{\partial t}\)</span> 的无旋性可引入<strong>电势</strong> <span class="math inline">\(\phi\)</span>. 则中间两个式子变成了: <span id="eq-potential-def"><span class="math display">\[
+  \begin{cases}
+      \nabla \cdot \mathbf{B} &amp;= 0 \\
+      \nabla \times \mathbf{E} &amp;= -\frac{\partial \mathbf{B}}{\partial t}
+  \end{cases}
+  \implies
+  \boxed{
+  \begin{cases}
+      \mathbf{B} &amp;=: \nabla \times \mathbf{A} \\
+      \mathbf{E} &amp;=: -\frac{\partial \mathbf{A}}{\partial t} - \nabla \varphi
+  \end{cases}
+  }
+   \tag{5}\]</span></span> <a href="#eq-potential-def" class="quarto-xref">Equation&nbsp;5</a> 始终成立, 与 Gauge 无关.</p></li>
+<li><p>用 <a href="#eq-potential-def" class="quarto-xref">Equation&nbsp;5</a> 将 <a href="#eq-maxwell-1" class="quarto-xref">Equation&nbsp;1</a> 和 <a href="#eq-maxwell-4" class="quarto-xref">Equation&nbsp;4</a> 的 <span class="math inline">\(\mathbf{D}\)</span> 和 <span class="math inline">\(\mathbf{H}\)</span> 替换掉, 得到 <strong>D’Alembert 方程</strong>: <span id="eq-d-alembert"><span class="math display">\[
+  \begin{cases}
+      \nabla \cdot \mathbf{D} &amp;= \rho_f \\
+      \nabla \times \mathbf{H} &amp;= \mathbf{j}_f + \frac{\partial \mathbf{D}}{\partial t}
+  \end{cases}
+  \implies
+  \begin{cases}
+      \epsilon \mu \frac{\partial^2 \varphi}{\partial t^2} - \nabla^2 \varphi &amp;= \frac{1}{\epsilon} \rho_f \\
+      \epsilon \mu \frac{\partial^2 \mathbf{A}}{\partial t^2} - \nabla^2 \mathbf{A} &amp;= \mu \mathbf{j}_f - \nabla (\nabla \cdot \mathbf{A} + \epsilon \mu \frac{\partial \varphi}{\partial t})
+  \end{cases}
+   \tag{6}\]</span></span></p>
+<ul>
+<li><strong>D’Alembert 算子</strong> 是 Minkowski 时空 上的 Laplace 算子<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>: <span class="math display">\[\boxed{\Box^2 \equiv \nabla^2 - \epsilon \mu \frac{\partial^2}{\partial t^2}}\]</span></li>
+</ul></li>
+</ul>
+<ul>
+<li><p><a href="#eq-d-alembert" class="quarto-xref">Equation&nbsp;6</a> 过于魔怔, 由 <a href="#sec-vector-fields" class="quarto-xref">Section&nbsp;1.2</a> 知: 我们可以通过 <strong>Gauge 变换</strong> 来简化方程: <span class="math display">\[
+  \begin{aligned}
+  A \to A + \nabla \psi \\
+  \varphi \to \varphi - \frac{\partial \psi}{\partial t}
+  \end{aligned}
+  \]</span></p>
+<ul>
+<li><p><strong>Coulomb gauge 库伦规范</strong>: <span class="math inline">\(\nabla \cdot \mathbf{A} = 0\)</span>, <a href="#eq-d-alembert" class="quarto-xref">Equation&nbsp;6</a> 变为: “<em>rubbish</em>” ╯°Д°）╯ <span class="math display">\[
+  \begin{cases}
+      \Box^2 \varphi = -\frac{1}{\epsilon} \rho_f \\
+      \Box^2 \mathbf{A} = \nabla (\epsilon \mu \frac{\partial \varphi}{\partial t}) - \mu \mathbf{j}_f
+  \end{cases}, \quad (\nabla^2 \psi = 0)
+  \]</span></p></li>
+<li><p><strong>Lorenz gauge 洛伦兹规范</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>: <span class="math inline">\(\nabla \cdot \mathbf{A} + \epsilon \mu \frac{\partial \varphi}{\partial t} = 0\)</span>, <a href="#eq-d-alembert" class="quarto-xref">Equation&nbsp;6</a> 变为 (<span class="math inline">\(4\)</span> 维 Poisson 方程) : “<em>democratic</em>” \(≧▽≦)/ <span id="eq-lorenz"><span class="math display">\[
+  \boxed{
+  \begin{cases}
+      \Box^2 \varphi = - \frac{1}{\epsilon} \rho_f \\
+      \Box^2 \mathbf{A} = - \mu \mathbf{j}_f
+  \end{cases}, \quad (\Box^2 \psi = 0)
+  }
+   \tag{7}\]</span></span></p></li>
+</ul></li>
+</ul>
+</section>
+<section id="source-free-maxwells-equations-无源麦克斯韦方程组" class="level3">
+<h3 class="anchored" data-anchor-id="source-free-maxwells-equations-无源麦克斯韦方程组">Source-free Maxwell’s equations 无源麦克斯韦方程组</h3>
+<p><span id="eq-maxwell-source-free"><span class="math display">\[
+\begin{cases}
+    \nabla \cdot \mathbf{D} &amp;= 0 \\
+    \nabla \cdot \mathbf{B} &amp;= 0 \\
+    \nabla \times \mathbf{E} &amp;= -\frac{\partial \mathbf{B}}{\partial t} \\
+    \nabla \times \mathbf{H} &amp;= \frac{\partial \mathbf{D}}{\partial t} \\
+\end{cases}
+\tag{8}\]</span></span></p>
+<ul>
+<li><p><a href="#eq-maxwell-source-free" class="quarto-xref">Equation&nbsp;8</a> 后面两个是经典的两个变量的耦合方程, 显然他的解是波动的 (有源的情况也是波动的) , 可用 <span class="math inline">\(4\)</span> 维的 Laplace 方程描述 (<a href="#eq-lorenz" class="quarto-xref">Equation&nbsp;7</a> 也可以): <span class="math display">\[
+  \boxed{
+  \begin{cases}
+      \Box^2 \mathbf{E} = 0 \\
+      \Box^2 \mathbf{H} = 0 \\
+  \end{cases}, \quad
+  \begin{cases}
+      \Box^2 \varphi = 0 \\
+      \Box^2 \mathbf{A} = 0 \\
+  \end{cases}
+  }
+  \]</span></p>
+<ul>
+<li>神在真空中说「要有光」: <span class="math display">\[
+  c = \frac{1}{\sqrt{\epsilon_0 \mu_0}}.
+  \]</span></li>
+</ul></li>
+</ul>
+</section>
+<section id="phasor-representation-相量麦克斯韦方程组" class="level3">
+<h3 class="anchored" data-anchor-id="phasor-representation-相量麦克斯韦方程组">Phasor representation 相量麦克斯韦方程组</h3>
+<ul>
+<li><p><strong>Time-harmonic 时谐波</strong>: 固定<strong>空间</strong>的任意一点, 这一点的 <span class="math inline">\(\mathbf{E}\)</span> 和 <span class="math inline">\(\mathbf{H}\)</span> 的三个分量都是<strong>时间</strong>的正弦函数.</p>
+<ul>
+<li>没有说空间上是周期性的!</li>
+<li><strong>Phasor 相量</strong>:
+<ul>
+<li><strong>固定角频率 <span class="math inline">\(\omega\)</span> 的正弦波集合 在向量空间的意义上 同构于复数域 <span class="math inline">\(\mathbb{C}\)</span></strong>, 对应的复数称为 <strong>Phasor 相量</strong></li>
+<li>为何同构? 每个正弦波只与初始状态有关, 每个初始状态与一个复数一一对应.</li>
+<li>为何固定角频率? 因为很多系统 (RC 电路, 弹簧振子, etc.) 在正弦输入下所有的物理量 (电压, 电流, 位移, 速度, etc.) 时间上一定是<strong>同频</strong>的.</li>
+<li>相量 <span class="math inline">\(Ae^{j\theta_0}\)</span> 中没有时间信息!</li>
+</ul></li>
+<li>对于时谐 EM 波, 我们只关心初始状态, 即<strong>相量场</strong>: <span class="math inline">\(\tilde{\mathbf{E}}: \mathbb{R}^3 \to \mathbb{C}^3\)</span>.</li>
+</ul></li>
+<li><p><strong>Phasor Maxwell 方程组</strong> <span id="eq-maxwell-source-free-phasor"><span class="math display">\[
+\begin{cases}
+  \nabla \cdot \mathbf{D} &amp;= \rho_f \\
+  \nabla \cdot \mathbf{B} &amp;= 0 \\
+  \widetilde{\nabla \times \mathbf{E}} &amp;= -j \omega \tilde{\mathbf{B}} \\
+  \widetilde{\nabla \times \mathbf{H}} &amp;= \tilde{\mathbf{j}}_f + j \omega \tilde{\mathbf{D}} \\
+\end{cases}
+\tag{9}\]</span></span></p>
+<ul>
+<li>Phasor representation 只是 Maxwell 方程组在「时谐」下的特例<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>.</li>
+<li>时谐波的情况下源项 <span class="math inline">\(\mathbf{j}\)</span> 一定也是时谐的.</li>
+<li><strong>Claim</strong>: 若 <span class="math inline">\(\mathbf{E}\)</span> 是时谐的, 则 <span class="math inline">\(\nabla \times \mathbf{E}\)</span> 也是时谐的.</li>
+</ul></li>
+</ul>
+<ul>
+<li><p><strong>Complex permittivity 复介电常数 <span class="math inline">\(\epsilon_c\)</span></strong></p>
+<ul>
+<li><p><strong>动机</strong>: 与阻抗 <span class="math inline">\(Z\)</span> 的动机类似<a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a> <span class="math display">\[
+  \begin{aligned}
+  \widetilde{\nabla \times \mathbf{H}} &amp;= \tilde{\mathbf{j}}_f + j \omega \epsilon \tilde{\mathbf{E}} \\
+  \xRightarrow[]{\tilde{\mathbf{j}}_f = \sigma \tilde{\mathbf{E}}} \widetilde{\nabla \times \mathbf{H}} &amp;= j \omega \epsilon_c \tilde{\mathbf{E}} \\
+  \end{aligned}
+  \]</span></p></li>
+<li><p><span class="math inline">\(\epsilon_c\)</span> 与频率有关: <span class="math display">\[\epsilon_c = \epsilon - j \frac{\sigma}{\omega}.\]</span></p></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="harmonic-waves-谐波" class="level2">
+<h2 class="anchored" data-anchor-id="harmonic-waves-谐波">Harmonic Waves 谐波</h2>
+<section id="wave-parameters-波参数" class="level3">
+<h3 class="anchored" data-anchor-id="wave-parameters-波参数">Wave parameters 波参数</h3>
+<ul>
+<li><p>EM 波并不都是 Harmonic 的. 可以在空间上周期, 也可以在时间上周期.</p></li>
+<li><p>谐波在 <strong>「空间」</strong> 和 <strong>「时间」</strong> 都是<strong>周期性</strong>的振动, 怎么描述这种振动的快慢呢:</p>
+<ul>
+<li><p>单位长度 (或 时间) 内振了几下.</p>
+<ul>
+<li><strong>(linear) wave number 波数</strong> <span class="math inline">\(\tilde{\nu}\)</span>: <span class="math inline">\(1\text{ m}\)</span> 内振了几下.</li>
+<li><strong>frequency 频率</strong> <span class="math inline">\(f\)</span>: <span class="math inline">\(1\text{ s}\)</span> 内振了几下.</li>
+</ul></li>
+<li><p>振一下花了多少长度 (或 时间).</p>
+<ul>
+<li><strong>wavelength 波长</strong> <span class="math inline">\(\lambda\)</span>: 振一下占了多少米.</li>
+<li><strong>period 周期</strong> <span class="math inline">\(T\)</span>: 振一下花了多久.</li>
+</ul></li>
+<li><p>以上二者度量方法相反, 显然数值上互为倒数: <span class="math inline">\(k = 1/\lambda, f = 1/T\)</span>.</p></li>
+<li><p><strong>角度的世界</strong>: 周期性的东西可以很自然的 wind up to 一个圆上, 度量方式也从「振了几下」变成了「转了多少度」. 每振一下对应 <span class="math inline">\(2\pi\)</span>. 所以以上四个概念通通可翻译成角度世界的度量: 乘 <span class="math inline">\(2\pi\)</span>.</p>
+<ul>
+<li><strong>angular wave number 角波数</strong> <span class="math inline">\(k\)</span>, <strong>angular frequency 角频率</strong> <span class="math inline">\(\omega\)</span>, <strong>angular wavelength 角波长</strong> <span class="math inline">\(\bar{\lambda}\)</span>, <strong>angular period 角周期</strong> <span class="math inline">\(\bar{T}\)</span>.</li>
+<li><span class="math inline">\(\cos\)</span> 里面 还有 <span class="math inline">\(e\)</span> 指数 上的量 就是角度世界的生物, 现实世界的量 (<span class="math inline">\(\tilde{\nu}, f, \lambda, T\)</span>) 不允许不乘 <span class="math inline">\(2\pi\)</span> 出现在这些地方. (<span class="math inline">\(\sout{\cos (ft)}\)</span>, <span class="math inline">\(\sout{e^{j \tilde{\nu} x}}\)</span>)</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="wave-properties.png" class="img-fluid figure-img" style="width:50.0%"></p>
+<figcaption>线性世界中的参数 与 角度世界的参数 的关系</figcaption>
+</figure>
+</div>
 
 </section>
 </section>
+
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" role="list">
 <div id="ref-griffiths_2017_introduction" class="csl-entry" role="listitem">
 <div class="csl-left-margin">1. </div><div class="csl-right-inline">Griffiths DJ (2017) Introduction to electrodynamics. Cambridge University Press</div>
 </div>
-</div></section></div></main>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>这不是 <span class="math inline">\(I\)</span> 的定义! 国际上用力定义了电流, 再用电流定义了电荷量.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>有地方也省略平方, 或定义为相反数 (sign convention)<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>此 Lorenz 非彼 Lorentz (<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>但由于 Fourier 变换, 仅仅考虑这种特例已经足够了 (“faithfully”).<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn5"><p>个人感觉应该换一个名字 (比如「耦合系数」), 因为「介电常数」已经被定义为 <span class="math inline">\(\mathbf{E}\)</span> 和 <span class="math inline">\(\mathbf{D}\)</span> (电-电) 的关系, 而这里是 <span class="math inline">\(\mathbf{E}\)</span> 和 <span class="math inline">\(\mathbf{H}\)</span> (电-磁) 的关系, 不像 阻抗 和 电阻 都是 <span class="math inline">\(V\)</span> 和 <span class="math inline">\(I\)</span> 的关系.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
