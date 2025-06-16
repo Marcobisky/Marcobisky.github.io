@@ -16,7 +16,7 @@ csl: diabetologia.csl #https://github.com/citation-style-language/styles
 
 > 本笔记是本人电子科技大学格院大三《通信电路设计》课程的期末考试复习笔记, 遵循个人学习习惯与轨迹, 但我将尝试保留所有概念的动机和尽可能地解释原因, 不保证覆盖全部考点, 不保证严谨性和绝对正确性.
 
-> EXAMPLE 是PPT或往年的经典题目, 框起来的公式**必须记住或独立推导**!!! *号章节了解即可, 其他的**都有可能考**
+> EXAMPLE 是PPT或往年的经典题目, 框起来的公式**必须记住或独立推导**!!! 概念用**粗体**表示, *号章节了解即可, 其他的**都有可能考**!!!
 
 ## Change of Mind 这个可能有用 {#sec-change-of-mind}
 
@@ -751,24 +751,19 @@ $$
     - 信号频率都相近, 信号间会 interference 干扰.
     - 低频信号传输需要几千米长的天线
 
-<!-- ----------------------------------------- -->
-::: {.callout-note icon=true collapse=false}
-## Notation
-
-- Intelligence 信息信号[^modulating]: $e_i = E_i \cos(\omega_i t)$ (若不是正弦信号, 则约定 $E_i := |\min(e_i)|$)
-- Carrier 载波信号[^carrier]: $e_c = \cos(\omega_c t)$
-- Modulated 调制信号: $e$
+- ***!!!!!!!!!!!!!!!!!! Notation 符号声明 !!!!!!!!!!!!!!!!!!***
+    - Intelligence 信息信号[^modulating]: $e_i = E_i \cos(\omega_i t)$ (若不是正弦信号, 则约定 $E_i := |\min(e_i)|$, 调制指数要用.)
+    - Carrier 载波信号[^carrier]: $e_c = \cos(\omega_c t)$
+    - Modulated 调制信号: $e$
 
 [^carrier]: 这里用 normalized 归一化的载波信号, PPT 上是 $e_c = E_c \cos(\omega_c t)$, 但是后面乘载波的时候又用的是 $\cos(\omega_c t)$, 回字的四种写法, 研究这个没有意义.
 
 [^modulating]: 注意跟 modulated 调制信号区分开来.
-:::
-<!-- ----------------------------------------- -->
 
 
 ### AM 调幅
 
-> AM 调制信息在幅度里面. 而且有很多种 AM 的方法[^am-method]: DSB-SC (omitted), DSB-WC, SSB, VSB, etc.
+> AM 调制信息在幅度里面. 而且有很多种 AM 的方法[^am-method]: **DSB-SC, DSB-WC, SSB, VSB**, etc.
 
 [^am-method]: Abbr. Double/Single/Vestigial (残留) Sideband- Suppressed/With Carrier.
 
@@ -836,7 +831,7 @@ $$
 
 - **High / Low Level Modulation 高/低电平调制**: 实际调制过程中 在输入和调制信号发射之间 肯定包含信号的放大 (@fig-dsb-wc 省略了), 是先调制再放大 还是 先放大再调制呢? (都可以)
 
-    - **High Level Modulation**: 先放大再调制, 适合高功率要求[^high-level-mod], 如radio broadcasting 广播塔台.
+    - **High Level Modulation**: 先放大再调制, 适合高功率要求[^high-level-mod], 如 radio broadcasting 广播塔台.
     - **Low Level Modulation**: 先调制再放大, 适合功耗低、低功率要求, 如通信模块.
 
 [^high-level-mod]: 为什么不能都用这种调制方法? 有一类放大器 ([Class C](https://en.wikipedia.org/wiki/Power_amplifier_classes#Class_C)) 对纯载波 $e_c$ 的功率放大效果非常好, 但是是非线性的, 所以不能用于放大 $e$.
@@ -869,7 +864,6 @@ $$
         - 动机: **Cut-off frequency 很高的滤波器很难有很高的 roll-off.** 传输的频率一般要达到 $\text{MHz}$, 如果将 $e_i$ 直接搬移到这个频率, 很难造出高 roll-off 的滤波器进行 SSB filtering. 但是低截止高 roll-off 的滤波器还是有的. 所以我们先将 $e_i$ 用这个滤波器搬移到一个低的频段, 用低截止高 roll-off 的滤波器滤波 (相当于增大 Band Gap), 再用一个高截止低 roll-off 的滤波器进行真正的 SSB Filtering. 即**先增大 Band Gap, 再 SSB Filtering.**
 
             ![SSB "Two-step Method" 调制过程, 信号频谱变化 @fig-ssb-two-step](SSB-modulation-block-diagram.png){#fig-ssb-modulation-block-diagram width=80%}
-        - 
 
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=true collapse=true}
@@ -948,7 +942,7 @@ VSB 很聪明地利用了解调的时候两边的频谱会合起来的特点, �
 
         ![FM 调制信号 $e(t)$ 的频谱: $(\pm) (\Delta f_e)_{\max}$ 是 Max Frequency Deviation 最大频偏, 瞬时频率范围的一半](Carson-rule.png){width=55%}
 
-    - **若后续有 $N$ 倍频器, 则 frequency deviation 也会放大 $N$ 倍**.
+    - **若后续有 $N$ 倍频器, 则 frequency deviation 也会放大 $N$ 倍** (见 @fig-CO-modulator).
     - 对于 PM, 相当于对 $e_i$ 的导数进行 FM 调制.
     - **Bessel 函数**: 可用于定量计算单音信号 $e_i = \cos(\omega_i t)$ 的频谱 (注意只是单音信号). 由计算[^carson]可知单音信号的 FM 调制波的频谱是离散的, 第 $n$ 个 频点上的幅度正比于 第一类 Bessel 函数的系数 $J_n(\beta)$.
 
@@ -957,7 +951,7 @@ VSB 很聪明地利用了解调的时候两边的频谱会合起来的特点, �
 
 - FM 调制器电路:
     - **Varactor Modulators**: 其实就是直接用 VCO 来当调制器, 比如用 @fig-Colpitts, 把其中一个电容换成 $e_i$ 控制的 varicap diode 就行. (PPT 上的图在 @fig-Varactor-modulator.)
-        - 缺点: 当没输入 ($e_i = 0$) 的时候, 这种用 $LC$ 当反馈的 VCO 甚至不能输出精确稳定的载波频率! 所以我们会用 **晶振 (Crystal Oscillator)**:
+        - 缺点: 当没输入 ($e_i = 0$) 的时候, 这种用 $LC$ 当反馈的 VCO 甚至不能输出精确稳定的载波频率! 所以我们会用 **晶振 (Crystal Oscillator)** 来产生精确的载波频率:
     - **Crystal Oscillator Modulators**: 用晶振来产生精确的载波频率. 由于 **晶振的频率可以被跟其串联的电容稍稍改变**, 所以我们可以用一个 varicap diode 作这个电容, 再用 $e_i$ 来控制这个 varicap diode.
         - 优点: 用晶振来产生载波非常精确, 且受温度影响小.
         - 问题: 晶体的频率调节范围非常小 ($100\text{ Hz}$), 但 FM 的频偏最好要达到 $\text{kHz}$ ($75\text{ kHz}$), 所以要用 **Frequency Multiplier 倍频器** 来增大频率 (frequency deviation 也会增大).
