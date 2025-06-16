@@ -67,7 +67,7 @@ csl: diabetologia.csl #https://github.com/citation-style-language/styles
     - **Thermal Voltage 热电压 $V_T$**: $$\boxed{V_T = \frac{kT}{q}}$$
         - **玻尔兹曼常数**: $k = 1.38 \times 10^{-23} \text{ J/K}$. **工作温度**: $T = t + 273.15 \text{ K}$. **电荷量**: $q = 1.6 \times 10^{-19} \text{ C}$.
         - 室温 $20^{\circ}$ 下: $\boxed{V_{\text{T}} = 25 \text{ mV}}$
-    - "Diode Mixer"
+    - "Diode Mixer": 用到了这个方程, 见 @sec-diode-mixer.
 
 ::: {.column-margin}
 ![二极管的 Shockley 指数性质](shockley.jpg)
@@ -271,7 +271,7 @@ $$
 :::
 <!-- ----------------------------------------- -->
 
-### Matching Network Design 匹配网络设计
+### Matching Network Design 匹配网络设计 {#sec-matching-network-design}
 
 > 有很多种匹配网络可供选择: $\pi, T$ 形网络等, 本文只考虑 $T$ 形网络. 本章重度依赖 @sec-q-factor-1st-order 的结论.
 
@@ -373,7 +373,7 @@ $$
 
 ### Common Mixer 常见混频器 {#sec-common-mixer}
 
-#### Diode Mixer 二极管混频器
+#### Diode Mixer 二极管混频器 {#sec-diode-mixer}
 
 ![](diode-mixer.png){#fig-diode-mixer width=60%}
 
@@ -415,7 +415,7 @@ $$
 ![Rejection 滤波器例子](rejection-filter.png){#fig-rejection-filter}
 :::
 
-![用带通滤波器滤掉可能存在的镜像频率, 定量分析见 @sec-rlc-rejection-filter, $\omega_{\text{IF}}$ 见 @sec-heterodyne](image-rejection.png){#fig-image-rejection width=80%}
+![用带通滤波器滤掉可能存在的镜像频率, 定量分析见 @sec-rlc-rejection-filter, $\omega_{\text{IF}}$ 见 @sec-heterodyne](image-rejection.png){#fig-image-rejection width=60%}
 
 ## RLC 电路作为滤波器 {#sec-rlc-filter}
 
@@ -457,12 +457,12 @@ $$
 - Dissipation $D := 1/Q.$
 
 - 等价定义(或推论):
-    - 二阶系统 (如弹簧振子模型) **在共振(协振 resonance)条件下** ($\omega_0$), 系统储存的能量与一个周期内消耗的能量 (在 $R$ 上) 之比, 的 $2\pi$ 倍: $$ Q := 2\pi \cdot \frac{ \text{Energy stored}}{\text{Energy dissipated in one period}}$$
-    - 串联协振 (记忆: 串联电流主导, $R$ 在分母, $R$ 越大越耗能, $Q$ 越小): $$ \boxed{Q = \frac{\omega_0 L}{R} = \frac{1}{\omega_0 C R}}$${#eq-serial-Q} 并联协振 (记忆: 并联电压主导, $R$ 在分子, $R$ 越大泻能越慢, $Q$ 越大): $$ \boxed{Q = \frac{R}{\omega_0 L} = \omega_0 C R}$${#eq-parallel-Q}
+    - 二阶系统 (如弹簧振子模型) **在共振(协振 resonance)条件下** ($\omega_0$), 系统储存的能量与一个周期内消耗的能量 (在 $R$ 上) 之比, 的 $2\pi$ 倍: $$ Q := 2\pi \cdot \frac{ \text{Energy stored}}{\text{Energy dissipated in one period}}$$ 这是其定义式, 但不会用它来计算, 可以由这个式子推出所有以下结论:
+    - 串联协振 (记忆: 串联电流主导, $R$ 在分母, $R$ 越大越耗能, $Q$ 越小): $$ \boxed{Q = \frac{\omega_0 L}{R} = \frac{1}{\omega_0 C R}}$${#eq-serial-Q} 并联协振 (记忆: 并联电压主导, $R$ 在分子, $R$ 越大泻能越慢, $Q$ 越大): $$ \boxed{Q = \frac{R}{\omega_0 L} = \omega_0 C R}$${#eq-parallel-Q} 这两个式子在 sec-q-factor-1st-order 被形式化地迁移到了一阶系统上, 在匹配网络设计 (@sec-matching-network-design) 中频繁用到!
     - 不管串/并联协振, $Q$ 都可由 中心频率和 $-3\text{ dB}$ 带宽相同地表示 : $$\boxed{Q = \frac{\omega_0}{\Delta \omega}}, \Delta \omega = \omega_2-\omega_1, \quad \text{when } 20\lg|H(\omega)| = -3\text{ dB}$${#eq-q-center-over-bandwidth}
-    - $\omega_0$ 是 $\omega_1$ 和 $\omega_2$ 的几何平均: $$\boxed{\omega_0^2 = \omega_1 \cdot \omega_2}$$ 但是实际上很接近算数平均, 所以可以这样算 $\omega_1, \omega_2$: $$ \begin{cases} \omega_1 &= \omega_0 - \frac{\Delta \omega}{2} \\ \omega_2 &= \omega_0 - \frac{\Delta \omega}{2}\end{cases}$$
+    - $\omega_0$ 是 $\omega_1$ 和 $\omega_2$ 的几何平均: $$\boxed{\omega_0^2 = \omega_1 \omega_2}$$ 但是实际上很接近算数平均, 所以可以这样算 $\omega_1, \omega_2$: $$ \begin{cases} \omega_1 &= \omega_0 - \frac{\Delta \omega}{2} \\ \omega_2 &= \omega_0 - \frac{\Delta \omega}{2}\end{cases}$$
 
-        ![$\omega_0$ 是 $\omega_1$ 和 $\omega_2$ 的几何平均](RLC-BPF.png){width=60%}
+        ![$\omega_0$ 是 $\omega_1$ 和 $\omega_2$ 的几何平均, 但计算时可用算数平均来近似计算](RLC-BPF.png){width=60%}
 
 :::{.column-margin}
 「半功率」点 $-3\text{ dB}$ 对应的 $\omega$ 叫 **截止频率**, $|H|^2 = 0.5$.
@@ -577,7 +577,7 @@ $$
 ![Tapped network 例子](tapped-network.png){#fig-tapped-network}
 :::
 
-- 根据所用的不同 Tapped network (@fig-tapped-network), 给振荡器起了不同名字 (仅仅是起个名字): Hartley, Colpitts, etc.
+- 根据所用的不同 Tapped network (@fig-tapped-network), 给振荡器起了不同名字 (仅仅是起个名字): Hartley, Colpitts, Clapp, etc.
 
 - **这里题目一般只会叫你算中心频率 $\omega_0$, 只要将他给的电路进行 AC 等效, 然后与 @fig-osc-feedback 进行对比找出 $\beta(s)$ 的部分, 这个部分含有一个 $LC$ 协振电路, 是一个 BPF, 所以其协振频率就是振荡器的输出频率 $\omega_0$![^omega0]**
 
