@@ -1,7 +1,7 @@
 ---
 author: Marcobisky
 title: CCD Crash Course 通信电路速成笔记
-description: "内容正确性仅限于格院 CCD 这一门课 (更新时间 Jun 17, 2025, 12:58)"
+description: "祝大家会的全考, 蒙的全对 (更新时间 Jun 17, 2025, 16:38)"
 date: 2025-06-17
 image: cover.png
 categories:
@@ -14,7 +14,7 @@ bibliographystyle: ieee
 csl: diabetologia.csl #https://github.com/citation-style-language/styles
 ---
 
-> 本笔记是本人电子科技大学格院大三《通信电路设计》课程的期末考试复习笔记, 遵循个人学习习惯与轨迹, 但我将尝试保留所有概念的动机和尽可能地解释原因, 不保证覆盖全部考点, 不保证严谨性和绝对正确性.
+> 本笔记是本人电子科技大学格院大三《通信电路设计》2025 年课程的期末考试复习笔记, 遵循个人学习习惯与轨迹, 但我将尝试保留所有概念的动机和尽可能地解释原因, 不保证覆盖全部考点, 不保证严谨性和绝对正确性.
 
 > EXAMPLE 是PPT或往年的经典题目, 框起来的公式**必须记住或独立推导**!!! 概念用**粗体**表示, *号章节了解即可, 其他的**都有可能考**!!!
 
@@ -254,7 +254,7 @@ $${#eq-thevenin-norton}
 > 阻抗匹配是一个实际中要考虑的问题, 而不是在纯理论层面上的问题, 所以会觉得有点脱节的感觉.
 
 - 问题建模: @sec-thevenin-norton 的结论对稳态交流电路同样适用 (见 @fig-matched-network-demo)! 任意复杂线性网络:
-    - 从外面看都只是一个电流电压源 $\tilde{V}_0$ 和 一个内阻抗 $\tilde{Z}_0$ (相当于 Thevenin 等效).
+    - 从外面看都只是一个内阻 $\tilde{Z}_0$ 的电压源 $\tilde{V}_0$ (相当于 Thevenin 等效).
     - 看外面都是一个阻抗为 $\tilde{Z}_L$ 的负载.
     - 问: 给定工作频率[^working-freq] $\omega_0$ 和 $\tilde{V}_0$, $\tilde{Z}_0, \tilde{Z}_L$ 满足什么的时候负载热功率最大?
 
@@ -634,11 +634,11 @@ $$
 
 ### 电路振荡要满足的条件
 
-![用正反馈来产生自发振荡, 振荡的根源在于内部的电噪声](positive-feedback.png){#fig-osc-feedback width=70%}
+![用正反馈来产生自发振荡, 振荡的根源在于内部的热噪声](positive-feedback.png){#fig-osc-feedback width=70%}
 
-- 为什么会自发震荡?
-    - **噪声不可避免**
-    - **噪声中含有所有的频率**, 通过线性系统有制造出任意想要的频率的潜力.
+- 为什么会自发震荡? (热噪声见 @sec-noise)
+    - **热噪声不可避免**
+    - **热噪声为白噪声 (频谱中含有所有的频率)**, 通过线性系统有制造出任意想要的频率的潜力.
     - 我们希望小噪声在正反馈系统里不断被「放大」[^amp] (用 $A(s)$), 而且能够筛选出我们想要的频率 $\omega_0$ (用 $\beta(s)$, $\omega_0$ 是振荡器的自发频率, 称为**中心频率或工作频率**, 是反馈 $LC$ 电路中的协振频率).
 
 - **Barkhausen Stability Criterion 巴克豪森准则**: @fig-osc-feedback 要振荡, 必须满足 (但不保证振荡):
@@ -848,8 +848,9 @@ $$
 
 - **High / Low Level Modulation 高/低电平调制**: 实际调制过程中 在输入和调制信号发射之间 肯定包含信号的放大 (@fig-dsb-wc 省略了), 是先调制再放大 还是 先放大再调制呢? (都可以)
 
-    - **High Level Modulation**: 先放大再调制, 适合高功率要求[^high-level-mod], 如 radio broadcasting 广播塔台.
-    - **Low Level Modulation**: 先调制再放大, 适合功耗低、低功率要求, 如通信模块.
+    - **High Level Modulation**: 先放大再调制 (在 High 功率 Level 调制), 适合高功率要求[^high-level-mod], 如 radio broadcasting 广播塔台.
+    - **Low Level Modulation**: 先调制再放大 (在 Low 功率 Level 调制), 适合功耗低、低功率要求, 如通信模块.
+        - 要求后续的放大器是线性的 (不能用 Class C 了)!
 
 [^high-level-mod]: 为什么不能都用这种调制方法? 有一类放大器 ([Class C](https://en.wikipedia.org/wiki/Power_amplifier_classes#Class_C)) 对纯载波 $e_c$ 的功率放大效果非常好, 但是是非线性的, 所以不能用于放大 $e$.
 
@@ -874,13 +875,13 @@ $$
     - **抗选择性衰落 (Selective Fading)**. @fig-dsb-sc 双边带解调端信号的重建用到两个边带的叠加, 不同频的边带从电离层 (ionosphere) 反射回来后折射角和路径不同 (选择性衰落), 使得两个边带不对称, 重建信号失真. 而 SSB 只用一个边带, 不受选择性衰落影响.
 
 - **SSB Selective Filtering**: 
-    - 是 SSB Generator 的其中一种电路实现.
+    - 是 SSB Generator 的其中一种实现方法.
     - 原始信号必须要有 **Band Gap** $\Delta f$. (比如人声音一般大于 $100\text{ Hz}$, 所以人声信号 $\Delta f = 200\text{ Hz}$, 见 @fig-ssb-selective-q)
     - 需要一个高 roll-off 的滤波器 (**原因是 Band Gap 很小**), 其 $Q$-factor 为: $$\boxed{Q = \frac{f_c \sqrt{|H|}}{4 \Delta f}}$$ 其中 $|H|$ 是该滤波器的传递函数在 Rejected Sideband 上的取值 (一般告诉你多少 $\text{dB}$, 代入公式时不能用 $\text{dB}$).
     - **(Two-step) SSB Transmitter 发射机**: 
         - 动机: **截止频率很高的滤波器很难有很高的 roll-off.** 传输的频率一般要达到 $\text{MHz}$, 如果将 $e_i$ 直接搬移到这个频率, 很难造出高 roll-off 的滤波器进行 SSB filtering. **但是低截止、高 roll-off 的滤波器还是有的**. 所以我们先将 $e_i$ 用这个滤波器搬移到一个低的频段, 用低截止高 roll-off 的滤波器滤波 (相当于增大 Band Gap, 见 @fig-ssb-two-step), 再用一个高截止低 roll-off 的滤波器进行真正的 SSB Filtering. 即**先增大 Band Gap, 再 SSB Filtering.**
 
-            ![SSB "Two-step Method" 调制过程, 信号频谱变化 @fig-ssb-two-step](SSB-modulation-block-diagram.png){#fig-ssb-modulation-block-diagram width=80%}
+            ![SSB "Two-step Method" 调制过程, 信号频谱变化见 @fig-ssb-two-step](SSB-modulation-block-diagram.png){#fig-ssb-modulation-block-diagram width=90%}
 
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=true collapse=true}
@@ -1007,13 +1008,21 @@ VSB 很聪明地利用了解调的时候两边的频谱会合起来的特点, �
 
 > 这一章最难学. RF 接收机的任务就是在空气中提取我们要的信号频率成分, 并恢复原始信号. 这不就是解调吗? 并不是, 在解调之前, 还有一个 “前端电路” , 要解决以下问题: 要根据不同调制方法 (AM, FM) 适配, 必须能调谐 (tune, 俗称调台). 为了保留动机, 我们将从简单到复杂介绍.
 
-- RF 接收机的特性参数:
+- RF 接收机的特性参数: (概念定义见 @sec-noise, 可视化见 @fig-RF-metrics)
     - **Selectivity 选择性**: 接收机能否精准地选出我们要听的台 (BPF 的 $Q$-factor 越大越好).
-    - **Sensitivity 灵敏度**: 接收机能听到多小的信号.
-    - **Dynamic Range (DR) 动态范围**: 接收机能处理多大范围的输入信号强度, 一般用 $\text{dB}$ 度量.
-        - 比如最小最大的信号对应的电平是 $1\text{ mV}$ 和 $1\text{ V}$, 则: $\text{DR} = 20 \lg \left(\frac{1}{0.001}\right) = 60\text{ dB}.$
+    - **Sensitivity 灵敏度**: 接收机能听到的最小的信号功率, 等于**实际 Noise Floor 乘期待的 SNR**, 在对数层面上是加: $$\boxed{S_n = \sum P_n + \text{SNR}_{\text{desired}} ~[\text{dB}]}$$
+    - **Dynamic Range (DR) 动态范围[^dynamic]**: 接收机能处理多大范围的输入信号强度, 一般用 $\text{dB}$ 度量.
+        - 一般定义为: 放大器能放大的最大信号功率 (用 $1\text{ dB}$ 点来定义[^1dB]) 与 接收机能听到的最小信号功率 (就是灵敏度!) 之比, 在对数层面上是减: $$\boxed{\text{DR} = P_{1\text{ dB}} - S_n ~[\text{dB}]}$$
+        - 如果题目告诉你最小最大的信号对应的电平是 $1\text{ mV}$ 和 $1\text{ V}$, 则: $\text{DR} = 20 \lg \left(\frac{1}{0.001}\right) = 60\text{ dB}.$
     - **Fidelity 保真度**: 接收机输出的波形是否与原始调制信号一致.
     
+
+![部分 RF 接收机的特性参数的总结 (这图挺好的)](RF-metrics-summarize.png){#fig-RF-metrics width=80%}
+
+
+[^dynamic]: "Dynamic" 在音乐上是 “强弱” 的意思, 跟这里的意思一样.
+
+[^1dB]: 你可能会问: 放大器能一直线性放大信号吗? 肯定不是的! 那什么时候不能放大了? 我们规定: **当放大器输出的信号小于期待值 $1\text{ dB}$ 的时候**, 此时的 **输入信号功率** 是该放大器能有效放大的最高功率信号, 称为 **1dB Compression Point $P_{1\text{ dB}}$**. ![$S_{\text{in}}$ 是该放大器的 **1dB Compression Point**](compression-point-1db.png)
 
 #### TRF (Tuned Radio Frequency) 接收机
 
@@ -1032,28 +1041,10 @@ VSB 很聪明地利用了解调的时候两边的频谱会合起来的特点, �
 
 > 既然直接处理射频频率太高了, 那就先降下来呗. Heterodyne 的核心思想就是把各种射频信号 (RF) “变频”成一个**固定**的**中频** (**IF**) 信号后再去处理. 其实就在 TRF 的 Stage 1,2 之间加了一个 **IF Section**. 这样既解决了频率太高的问题, 又让后续的电路只要处理一个**固定的** IF 频率就行了.
 
-![Heterodyne 比 TRF 多了一个中频率转换, 包含一个 Mixer 和一个 BPF, LNA 只是用来放大的](Heterodyne.png){#fig-Heterodyne width=80%}
+![Heterodyne 比 TRF 多了一个中频率转换, 包含一个 Mixer 和一个 BPF, LNA 只是用来放大的 (见 @sec-noise)](Heterodyne.png){#fig-Heterodyne width=80%}
 
 - **Superheterodyne Receiver 超外差接收机**: 有两个或更多的 IF Section.
 
-- **Low Noise Amplifier LNA 低噪声放大器**: 一个以 $\omega_{\text{RF}}$ 为中心频率的放大器. 由于 RF 信号本身很弱, 后续电路听不到 (而 RF stage 只有选择作用而没有放大作用), 所以加一个放大器用来放大微弱的 RF 信号.
-    - 叫做 “低噪声” 是因为一般的放大器在放大信号的同时会引入很多的**电噪声** (系统本身的噪声, 不是外界的!), 而 LNA 本身的电噪声很小.
-
-- **Noise factor ($F$) 电噪声因子**:
-
-    ![](noise-factor.png){#fig-noise-factor width=70%}
-
-    - 定义: 一个放大器输入信号的信噪比 (SNR) 与输出信号的 SNR 的比值: $$\boxed{F := \frac{\text{SNR}_{\text{in}}}{\text{SNR}_{\text{out}}} = \frac{S_i / N_i}{S_i G / ((N_i + N_a) G)} = 1+\frac{N_a}{N_i}}$$
-        - $N_a$: 归一化 $G$ 引入的噪声[^n-i-defn]
-        - **Noise Figure ($\text{NF}$)**: 仅仅是化成 $\text{dB}$, 注意 $F$ 本来就是功率比了, 所以用 $10$ 当系数: $$\boxed{\text{NF} := 10 \lg F}$$
-        - 由于所有放大器都可能有电噪声 ($N_a \ge 0$), 所以 $F \ge 1, \text{NF} \ge 0$.
-
-    - **Friis Formula**: 用来计算连级放大器的总噪声因子, 稍微算一算, 结果是这个: $$\boxed{F_{\text{total}} = F_1 + \frac{F_2 - 1}{G_1} + \frac{F_3 - 1}{G_1 G_2} + \frac{F_4 - 1}{G_1 G_2 G_3} + \cdots}$$
-
-        ![Friis Formula 用来计算连级放大器的总噪声因子, $G = G_1G_2G_3G_4$](friis-cascade.png){#fig-friis-cascade width=70%}
-
-
-[^n-i-defn]: 这个概念跟 [Wiki](https://en.wikipedia.org/wiki/Noise_figure#Noise_factor_as_a_function_of_additional_noise) 的定义不一样, Wiki 上没有归一化 $G$.
 
 - **IF 中频**: 调节 LO 的频率可以使得 IF 的频率固定: $$\boxed{\omega_{\text{IF}} := |\omega_{\text{RF}} - \omega_{\text{LO}}|}$$ 由于取了绝对值, 引申出了以下概念:
     - **Image Frequency 镜像频率**: 
@@ -1070,8 +1061,41 @@ VSB 很聪明地利用了解调的时候两边的频谱会合起来的特点, �
     - **Total Harmonic Distortion (THD) 总谐波失真**: 衡量谐波失真的程度. 设基波与高次谐波的幅度为: $V_1, V_2, V_3, \ldots$, THD 定义为**所有高次波与基波功率的比例**: $$\boxed{\text{THD} := \sqrt{\frac{V_2^2 + V_3^2 + \cdots}{V_1^2}}}$$
 
 
+#### Thermal Noise 热噪声 {#sec-noise}
+
+> 区别于外界的噪声, 热噪声是**系统本身**的电信号**白噪声** (每个频率上的能量密度是均匀的), 由于系统中电阻里的电子会因为温度而发生热运动, 故称为热噪声. 它正是振荡器起振的种子.
+
+- **(导线) 热噪声功率**: (不考虑器件热噪声)
+    - 正比于**温度和带宽** $$\boxed{P_n = kTB}$$
+        - $k$: **Boltzmann constant 玻尔兹曼常数**: $1.38 \times 10^{-23} \text{ J/K}$, $T$: 系统的温度 (单位为 K), $B$: 带宽 (单位为 Hz)
+        - 为什么跟带宽有关? 因为 “每个频率上的能量密度是均匀的”.
+        - **Noise Floor**: 单位带宽 ($B=1\text{ Hz}$) 上的热噪声功率. $$\text{Noise Floor} = kT$$
+            - 当 $T = 290\text{ K}, \boxed{\text{Noise Floor} = -174 \text{ dBm/Hz}} = -204 \text{ dBW/Hz}$.
+            - 为什么功率的单位是 $\text{dB}$? 因为这里是用了**以 $1\text{ W}$ 和 $1\text{ mW}$ 为基准的功率度量**:$$\begin{aligned} \text{dBW} &:= 10 \log_{10}\left( \frac{P}{1~\text{W}} \right) \\ \text{dBm} &:= 10 \log_{10}\left( \frac{P}{1~\text{mW}} \right) \end{aligned}$$
+
+- **(器件) 热噪声因子 Noise factor ($F$)**:
+
+    ![](noise-factor.png){#fig-noise-factor width=70%}
+
+    - **定义**: 一个放大器输入信号的信噪比 (SNR) 与输出信号的 SNR 的比值: $$\boxed{F := \frac{\text{SNR}_{\text{in}}}{\text{SNR}_{\text{out}}} = \frac{S_i / N_i}{S_i G / ((N_i + N_a) G)} = 1+\frac{N_a}{N_i}}$$
+        - $N_a$: 归一化 $G$ 引入的噪声[^n-i-defn]
+        - **Noise Figure ($\text{NF}$)**: 仅仅是化成 $\text{dB}$, 注意 $F$ 本来就是功率比了 (而不是幅值比), 所以用 $10$ 当系数: $$\boxed{\text{NF} := 10 \lg F}$$
+        - 由于所有放大器都可能有热噪声 ($N_a \ge 0$), 所以 $F \ge 1, \text{NF} \ge 0$.
+
+    - **Friis Formula**: 用来计算连级放大器的总噪声因子, 稍微算一算, 结果是这个: $$\boxed{F_{\text{total}} = F_1 + \frac{F_2 - 1}{G_1} + \frac{F_3 - 1}{G_1 G_2} + \frac{F_4 - 1}{G_1 G_2 G_3} + \cdots}$$
+
+        ![Friis Formula 用来计算连级放大器的总噪声因子, $G = G_1G_2G_3G_4$](friis-cascade.png){#fig-friis-cascade width=70%}
 
 
+[^n-i-defn]: 这个概念跟 [Wiki](https://en.wikipedia.org/wiki/Noise_figure#Noise_factor_as_a_function_of_additional_noise) 的定义不一样, Wiki 上没有归一化 $G$.
+
+
+- **总热噪声功率**
+    - 在 Noise Floor 的基础上, 我们还要乘上**带宽 $B$ 和放大器增强的倍数 $F$**, 在 $\log$ 层面体现为加和: $$\boxed{\sum P_n =  -174 + 10 \lg B + \text{NF} ~[\text{dBm}]}$$
+        - 这是一个电路最低的噪声功率, 也称 **True (实际) Noise Floor**. 
+
+- **Low Noise Amplifier LNA 低噪声放大器**: 一个以 $\omega_{\text{RF}}$ 为中心频率的放大器. 由于 RF 信号本身很弱, 后续电路听不到 (而 RF stage 只有选择作用而没有放大作用), 所以加一个放大器用来放大微弱的 RF 信号.
+    - 叫做 “低噪声” 是因为一般的放大器在放大信号的同时会引入很多的**热噪声** (系统本身的噪声, 不是外界的!), 而 LNA 本身的热噪声很小.
 
 
 ## A & D 模数转换 ★★★★★
