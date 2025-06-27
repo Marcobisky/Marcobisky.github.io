@@ -1,7 +1,7 @@
 ---
 author: Marcobisky
 title: Electromagnetism 电磁场与波速成笔记
-description: (更新中 Jun 27, 00:43, 2025)
+description: (更新中 Jun 27, 17:24, 2025), 第 2, 7, 8, 9, 10 章相对比较完整
 date: 2025-6-27
 image: cover.png
 categories:
@@ -22,12 +22,24 @@ csl: diabetologia.csl #https://github.com/citation-style-language/styles
 
 ## Change of Mind 这个可能有用
 
+> "我们永远无法认识事物本身 (Ding an sich), 我们只能认识它在我们感官和理解结构下所呈现的现象." — 康德《纯粹理性批判》
+
+- **电磁场从来都不会「传播」**: 电磁场本身就是空间中每个点都对应一个矢量, 而且这些矢量会随着时间摇摆, 用二维来做比喻, 就像是风吹过一片草坪, 草坪上每个点的草构成一个时变矢量场, 但草本身并没有「传播」. 我们感觉波在传播是因为波恰好就被画成了**空间域周期性**的样子, 而且它碰巧又是在**时域周期性**运动, 当我们一眼看过去的时候, 我们大脑被欺骗地认为是一个波正在往前运动, **But there is nothing moving!**. **波的速度需要人为定义!!!**
+    - 当波是时空域正弦的时候, 它的移动方向和速度所有人都觉得一样, 但是:
+    - 如果波长成 @fig-group-phase-velocity 呢? 有些人会觉得它速度快, 有些人会觉得它速度慢, 甚至移动的方向每个人看起来都不一样! 所以我们引入了**群速度**和**相速度**两个速度来描述波的「传播」
+    - 能流密度的定义是把波的速度当作了相速度时的定义 (所以能量才有了「流动」的概念).
+
+        ![群速度与相速度](group-phase-velocity.gif){#fig-group-phase-velocity width=70%}
+
+
 - 波的行为**完全**由一组偏微分方程 (Maxwell 方程组) 描述
     - 电场和磁场为什么会传播? 因为求解偏微分方程后得到的是空间二阶导与时间二阶导 (而不是一阶导) 的方程, 这决定了这两个场的行为是「传播」而不是「扩散」(如果是时间一阶导, 则是扩散, 比如热量).
     - 电磁波为什么会反射和折射? 当你写下 Maxwell 方程组的那一刻, 它定义的对象 (电磁波) 就已经会反射和折射了. 设想你轻轻摇动一根绳子, 左行波和右行波 (还有无数其它奇形怪状的波) 都满足振动方程. 如果没有边界条件, 就用右行波当作这个情形的 mental picture 吧. 若将绳子的另一头固定在墙上, 单独一个右行波并不能保证满足这个边界条件, 所以再叠加一个左行波试试, 诶已经可以满足边界条件了! 这个左行波就是反射波, 它完全就是为了满足边界条件而引入的. 所以 **反射的本质是为了让偏微分方程的解满足边界条件而引入的修正项** ($E_r e^{jkz}$).
 
+
 - 电磁波不需要一定是一个正弦波的样子, 可以是任何随时间变化的场, 只要满足 Maxwell 方程组就行. 就像水面的波纹也是由一个偏微分方程所描述的, 但水波微澜不定，自有万千形态. 
     - 那为什么我们好像指讨论过正弦波? 因为正弦波是 Maxwell 方程组的**特征解**, 其他的解都是特征解的线性组合. 所以只需要研究特征解就行了, 而 Maxwell 方程组的 Phasor 表示就是专门描述特征解的, 所以只需要研究 Phasor 表示就足够.
+
 
 - 要优雅地理解电磁场理论, 必须引入狭义相对论、四元数 (或 Maxwell 电磁张量). 在经典力学中, 比较难看清电磁场的本质.
 
@@ -47,8 +59,10 @@ csl: diabetologia.csl #https://github.com/citation-style-language/styles
     - 三叉乘操作等价于先投影 $\mathbf{a}$ 再旋转 $90^\circ$:
     ![](bac-cab.png){#fig-bac-cab width=50%}
 
-    - $\nabla^2 \neq \nabla \times \nabla$: 当 $\nabla^2$ 作用在向量场时, 约定为**作用在向量场的每个分量上**.
-    - 引入 $\nabla^2$ 是因为 $\nabla^2$ 是**二阶导**的自然高维推广 (而不是 $\nabla \times \nabla$). 用 $\nabla^2$ 列出的方程的每个分量一般就是二阶一维 PDE. 所以涉及到 $\nabla^2$ 的方程我们都 component-wise 地求解.
+    - **空间二阶导算子 $\nabla^2$**
+        - 当 $\nabla^2$ 作用在标量场 $\psi$ 上时, $\nabla^2 \psi \equiv \nabla \cdot \nabla \psi$.
+        - 当 $\nabla^2$ 作用在向量场上时, 约定为 **作用在向量场的每个分量上** (相当于三个标量场). 注意这个时候 $\nabla^2 \neq \nabla \times \nabla \neq \nabla \cdot \nabla $. 
+        - 引入 $\nabla^2$ 是因为 $\nabla^2$ 是**二阶导**的自然高维推广 (而不是 $\nabla \times \nabla$). 用 $\nabla^2$ 列出的方程的每个分量一般就是二阶一维 PDE. 所以涉及到 $\nabla^2$ 的方程我们都 component-wise 地求解.
 
 ### Vector fields 向量场 {#sec-vector-fields}
 
@@ -406,9 +420,9 @@ $$
 
 ### Potential functions 势函数的麦克斯韦方程组
 
-- 我们希望通过引入**势函数**来将 Maxwell 方程变成只有两个.
+- 我们希望通过引入**势函数**来将 Maxwell 方程变成只有两个 (称为 **D'Alembert 方程**).
 
-- 由 $\mathbf{B}$ 的无散性 (@eq-maxwell-2) 可引入**磁势** $\mathbf{A}$, 代入到 @eq-maxwell-3 由 $\mathbf{E}+\frac{\partial \mathbf{A}}{\partial t}$ 的无旋性可引入**电势** $\varphi$. 则中间两个式子变成了:
+- 我们拿出 Maxwell 方程组的中间两个 (@eq-maxwell-2 和 @eq-maxwell-3) 来定义[^define-potential] $\mathbf{A}$ 和 $\varphi$:
     $$
     \begin{cases}
         \nabla \cdot \mathbf{B} &= 0 \\
@@ -422,9 +436,20 @@ $$
     \end{cases}
     }
     $${#eq-potential-def}
-    @eq-potential-def 始终成立, 与 Gauge 无关.
+    - 由 $\mathbf{B}$ 的无散性 (@eq-maxwell-2) 可引入**磁势** $\mathbf{A}$.
+    - 代入到 @eq-maxwell-3 由 $\mathbf{E}+\frac{\partial \mathbf{A}}{\partial t}$ 的无旋性可引入**电势** $\varphi$.
 
-- 用 @eq-potential-def 将 @eq-maxwell-1 和 @eq-maxwell-4 的 $\mathbf{D}$ 和 $\mathbf{H}$ 替换掉, 得到 **D'Alembert 方程**:
+[^define-potential]: 说是定义, 其实没有 well-defined, 因为对于给定的 $\mathbf{B}$, 有无数个磁势 $\mathbf{A}$ 可以选择 (通过不同的 Gauge). 但是一旦选择了 $\mathbf{A}$ 的 Gauge, 由 @eq-potential-def 中右边的第二个式子可知 $\varphi$ 和 $\mathbf{A}$ 是关联在一起的, 所以 $\varphi$ 的 Gauge 也就随之确定了 (这叫做 **Gauge 变换**).
+
+- **Gauge 变换**: 由 @sec-vector-fields 有关 Gauge 的介绍可知: $\varphi$ 和 $\mathbf{A}$ 都不是唯一的, 他们可以分别选择各自的 Gauge 吗? 不能! 由 @eq-potential-def 知: $\mathbf{A}$ 和 $\varphi$ 是关联在一起的, 当 $\mathbf{A}$ 变化时, $\varphi$ 必须跟着变, 稍加推导可得:
+    $$
+    \begin{aligned}
+    A \to A + \nabla \psi \\
+    \varphi \to \varphi - \frac{\partial \psi}{\partial t}
+    \end{aligned}
+    $${#eq-gauge-transform}
+
+- 我们把剩下两个方程 (@eq-maxwell-1 和 @eq-maxwell-4) 用 @eq-potential-def 中的 $\mathbf{A}$ 和 $\varphi$ 替换掉, 得到 **D'Alembert 方程**:
     $$
     \begin{cases}
         \nabla \cdot \mathbf{D} &= \rho_f \\
@@ -437,37 +462,95 @@ $$
     \end{cases}
     $${#eq-d-alembert}
 
-    - **D'Alembert 算子** 是  Minkowski 时空 上的 Laplace 算子[^d-alembert]: $$\boxed{\Box^2 \equiv \nabla^2 - \epsilon \mu \frac{\partial^2}{\partial t^2}}$$
+    - **D'Alembert 算子**: 这个算子经常以整体出现, 是 Minkowski 时空 上的 Laplace 算子[^d-alembert]: $$\boxed{\Box^2 \equiv \nabla^2 - \epsilon \mu \frac{\partial^2}{\partial t^2}}$$
 
 [^d-alembert]: 有地方也省略平方, 或定义为相反数 (sign convention)
 
-- @eq-d-alembert 过于魔怔, 由 @sec-vector-fields 知: 我们可以通过 **Gauge 变换** 来简化方程:
-    $$
-    \begin{aligned}
-    A \to A + \nabla \psi \\
-    \varphi \to \varphi - \frac{\partial \psi}{\partial t}
-    \end{aligned}
-    $$
+- @eq-d-alembert 几乎快要对称[^symmetry]了, 但是第二个式子过于魔怔, 我们希望通过**选择一个合适的 Gauge**, 使后面的 $- \nabla (\nabla \cdot \mathbf{A} + \epsilon \mu \frac{\partial \varphi}{\partial t})$ 消失掉.
 
-    - **Coulomb gauge 库伦规范**: $\nabla \cdot \mathbf{A} = 0$, @eq-d-alembert 变为: "*rubbish*" ╯°Д°）╯
-        $$
-        \begin{cases}
-            \Box^2 \varphi = -\frac{1}{\epsilon} \rho_f \\
-            \Box^2 \mathbf{A} = \nabla (\epsilon \mu \frac{\partial \varphi}{\partial t}) - \mu \mathbf{j}_f
-        \end{cases}, \quad (\nabla^2 \psi = 0)
-        $$
-
-    - **Lorenz gauge 洛伦兹规范**[^lorenz]: $\nabla \cdot \mathbf{A} + \epsilon \mu \frac{\partial \varphi}{\partial t} = 0$, @eq-d-alembert 变为 ($4$ 维 Poisson 方程) : "*democratic*"
+    - **Lorenz gauge 洛伦兹规范**[^lorenz]: $$\boxed{\nabla \cdot \mathbf{A} + \epsilon \mu \frac{\partial \varphi}{\partial t} = 0}$${#eq-l-gauge} @eq-d-alembert 变为 ($4$ 维 Poisson 方程, 非常 nice!):
         $$
         \boxed{
         \begin{cases}
             \Box^2 \varphi = - \frac{1}{\epsilon} \rho_f \\
             \Box^2 \mathbf{A} = - \mu \mathbf{j}_f
-        \end{cases}, \quad (\Box^2 \psi = 0)
+        \end{cases}
         }
         $${#eq-lorenz}
 
-[^lorenz]: 此 Lorenz 非彼 Lorentz (
+    - **Coulomb gauge 库伦规范**: $$\boxed{\nabla \cdot \mathbf{A} = 0}$${#eq-c-gauge} @eq-d-alembert 变为: "*rubbish*" ╯°Д°）╯
+        $$
+        \begin{cases}
+            \Box^2 \varphi = -\frac{1}{\epsilon} \rho_f \\
+            \Box^2 \mathbf{A} = \nabla (\epsilon \mu \frac{\partial \varphi}{\partial t}) - \mu \mathbf{j}_f
+        \end{cases}
+        $$
+
+
+[^symmetry]: 为什么这里的 $\mu$ 好像对应的是 $1/\epsilon$? 不是说 $\mu$ 应该对应 $\epsilon$ 吗? 原因是 $\varphi$ 和 $\mathbf{A}$ 就不是「对应」的. $\varphi$ 用来定义了 $\mathbf{E}$, 照理来说 $\mathbf{E}$ 对应 $\mathbf{H}$, 所以应该定义 $\nabla \times \mathbf{A} := \mathbf{H}$, 但没这么做, 导致这个地方没有完全对称. 
+
+[^lorenz]: 此 Lorenz 非彼 Lorentz (. 而且这个式子并没有显式地给出 $\psi$ 是什么, 事实上能不能这样做是需要验证的, 如果存在合法的 $\psi$ 才能这么做! 所以我们后面对其进行了合法性验证.
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## Gauge 变换 (@eq-gauge-transform) 的证明
+
+两个势 ($\mathbf{A}$ 和 $\varphi$) 由以下式子相关联:
+$$
+\mathbf{E} =: -\frac{\partial \mathbf{A}}{\partial t} - \nabla \varphi
+$$
+
+当 $\mathbf{A}$ 变化成 $\mathbf{A} + \nabla \psi$ 时, 假设 $\varphi$ 变成了 $\varphi'$. 不管 $\mathbf{A}$, $\varphi$ 怎么变, $\mathbf{E}$ 都不能变, 即:
+$$
+\begin{aligned}
+-\frac{\partial \mathbf{A}}{\partial t} - \nabla \varphi &= -\frac{\partial (\mathbf{A} + \nabla \psi)}{\partial t} - \nabla \varphi' \\
+&= -\frac{\partial \mathbf{A}}{\partial t} - \nabla \frac{\partial \psi}{\partial t} - \nabla \varphi' \\
+&= -\frac{\partial \mathbf{A}}{\partial t} - \nabla (\varphi' + \frac{\partial \psi}{\partial t}) \\
+\implies \varphi &= \varphi' + \frac{\partial \psi}{\partial t} \\
+\implies \varphi' &= \varphi - \frac{\partial \psi}{\partial t}
+\end{aligned}
+$$
+
+Q.E.D.
+:::
+<!-- ----------------------------------------- -->
+
+
+<!-- ----------------------------------------- -->
+::: {.callout-important icon=true collapse=true}
+## Lorenz gauge 和 Coulomb gauge 的合法性验证
+
+我们需要证明 @eq-l-gauge 和 @eq-c-gauge 中确实定义了 $\psi$ (也许没有唯一定义, 但我们至少得证明存在一个合法的 $\psi$).
+
+- @eq-l-gauge 的合法性验证:
+
+    将 @eq-gauge-transform 代入 @eq-l-gauge, 得到:
+    $$
+    \begin{aligned}
+    \nabla \cdot (\mathbf{A} + \nabla \psi) + \epsilon \mu \frac{\partial}{\partial t} (\varphi - \frac{\partial \psi}{\partial t}) &= 0 \\
+    \implies \underbrace{\nabla \cdot \mathbf{A} + \epsilon \mu \frac{\partial \varphi}{\partial t}}_{0} + \nabla \cdot \nabla \psi - \epsilon \mu \frac{\partial^2 \psi}{\partial t^2} &= 0 \\
+    \implies \nabla^2 \psi - \epsilon \mu \frac{\partial^2 \psi}{\partial t^2} &= 0 \\
+    \implies \Box^2 \psi &= 0
+    \end{aligned}
+    $$
+
+    所以这样的 $\psi$ 肯定是存在的, 只要满足 $$\boxed{\Box^2 \psi = 0}$$ 所以 @eq-l-gauge 是合法的.
+
+- @eq-c-gauge 的合法性验证:
+
+    将 @eq-gauge-transform 代入 @eq-c-gauge, 得到:
+    $$
+    \begin{aligned}
+    \nabla \cdot (\mathbf{A} + \nabla \psi) &= 0 \\
+    \implies \underbrace{\nabla \cdot \mathbf{A}}_{0} + \nabla^2 \psi &= 0 \\
+    \implies \nabla^2 \psi &= 0
+    \end{aligned}
+    $$
+
+    同理, 这样的 $\psi$ 肯定也是存在的, 只要满足 $$\boxed{\nabla^2 \psi = 0}$$ 所以 @eq-c-gauge 也是合法的.
+:::
+<!-- ----------------------------------------- -->
+
 
 
 
@@ -484,7 +567,7 @@ $$
 $${#eq-maxwell-source-free-phasor}
 
 
-由于时谐波的情况下源项 $\mathbf{j}$ 一定也是时谐的: $\tilde{\mathbf{j}}_f = \sigma \tilde{\mathbf{E}}$, 我们代入 @eq-maxwell-source-free-phasor, 得到:
+由于时谐波的情况下产生的电流 $\mathbf{j}_f$ 一定也是时谐的: $\tilde{\mathbf{j}}_f = \sigma \tilde{\mathbf{E}}$, 我们代入 @eq-maxwell-source-free-phasor, 得到:
 
 $$
 \begin{cases} \nabla \cdot \mathbf{D} &= \rho_f \\ 
@@ -527,36 +610,6 @@ $${#eq-maxwell-source-free-phasor-complex}
         $${#eq-phasor-domain-solution}
         其中 $$\boxed{k_c = \omega \sqrt{\epsilon_c \mu}}$$ 注意 @eq-time-domain-solution 的耗散项 $-\sigma \mu \frac{\partial \mathbf{E}}{\partial t}$ 融入进了复介电常数 $\epsilon_c$ 里面.
 
-- 若**无源无损** ($\sigma = 0$), 则 @eq-time-domain-solution 变为 (右边的是 $4$ 维的 Laplace 方程描述):
-    - **时域化简结果**:
-        $$
-        \boxed{
-        \begin{cases}
-            \nabla^2 \mathbf{E} - \epsilon \mu \frac{\partial^2 \mathbf{E}}{\partial t^2} &= 0 \\
-            \nabla^2 \mathbf{H} - \epsilon \mu \frac{\partial^2 \mathbf{H}}{\partial t^2} &= 0 \\
-        \end{cases} \quad \text{or}
-        \begin{cases}
-        \Box^2 \mathbf{E} = 0 \\
-        \Box^2 \mathbf{H} = 0 \\
-        \end{cases}
-        }
-        $${#eq-maxwell-source-free-wave}
-    
-
-    - **相量域化简结果**: 与有损介质中的 @eq-phasor-domain-solution 一样 (这就是用复数的好处!), 只不过 $\epsilon_c$ 退化为了 $\epsilon$: $$k_c = \omega \sqrt{\epsilon \mu}$$
-
-
-- **Phase velocity 相速度**
-
-    - 将 @eq-maxwell-source-free-wave 与波动方程的一般形式比较, 可知**相速度** $$\boxed{v = \frac{1}{\sqrt{\epsilon \mu}}}$$
-
-        - 一般我们说的「波速」就是指相速度. 光在 $T$ 时间里刚好走了一个波长 $\lambda$ (见 @fig-wave-speed), 所以波速就是: $$\boxed{v := \frac{\lambda}{T} = \lambda f}$${#eq-wave-speed}
-        - **光速**: 真空中的波速. 神说「要有光」:$$c = \frac{1}{\sqrt{\epsilon_0 \mu_0}}.$$
-        - **特例**: 对于 $\epsilon_r, \mu_0$ 的介质, 波速为 $$v = \frac{1}{\sqrt{\epsilon_r \epsilon_0 \mu_0}} = \frac{c}{\sqrt{\epsilon_r}}$$
-
-:::{.column-margin}
-![光在 $T$ 时间里刚好走了一个波长 $\lambda$](wave-speed.png){#fig-wave-speed}
-:::
 
 
 <!-- ----------------------------------------- -->
@@ -608,9 +661,43 @@ $$
 
 
 
+
+- 若**无源无损** ($\sigma = 0$), 则 @eq-time-domain-solution 变为 (右边的是 $4$ 维的 Laplace 方程描述):
+    - **时域化简结果**:
+        $$
+        \boxed{
+        \begin{cases}
+            \nabla^2 \mathbf{E} - \epsilon \mu \frac{\partial^2 \mathbf{E}}{\partial t^2} &= 0 \\
+            \nabla^2 \mathbf{H} - \epsilon \mu \frac{\partial^2 \mathbf{H}}{\partial t^2} &= 0 \\
+        \end{cases} \quad \text{or}
+        \begin{cases}
+        \Box^2 \mathbf{E} = 0 \\
+        \Box^2 \mathbf{H} = 0 \\
+        \end{cases}
+        }
+        $${#eq-maxwell-source-free-wave}
+    
+
+    - **相量域化简结果**: 与有损介质中的 @eq-phasor-domain-solution 一样 (这就是用复数的好处!), 只不过 $\epsilon_c$ 退化为了 $\epsilon$: $$k_c = \omega \sqrt{\epsilon \mu}$$
+
+
+- **Phase velocity 相速度**
+
+    - 将 @eq-maxwell-source-free-wave 与波动方程的一般形式比较, 可知**相速度** $$\boxed{v = \frac{1}{\sqrt{\epsilon \mu}}}$$
+
+        - 一般我们说的「波速」就是指相速度. 光在 $T$ 时间里刚好走了一个波长 $\lambda$ (见 @fig-wave-speed), 所以波速就是: $$\boxed{v := \frac{\lambda}{T} = \lambda f}$${#eq-wave-speed}
+        - **光速**: 真空中的波速. 神说「要有光」:$$c = \frac{1}{\sqrt{\epsilon_0 \mu_0}}.$$
+        - **特例**: 对于 $\epsilon_r, \mu_0$ 的介质, 波速为 $$v = \frac{1}{\sqrt{\epsilon_r \epsilon_0 \mu_0}} = \frac{c}{\sqrt{\epsilon_r}}$$
+
+:::{.column-margin}
+![光在 $T$ 时间里刚好走了一个波长 $\lambda$](wave-speed.png){#fig-wave-speed}
+:::
+
+
+
 - **@eq-phasor-domain-solution 复值二阶 ODE 解的结构**:
 
-    设 $\mathbf{E}$ 是平行于 $z$ 传播的水平偏振时空谐波, $\tilde{\mathbf{E}}: \mathbb{R}^3 \to \mathbb{C}^3$ 为其相量场, 我们只考虑其 $x$ 分量 $f \equiv \tilde{E}^x: \mathbb{R}^3 \to \mathbb{C}$, 满足:
+    设 $\mathbf{E}$ 是平行于 $z$ 传播的水平偏振时谐波, $\tilde{\mathbf{E}}: \mathbb{R}^3 \to \mathbb{C}^3$ 为其相量场, 我们只考虑其 $x$ 分量 $f \equiv \tilde{E}^x: \mathbb{R}^3 \to \mathbb{C}$, 满足:
         $$
         \frac{\partial^2}{\partial z^2} f + k_c^2 f = 0
         $$
@@ -669,10 +756,10 @@ $$
     $$
     \boxed{
     \eta_c := \frac{\tilde{E}^x}{\tilde{H}^y} = \sqrt{\frac{\mu}{\epsilon_c}}}
-    $${#eq-intrinsic-impedance}
+    $${#eq-intrinsic-impedance-complex}
 
     - **$\eta_c$ 的单位恰好为 $\Omega$**: $E: [\text{V/m}], H: [\text{A/m}]$.
-    - 无损介质中 $\eta_c$ 退化为实数, 即 $$\eta = \frac{E}{H} = \sqrt{\frac{\mu}{\epsilon}}$$ 表明 **无损介质中 $\mathbf{E}$ 和 $\mathbf{H}$ 是同相的** (见 @fig-e-h-lossy). 而且我们有:
+    - 无损介质中 $\eta_c$ 退化为实数, 即 $$\eta = \frac{E}{H} = \sqrt{\frac{\mu}{\epsilon}}$${#eq-intrinsic-impedance-real} 表明 **无损介质中 $\mathbf{E}$ 和 $\mathbf{H}$ 是同相的** (见 @fig-e-h-lossy). 而且我们有:
         - **$E$ 恰好是 $B$ 的波速倍**: $$\boxed{\frac{E}{B} = \frac{E}{\mu H} = \frac{1}{\sqrt{\epsilon \mu}} = v}$$
         - **真空中的特征阻抗**: $$\eta_0 = \sqrt{\frac{\mu_0}{\epsilon_0}} \approx 377 ~\Omega$$ 说明一般情况下 $E$ 都要比 $H$ 大很多.
     
@@ -682,7 +769,7 @@ $$
 
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=true collapse=true}
-## 特征阻抗 @eq-intrinsic-impedance 的推导
+## 特征阻抗 @eq-intrinsic-impedance-complex 的推导
 
 设该电磁波是:
 
@@ -709,36 +796,100 @@ $$
 <!-- ----------------------------------------- -->
 
 
-
-### 平面波经过两种介质的界面
-
-> 一个时空谐波在经过两种介质的界面时, 会发生反射 (Reflect) 和折射 (继续传播, transmit), 这两种波的幅度怎么计算呢?
-
-- 直接利用切向边界条件:
-    $$
-    \begin{aligned}
-        &\begin{cases}
-        E_{1t} &= E_{2t} \\
-        H_{1t} &= H_{2t}
-        \end{cases} \\
-        \implies &
-        \begin{cases}
-        E_i + E_r &= E_t \\
-        H_i - H_r &= H_t
-        \end{cases} \\
-        \implies &
-        \begin{cases}
-        E_i + E_r &= E_t \\
-        \frac{E_i - E_r}{\eta_1} &= \frac{E_t}{\eta_2}
-        \end{cases} \\
-    \end{aligned}
-    $$
+- **电磁波的能量密度**: 在无损介质中, 空间中某一点的能量密度有电场和磁场的贡献: $$\boxed{u = \frac{1}{2} \epsilon E^2 + \frac{1}{2} \mu H^2}$$
+    - 由 @eq-intrinsic-impedance-real 可知: **电场和磁场贡献的能量是一样的**: $$\boxed{\frac{1}{2} \epsilon E^2 = \frac{1}{2} \mu H^2}$$
+    - 由于 $E$ 和 $H$ 在每一点都是不一样的, 假设是时谐波, 我们想求出空间中某一点 $u$ 的**时间平均值**. 只考虑电场, 其平均值为 $\epsilon E_m^2/4$, 再乘 $2$ 得: $$\langle u \rangle = \frac{1}{2} \epsilon E_m^2$${#eq-energy-density-average}
+    - **Energy Flux Density 能流密度**: 单位时间流过单位面积的能量 (即单位面积的**功率**, 也叫 **Intensity 强度**), 由于 $1\text{ s}$ 内单位面积吸收了数值上为波速 $v$ 长度的能量, 只需要将 @eq-energy-density-average 放大 $v$ 倍: $$I := \text{Energy Flux Density} = \frac{1}{2} v \epsilon E_m^2$$
+    - **Poynting vector $\mathbf{S}$**: 一个矢量, 我们希望用它的方向表征能量流动的方向, 长度的时间平均代表能流密度. 可以证明以下定义可同时满足这两个需求: $$\boxed{\mathbf{S} := \mathbf{E} \times \mathbf{H}}$${#eq-poynting-vector}
+        - $\langle S \rangle$ 与能流密度的关系: $$\langle S \rangle = I = \frac{1}{2} v \epsilon E_m^2$$
+        - $\langle \mathbf{S} \rangle$ 的相量表示: $$\boxed{\langle \mathbf{S} \rangle = \frac{1}{2} \Re (\tilde{\mathbf{E}} \times \tilde{\mathbf{H}}^*)}$${#eq-poynting-vector-phasor}
 
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=true collapse=true}
-## 从相量 Maxwell 方程组来看为什么会有反射
+## $\mathbf{S}$ 为什么这么定义 @eq-poynting-vector?
+
+首先 $\mathbf{S}$ 的方向肯定是波传播的方向, 我们只需要验证其长度的时间平均值是能流密度.
+
+$$
+\begin{aligned}
+S &= EH = \frac{E^2}{\eta} \\
+\implies \langle S \rangle &= \frac{1}{2} \frac{E_m^2}{\eta} \\
+&= \frac{1}{2} \sqrt{\frac{\epsilon}{\mu}} E_m^2 \\
+&= \frac{1}{2} \epsilon \sqrt{\frac{1}{\epsilon \mu}} E_m^2 \\
+&= \frac{1}{2} \epsilon v E_m^2 = \text{Energy Flux Density}
+\end{aligned}
+$$
+:::
+<!-- ----------------------------------------- -->
 
 
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## @eq-poynting-vector-phasor 的证明
+
+**Pf.**
+
+$$
+\begin{aligned}
+\mathbf{S} = \mathbf{E} \times \mathbf{H} &= \Re{(\tilde{\mathbf{E}} e^{j \omega t}) \times \Re{(\tilde{\mathbf{H}} e^{j \omega t})}} \\
+&= \frac{1}{2} \left(\tilde{\mathbf{E}} e^{j \omega t} + \tilde{\mathbf{E}}^* e^{-j \omega t}\right) \times \frac{1}{2} \left(\tilde{\mathbf{H}} e^{j \omega t} + \tilde{\mathbf{H}}^* e^{-j \omega t}\right) \\
+&= \frac{1}{4} \left(\tilde{\mathbf{E}} \times \tilde{\mathbf{H}} e^{2 j \omega t} + \tilde{\mathbf{E}} \times \tilde{\mathbf{H}}^* + \tilde{\mathbf{E}}^* \times \tilde{\mathbf{H}} + \tilde{\mathbf{E}}^* \times \tilde{\mathbf{H}}^* e^{-2 j \omega t}\right) \\
+\implies \langle \mathbf{S} \rangle = \langle \mathbf{E} \times \mathbf{H} \rangle &= \frac{1}{4} \left(\tilde{\mathbf{E}} \times \tilde{\mathbf{H}}^* + \tilde{\mathbf{E}}^* \times \tilde{\mathbf{H}}\right) \\
+&= \frac{1}{4} \left(\tilde{\mathbf{E}} \times \tilde{\mathbf{H}}^* + \left(\tilde{\mathbf{E}} \times \tilde{\mathbf{H}}^*\right)^*\right) \\
+&= \frac{1}{2} \Re (\tilde{\mathbf{E}} \times \tilde{\mathbf{H}}^*)
+\end{aligned}
+$$
+
+Q.E.D.
+:::
+<!-- ----------------------------------------- -->
+
+
+
+### 平面波经过两种介质的界面
+
+- 一个时谐波 $\mathbf{E}_i$ 从介质 1 入射 (Incident) 介质 2 时, 会发生反射 (Reflect) 和折射 (继续传播, Transmit), 这两种波的相量与入射波相量和介质的性质有关:
+    - **Reflection coefficient 反射系数**: $$\boxed{\Gamma := \frac{\tilde{E}_r}{\tilde{E}_i} = \frac{\eta_{2c} - \eta_{1c}}{\eta_{2c} + \eta_{1c}}}$${#eq-reflection-coefficient}
+    - **Transmission coefficient 透射系数**: $$\boxed{\tau := \frac{\tilde{E}_t}{\tilde{E}_i} = \frac{2 \eta_{2c}}{\eta_{2c} + \eta_{1c}}}$${#eq-transmission-coefficient}
+
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## 从边界条件推导反射系数和透射系数
+
+利用切向边界条件:
+
+$$
+\begin{aligned}
+    &\begin{cases}
+    \tilde{E}_{1t} &= \tilde{E}_{2t} \\
+    \tilde{H}_{1t} &= \tilde{H}_{2t}
+    \end{cases} \\
+    \implies &
+    \begin{cases}
+    \tilde{E}_i + \tilde{E}_r &= \tilde{E}_t \\
+    \tilde{H}_i - \tilde{H}_r &= \tilde{H}_t
+    \end{cases} \\
+    \implies &
+    \begin{cases}
+    \tilde{E}_i + \tilde{E}_r &= \tilde{E}_t \\
+    \frac{\tilde{E}_i - \tilde{E}_r}{\eta_{1c}} &= \frac{\tilde{E}_t}{\eta_{2c}}
+    \end{cases}
+\end{aligned}
+$$
+
+求解即可得到 @eq-reflection-coefficient 和 @eq-transmission-coefficient.
+
+**反射的本质**是为了让偏微分方程的解满足边界条件而引入的修正项, 如果不引入 $\tilde{E}_r$, 则由切向边界条件得:
+
+$$
+\begin{cases}
+\tilde{E}_i &= \tilde{E}_t \\
+\frac{\tilde{E}_i}{\eta_{1c}} &= \frac{\tilde{E}_t}{\eta_{2c}}
+\end{cases}
+$$
+
+这是无解的.
 
 :::
 <!-- ----------------------------------------- -->
@@ -767,11 +918,6 @@ $$
 
             ![线性世界中的参数 与 角度世界的参数 的关系](wave-properties.png){width=50%}
 
-### Plane wave 平面波
-
-#### Lossless medium 无损介质
-
-@eq-maxwell-source-free-wave
 
 ### Polarization 极化 (偏振)
 
