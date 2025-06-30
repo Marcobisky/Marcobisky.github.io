@@ -2,6 +2,41 @@
 title: "MacOS"
 ---
 
-## Prerequisites
+## MacOS 环境配置
 
-Test.
+官方 [Setup Guide](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html) 不适用于 MacOS. 以下是在 14-inch MacBook Pro (M2 pro) 上我执行过的命令, 可能有不必要的步骤.
+
+```zsh
+git clone https://github.com/google/CFU-Playground.git
+cd CFU-Playground
+# Check necessary tools
+which gcc
+which make
+which brew
+brew install openocd ccache verilator ninja libusb libftdi
+which expect
+```
+
+将 `scripts/setup` 中的 line 58-69 替换为:
+
+```bash
+# Check for libusb development libraries
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS: check for Homebrew libusb
+    if ! brew list libusb >/dev/null 2>&1 || ! brew list libftdi >/dev/null 2>&1; then
+        missing+=(libusb libftdi)
+    fi
+else
+    # Linux: check for apt packages
+    if ! (apt list -i | grep libusb-1.0-0-dev) ; then
+        missing+=(libusb-1.0-0-dev libftdi1-dev)
+    fi
+fi
+```
+
+再运行:
+
+```zsh
+./scripts/setup # Should end up "Setup complete"
+```
+

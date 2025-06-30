@@ -192,3 +192,20 @@ $$
 - **Minimum Stopband Attenuation 最小阻带衰减**: $\boxed{\alpha_s = -20 \lg \delta_s}$, 越大越好.
 
 	![Characteristics of a LPF](LPF.png)
+
+### Design 数字滤波器设计
+
+- **Objective**: 设计出来的必须是 causal 和 stable 的. IIR 和 FIR 的优缺点:
+	- **IIR**: 一般 lower order, 计算复杂度低, 但要确保稳定. 可想象成反馈系统.
+	- **FIR**: 一般 higher order, 计算复杂度高, 一定稳定. 可想象成开环系统.
+
+#### IIR 数字滤波器设计
+
+- **步骤**
+	- Convert the digital filter specifications into analog lowpass prototype one. (因为 analog filter 的设计方法有很多表可以查, 更成熟)
+	- Determine the analog lowpass filter $H_a(s)$ meeting these specifications.
+	- Transform it into the desired digital filter transfer function $G(z)$. (涉及到 $s$ 域到 $z$ 域的变换)
+		- **Impulse Invariance Method 脉冲不变法**: 数字系统的冲激响应是模拟系统冲激响应在采样点处的取值. (会发生混叠 aliasing)
+
+		![EXAMPLE: 脉冲不变法举例](Impulse-Invariance-Method.png){width=60%}
+		- **Bilinear Transformation 双线性变换**: 
