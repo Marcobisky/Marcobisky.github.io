@@ -4,39 +4,230 @@ title: "MacOS"
 
 ## MacOS 环境配置
 
-官方 [Setup Guide](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html) 不适用于 MacOS. 以下是在 14-inch MacBook Pro (M2 pro) 上我执行过的命令, 可能有不必要的步骤.
+以下是本人在 MacOS 试过的三种失败的方法, 供参考:
 
-```zsh
-git clone https://github.com/google/CFU-Playground.git
-cd CFU-Playground
-# Check necessary tools
-which gcc
-which make
-which brew
-brew install openocd ccache verilator ninja libusb libftdi
-which expect
-```
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## MacOS 原生部署 (未成功)
 
-将 `scripts/setup` 中的 line 58-69 替换为:
+官方 [Setup Guide](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html) 不适用于 MacOS, 本教程可以配合官方教程. 以下是在 14-inch MacBook Pro (M2 pro) 上我执行过的命令, 可能有不必要的步骤. 另外我之前安装过一些工具如 `make`, `brew`, `openocd` 等, 如有漏掉的步骤请用 `brew` 自行安装.
+
+1. CFU 环境配置
+
+    ```zsh
+    git clone https://github.com/google/CFU-Playground.git
+    cd CFU-Playground
+    # Check necessary tools
+    which gcc
+    which make
+    which brew
+    brew install openocd ccache verilator ninja libusb libftdi
+    which expect
+    ```
+
+    将 `scripts/setup` 中的 line 58-60 替换为:
+
+    ```bash
+    # Check for libusb development libraries
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS: check for Homebrew libusb
+        if ! brew list libusb >/dev/null 2>&1 || ! brew list libftdi >/dev/null 2>&1; then
+            missing+=(libusb libftdi)
+        fi
+    else
+        # Linux: check for apt packages
+        if ! (apt list -i | grep libusb-1.0-0-dev) ; then
+            missing+=(libusb-1.0-0-dev libftdi1-dev)
+        fi
+    fi
+    ```
+
+    再运行:
+
+    ```zsh
+    ./scripts/setup # Should end up "Setup complete"
+    ```
+
+    `Amaranth` 能让你用 `Python` 写硬件描述语言, 我们暂时不安装.
+
+2. FPGA 开源工具链 SymbiFlow 配置
+
+    `SymbiFlow` 是一个开源的 FPGA 工具链, 支持我们用的 `Arty A7-35T` 开发板. `F4PGA` (Framework for FPGA) 是它的下一代.
+
+    MacOS 上会遇到以下问题:
+
+    - dfu-util 包不可用
+    - flterm 包不可用
+    - Python 3.7 不支持
+
+    执行:
+
+    ```zsh
+    brew install dfu-util yosys
+    ```
+
+    将 `conf/environment-symbiflow.yml` 中替换为:
+
+    ```yaml
+    name: cfu-symbiflow
+    channels:
+    - defaults
+    - conda-forge
+    dependencies:
+    # Basic Python packages that should be available
+    - lxml
+    - simplejson
+    - intervaltree
+    - json-c
+    - libevent
+    - python=3.9
+    - pip
+    - pip:
+        - -r ./requirements-symbiflow.txt
+    ```
+
+    然后运行:
+
+    ```zsh
+    rm -rf env/symbiflow && make install-sf
+    ```
+
+    出现以下输出时表示安装成功:
+
+    ```
+    Done installing SymbiFlow.  To enter the environment, type 'make enter-sf', which creates a new subshell, and 'exit' when done.
+    ```
+
+    测试环境:
+
+    ```zsh
+    make enter-sf
+    exit
+    ```
+
+    以上方法会在执行
+    ```zsh
+    make prog TARGET=digilent_arty USE_SYMBIFLOW=1
+    ```
+
+    时出现错误, 因为我们删掉了很多 `python` 依赖. 这些依赖在 `litex-hub` 源里面没有 `osx-arm64` 的版本!!!
+:::
+<!-- ----------------------------------------- -->
+
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## MacOS 虚拟机部署 (未成功)
+
+CFU playground 里的 `environment-symbiflow` 里的很多依赖 (比如 `dfu-util` 和 `flterm` 等, 可以在 [Anaconda](https://anaconda.org) 里面搜索你需要的包) 只支持 `linux-64` 版本, M 芯片的 MacOS 上的 PD 好像只能安装 `linux-aarch64` 架构的虚拟机.
+
+![`gcc-riscv32-elf-newlib` 只支持 `linux-64`](image/env-setup/gcc-riscv32-elf-newlib.png)
+
+在你安装的虚拟机终端执行:
 
 ```bash
-# Check for libusb development libraries
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS: check for Homebrew libusb
-    if ! brew list libusb >/dev/null 2>&1 || ! brew list libftdi >/dev/null 2>&1; then
-        missing+=(libusb libftdi)
-    fi
-else
-    # Linux: check for apt packages
-    if ! (apt list -i | grep libusb-1.0-0-dev) ; then
-        missing+=(libusb-1.0-0-dev libftdi1-dev)
-    fi
-fi
+arch
 ```
 
-再运行:
+不能是 `aarch64` 才行, 需要是 `x86_64` 才能安装 `linux-64` 架构的包!!!
 
-```zsh
-./scripts/setup # Should end up "Setup complete"
+:::
+<!-- ----------------------------------------- -->
+
+
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## MacOS Docker 部署 (未成功)
+
+我们利用 Docker 来搭建 CFU Playground 环境, 这样可以避免 MacOS 上的架构问题. 自行安装 Docker, 然后将 `scripts/Dockerfile` 更改为:
+
+```dockerfile
+FROM debian:testing
+
+ENV RISCV_DIR=/toolchain/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14/bin
+ENV PATH="/third_party/renode:${RISCV_DIR}:${PATH}"
+ARG WORKDIR=/CFU-Playground
+
+RUN apt update -y && apt install -y wget git python3-pip make gcc openocd yosys expect ccache verilator libevent-dev libjson-c-dev libusb-1.0-0-dev libftdi1-dev vim curl bzip2 && rm -rf /var/lib/apt/lists/*
+
+# Install miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+    bash miniconda.sh -b -p /opt/conda && \
+    rm miniconda.sh && \
+    /opt/conda/bin/conda clean -ya
+
+ENV PATH="/opt/conda/bin:${PATH}"
+
+RUN mkdir /toolchain && cd /toolchain && wget --progress=dot:giga https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-8.3.0-2020.04.1-x86_64-linux-ubuntu14.tar.gz && tar xf riscv64*tar.gz && rm riscv64*tar.gz
+
+RUN mkdir -p /third_party/renode && wget --progress=dot:giga https://dl.antmicro.com/projects/renode/builds/renode-latest.linux-portable.tar.gz && tar xf renode-*tar.gz -C /third_party/renode --strip-components=1 && rm renode-*tar.gz && python3 -m pip install --break-system-packages -r /third_party/renode/tests/requirements.txt
+
+RUN git clone https://github.com/google/CFU-Playground ${WORKDIR}
+WORKDIR ${WORKDIR}
+
+RUN ./scripts/setup -ci
 ```
+
+然后在 `CFU-Playground` 目录下执行:
+
+```bash
+docker build -t cfu-playground --platform linux/amd64 ./scripts # Takes around 20 min
+```
+
+查看镜像:
+
+```bash
+docker images
+```
+
+逐条执行, 其中 `-v $(pwd):/workspace` 表示**当前目录 (宿主机)**挂载到容器的 `/workspace` 目录中 (数据共享通道).
+
+
+```bash
+docker run -it -v $(pwd):/workspace cfu-playground bash
+cd ../workspace
+./scripts/setup
+make install-sf # Takes around 9 min
+make enter-sf
+cd proj/proj_template
+make clean
+make prog TARGET=digilent_arty USE_SYMBIFLOW=1
+```
+
+这最后一条指令最后会报错:
+
+```bash
+Error: libusb_init() failed with LIBUSB_ERROR_OTHER
+
+Traceback (most recent call last):
+  File "./common_soc.py", line 57, in <module>
+    main()
+  File "./common_soc.py", line 53, in main
+    workflow.run()
+  File "/CFU-Playground/soc/board_specific_workflows/general.py", line 127, in run
+    self.load(soc, soc_builder)
+  File "/CFU-Playground/soc/board_specific_workflows/general.py", line 116, in load
+    prog.load_bitstream(bitstream_filename)
+  File "/CFU-Playground/third_party/python/litex/litex/build/openocd.py", line 27, in load_bitstream
+    self.call(["openocd", "-f", config, "-c", script])
+  File "/CFU-Playground/third_party/python/litex/litex/build/generic_programmer.py", line 101, in call
+    raise OSError(msg)
+OSError: Error occured during OpenOCD's call, please check:
+- OpenOCD installation.
+- Access permissions.
+- Hardware and cable.
+- Bitstream presence.
+```
+
+
+即 `libusb_init()` 函数初始化错误. 事实上不可能通过 Docker 给开发版烧录, MacOS 环境有一个隔离层, GPT 如是说:
+
+![不可能通过 Docker 给开发版烧录](./image/env-setup/docker-fail.png)
+
+:::
+<!-- ----------------------------------------- -->
+
+
+## Ubuntu 24.04 实体机部署
 
