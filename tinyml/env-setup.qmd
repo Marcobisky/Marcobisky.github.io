@@ -4,7 +4,7 @@ title: "MacOS"
 
 ## MacOS 环境配置
 
-以下是本人在 MacOS 试过的三种失败的方法, 供参考:
+以下是本人在 MacOS 试过的两种失败的方法, 供参考:
 
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=true collapse=true}
@@ -135,11 +135,6 @@ arch
 <!-- ----------------------------------------- -->
 
 
-
-<!-- ----------------------------------------- -->
-::: {.callout-note icon=true collapse=true}
-## MacOS Docker 部署 (未成功)
-
 我们利用 Docker 来搭建 CFU Playground 环境, 这样可以避免 MacOS 上的架构问题. 自行安装 Docker, 然后将 `scripts/Dockerfile` 更改为:
 
 ```dockerfile
@@ -225,9 +220,46 @@ OSError: Error occured during OpenOCD's call, please check:
 
 ![不可能通过 Docker 给开发版烧录](./image/env-setup/docker-fail.png)
 
-:::
-<!-- ----------------------------------------- -->
+但是可以生成比特流文件, 运行:
 
+```bash
+make bitstream TARGET=digilent_arty USE_SYMBIFLOW=1
+```
+
+如果要运行已经存在的容器 (例如叫 `romantic_austin`), 运行:
+
+```bash
+docker start -ai romantic_austin
+```
 
 ## Ubuntu 24.04 实体机部署
 
+我们用 Arty A7-100T 开发板.
+
+直接按照 [Setup Guide](https://cfu-playground.readthedocs.io/en/latest/setup-guide.html) 执行即可, 一般没问题. 有可能 `make install-sf` 会报错, 仅仅是网络连接的问题:
+
+```bash
+wget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220729-181657/symbiflow-arch-defs-install-xc7-7833050.tar.xz | tar -xJC env/symbiflow/xc7/install
+xz: (stdin): File format not recognized
+tar: Child returned status 1
+tar: Error is not recoverable: exiting now
+make: *** [Makefile:58: install-sf] Error 2
+```
+
+请把科学上网 (如 Clash Verge) 安装上 Service Mode, 然后打开 Tun Mode. 把 `Makefile` 中 63-65 行的三个 `wget` 改成:
+
+```bash
+	curl -L https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-install-xc7-${F4PGA_HASH}.tar.xz | tar -xJ -C $(SF_INSTALL)/xc7/install
+	curl -L https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a50t_test-${F4PGA_HASH}.tar.xz | tar -xJ -C $(SF_INSTALL)/xc7/install
+	curl -L https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${F4PGA_TIMESTAMP}/symbiflow-arch-defs-xc7a100t_test-${F4PGA_HASH}.tar.xz | tar -xJ -C $(SF_INSTALL)/xc7/install
+```
+
+即可跑通 `make install-sf`.
+
+如果没插入开发板, 运行:
+
+```bash
+make bitstream TARGET=digilent_arty USE_SYMBIFLOW=1
+```
+
+跑通即可.
