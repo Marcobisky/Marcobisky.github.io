@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "TinyML",
     "section": "",
-    "text": "0.1 Hi!\nThis is a personal project titled System-Level Co-Design and AI-EDA of RISC-V Accelerators for TinyML at the Edge under my supervisor LIYUN. His PhD student Jintao Li also helps me greatly. This is a place where I record my learning journey into TinyML and RISC-V accelerators – from scratch. So some of the content may be too basic or even technically incorrect, but they are, hopefully, informative and motivation-boosting for you thirsty learners.",
+    "text": "0.1 Hi!\nThis is a personal project titled System-Level Co-Design and AI-EDA of RISC-V Accelerators for TinyML at the Edge under my supervisor LIYUN. His PhD student Jintao Li also helps me greatly. This is a place where I record my learning journey into TinyML and RISC-V accelerators – from scratch. So some of the content may be too basic or even technically incorrect, but they are, hopefully, informative and motivation-boosting for you thirsty learners.\n本项目有关的代码主要存放在两个仓库:",
     "crumbs": [
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Prologue</span>"
     ]
@@ -22,12 +22,12 @@
   {
     "objectID": "env-setup.html",
     "href": "env-setup.html",
-    "title": "2  MacOS",
+    "title": "2  FPGA 开发环境配置",
     "section": "",
-    "text": "2.1 MacOS 环境配置\n以下是本人在 MacOS 试过的两种失败的方法, 供参考:\n我们利用 Docker 来搭建 CFU Playground 环境, 这样可以避免 MacOS 上的架构问题. 自行安装 Docker, 然后将 scripts/Dockerfile 更改为:\n然后在 CFU-Playground 目录下执行:\n查看镜像:\n逐条执行, 其中 -v $(pwd):/workspace 表示当前目录 (宿主机)挂载到容器的 /workspace 目录中 (数据共享通道).\n这最后一条指令最后会报错:\n即 libusb_init() 函数初始化错误. 事实上不可能通过 Docker 给开发版烧录, MacOS 环境有一个隔离层, GPT 如是说:\n但是可以生成比特流文件, 运行:\n如果要运行已经存在的容器 (例如叫 romantic_austin), 运行:",
+    "text": "2.1 Arty A7-100T CFU-playground 环境配置\n资料:",
     "crumbs": [
       "Environment Setup",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>MacOS</span>"
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>FPGA 开发环境配置</span>"
     ]
   },
   {
@@ -35,7 +35,7 @@
     "href": "index.html#hi",
     "title": "TinyML",
     "section": "",
-    "text": "Correctness is the enemy of progress. – Myself",
+    "text": "Correctness is the enemy of progress. – Myself\n\n\n\nMy TinyML Repo\nMy Forked CFU Playground",
     "crumbs": [
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Prologue</span>"
     ]
@@ -75,12 +75,12 @@
   {
     "objectID": "terms.html",
     "href": "terms.html",
-    "title": "5  Terms 名词解释",
+    "title": "6  Terms 名词解释",
     "section": "",
-    "text": "多数定义为 GPT 生成.\n\n\nCFU: Custom Function Unit (自定义功能单元). 为 ML 某些耗时的计算 (如卷积、矩阵乘法、位操作等) 定制的指令加速硬件模块.\n\n一旦主处理器执行到特定的 CFU 指令，就会将数据发送给 CFU 处理，然后 CFU 返回结果.\n\nPMOD (Peripheral Module) 接口: 一组 2*6 排针的引脚 PMOD. 定义了电源、地线、以及最多 8 条可用于通信的信号线. PMOD模块通常通过 SPI、I2C 或 GPIO (通用数字输入输出) 与主控通信. 你可以买到很多支持 PMOD 的模块, 如传感器、显示屏、存储器等.\nJTAG 接口: 一种用于调试和编程的标准接口.",
+    "text": "多数定义为 GPT 生成.\n\n\nCFU: Custom Function Unit (自定义功能单元). 为 ML 某些耗时的计算 (如卷积、矩阵乘法、位操作等) 定制的指令加速硬件模块.\n\n一旦主处理器执行到特定的 CFU 指令，就会将数据发送给 CFU 处理，然后 CFU 返回结果.\n\nPMOD (Peripheral Module) 接口: 一组 2*6 排针的引脚 PMOD. 定义了电源、地线、以及最多 8 条可用于通信的信号线. PMOD模块通常通过 SPI、I2C 或 GPIO (通用数字输入输出) 与主控通信. 你可以买到很多支持 PMOD 的模块, 如传感器、显示屏、存储器等.\nJTAG 接口: 一种用于调试和编程的标准接口.\n.pcf 文件: Physical Constraints File. .pcf 文件告诉工具：Verilog 中的某个逻辑信号，物理上应该接到 FPGA 的哪个 pin. 比如:\nset_io D1 B5\n表示把 D1 (在 .v 文件中定义的) 信号连接到 FPGA 的 B5 引脚.",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Terms 名词解释</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Terms 名词解释</span>"
     ]
   },
   {
@@ -88,7 +88,7 @@
     "href": "index.html#change-logs-更新日志",
     "title": "TinyML",
     "section": "0.2 Change Logs 更新日志",
-    "text": "0.2 Change Logs 更新日志\n\n2025-06-29: Initial commit.\n2025-07-06: 尝试在 MacOS 上原生搭建和用 Docker 搭建, 无果, 遂改用 Parallel Desktop 上安装 Ubuntu 24.04.\n2025-07-07: 发现在 M 芯片 MacOS 上无法安装 linux-64 架构, 改用 Docker 搭建环境成功 … 了一半, 最后因为 Docker 无法连接访问 MacOS 连接的 USB 而构建实例工程失败.\n2025-07-08: 喜提新 Thinkbook, 由于显卡和网卡驱动找不到安装 Debian 失败特别狂躁, Tonic 上报复性狂练 3 小时降 E 大调音阶. 后来安装 Ubuntu 24.04 实体机成功编译. btw, Spark 推荐的 AtlasOS 太好用啦, Synergy 同步 Win, Mac, IOS, Linux 剪切板太方便啦 (就是没有安卓hh)\n2025-07-09: 在 Ubuntu 24.04 上成功构建 CFU-Playground 的 /proj/proj_template 实例工程. 并且发现 MacOS 上也可以成功生成比特流文件.",
+    "text": "0.2 Change Logs 更新日志\n\n2025-06-29: Initial commit.\n2025-07-06: 尝试在 MacOS 上原生搭建和用 Docker 搭建, 无果, 遂改用 Parallel Desktop 上安装 Ubuntu 24.04.\n2025-07-07: 发现在 M 芯片 MacOS 上无法安装 linux-64 架构, 改用 Docker 搭建环境成功 … 了一半, 最后因为 Docker 无法连接访问 MacOS 连接的 USB 而构建实例工程失败.\n2025-07-08: 喜提新 Thinkbook, 由于显卡和网卡驱动找不到安装 Debian 失败特别狂躁, Tonic 上报复性狂练 3 小时降 E 大调音阶. 后来安装 Ubuntu 24.04 实体机成功编译. btw, Spark 推荐的 AtlasOS 太好用啦, Synergy 同步 Win, Mac, IOS, Linux 剪切板太方便啦 (就是没有安卓hh)\n2025-07-09: 在 Ubuntu 24.04 上成功构建 CFU-Playground 的 /proj/proj_template 实例工程. 并且发现 MacOS 上也可以用 Docker 成功生成比特流文件.\n2025-07-10: 在 Ubuntu 24.04 和 MacOS 上成功搭建 iCESugar-UP5K 开发环境, 并成功烧录! 完善了教程内容, 建立了 My TinyML Repo 用来存放 iCESugar-UP5K 开发板的例子代码和 ML 加速器的代码.",
     "crumbs": [
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Prologue</span>"
     ]
@@ -124,6 +124,50 @@
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Digital Circuit and Verilog 数字电路与 Verilog</span>"
+    ]
+  },
+  {
+    "objectID": "env-setup.html#arty-a7-100t-cfu-playground-环境配置",
+    "href": "env-setup.html#arty-a7-100t-cfu-playground-环境配置",
+    "title": "2  FPGA 开发环境配置",
+    "section": "",
+    "text": "官方 CFU Playground Setup Guide, 官方 CFU Github\nMy Forked CFU Playground\n\n\n2.1.1 MacOS Docker 部署\n以下是本人在 MacOS 试过的两种失败的方法, 供参考:\n\n\n\n\n\n\n\nMacOS 原生部署 (未成功)\n\n\n\n\n\n官方 Setup Guide 不适用于 MacOS, 本教程可以配合官方教程. 以下是在 14-inch MacBook Pro (M2 pro) 上我执行过的命令, 可能有不必要的步骤. 另外我之前安装过一些工具如 make, brew, openocd 等, 如有漏掉的步骤请用 brew 自行安装.\n\nCFU 环境配置\ngit clone https://github.com/google/CFU-Playground.git\ncd CFU-Playground\n# Check necessary tools\nwhich gcc\nwhich make\nwhich brew\nbrew install openocd ccache verilator ninja libusb libftdi\nwhich expect\n将 scripts/setup 中的 line 58-60 替换为:\n# Check for libusb development libraries\nif [[ \"$OSTYPE\" == \"darwin\"* ]]; then\n    # macOS: check for Homebrew libusb\n    if ! brew list libusb &gt;/dev/null 2&gt;&1 || ! brew list libftdi &gt;/dev/null 2&gt;&1; then\n        missing+=(libusb libftdi)\n    fi\nelse\n    # Linux: check for apt packages\n    if ! (apt list -i | grep libusb-1.0-0-dev) ; then\n        missing+=(libusb-1.0-0-dev libftdi1-dev)\n    fi\nfi\n再运行:\n# Should end up \"Setup complete\"\n./scripts/setup\nAmaranth 能让你用 Python 写硬件描述语言, 我们暂时不安装.\nFPGA 开源工具链 SymbiFlow 配置\nSymbiFlow 是一个开源的 FPGA 工具链, 支持我们用的 Arty A7-35T 开发板. F4PGA (Framework for FPGA) 是它的下一代.\nMacOS 上会遇到以下问题:\n\ndfu-util 包不可用\nflterm 包不可用\nPython 3.7 不支持\n\n执行:\nbrew install dfu-util yosys\n将 conf/environment-symbiflow.yml 中替换为:\nname: cfu-symbiflow\nchannels:\n- defaults\n- conda-forge\ndependencies:\n# Basic Python packages that should be available\n- lxml\n- simplejson\n- intervaltree\n- json-c\n- libevent\n- python=3.9\n- pip\n- pip:\n    - -r ./requirements-symbiflow.txt\n然后运行:\nrm -rf env/symbiflow && make install-sf\n出现以下输出时表示安装成功:\nDone installing SymbiFlow.  To enter the environment, type 'make enter-sf', which creates a new subshell, and 'exit' when done.\n测试环境:\nmake enter-sf\nexit\n以上方法会在执行 zsh  make prog TARGET=digilent_arty USE_SYMBIFLOW=1\n时出现错误, 因为我们删掉了很多 python 依赖. 这些依赖在 litex-hub 源里面没有 osx-arm64 的版本!!!\n\n\n\n\n\n\n\n\n\n\n\n\nMacOS 虚拟机部署 (未成功)\n\n\n\n\n\nCFU playground 里的 environment-symbiflow 里的很多依赖 (比如 dfu-util 和 flterm 等, 可以在 Anaconda 里面搜索你需要的包) 只支持 linux-64 版本, M 芯片的 MacOS 上的 PD 好像只能安装 linux-aarch64 架构的虚拟机.\n\n\n\ngcc-riscv32-elf-newlib 只支持 linux-64\n\n\n在你安装的虚拟机终端执行:\narch\n不能是 aarch64 才行, 需要是 x86_64 才能安装 linux-64 架构的包!!!\n\n\n\n\n我们利用 Docker 来搭建 CFU Playground 环境, 这样可以避免 MacOS 上的架构问题. 自行安装 Docker, 然后需要稍微改一下 scripts/Dockerfile 和 scripts/setup 脚本. 可以直接 clone 我的 fork:\ngit clone https://github.com/Marcobisky/CFU-Playground.git\n然后切换到 macos-env 分支, 在 CFU-Playground 目录下执行:\n# Takes around 20 min\ndocker build -t cfu-playground --platform linux/amd64 ./scripts\n查看镜像:\ndocker images\n逐条执行, 其中 -v $(pwd):/workspace 表示当前目录 (宿主机)挂载到容器的 /workspace 目录中 (数据共享通道). 但是以下命令不要在 /workspace 里面执行:\ndocker run -it -v $(pwd):/workspace cfu-playground bash\n./scripts/setup\n# Takes around 9 min\nmake install-sf\nmake enter-sf\ncd proj/proj_template\nmake clean\nmake bitstream TARGET=digilent_arty USE_SYMBIFLOW=1\n如果没报错, 恭喜你成功生成了比特流文件! 当你没插上板子的时候如果按照官方运行 make prog TARGET=digilent_arty USE_SYMBIFLOW=1 会报错:\nError: libusb_init() failed with LIBUSB_ERROR_OTHER\n\nTraceback (most recent call last):\n  File \"./common_soc.py\", line 57, in &lt;module&gt;\n    main()\n  File \"./common_soc.py\", line 53, in main\n    workflow.run()\n  File \"/CFU-Playground/soc/board_specific_workflows/general.py\", line 127, in run\n    self.load(soc, soc_builder)\n  File \"/CFU-Playground/soc/board_specific_workflows/general.py\", line 116, in load\n    prog.load_bitstream(bitstream_filename)\n  File \"/CFU-Playground/third_party/python/litex/litex/build/openocd.py\", line 27, in load_bitstream\n    self.call([\"openocd\", \"-f\", config, \"-c\", script])\n  File \"/CFU-Playground/third_party/python/litex/litex/build/generic_programmer.py\", line 101, in call\n    raise OSError(msg)\nOSError: Error occured during OpenOCD's call, please check:\n- OpenOCD installation.\n- Access permissions.\n- Hardware and cable.\n- Bitstream presence.\n即 libusb_init() 函数初始化错误. 事实上不可能通过 Docker 给开发版烧录, MacOS 环境有一个隔离层, GPT 如是说:\n\n\n\n不可能通过 Docker 给开发版烧录\n\n\n可以用两次 exit 退出容器 (第一次只会退出 enter-sf 的子 shell).\n如果要交互式运行已经存在的容器 (例如叫 romantic_austin), 运行:\ndocker start -ai romantic_austin\n\n\n2.1.2 Ubuntu 24.04 实体机部署\n我们用 Arty A7-100T 开发板.\n具体运行步骤几乎与 MacOS 一样, 直接按照 Setup Guide 执行即可. 如果 make install-sf 报错:\nwget -qO- https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/20220729-181657/symbiflow-arch-defs-install-xc7-7833050.tar.xz | tar -xJC env/symbiflow/xc7/install\nxz: (stdin): File format not recognized\ntar: Child returned status 1\ntar: Error is not recoverable: exiting now\nmake: *** [Makefile:58: install-sf] Error 2\n仅仅是网络连接的问题, 请把科学上网 (如 Clash Verge) 安装上 Service Mode, 然后打开 Tun Mode. 把 Makefile 中 63-65 行的三个 wget 改成 curl 的写法. 在我的 fork 上已经更改, 直接 clone 即可:\ngit clone https://github.com/Marcobisky/CFU-Playground.git\n让后切换到 ubuntu-env 分支, 即可跑通 make install-sf.\n如果没插入开发板, 运行:\nmake bitstream TARGET=digilent_arty USE_SYMBIFLOW=1\n即可跑通.",
+    "crumbs": [
+      "Environment Setup",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>FPGA 开发环境配置</span>"
+    ]
+  },
+  {
+    "objectID": "env-setup.html#icesugar-up5k-开发环境配置",
+    "href": "env-setup.html#icesugar-up5k-开发环境配置",
+    "title": "2  FPGA 开发环境配置",
+    "section": "2.2 iCESugar-UP5K 开发环境配置",
+    "text": "2.2 iCESugar-UP5K 开发环境配置\n资料:\n\n官方 icesugar: 重要! 用它来学习 iCESugar-UP5K 开发板.\nMy TinyML Repo\n\n\n2.2.1 MacOS 部署\n如果你没有安装 Homebrew 包管理器, 请先安装 (会自动先安装 Xcode 命令行工具, 输入密码的过程不可见, 装完了要按照提示将 brew 添加到 PATH 中):\n/bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"\n直接按 nextpnr 中的 next-pnr-ice40 的说明安装即可. 大致为以下几个命令 (可能有遗漏), 逐条执行:\ngit clone https://github.com/YosysHQ/nextpnr.git\ncd nextpnr\n# May not be successful immediately\nbrew install cmake python boost eigen\ngit submodule update --init --recursive\nbrew install boost\n# These two lines just to make sure dependencies are installed\nbrew install eigen\nmkdir -p build && cd build\ncmake .. -DARCH=ice40 -DICESTORM_INSTALL_PREFIX=/usr -DICEBOX_DATADIR=/usr/share/fpga-icestorm/chipdb\n# May be some error, please solve by yourself using GPT.\nmake -j$(nproc)\n# Check if nextpnr-ice40 is built\nls -la nextpnr-ice40\n# Install placing, routing and binary database format files\nsudo make install\n\n\n2.2.2 Ubuntu 24.04 实体机部署\n按 nextpnr 中的 next-pnr-ice40 的说明安装即可. i.e., 逐条执行:\ngit clone https://github.com/YosysHQ/nextpnr.git\nsudo apt update\nsudo apt install libboost-all-dev libboost-filesystem-dev libboost-program-options-dev libboost-iostreams-dev libboost-system-dev libboost-thread-dev libeigen3-dev\ngit submodule update --init --recursive\nmkdir -p build && cd build\nsudo apt install fpga-icestorm\ncmake .. -DARCH=ice40 -DICESTORM_INSTALL_PREFIX=/usr -DICEBOX_DATADIR=/usr/share/fpga-icestorm/chipdb\nmake -j$(nproc)\n# Check if nextpnr-ice40 is built\nls -la nextpnr-ice40\n# Install placing, routing and binary database format files\nsudo make install\n\n\n2.2.3 blink 例子测试\n用 My TinyML Repo 的 blink 例子测试一下. 将 iCESugar 开发板连接到电脑 (注意不要用 JTAG 调试器, 直接用 C 口连接电脑). 按以下方式生成比特流 blink.bin:\ncd iCESugar/examples/blink\nmake\n在 Ubuntu 上可通过以下方式烧录:\nsudo icesprog blink.bin\n在 MacOS 上, 好像安装不上 icesprog, 直接将 blink.bin 拷贝到 iCESugar 虚拟磁盘上即可烧录.\n\n\n\n\n\n\n\n烧录方法注意\n\n\n\n\n\n\nUbuntu\n一定要用 sudo icesprog! 单用 iceprog 会报错:\ninit..\nCan't find iCE FTDI USB device (vendor_id 0x0403, device_id 0x6010 or 0x6014).\nABORT.\nMacOS\n注意 MacOS 上 iceprog 和 icesprog 烧录工具都不能用!\nMacOS 上的烧录工具 iceprog 不能识别到 FTDI 设备, 这可能是 MacOS 上的 USB 设备权限问题, 本人尝试过安装 FTDI 驱动, 安装手册见这里. 安装的时候如果不小心点了 OK, 安装程序会提示 “awaiting approval”, 解决方法见这里. 但是安装好了, Mac 还是识别不到开发板.",
+    "crumbs": [
+      "Environment Setup",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>FPGA 开发环境配置</span>"
+    ]
+  },
+  {
+    "objectID": "cc-fpga.html",
+    "href": "cc-fpga.html",
+    "title": "4  FPGA 原理速成",
+    "section": "",
+    "text": "4.1 编译过程",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-fpga.html#编译过程",
+    "href": "cc-fpga.html#编译过程",
+    "title": "4  FPGA 原理速成",
+    "section": "",
+    "text": "4.1.1 Synthesis 综合\n\n动机: FPGA 不懂 “行为”, 它需要的是 “你想用哪些门, 怎么连线”. 所以 Synthesis 是将你写的 .v 逻辑翻译成各种 Logic gates 应该如何连接 (门级网表) 的过程 (以 .json 格式输出).",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   }
 ]
