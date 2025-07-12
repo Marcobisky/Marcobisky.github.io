@@ -245,7 +245,28 @@ git clone https://github.com/Marcobisky/CFU-Playground.git
 make bitstream TARGET=digilent_arty USE_SYMBIFLOW=1
 ```
 
-即可跑通.
+即可跑通. 若已经插入开发板, 则运行:
+
+```bash
+make prog TARGET=digilent_arty USE_SYMBIFLOW=1 EXTRA_LITEX_ARGS='--variant=a7-100'
+make load BUILD_JOBS=4 TARGET=digilent_arty EXTRA_LITEX_ARGS='--variant=a7-100'
+```
+
+<!-- ----------------------------------------- -->
+::: {.callout-important icon=true collapse=true}
+## Important
+
+如果你跟我一样用的是 Arty A7-100T **而不是 35T**, 必须加上 `EXTRA_LITEX_ARGS='--variant=a7-100'` 参数 (见 [CFU Wiki](https://github.com/google/CFU-Playground/wiki/Supported-Boards)), 否则程序会卡在 `make load` 这一步, 并且会一直卡在这里 (按 enter 也没有用, 只能两下 Ctrl+C 退出):
+
+```bash
+/home/merlin/fpga/CFU-Playground/soc/bin/litex_term --speed 3686400  --kernel /home/merlin/fpga/CFU-Playground/proj/proj_template/build/software.bin /dev/ttyUSB1
+```
+
+当然卡在这里还有可能是其它问题: 见 [Issue #787](https://github.com/google/CFU-Playground/issues/787), [Issue #775](https://github.com/google/CFU-Playground/issues/775).
+
+:::
+<!-- ----------------------------------------- -->
+
 
 
 
