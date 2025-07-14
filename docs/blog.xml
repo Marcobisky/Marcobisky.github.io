@@ -10,7 +10,557 @@
 <atom:link href="https://marcobisky.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Getting better every second!</description>
 <generator>quarto-1.6.41</generator>
-<lastBuildDate>Sat, 28 Jun 2025 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 13 Jul 2025 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>Touchpad Cannot Use for Ubuntu 24.04 on Thinkbook 16+ Solution</title>
+  <dc:creator>Marcobisky </dc:creator>
+  <link>https://marcobisky.github.io/posts/ubuntu-touchpad/</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="synaptics-配置文件" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="synaptics-配置文件"><span class="header-section-number">1</span> Synaptics 配置文件</h2>
+<p>在 Thinkbook 16+ 2025 上装好 Ubuntu 24.04 后会发现触控板只有右键能用, 不是驱动的问题, 在设置里配置也没有用, 先看看触控板设备的 id 是多少:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">xinput</span> list</span></code></pre></div>
+<p>输出类似:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">⎡</span> Virtual core pointer                          id=2    [master pointer  <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">3</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">⎜</span>   ↳ Virtual core XTEST pointer                id=4    [slave  pointer  <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">2</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">⎜</span>   ↳ Logitech G304                             id=8    [slave  pointer  <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">2</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-4"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">⎜</span>   ↳ GXTP5100:00 27C6:01E9                     id=9    [slave  pointer  <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">2</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">⎜</span>   ↳ GXTP5100:00 27C6:01E9                     id=10   [slave  pointer  <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">2</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-6"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">⎣</span> Virtual core keyboard                         id=3    [master keyboard <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">2</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-7">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">↳</span> Virtual core XTEST keyboard               id=5    [slave  keyboard <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">3</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-8">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">↳</span> Video Bus                                 id=6    [slave  keyboard <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">3</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-9">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">↳</span> Power Button                              id=7    [slave  keyboard <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">3</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-10">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">↳</span> Ideapad extra buttons                     id=11   [slave  keyboard <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">3</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-11">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">↳</span> Intel HID events                          id=12   [slave  keyboard <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">3</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-12">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">↳</span> Intel HID 5 button array                  id=13   [slave  keyboard <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">3</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-13">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">↳</span> AT Translated Set 2 keyboard              id=14   [slave  keyboard <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">3</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb2-14">    <span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">↳</span> Logitech G304                             id=15   [slave  keyboard <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">(</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">3</span><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">)</span><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">]</span></span></code></pre></div>
+<p>找到触控板 (例如 <code>GXTP5100:00 27C6:01E9</code>), 然后查看它的属性:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">xinput</span> list-props <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"GXTP5100:00 27C6:01E9"</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">|</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">grep</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-E</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"(Tapping|Natural|Scrolling|Accel|Click)"</span></span></code></pre></div>
+<p>若有多个触控板设备, 则提示:</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">Warning:</span> There are multiple devices matching <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'GXTP5100:00 27C6:01E9'</span>.</span>
+<span id="cb4-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">To</span> ensure the correct one is selected, please use the device ID, or prefix the</span>
+<span id="cb4-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">device</span> name with <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'pointer:'</span> or <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'keyboard:'</span> as appropriate.</span>
+<span id="cb4-4"></span>
+<span id="cb4-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">unable</span> to find device GXTP5100:00 27C6:01E9</span></code></pre></div>
+<p>可以分别查看他们的属性 (记得把 id 换成你自己的):</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">xinput</span> list-props 9  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># id = 9</span></span>
+<span id="cb5-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">xinput</span> list-props 10 <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># id = 10</span></span></code></pre></div>
+<p>选一个改变其参数, 然后试试触控板能不能用, 比如改 <code>id = 10</code> 的属性:</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">xinput</span> set-prop 10 <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Synaptics Finger"</span> 0 0 0                  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 设置触控板压力灵敏度为超轻触, 改完了试试</span></span></code></pre></div>
+<p>这里顺带也改了触控板的方向吧, 不然是反着的:</p>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">xinput</span> set-prop 10 <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Synaptics Scrolling Distance"</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-300</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-300</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 设置自然/反向滚动 (速度较慢)</span></span></code></pre></div>
+<p>但是这样改完了重启电脑后会自动消失, 需要加个配置文件才能永久:</p>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> mkdir <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-p</span> /etc/X11/xorg.conf.d</span></code></pre></div>
+<p>建立文件 <code>/etc/X11/xorg.conf.d/70-synaptics-touchpad.conf</code>, 加入 (我也顺带改了光标移动速度和 scroll 速度):</p>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode conf code-with-copy"><code class="sourceCode toml"><span id="cb9-1"><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Section</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"InputClass"</span></span>
+<span id="cb9-2">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Identifier</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"touchpad"</span></span>
+<span id="cb9-3">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Driver</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"synaptics"</span></span>
+<span id="cb9-4">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">MatchIsTouchpad</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"on"</span></span>
+<span id="cb9-5">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">MatchDevicePath</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"/dev/input/event*"</span></span>
+<span id="cb9-6">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Enable tapping</span></span>
+<span id="cb9-7">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"TapButton1"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"1"</span></span>
+<span id="cb9-8">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"TapButton2"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"3"</span></span>
+<span id="cb9-9">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"TapButton3"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"2"</span></span>
+<span id="cb9-10">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Set finger pressure sensitivity (ultra light touch)</span></span>
+<span id="cb9-11">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"FingerLow"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"0"</span></span>
+<span id="cb9-12">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"FingerHigh"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"0"</span></span>
+<span id="cb9-13">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Enable natural/reverse scrolling (slower speed)</span></span>
+<span id="cb9-14">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"VertScrollDelta"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"-300"</span></span>
+<span id="cb9-15">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"HorizScrollDelta"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"-300"</span></span>
+<span id="cb9-16">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Enable two-finger scrolling</span></span>
+<span id="cb9-17">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"VertTwoFingerScroll"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"1"</span></span>
+<span id="cb9-18">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"HorizTwoFingerScroll"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"1"</span></span>
+<span id="cb9-19">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Disable edge scrolling (prefer two-finger)</span></span>
+<span id="cb9-20">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"VertEdgeScroll"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"0"</span></span>
+<span id="cb9-21">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"HorizEdgeScroll"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"0"</span></span>
+<span id="cb9-22">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Enable palm detection</span></span>
+<span id="cb9-23">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"PalmDetect"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"1"</span></span>
+<span id="cb9-24">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"PalmMinWidth"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"10"</span></span>
+<span id="cb9-25">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"PalmMinZ"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"200"</span></span>
+<span id="cb9-26">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Mouse movement speed settings</span></span>
+<span id="cb9-27">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"MinSpeed"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"1.5"</span></span>
+<span id="cb9-28">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"MaxSpeed"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"2.5"</span></span>
+<span id="cb9-29">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"AccelFactor"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"0.042817"</span></span>
+<span id="cb9-30">    <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Option</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"ConstantDeceleration"</span> <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">"1.5"</span></span>
+<span id="cb9-31"><span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">EndSection</span></span></code></pre></div>
+<p>各参数作用可自行了解修改.</p>
+<p>使其生效:</p>
+<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> chmod 644 /etc/X11/xorg.conf.d/70-synaptics-touchpad.conf</span>
+<span id="cb10-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> systemctl restart gdm3 <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 或者重启电脑</span></span></code></pre></div>
+</section>
+<section id="optional-安装-libinput10" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="optional-安装-libinput10"><span class="header-section-number">2</span> Optional: 安装 <code>libinput10</code></h2>
+<p><code>libinput10</code> 可以让你用 Mac 手势控制电脑. 参考 <a href="https://wayland.freedesktop.org/libinput/doc/latest/index.html">libinput 官方说明</a></p>
+<p><strong>注意</strong>: 不要按 <a href="https://medium.com/@dakshin.k1/enable-3-finger-gesture-for-click-and-drag-on-windows-and-linux-cd7165b66851">这里</a> 直接下载编译好的文件, 请自行源码编译! 如果搞爆了, 按 Section&nbsp;2.2 的方法修复.</p>
+<section id="开启-ssh" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="开启-ssh"><span class="header-section-number">2.1</span> 开启 SSH</h3>
+<p>由于操作可能会导致 GNOME 桌面环境崩溃, 先确保 SSH 已经开启, 以便后续可以远程操作:</p>
+<div class="sourceCode" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt update</span>
+<span id="cb11-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt install openssh-server</span>
+<span id="cb11-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> systemctl status ssh <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># check if SSH is running, if not, start it:</span></span>
+<span id="cb11-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> systemctl start ssh  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># If use `sudo systemctl enable ssh`, SSH will start automatically on boot</span></span></code></pre></div>
+<p>获取 IP:</p>
+<div class="sourceCode" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">hostname</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-I</span></span></code></pre></div>
+</section>
+<section id="sec-recovery" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="sec-recovery"><span class="header-section-number">2.2</span> 恢复方法</h3>
+<p>如果:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://marcobisky.github.io/posts/ubuntu-touchpad/cover.jpg" class="img-fluid figure-img" style="width:70.0%"></p>
+<figcaption>A problem has occurred and the system can’t recover</figcaption>
+</figure>
+</div>
+<p>别慌, 进入 TTY: Ctrl + Alt + F3 (或 F4/F5), 输入用户名和密码登录 (如果你可以 SSH 上去也可以远程), 然后:</p>
+<div class="sourceCode" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt-get update</span>
+<span id="cb13-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt-get install <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--reinstall</span> libinput10</span>
+<span id="cb13-3"></span>
+<span id="cb13-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 删除你自己 cp 的错误文件（如果还在）</span></span>
+<span id="cb13-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> rm <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-f</span> /usr/lib/x86_64-linux-gnu/libinput.so.10.14.0</span>
+<span id="cb13-6"></span>
+<span id="cb13-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 删除错误链接（如果它仍然指向 10.14.0）</span></span>
+<span id="cb13-8"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> rm <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-f</span> /usr/lib/x86_64-linux-gnu/libinput.so.10</span>
+<span id="cb13-9"></span>
+<span id="cb13-10"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 手动建立正确的符号链接</span></span>
+<span id="cb13-11"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> ln <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-s</span> libinput.so.10.13.0 /usr/lib/x86_64-linux-gnu/libinput.so.10</span>
+<span id="cb13-12"></span>
+<span id="cb13-13"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 刷新链接缓存</span></span>
+<span id="cb13-14"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> ldconfig</span>
+<span id="cb13-15"></span>
+<span id="cb13-16"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ls</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-l</span> /usr/lib/x86_64-linux-gnu/libinput.so.10<span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">*</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 确认链接是否正确</span></span>
+<span id="cb13-17"></span>
+<span id="cb13-18"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> reboot</span></code></pre></div>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>Linux</category>
+  <guid>https://marcobisky.github.io/posts/ubuntu-touchpad/</guid>
+  <pubDate>Sun, 13 Jul 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://marcobisky.github.io/posts/ubuntu-touchpad/cover.jpg" medium="image" type="image/jpeg"/>
+</item>
 <item>
   <title>DSP Crash Course 数字信号处理速成笔记</title>
   <dc:creator>Marcobisky </dc:creator>
@@ -12170,138 +12720,6 @@ font-style: inherit;">killall</span> Dock</span></code></pre></div>
   <guid>https://marcobisky.github.io/posts/java-to-launchpad/</guid>
   <pubDate>Tue, 10 Sep 2024 16:00:00 GMT</pubDate>
   <media:content url="https://marcobisky.github.io/posts/java-to-launchpad/cover.png" medium="image" type="image/png" height="95" width="136"/>
-</item>
-<item>
-  <title>Create your own website using Hugo on MacOS</title>
-  <dc:creator>Marcobisky </dc:creator>
-  <link>https://marcobisky.github.io/posts/create-first-web/</link>
-  <description><![CDATA[ 
-
-
-
-
-<section id="introduction-and-overview" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="introduction-and-overview"><span class="header-section-number">1</span> Introduction and Overview</h2>
-<p>Building a generic website from scratch is a tough work. However, personal websites for blogs, a special type of website, is actually programmatic. <a href="https://gohugo.io">Hugo</a> provides a convenient building templates for that. To make a new blog in Hugo, one could only just create a new folder, write a markdown file (in a specific format) and that’s it. You don’t need ANY knowledge about HTML or CSS. Well do you need to buy a domain name for everyone to see your posts? Well, GitHub Pages is a free service where you just push some contents in a repository of your own with some extremely easy command line, you created your sites of names like <code>yourname.github.io</code>.</p>
-</section>
-<section id="tools-needed" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="tools-needed"><span class="header-section-number">2</span> Tools needed</h2>
-<section id="homebrew-packet-manager" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="homebrew-packet-manager"><span class="header-section-number">2.1</span> Homebrew (Packet Manager)</h3>
-<p>We will use a packet manager called Homebrew to install Hugo. Follow the commands <a href="https://brew.sh">here</a> to download Homebrew first, or you can execute:</p>
-<pre><code>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"</code></pre>
-<p>Once downloaded, if you don’t get any error by entering this in the terminal in any folder, you installed it properly (Install testing):</p>
-<pre><code>brew --version</code></pre>
-</section>
-<section id="git-version-control-system" class="level3" data-number="2.2">
-<h3 data-number="2.2" class="anchored" data-anchor-id="git-version-control-system"><span class="header-section-number">2.2</span> Git (Version Control System)</h3>
-<p>You can use Homebrew to install Git:</p>
-<pre><code>brew install git
-git --version # install testing</code></pre>
-</section>
-</section>
-<section id="install-hugo" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="install-hugo"><span class="header-section-number">3</span> Install Hugo</h2>
-<p>Run this in any folder:</p>
-<pre><code>brew install hugo</code></pre>
-<p>Install testing:</p>
-<pre><code>hugo version</code></pre>
-</section>
-<section id="run-example-theme" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="run-example-theme"><span class="header-section-number">4</span> Run Example Theme</h2>
-<section id="create-framework" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="create-framework"><span class="header-section-number">4.1</span> Create Framework</h3>
-<p>Enter the terminal in any folder, you will be creating another main folder called <code>mysite</code> in it. Folder <code>mysite</code> will contain all the contents that are relevant to your website:</p>
-<pre><code>hugo new site mysite
-cd mysite</code></pre>
-<p>Folder <code>mysite</code> should look like this:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/create-first-web/mysite-initial.png" class="img-fluid figure-img"></p>
-<figcaption>Inside <code>mysite</code> folder</figcaption>
-</figure>
-</div>
-<p>with most folders in it empty. This is the framework.</p>
-</section>
-<section id="choose-theme" class="level3" data-number="4.2">
-<h3 data-number="4.2" class="anchored" data-anchor-id="choose-theme"><span class="header-section-number">4.2</span> Choose Theme</h3>
-<p>The <code>themes</code> folder is empty, now we will add some code representing a theme inside it. Now choose a template <a href="https://themes.gohugo.io">here</a> and downlaod its source code folder inside the <code>themes</code> folder. I use <a href="https://github.com/CaiJimmy/hugo-theme-stack">Stack</a></p>
-<pre><code>cd themes/
-git clone https://github.com/CaiJimmy/hugo-theme-stack.git # Replace as needed</code></pre>
-</section>
-<section id="run-theme" class="level3" data-number="4.3">
-<h3 data-number="4.3" class="anchored" data-anchor-id="run-theme"><span class="header-section-number">4.3</span> Run Theme</h3>
-<p>Now there should be a folder inside <code>themes</code>. Now copy all the things inside a folder like <code>exampleSite</code> into the main <code>mysite</code> folder (‘’replace’’).</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/create-first-web/copy-4-files.png" class="img-fluid figure-img"></p>
-<figcaption>Copy the contents in <code>exampleSite</code> into <code>mysite</code></figcaption>
-</figure>
-</div>
-<p>Go to the main <code>mysite</code> folder and remove the original <code>hugo.tomal</code> file, or you can do:</p>
-<pre><code>pwd # should be in "mysite"
-rm hugo.tomal</code></pre>
-<p>Then (in <code>mysite</code> folder), run:</p>
-<pre><code>hugo server -D</code></pre>
-<p>it will prompt something like:</p>
-<pre><code>Built in 865 ms
-Environment: "development"
-Serving pages from disk
-Running in Fast Render Mode. For full rebuilds on change: hugo server --disableFastRender
-Web Server is available at http://localhost:53844/ (bind address 127.0.0.1) 
-Press Ctrl+C to stop</code></pre>
-<p>Enter the link provided (<code>http://localhost:53844/</code>). You are done!</p>
-</section>
-</section>
-<section id="play-around" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="play-around"><span class="header-section-number">5</span> Play Around</h2>
-<p>This is easy, just compare the contents in each folder and the website and modify things a little.</p>
-</section>
-<section id="publish-your-website" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="publish-your-website"><span class="header-section-number">6</span> Publish your website</h2>
-<p>Note the link (<code>http://localhost:53844/</code>) is private and cannot be visited on other devices. So follow these steps to publish it:</p>
-<section id="create-github-repository" class="level3" data-number="6.1">
-<h3 data-number="6.1" class="anchored" data-anchor-id="create-github-repository"><span class="header-section-number">6.1</span> Create GitHub Repository</h3>
-<p>Go to your GitHub page and click ‘+’ on the right upper corner, choose <code>New repository</code> and name it like this:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/create-first-web/repo.png" class="img-fluid figure-img"></p>
-<figcaption>Name of your repository</figcaption>
-</figure>
-</div>
-<p>i.e., <code>yourname.github.io</code>, which will be your own domain name.</p>
-</section>
-<section id="push-contents" class="level3" data-number="6.2">
-<h3 data-number="6.2" class="anchored" data-anchor-id="push-contents"><span class="header-section-number">6.2</span> Push Contents</h3>
-<p>Run this:</p>
-<pre><code>hugo --theme=hugo-theme-stack --baseURL="https://yourname.github.io/" --buildDrafts</code></pre>
-<p>Then push the contents in your folder <code>public</code> on it by:</p>
-<pre><code>cd public
-git init
-git remote add origin https://github.com/yourname/yourname.github.io.git # change as needed
-git add .
-git commit -m "Initial commit"
-git push -u origin main</code></pre>
-<p>You can access your website on <code>https://yourname.github.io/</code> within several minutes.</p>
-</section>
-<section id="notes" class="level3" data-number="6.3">
-<h3 data-number="6.3" class="anchored" data-anchor-id="notes"><span class="header-section-number">6.3</span> Notes</h3>
-<p>After you change contents locally, the contents on <code>https://yourname.github.io/</code> will not change automatically, you will have to push it on GitHub again:</p>
-<pre><code>cd public
-git add .
-git commit -m "Add something new"
-git push origin main</code></pre>
-<p>Also the public website will not update instantly, you will have to wait several minutes.</p>
-
-
-</section>
-</section>
-
- ]]></description>
-  <category>CS</category>
-  <guid>https://marcobisky.github.io/posts/create-first-web/</guid>
-  <pubDate>Fri, 30 Aug 2024 16:00:00 GMT</pubDate>
-  <media:content url="https://marcobisky.github.io/posts/create-first-web/cover.jpg" medium="image" type="image/jpeg"/>
 </item>
 </channel>
 </rss>
