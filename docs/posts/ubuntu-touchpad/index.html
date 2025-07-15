@@ -260,37 +260,42 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>但是这样改完了重启电脑后会自动消失, 需要加个配置文件才能永久:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> mkdir <span class="at">-p</span> /etc/X11/xorg.conf.d</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>建立文件 <code>/etc/X11/xorg.conf.d/70-synaptics-touchpad.conf</code>, 加入 (我也顺带改了光标移动速度和 scroll 速度):</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode conf code-with-copy"><code class="sourceCode toml"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">Section</span> <span class="dt">"InputClass"</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Identifier</span> <span class="dt">"touchpad"</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Driver</span> <span class="dt">"synaptics"</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">MatchIsTouchpad</span> <span class="dt">"on"</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">MatchDevicePath</span> <span class="dt">"/dev/input/event*"</span></span>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>70-synaptics-touchpad.conf</strong></pre>
+</div>
+<div class="sourceCode" id="cb9" data-filename="70-synaptics-touchpad.conf"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>Section <span class="st">"InputClass"</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    Identifier <span class="st">"touchpad"</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    Driver <span class="st">"synaptics"</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    MatchIsTouchpad <span class="st">"on"</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    MatchDevicePath <span class="st">"/dev/input/event*"</span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Enable tapping</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"TapButton1"</span> <span class="dt">"1"</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"TapButton2"</span> <span class="dt">"3"</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"TapButton3"</span> <span class="dt">"2"</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"TapButton1"</span> <span class="st">"1"</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"TapButton2"</span> <span class="st">"3"</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"TapButton3"</span> <span class="st">"2"</span></span>
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Set finger pressure sensitivity (ultra light touch)</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"FingerLow"</span> <span class="dt">"0"</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"FingerHigh"</span> <span class="dt">"0"</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"FingerLow"</span> <span class="st">"0"</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"FingerHigh"</span> <span class="st">"0"</span></span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Enable natural/reverse scrolling (slower speed)</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"VertScrollDelta"</span> <span class="dt">"-300"</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"HorizScrollDelta"</span> <span class="dt">"-300"</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"VertScrollDelta"</span> <span class="st">"-300"</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"HorizScrollDelta"</span> <span class="st">"-300"</span></span>
 <span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Enable two-finger scrolling</span></span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"VertTwoFingerScroll"</span> <span class="dt">"1"</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"HorizTwoFingerScroll"</span> <span class="dt">"1"</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"VertTwoFingerScroll"</span> <span class="st">"1"</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"HorizTwoFingerScroll"</span> <span class="st">"1"</span></span>
 <span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Disable edge scrolling (prefer two-finger)</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"VertEdgeScroll"</span> <span class="dt">"0"</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"HorizEdgeScroll"</span> <span class="dt">"0"</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"VertEdgeScroll"</span> <span class="st">"0"</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"HorizEdgeScroll"</span> <span class="st">"0"</span></span>
 <span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Enable palm detection</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"PalmDetect"</span> <span class="dt">"1"</span></span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"PalmMinWidth"</span> <span class="dt">"10"</span></span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"PalmMinZ"</span> <span class="dt">"200"</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"PalmDetect"</span> <span class="st">"1"</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"PalmMinWidth"</span> <span class="st">"10"</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"PalmMinZ"</span> <span class="st">"200"</span></span>
 <span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Mouse movement speed settings</span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"MinSpeed"</span> <span class="dt">"1.5"</span></span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"MaxSpeed"</span> <span class="dt">"2.5"</span></span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"AccelFactor"</span> <span class="dt">"0.042817"</span></span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">Option</span> <span class="dt">"ConstantDeceleration"</span> <span class="dt">"1.5"</span></span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a><span class="dt">EndSection</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"MinSpeed"</span> <span class="st">"1.5"</span></span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"MaxSpeed"</span> <span class="st">"2.5"</span></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"AccelFactor"</span> <span class="st">"0.042817"</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    Option <span class="st">"ConstantDeceleration"</span> <span class="st">"1.5"</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>EndSection</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>各参数作用可自行了解修改.</p>
 <p>使其生效:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> chmod 644 /etc/X11/xorg.conf.d/70-synaptics-touchpad.conf</span>
