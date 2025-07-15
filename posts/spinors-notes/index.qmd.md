@@ -7,6 +7,7 @@ date: 2025-4-22
 # image: cover.png
 categories:
     - Differential-Geometry
+    - EN-blogs
 format: 
     html: default
 bibliography: refs.bib

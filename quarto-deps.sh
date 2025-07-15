@@ -9,7 +9,7 @@ else
     echo "Quarto is already installed"
 fi
 # Render webpage (incremental rendering with cache and freezer)
-quarto render --use-freezer
+quarto render --use-freezer --no-clean
 cd tinyml
-quarto render --use-freezer
+quarto render --use-freezer --no-clean
 cd ..
