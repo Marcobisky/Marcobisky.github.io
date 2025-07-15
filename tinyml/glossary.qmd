@@ -2,15 +2,35 @@
 title: "Glossary 名词解释"
 ---
 
-> **NOTE**: 以下概念均与 FPGA 和 CFU-playground 有关 (多数定义为 GPT 生成).
+> **NOTE**: 以下概念均与 FPGA 和 CFU-playground 有关.
+
+## General Terms
 
 - **CFU**: Custom Function Unit (自定义功能单元). 为 ML 某些耗时的计算 (如卷积、矩阵乘法、位操作等) 定制的指令加速硬件模块.
     - 一旦主处理器执行到特定的 CFU 指令，就会将数据发送给 CFU 处理，然后 CFU 返回结果.
     - **FPU**: Floating Point Unit (浮点运算单元), 是 CPU 中专门处理浮点数运算的硬件组件.
 
+
+
+## FPGA Terms
+
+### General
+
+- **TfLM**: TensorFlow Lite for Microcontrollers. 
+    - **PDTI8**: Person DeTection Int 8
+
+- **Gateware**: 用软件编写的硬件电路. (既不是 Software, 也不是 Hardware).
+
+- **HPS**: High Performance System. 
+    - `PLATFORMS=common_soc sim hps`, 三个平台. `common_soc` 指标准的 FPGA 开发平台; `sim` 指用 Verilator 进行软件仿真.
+
+### Interface
+
 - **PMOD (Peripheral Module) 接口**: 一组 2*6 排针的引脚 PMOD. 定义了电源、地线、以及最多 8 条可用于通信的信号线. PMOD模块通常通过 SPI、I2C 或 GPIO (通用数字输入输出) 与主控通信. 你可以买到很多支持 PMOD 的模块, 如传感器、显示屏、存储器等.
 
 - **JTAG 接口**: 一种用于调试和编程的标准接口.
+
+### File formats
 
 - **`.pcf` 文件**: Physical Constraints File. `.pcf` 文件告诉工具：Verilog 中的某个逻辑信号，物理上应该接到 FPGA 的哪个 pin. 比如:
 
@@ -22,25 +42,41 @@ title: "Glossary 名词解释"
 
     - **`.xdc` 文件**: Xilinx Design Constraints File. Vivado 工具使用的约束文件.
 
-- **SpinalHDL**: 一种 Hardware Description Language (HDL, scala 的一种 DSL (Domain Specific Language)). 可用来生成更底层的 Verilog 代码. 
-    - **Scala**: 其实这才是 SpinalHDL 的语言. SpinalHDL 只是用 scala 来构建了一个电路.
-        - **Scalac**: Scala 编译器.
-        - **sbt**: Scala Build Tool. 配置依赖、插件和调用 Scalac.
-        - **Mill**: 跟 sbt 类似, 但更轻量.
-    - **[VexRiscv Soft CPU](https://github.com/SpinalHDL/VexRiscv)**: 用 SpinalHDL 写的一个 高度可配置的 RISC-V soft CPU 内核 (soft 的意思就是 CPU 不是硬件焊死的 ("hard CPU") , 而是部署在 FPGA 上可以改变结构的).
+### HDL
 
-- **Amaranth**: 一个 Python 库, 也是用于硬件描述和设计. 可生成 Verilog 代码.
+- **HLS**: High-Level Synthesis. 用 C/C++ 等高级语言来写硬件电路设计.
 
-- **TfLM**: TensorFlow Lite for Microcontrollers. 
-    - **PDTI8**: Person DeTection Int 8
+    - **SpinalHDL**: 一种 Hardware Description Language (HDL, scala 的一种 DSL (Domain Specific Language)). 可用来生成更底层的 Verilog 代码. 
+        - **Scala**: 其实这才是 SpinalHDL 的语言. SpinalHDL 只是用 scala 来构建了一个电路.
+            - **Scalac**: Scala 编译器.
+            - **sbt**: Scala Build Tool. 配置依赖、插件和调用 Scalac.
+            - **Mill**: 跟 sbt 类似, 但更轻量.
+        - **[VexRiscv Soft CPU](https://github.com/SpinalHDL/VexRiscv)**: 用 SpinalHDL 写的一个 高度可配置的 RISC-V soft CPU 内核 (soft 的意思就是 CPU 不是硬件焊死的 ("hard CPU") , 而是部署在 FPGA 上可以改变结构的).
+        - **IP Core**: Intellectual Property Core. 由一方 (开发者或公司) 设计，并通过许可授权给其他设计者使用。常见的 IP 核包括 CPU 内核、以太网控制器、内存控制器等.
+            - **Soft IP**: 软核
+            - **Hard IP**: 硬核
 
-- **RTL**: Register Transfer Level. 通俗说就是 verilog 代码的抽象程度. 
+    - **Amaranth**: 一个 Python 库, 也是用于硬件描述和设计. 可生成 Verilog 代码.
+
+
+- **RTL**: Register Transfer Level. 通俗说就是 verilog 代码的抽象程度水平.
 
     ![](image/glossary/design-level.png){width=80%}
 
-## Submodules 用到的核心子模块
 
-该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!
+
+### FPGA Principles
+
+- **PAR**： Place and Route. 布局布线. 
+
+
+### FPGA Structure 结构
+
+
+
+## Submodules 项目中用到的核心子模块
+
+> 该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!
 
 - [**verilator**](https://github.com/verilator/verilator): 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行**仿真**, 模拟出时钟、寄存器逻辑、外设交互等行为.
 
@@ -62,22 +98,26 @@ title: "Glossary 名词解释"
 
 - [**openocd**](https://github.com/openocd-org/openocd): Open On-Chip Debugger. 用于调试 FPGA 的工具. 支持 JTAG 接口.
 
-- [**yosysHQ (Yosys Open SYnthesis Suite Headquarters)**](https://github.com/YosysHQ): yyds!! 一个开源的 EDA 工具链. 子项目包括:
-    - [**icestorm**](https://github.com/YosysHQ/icestorm): 用于针对 Lattice iCE40 FPGA 实现完全的端到端开源流程, 从 Verilog 到 bitstream, 再烧写到 FPGA 板卡上. 以下每一个命令都是一个单独的 repo!!
+- 三个端到端的工具链:
 
-        ```bash
-        # yosys 综合 (将 verilog 转换为网表 .json)
-        yosys -p 'synth_ice40 -top blink -json blink.json' blink.v
-        # nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)
-        nextpnr-ice40 --up5k --json blink.json --pcf blink.pcf --asc blink.asc
-        # icepack 打包 (生成 bitstream .bin)
-        icepack blink.asc blink.bin
-        # icesprog 烧写 (将 bitstream 写入 FPGA)
-        sudo icesprog blink.bin
-        ```
+    - **Vivado**: IDE, 闭源.
 
-- [**F4PGA**](https://github.com/chipsalliance/f4pga): 以前叫 `Symbiflow`, 旨在为多家 FPGA 供应商 (Xilinx 7 系列、Lattice iCE40/ECP5、QuickLogic EOS S3 等) 提供统一、功能完备、可扩展且无需专有软件的端到端开发流程.
-    - 里面大量使用了 `YosysHQ` 的工具.
+    - [**yosysHQ (Yosys Open SYnthesis Suite Headquarters)**](https://github.com/YosysHQ): yyds!! 一个开源的 EDA 工具链. 子项目包括:
+        - [**icestorm**](https://github.com/YosysHQ/icestorm): 用于针对 Lattice iCE40 FPGA 实现完全的端到端开源流程, 从 Verilog 到 bitstream, 再烧写到 FPGA 板卡上. 以下每一个命令都是一个单独的 repo!!
+
+            ```bash
+            # yosys 综合 (将 verilog 转换为网表 .json)
+            yosys -p 'synth_ice40 -top blink -json blink.json' blink.v
+            # nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)
+            nextpnr-ice40 --up5k --json blink.json --pcf blink.pcf --asc blink.asc
+            # icepack 打包 (生成 bitstream .bin)
+            icepack blink.asc blink.bin
+            # icesprog 烧写 (将 bitstream 写入 FPGA)
+            sudo icesprog blink.bin
+            ```
+
+    - [**F4PGA**](https://github.com/chipsalliance/f4pga): 以前叫 `Symbiflow`, 旨在为多家 FPGA 供应商 (Xilinx 7 系列、Lattice iCE40/ECP5、QuickLogic EOS S3 等) 提供统一、功能完备、可扩展且无需专有软件的端到端开发流程.
+        - 里面大量使用了 `YosysHQ` 的工具.
 
 - [**SpinalHDL**](https://github.com/SpinalHDL): 一个基于 Scala 的硬件描述语言 (HDL), 用于生成 Verilog 代码. SpinalHDL 提供了更高级的抽象和更强大的功能, 使得硬件设计更加灵活和可扩展.
     - [**VexRiscv**](https://github.com/SpinalHDL/VexRiscv): 
