@@ -1,4 +1,5 @@
 #!/bin/bash
+# Run this script using `bash ./quarto-deps.sh` to regenerate all things in the website.
 # Install Quarto CLI only if not already installed
 if ! command -v quarto &> /dev/null; then
     echo "Quarto not found, installing..."
