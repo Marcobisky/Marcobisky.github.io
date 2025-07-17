@@ -366,3 +366,34 @@ sudo icesprog blink.bin
     MacOS 上的烧录工具 `iceprog` 不能识别到 FTDI 设备, 这可能是 MacOS 上的 USB 设备权限问题, 本人尝试过安装 [FTDI 驱动](https://ftdichip.com/drivers/d2xx-drivers/), 安装手册见[这里](https://ftdichip.com/document/installation-guides/). 安装的时候如果不小心点了 `OK`, 安装程序会提示 "awaiting approval", 解决方法见[这里](https://www.reddit.com/r/Baofeng/comments/1i4b9t0/ftdi_driver_install_issue_on_mac/). 但是安装好了, Mac 还是识别不到开发板. 
 :::
 <!-- ----------------------------------------- -->
+
+
+## Vivado & Vitis HLS 安装 (Ubuntu 24.04)
+
+> 这个是备选项, 不严格要求. 有一说一 Vivado 的 block diagram 界面还是挺好的 (
+
+- 去官网下载最新的 [Vivado 2025.1](https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/vivado-design-tools.html) 即可. 
+
+- 注意 **Vitis HLS 工具和 Vivado 软件是分开的**! 安装软件的时候我们可以先选择 Vivado ML Enterprise, 装完之后用它的 Add Design Tools or Devices 工具来 upgrade:
+
+    ![upgrade 的时候要选择 Vitis Unified Software Platform!!](vitis.png)
+
+- 安装完成后, 会发现 Vitis 2025.1 GUI (@fig-vitis-gui) 打不开, 我们需要换这个库: `libstdc++`, 解决方法参考 [这里](https://adaptivesupport.amd.com/s/question/0D5KZ00000vvAYM0A2/i-am-facing-the-same-problem-with-vitis-20251-and-ubuntu-24042-it-runs-but-the-gui-doesnt-open?language=en_US). 大致的步骤就是:
+
+    ```bash
+    cd <installation_path>/Xilinx/2025.1/Vitis/lib/lnx64.o/Ubuntu
+    sudo -s
+    apt update && apt install libstdc++6:amd64
+    mv libstdc++.so libstdc++.so.origin
+    mv libstdc++.so.6 libstdc++.so.6.origin
+    ln -s /usr/lib/x86_64-linux-gnu/libstdc++.so.6
+    ln -s /usr/lib/x86_64-linux-gnu/libstdc++.so.6 libstdc++.so
+    ```
+
+:::{.column-margin}
+![Vitis 的 GUI 在 Ubuntu 24.04 上打不开](vitis-gui.png){#fig-vitis-gui width=40%}
+:::
+
+- @fig-vitis-gui 打开后的界面:
+
+    ![Vitis 界面](vitis-ide.png)
