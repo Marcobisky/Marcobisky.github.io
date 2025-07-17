@@ -7,7 +7,36 @@ csl: ../diabetologia.csl #https://github.com/citation-style-language/styles
 
 ## FPGA Structure 结构
 
-Ongoing
+### PL (Programmable Logic) 可编程部分 {#sec-pl-structure}
+
+这个部分是我们学 FPGA 结构经常看到的, 要理清一下几个概念:
+
+- **BLE (Basic Logic Element)**: 基本逻辑单元. LUT 和 FF 的「经典」的组合.
+    - 见 @fig-ble, 方框代表 LUT (Look up Table), 本质上就是一个 Mux (Multiplexer, 多路选择器).
+    - **红色的位置将来的 bitstream 会写入 (用来配置这个 BLE 的功能), i0-i3 是这个 BLE 的输入, 右边是输出**.
+
+        ![这个 BLE 由 LUT-4 和 D-FF 组成](ble.png){#fig-ble width=60%}
+
+- **CLB (Configurable Logic Block, Xilinx) 可配置逻辑块**: 一个或者多个 BLE 的组合.
+    - 也叫 **Slice** (Vivado HLS) 或 **LAB** (Logic Array Block) 或 **ALM** (Adaptive Logic Module, Intel).
+
+::: {layout-ncol=2}
+![由 1 个 BLE 构成的 CLB (e.g. Xilinx Spartan 6)](clb-1-ble.png)
+
+![由 4 个 BLE 构成的 CLB](clb-multiple-ble.png){width=50%}
+:::
+
+- **SB (SwitchBox)**: 连接不同 CLB 的开关盒.
+
+    ![Slice (蓝色) 和其周围的 SB (SwitchBox) @2018arXiv180503648K](slice-sb.png){#fig-slice-sb width=70%}
+
+:::{.column-margin}
+![@fig-slice-sb 的放大结构](slice-sb-zoom.png)
+:::
+
+### PS (Processing System) 处理器部分
+
+
 
 ## 编译过程
 
@@ -15,3 +44,6 @@ Ongoing
 
 > **动机**: FPGA 不懂 “行为”, 它需要的是 “你想用哪些门, 怎么连线”. 所以 Synthesis 是将你写的 `.v` 逻辑翻译成各种 Logic gates 应该如何连接 (门级网表) 的过程 (以 `.json` 格式输出). 
 
+## Some Products 一些产品
+
+### ZYNQ
