@@ -9,7 +9,7 @@ csl: ../diabetologia.csl #https://github.com/citation-style-language/styles
 
 ### PL (Programmable Logic) 可编程部分 {#sec-pl-structure}
 
-这个部分是我们学 FPGA 结构经常看到的, 要理清一下几个概念:
+这个部分是一个 FPGA 开发板 “软” 的部分, 即可以通过 verilog 来控制硬件电路的部分. 要理清一下几个概念:
 
 - **BLE (Basic Logic Element)**: 基本逻辑单元. LUT 和 FF 的「经典」的组合.
     - 见 @fig-ble, 方框代表 LUT (Look up Table), 本质上就是一个 Mux (Multiplexer, 多路选择器).
@@ -34,9 +34,11 @@ csl: ../diabetologia.csl #https://github.com/citation-style-language/styles
 ![@fig-slice-sb 的放大结构](slice-sb-zoom.png)
 :::
 
-### PS (Processing System) 处理器部分
+### PS (Processing System) 处理器部分 {#sec-ps-structure}
 
+不要认为一个开发板只有 “软” 部分, 有些经常用的模块会用硬件 “焊死” 在板子上 (**Heterogenous 异构**). 这些硬件通过 I/O 口与 PL 部分通信, 比如:
 
+![ZYNQ PS 和 PL 通过 AXI 通信](zynq.png){width=60%}
 
 ## 编译过程
 
@@ -44,6 +46,3 @@ csl: ../diabetologia.csl #https://github.com/citation-style-language/styles
 
 > **动机**: FPGA 不懂 “行为”, 它需要的是 “你想用哪些门, 怎么连线”. 所以 Synthesis 是将你写的 `.v` 逻辑翻译成各种 Logic gates 应该如何连接 (门级网表) 的过程 (以 `.json` 格式输出). 
 
-## Some Products 一些产品
-
-### ZYNQ

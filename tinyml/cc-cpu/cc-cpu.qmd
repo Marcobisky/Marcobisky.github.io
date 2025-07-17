@@ -2,7 +2,29 @@
 title: "CPU 原理速成"
 ---
 
+> The following is a critical path towards understanding CPU. You can't drop any of them. 以下是理解 CPU 的必经之路.
 
-## Test
+## CPU 是如何成为现在这个样子的?
 
-Ongoing
+### 第一阶段: 分而治之, 穷举 + 控制信号
+
+- **分而治之**: 一条指令的执行可以拆分为 **Instruction Fetch, Instruction Decode, (Evaluate Address, Fetch Operands), Execute, Memory Access, Write Back** 这几个 phases @patt_2020_introduction.
+
+    - 每个 phase 都**可以**有**固定的输入和输出**, 所以每个 phase 都对应一个 (或多个) **电路模块**.
+
+        ![这个 phase 的 CPU 可以通过我的 [my-riscv 项目](https://github.com/Marcobisky/my-riscv) 可视化地理解](my-riscv.png)
+
+- **穷举 + 控制信号** 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, **所有**可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用**控制信号**来决定哪个计算结果才是我们要的 (**一般控制信号都由 Decoder 产生**, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).
+
+    ![**穷举 + 控制信号** 思想在 ALU 内部的体现](alu.png)
+
+- 一条指令的执行的那几个 phase 可以设计成:
+    - **Single-Cycle**: 在一个时钟周期内完成所有 phases.
+    - **Multi-Cycle**: 每个时钟周期只执行一个 phase.
+
+        ![为了提升指令执行效率引入了 Pipeline @Slchoi_2025_velog](single-mult-pipelined.png)
+
+- 这样的 CPU: simple, general, 但是 not efficient!
+
+### 第二阶段
+

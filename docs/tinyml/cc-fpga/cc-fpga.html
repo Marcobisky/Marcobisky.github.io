@@ -316,7 +316,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction 引入</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -397,7 +397,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../yolo/yolo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Yolo Object Detection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">YOLO Object Detection 目标检测</span></span></a>
   </div>
 </li>
       </ul>
@@ -449,15 +449,11 @@ div.csl-indent {
   <li><a href="#fpga-structure-结构" id="toc-fpga-structure-结构" class="nav-link active" data-scroll-target="#fpga-structure-结构">FPGA Structure 结构</a>
   <ul class="collapse">
   <li><a href="#sec-pl-structure" id="toc-sec-pl-structure" class="nav-link" data-scroll-target="#sec-pl-structure">PL (Programmable Logic) 可编程部分</a></li>
-  <li><a href="#ps-processing-system-处理器部分" id="toc-ps-processing-system-处理器部分" class="nav-link" data-scroll-target="#ps-processing-system-处理器部分">PS (Processing System) 处理器部分</a></li>
+  <li><a href="#sec-ps-structure" id="toc-sec-ps-structure" class="nav-link" data-scroll-target="#sec-ps-structure">PS (Processing System) 处理器部分</a></li>
   </ul></li>
   <li><a href="#编译过程" id="toc-编译过程" class="nav-link" data-scroll-target="#编译过程">编译过程</a>
   <ul class="collapse">
   <li><a href="#synthesis-综合" id="toc-synthesis-综合" class="nav-link" data-scroll-target="#synthesis-综合">Synthesis 综合</a></li>
-  </ul></li>
-  <li><a href="#some-products-一些产品" id="toc-some-products-一些产品" class="nav-link" data-scroll-target="#some-products-一些产品">Some Products 一些产品</a>
-  <ul class="collapse">
-  <li><a href="#zynq" id="toc-zynq" class="nav-link" data-scroll-target="#zynq">ZYNQ</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -489,7 +485,7 @@ div.csl-indent {
 <h2 class="anchored" data-anchor-id="fpga-structure-结构">FPGA Structure 结构</h2>
 <section id="sec-pl-structure" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="sec-pl-structure">PL (Programmable Logic) 可编程部分</h3>
-<p>这个部分是我们学 FPGA 结构经常看到的, 要理清一下几个概念:</p>
+<p>这个部分是一个 FPGA 开发板 “软” 的部分, 即可以通过 verilog 来控制硬件电路的部分. 要理清一下几个概念:</p>
 <ul>
 <li><strong>BLE (Basic Logic Element)</strong>: 基本逻辑单元. LUT 和 FF 的「经典」的组合.
 <ul>
@@ -553,8 +549,15 @@ Figure&nbsp;2: Slice (蓝色) 和其周围的 SB (SwitchBox) <span class="citati
 </figure>
 </div>
 </div></div></section>
-<section id="ps-processing-system-处理器部分" class="level3">
-<h3 class="anchored" data-anchor-id="ps-processing-system-处理器部分">PS (Processing System) 处理器部分</h3>
+<section id="sec-ps-structure" class="level3">
+<h3 class="anchored" data-anchor-id="sec-ps-structure">PS (Processing System) 处理器部分</h3>
+<p>不要认为一个开发板只有 “软” 部分, 有些经常用的模块会用硬件 “焊死” 在板子上 (<strong>Heterogenous 异构</strong>). 这些硬件通过 I/O 口与 PL 部分通信, 比如:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="zynq.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>ZYNQ PS 和 PL 通过 AXI 通信</figcaption>
+</figure>
+</div>
 </section>
 </section>
 <section id="编译过程" class="level2">
@@ -564,12 +567,6 @@ Figure&nbsp;2: Slice (蓝色) 和其周围的 SB (SwitchBox) <span class="citati
 <blockquote class="blockquote">
 <p><strong>动机</strong>: FPGA 不懂 “行为”, 它需要的是 “你想用哪些门, 怎么连线”. 所以 Synthesis 是将你写的 <code>.v</code> 逻辑翻译成各种 Logic gates 应该如何连接 (门级网表) 的过程 (以 <code>.json</code> 格式输出).</p>
 </blockquote>
-</section>
-</section>
-<section id="some-products-一些产品" class="level2">
-<h2 class="anchored" data-anchor-id="some-products-一些产品">Some Products 一些产品</h2>
-<section id="zynq" class="level3">
-<h3 class="anchored" data-anchor-id="zynq">ZYNQ</h3>
 
 
 <div id="refs" class="references csl-bib-body" role="list">
