@@ -446,7 +446,8 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#cpu-是如何成为现在这个样子的" id="toc-cpu-是如何成为现在这个样子的" class="nav-link active" data-scroll-target="#cpu-是如何成为现在这个样子的">CPU 是如何成为现在这个样子的?</a>
+  <li><a href="#change-of-mind" id="toc-change-of-mind" class="nav-link active" data-scroll-target="#change-of-mind">Change of Mind</a></li>
+  <li><a href="#cpu-是如何成为现在这个样子的" id="toc-cpu-是如何成为现在这个样子的" class="nav-link" data-scroll-target="#cpu-是如何成为现在这个样子的">CPU 是如何成为现在这个样子的?</a>
   <ul class="collapse">
   <li><a href="#第一阶段-分而治之-穷举-控制信号" id="toc-第一阶段-分而治之-穷举-控制信号" class="nav-link" data-scroll-target="#第一阶段-分而治之-穷举-控制信号">第一阶段: 分而治之, 穷举 + 控制信号</a></li>
   <li><a href="#第二阶段" id="toc-第二阶段" class="nav-link" data-scroll-target="#第二阶段">第二阶段</a></li>
@@ -477,16 +478,34 @@ div.csl-indent {
 </header>
 
 
+<section id="change-of-mind" class="level2">
+<h2 class="anchored" data-anchor-id="change-of-mind">Change of Mind</h2>
+<ul>
+<li>对于有时钟的电路, 我们应该想象成: 电路的状态<strong>只在时钟的上升沿</strong>「<strong>瞬间</strong>」变化. 时钟的上升沿发生时电路做了两件事情:
+<ul>
+<li>前一个时钟周期的计算结果该锁存的 <strong>锁存到寄存器</strong> 中.</li>
+<li>下一个时钟周期的结果瞬间计算出来并 <strong>放在线上</strong> (他们目前还不能被 CPU “看到”).</li>
+</ul></li>
+</ul>
+</section>
+<section id="cpu-是如何成为现在这个样子的" class="level2">
+<h2 class="anchored" data-anchor-id="cpu-是如何成为现在这个样子的">CPU 是如何成为现在这个样子的?</h2>
 <blockquote class="blockquote">
 <p>The following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.</p>
 </blockquote>
-<section id="cpu-是如何成为现在这个样子的" class="level2">
-<h2 class="anchored" data-anchor-id="cpu-是如何成为现在这个样子的">CPU 是如何成为现在这个样子的?</h2>
 <section id="第一阶段-分而治之-穷举-控制信号" class="level3">
 <h3 class="anchored" data-anchor-id="第一阶段-分而治之-穷举-控制信号">第一阶段: 分而治之, 穷举 + 控制信号</h3>
 <ul>
-<li><p><strong>分而治之</strong>: 一条指令的执行可以拆分为 <strong>Instruction Fetch, Instruction Decode, (Evaluate Address, Fetch Operands), Execute, Memory Access, Write Back</strong> 这几个 phases <span class="citation" data-cites="patt_2020_introduction">[<a href="#ref-patt_2020_introduction" role="doc-biblioref">1</a>]</span>.</p>
+<li><p><strong>分而治之</strong>: 一条指令的执行可以拆分为这几个阶段 (phase):</p>
 <ul>
+<li><p><strong>IF (Instruction Fetch)</strong>: 取指.</p></li>
+<li><p><strong>ID (Instruction Decode)</strong>: 译码.</p>
+<ul>
+<li>ID 后面有些地方 <span class="citation" data-cites="patt_2020_introduction">[<a href="#ref-patt_2020_introduction" role="doc-biblioref">1</a>]</span> 后面还细分了 <strong>Evaluate Address</strong> 和 <strong>Fetch Operands</strong>.</li>
+</ul></li>
+<li><p><strong>EX (Execute)</strong>: 执行.</p></li>
+<li><p><strong>ME (Memory Access)</strong>: 访存.</p></li>
+<li><p><strong>WB (Write Back)</strong>: 写回.</p></li>
 <li><p>每个 phase 都<strong>可以</strong>有<strong>固定的输入和输出</strong>, 所以每个 phase 都对应一个 (或多个) <strong>电路模块</strong>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -495,6 +514,30 @@ div.csl-indent {
 </figure>
 </div></li>
 </ul></li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+RISC-V 指令分类
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><p><strong>Arithmetic 运算</strong>: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)</p></li>
+<li><p><strong>Load/Store 访存</strong>: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)</p></li>
+<li><p><strong>Control 控制流</strong>: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))</p></li>
+</ol>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<ul>
 <li><p><strong>穷举 + 控制信号</strong> 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, <strong>所有</strong>可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用<strong>控制信号</strong>来决定哪个计算结果才是我们要的 (<strong>一般控制信号都由 Decoder 产生</strong>, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -504,12 +547,16 @@ div.csl-indent {
 </div></li>
 <li><p>一条指令的执行的那几个 phase 可以设计成:</p>
 <ul>
-<li><p><strong>Single-Cycle</strong>: 在一个时钟周期内完成所有 phases.</p></li>
+<li><p><strong>Single-Cycle</strong>: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.</p></li>
 <li><p><strong>Multi-Cycle</strong>: 每个时钟周期只执行一个 phase.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="single-mult-pipelined.png" class="img-fluid figure-img"></p>
-<figcaption>为了提升指令执行效率引入了 Pipeline <span class="citation" data-cites="Slchoi_2025_velog">[<a href="#ref-Slchoi_2025_velog" role="doc-biblioref">2</a>]</span></figcaption>
+<div id="fig-single-mult-pipelined" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-single-mult-pipelined-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="single-mult-pipelined.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-single-mult-pipelined-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 为了提升指令执行效率引入了 Pipeline <span class="citation" data-cites="Slchoi_2025_velog">[<a href="#ref-Slchoi_2025_velog" role="doc-biblioref">2</a>]</span>
+</figcaption>
 </figure>
 </div></li>
 </ul></li>
@@ -518,6 +565,9 @@ div.csl-indent {
 </section>
 <section id="第二阶段" class="level3">
 <h3 class="anchored" data-anchor-id="第二阶段">第二阶段</h3>
+<ul>
+<li><strong>Pipeline 流水线</strong>: 见 <a href="#fig-single-mult-pipelined" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-single-mult-pipelined</span></a>.</li>
+</ul>
 
 
 <div id="refs" class="references csl-bib-body" role="list">
@@ -525,7 +575,7 @@ div.csl-indent {
 <div class="csl-left-margin">1. </div><div class="csl-right-inline">Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ &amp; beyond. Mcgraw-Hill</div>
 </div>
 <div id="ref-Slchoi_2025_velog" class="csl-entry" role="listitem">
-<div class="csl-left-margin">2. </div><div class="csl-right-inline">Slchoi (2025) <a href="https://velog.io/@taegon1998/4.2-4.3-Multi-Cycle-Implementation-Pipelining">4.2 &nbsp; 4.3 - multi-cycle implementation &amp; pipelining</a></div>
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">Slchoi (2025) <a href="https://velog.io/@taegon1998/4.2-4.3-Multi-Cycle-Implementation-Pipelining">Multi-cycle implementation &amp; pipelining</a></div>
 </div>
 </div>
 </section>

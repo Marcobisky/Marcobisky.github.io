@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "TinyML",
     "section": "",
-    "text": "0.1 Hi there!\nThis is a graduation project titled System-Level Co-Design and AI-EDA of RISC-V Accelerators for TinyML at the Edge under my supervisor Prof. LIYUN. His PhD student Jintao Li also helps me greatly. This is a place where I record my learning journey into TinyML and RISC-V accelerators – from scratch. The contents are actively updating. Some of the content may be too basic or even technically incorrect up to now, but they are, hopefully, informative and motivation-boosting. The pure English documentation will be available soon.\n本项目有关的代码主要存放在两个仓库:",
+    "text": "0.1 Hi there!\nThis is a graduation project titled System-Level Co-Design and AI-EDA of RISC-V Accelerators for TinyML at the Edge under my supervisor Prof. LIYUN. His PhD student Jintao Li also helps me greatly. This is a place where I record my learning journey into TinyML and RISC-V accelerators – from scratch. The contents are actively updating. Some of the content may be too basic or even technically incorrect up to now, but they are, hopefully, informative and motivation-boosting. English documentation will be available soon.\n本项目有关的代码主要存放在两个仓库:",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction 引入</span>"
@@ -81,7 +81,7 @@
     "href": "resources/resources.html#fpga-理论",
     "title": "Resources 学习资料汇总",
     "section": "FPGA 理论",
-    "text": "FPGA 理论\n\nFPGA: ★★☆☆☆ 用来学习 FPGA 的资料库.\n\nVerilog 语法 (Artix7修炼秘籍)",
+    "text": "FPGA 理论\n\nHDLBits: ★★★★★ 一个在线的 HDL 练习网站. 如果你对 verilog 一无所知, 直接上这个网站绝对没错.\nFPGA: ★☆☆☆☆ 用来学习 FPGA 的资料库.\n\nVerilog 语法 (Artix7修炼秘籍)",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Resources 学习资料汇总</span>"
@@ -213,7 +213,7 @@
     "href": "verilog/verilog.html#verilog",
     "title": "Digital Circuit and Verilog 数字电路与 Verilog",
     "section": "",
-    "text": "语法注意\nOngoing",
+    "text": "Inside a Module 模块内部\n\n定义一个模块 (缩进随意, 这不是 python):\nmodule my_AND (input wire a, b, output wire c);\n    wire not_a = ~a;\n    assign c = not_a & b;\nendmodule\nassign\n\n多个 assign 执行没有顺序, 同时进行.\nassign 是 “continuous assignment”, 右值变化时, 左值跟着变化.\n\nOperation 运算符: verilog     assign my_out = ~my_in; // bit-wise NOT, `!`: logical NOT.     assign my_out = my_a & my_b; // bit-wise AND, `&&`: logical AND.     assign my_out = my_a | my_b; // bit-wise OR, `||`: logical OR.     assign my_out = my_a ^ my_b; // bit-wise XOR. 没有 logical XOR. verilog     wire tmp = 7'd3; // tmp = 0000011     output [15:0] out;     assign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100\nSignal Types 信号类型:\n\nConventional 常规写法\nwire my_in1;\ninput wire my_in2;  // `input`, `output`: port type. 仅仅说明 `my_in` 不是内部信号而是模块的输入信号.\nwire [31:0] inst;\nwire [6:0] opcode;\nassign opcode = inst[6:0];\nreg [5:-1] my_reg; // index 可以是负数.\nwire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!\nassign my_wire = 4'b1010;\nUnconventional 非常规写法\noutput my_out; // output wire my_out;\nassign a = 3'b110;  // a = 110\nassign b = a;       // b =   0  implicitly-created wire\nassign c = b;       // c = 001  &lt;-- bug\n\n\n\n\nHierarchy of Modules 模块之间",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>Digital Circuit and Verilog 数字电路与 Verilog</span>"
@@ -268,7 +268,7 @@
     "href": "cc-cpu/cc-cpu.html",
     "title": "CPU 原理速成",
     "section": "",
-    "text": "CPU 是如何成为现在这个样子的?",
+    "text": "Change of Mind",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>CPU 原理速成</span>"
@@ -278,8 +278,8 @@
     "objectID": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
     "href": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
     "title": "CPU 原理速成",
-    "section": "",
-    "text": "第一阶段: 分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为 Instruction Fetch, Instruction Decode, (Evaluate Address, Fetch Operands), Execute, Memory Access, Write Back 这几个 phases [1].\n\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n第二阶段\n\n\n\n\n1. Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill\n\n\n2. Slchoi (2025) 4.2   4.3 - multi-cycle implementation & pipelining",
+    "section": "CPU 是如何成为现在这个样子的?",
+    "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n第一阶段: 分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n第二阶段\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n\n\n\n\n\n1. Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill\n\n\n2. Slchoi (2025) Multi-cycle implementation & pipelining",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>CPU 原理速成</span>"
@@ -360,6 +360,17 @@
     "crumbs": [
       "CFU Playground",
       "<span class='chapter-number'>11</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cpu/cc-cpu.html#change-of-mind",
+    "href": "cc-cpu/cc-cpu.html#change-of-mind",
+    "title": "CPU 原理速成",
+    "section": "",
+    "text": "对于有时钟的电路, 我们应该想象成: 电路的状态只在时钟的上升沿「瞬间」变化. 时钟的上升沿发生时电路做了两件事情:\n\n前一个时钟周期的计算结果该锁存的 锁存到寄存器 中.\n下一个时钟周期的结果瞬间计算出来并 放在线上 (他们目前还不能被 CPU “看到”).",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>CPU 原理速成</span>"
     ]
   }
 ]

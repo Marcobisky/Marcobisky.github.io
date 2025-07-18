@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -429,9 +464,9 @@ ul.task-list li input[type="checkbox"] {
   <ul>
   <li><a href="#verilog" id="toc-verilog" class="nav-link active" data-scroll-target="#verilog">Verilog</a>
   <ul class="collapse">
-  <li><a href="#语法注意" id="toc-语法注意" class="nav-link" data-scroll-target="#语法注意">语法注意</a></li>
+  <li><a href="#inside-a-module-模块内部" id="toc-inside-a-module-模块内部" class="nav-link" data-scroll-target="#inside-a-module-模块内部">Inside a Module 模块内部</a></li>
+  <li><a href="#hierarchy-of-modules-模块之间" id="toc-hierarchy-of-modules-模块之间" class="nav-link" data-scroll-target="#hierarchy-of-modules-模块之间">Hierarchy of Modules 模块之间</a></li>
   </ul></li>
-  <li><a href="#verilog-语法的电路对应" id="toc-verilog-语法的电路对应" class="nav-link" data-scroll-target="#verilog-语法的电路对应">Verilog 语法的电路对应</a></li>
   </ul>
 </nav>
     </div>
@@ -460,15 +495,44 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="verilog" class="level2">
 <h2 class="anchored" data-anchor-id="verilog">Verilog</h2>
-<section id="语法注意" class="level3">
-<h3 class="anchored" data-anchor-id="语法注意">语法注意</h3>
-<p>Ongoing</p>
+<section id="inside-a-module-模块内部" class="level3">
+<h3 class="anchored" data-anchor-id="inside-a-module-模块内部">Inside a Module 模块内部</h3>
+<ul>
+<li><p>定义一个模块 (缩进随意, 这不是 python):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> my_AND <span class="op">(</span><span class="dt">input</span> <span class="dt">wire</span> a<span class="op">,</span> b<span class="op">,</span> <span class="dt">output</span> <span class="dt">wire</span> c<span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">wire</span> not_a <span class="op">=</span> <span class="op">~</span>a<span class="op">;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> c <span class="op">=</span> not_a <span class="op">&amp;</span> b<span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><code>assign</code></p>
+<ul>
+<li>多个 <code>assign</code> 执行<strong>没有顺序</strong>, 同时进行.</li>
+<li><code>assign</code> 是 “continuous assignment”, 右值变化时, 左值跟着变化.</li>
+</ul></li>
+<li><p><strong>Operation 运算符</strong>: <code>verilog     assign my_out = ~my_in; // bit-wise NOT, `!`: logical NOT.     assign my_out = my_a &amp; my_b; // bit-wise AND, `&amp;&amp;`: logical AND.     assign my_out = my_a | my_b; // bit-wise OR, `||`: logical OR.     assign my_out = my_a ^ my_b; // bit-wise XOR. 没有 logical XOR.</code> <code>verilog     wire tmp = 7'd3; // tmp = 0000011     output [15:0] out;     assign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100</code></p></li>
+<li><p><strong>Signal Types 信号类型</strong>:</p>
+<ul>
+<li><p>Conventional 常规写法</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> my_in1<span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">input</span> <span class="dt">wire</span> my_in2<span class="op">;</span>  <span class="co">// `input`, `output`: port type. 仅仅说明 `my_in` 不是内部信号而是模块的输入信号.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> <span class="op">[</span><span class="dv">31</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> inst<span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> <span class="op">[</span><span class="dv">6</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> opcode<span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> opcode <span class="op">=</span> inst<span class="op">[</span><span class="dv">6</span><span class="op">:</span><span class="dv">0</span><span class="op">];</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">reg</span> <span class="op">[</span><span class="dv">5</span><span class="op">:-</span><span class="dv">1</span><span class="op">]</span> my_reg<span class="op">;</span> <span class="co">// index 可以是负数.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> <span class="op">[</span><span class="dv">0</span><span class="op">:</span><span class="dv">3</span><span class="op">]</span> my_wire<span class="op">;</span> <span class="co">// Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> my_wire <span class="op">=</span> <span class="bn">4'b1010</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>Unconventional 非常规写法</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">output</span> my_out<span class="op">;</span> <span class="co">// output wire my_out;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> a <span class="op">=</span> <span class="bn">3'b110</span><span class="op">;</span>  <span class="co">// a = 110</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> b <span class="op">=</span> a<span class="op">;</span>       <span class="co">// b =   0  implicitly-created wire</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> c <span class="op">=</span> b<span class="op">;</span>       <span class="co">// c = 001  &lt;-- bug</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul></li>
+</ul>
 </section>
-</section>
-<section id="verilog-语法的电路对应" class="level2">
-<h2 class="anchored" data-anchor-id="verilog-语法的电路对应">Verilog 语法的电路对应</h2>
+<section id="hierarchy-of-modules-模块之间" class="level3">
+<h3 class="anchored" data-anchor-id="hierarchy-of-modules-模块之间">Hierarchy of Modules 模块之间</h3>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

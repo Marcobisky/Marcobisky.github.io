@@ -5,8 +5,65 @@ title: "Digital Circuit and Verilog 数字电路与 Verilog"
 ## Verilog
 
 
-### 语法注意
+### Inside a Module 模块内部
 
-Ongoing
+- 定义一个模块 (缩进随意, 这不是 python):
 
-## Verilog 语法的电路对应
+    ```verilog
+    module my_AND (input wire a, b, output wire c);
+        wire not_a = ~a;
+        assign c = not_a & b;
+    endmodule
+    ```
+
+- `assign`
+    - 多个 `assign` 执行**没有顺序**, 同时进行.
+    - `assign` 是 "continuous assignment", 右值变化时, 左值跟着变化.
+
+- **Operation 运算符**:
+    ```verilog
+    assign my_out = ~my_in; // bit-wise NOT, `!`: logical NOT.
+    assign my_out = my_a & my_b; // bit-wise AND, `&&`: logical AND.
+    assign my_out = my_a | my_b; // bit-wise OR, `||`: logical OR.
+    assign my_out = my_a ^ my_b; // bit-wise XOR. 没有 logical XOR.
+    ```
+    ```verilog
+    wire tmp = 7'd3; // tmp = 0000011
+    output [15:0] out;
+    assign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100
+    ```
+
+- **Signal Types 信号类型**: 
+    - Conventional 常规写法
+
+        ```verilog
+        wire my_in1;
+        input wire my_in2;  // `input`, `output`: port type. 仅仅说明 `my_in` 不是内部信号而是模块的输入信号.
+        ```
+        ```verilog
+        wire [31:0] inst;
+        wire [6:0] opcode;
+        assign opcode = inst[6:0];
+        ```
+        ```verilog
+        reg [5:-1] my_reg; // index 可以是负数.
+        wire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!
+        assign my_wire = 4'b1010;
+        ```
+
+    - Unconventional 非常规写法
+
+        ```verilog
+        output my_out; // output wire my_out;
+        ```
+        ```verilog
+        assign a = 3'b110;  // a = 110
+        assign b = a;       // b =   0  implicitly-created wire
+        assign c = b;       // c = 001  <-- bug
+        ```
+
+
+
+### Hierarchy of Modules 模块之间
+
+
