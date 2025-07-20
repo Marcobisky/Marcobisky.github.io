@@ -2,6 +2,10 @@
 title: "Digital Circuit and Verilog 数字电路与 Verilog"
 ---
 
+## Change of Mind
+
+- Hardware does not "execute" the lines of code in sequence. 
+
 ## Verilog
 
 
@@ -21,6 +25,7 @@ title: "Digital Circuit and Verilog 数字电路与 Verilog"
     - `assign` 是 "continuous assignment", 右值变化时, 左值跟着变化.
 
 - **Operation 运算符**:
+
     ```verilog
     assign my_out = ~my_in; // bit-wise NOT, `!`: logical NOT.
     assign my_out = my_a & my_b; // bit-wise AND, `&&`: logical AND.
@@ -67,3 +72,28 @@ title: "Digital Circuit and Verilog 数字电路与 Verilog"
 ### Hierarchy of Modules 模块之间
 
 
+(If, else if 是有顺序的!!!)
+
+(procedure 一定要放在 always 块中吗?)
+
+(一定要避免浮空状态! verilog 中如何体现默认电平? 用 else (if 当中) 或者 default (case 当中), 或者利用 always 的顺序性先提前赋值 (推荐!!).)
+
+这样写会发生什么:
+
+```verilog
+module top (input my_in, output my_out);
+    assign my_out = 0;
+    assign my_out = 1;
+endmodule
+```
+
+(为什么 wire 类型不能在 always 里面被赋值?)
+
+```verilog
+module top (input my_in, output reg my_out);
+    always @(*) begin
+        my_out = 0;
+        my_out = 1; // This is valid! (Always block 按顺序执行)
+    end
+endmodule
+```
