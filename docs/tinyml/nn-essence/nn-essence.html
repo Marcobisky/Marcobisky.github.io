@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Resources 学习资料汇总 – TinyML</title>
+<title>The Essence of NN 神经网络的本质 – TinyML</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,7 +20,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -30,8 +49,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../glossary/glossary.html" rel="next">
-<link href="../index.html" rel="prev">
+<link href="../yolo/yolo.html" rel="next">
+<link href="../cc-gpu/cc-gpu.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -74,10 +93,39 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -257,7 +305,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../index.html">Prologue</a></li><li class="breadcrumb-item"><a href="../resources/resources.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Resources 学习资料汇总</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../nn-essence/nn-essence.html">Neural Network</a></li><li class="breadcrumb-item"><a href="../nn-essence/nn-essence.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -302,7 +350,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../resources/resources.html" class="sidebar-item-text sidebar-link active">
+  <a href="../resources/resources.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Resources 学习资料汇总</span></span></a>
   </div>
 </li>
@@ -377,8 +425,14 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../yolo/yolo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">YOLO Object Detection 目标检测</span></span></a>
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">YOLO Object Detection 目标检测</span></span></a>
   </div>
 </li>
       </ul>
@@ -395,7 +449,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../hls-design/HLS-design.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">HLS Design FPGA 并行编程</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">HLS Design FPGA 并行编程</span></span></a>
   </div>
 </li>
       </ul>
@@ -412,7 +466,7 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
   </div>
 </li>
       </ul>
@@ -427,21 +481,28 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#cpu" id="toc-cpu" class="nav-link active" data-scroll-target="#cpu">CPU</a></li>
-  <li><a href="#neural-network" id="toc-neural-network" class="nav-link" data-scroll-target="#neural-network">Neural Network</a></li>
-  <li><a href="#fpga-理论" id="toc-fpga-理论" class="nav-link" data-scroll-target="#fpga-理论">FPGA 理论</a></li>
-  <li><a href="#hls-design-fpga-并行编程" id="toc-hls-design-fpga-并行编程" class="nav-link" data-scroll-target="#hls-design-fpga-并行编程">HLS Design FPGA 并行编程</a></li>
-  <li><a href="#gpu" id="toc-gpu" class="nav-link" data-scroll-target="#gpu">GPU</a></li>
+  <li><a href="#change-of-mind" id="toc-change-of-mind" class="nav-link active" data-scroll-target="#change-of-mind">Change of Mind</a></li>
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions">Questions</a></li>
+  <li><a href="#neural-network-is-not-so-different" id="toc-neural-network-is-not-so-different" class="nav-link" data-scroll-target="#neural-network-is-not-so-different">Neural Network is Not So Different</a>
+  <ul class="collapse">
+  <li><a href="#复杂的映射" id="toc-复杂的映射" class="nav-link" data-scroll-target="#复杂的映射">「复杂的映射」</a></li>
+  <li><a href="#参数化" id="toc-参数化" class="nav-link" data-scroll-target="#参数化">参数化</a></li>
+  </ul></li>
+  <li><a href="#如何设计-mathcalhatf" id="toc-如何设计-mathcalhatf" class="nav-link" data-scroll-target="#如何设计-mathcalhatf">如何设计 <span class="math inline">\(\mathcal{\hat{F}}\)</span> ?</a>
+  <ul class="collapse">
+  <li><a href="#尊重-mathcalx-mathcaly-中元素的结构" id="toc-尊重-mathcalx-mathcaly-中元素的结构" class="nav-link" data-scroll-target="#尊重-mathcalx-mathcaly-中元素的结构">尊重 <span class="math inline">\(\mathcal{X}, \mathcal{Y}\)</span> 中元素的结构</a></li>
+  </ul></li>
+  <li><a href="#如何找到-hatf" id="toc-如何找到-hatf" class="nav-link" data-scroll-target="#如何找到-hatf">如何找到 <span class="math inline">\(\hat{f}\)</span> ?</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../index.html">Prologue</a></li><li class="breadcrumb-item"><a href="../resources/resources.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Resources 学习资料汇总</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../nn-essence/nn-essence.html">Neural Network</a></li><li class="breadcrumb-item"><a href="../nn-essence/nn-essence.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Resources 学习资料汇总</h1>
+<h1 class="title">The Essence of NN 神经网络的本质</h1>
 </div>
 
 
@@ -459,64 +520,130 @@ ul.task-list li input[type="checkbox"] {
 
 
 <blockquote class="blockquote">
-<p>以下是我学习过程中发现的比较好用的资料. 注意这里只是大概的分类, 同一个资料可能会在多个话题下有帮助, 但这里只列出一次 (在对我帮助最大的话题下), 顺序大致遵循学习规律.</p>
+<p>写这篇文章的动机: 学习神经网络的资源一般就是论文和书籍, 论文 not self-contained, 书籍 self-contained 但是会加入很多基础知识导致思维不连贯. 以下内容不会介绍任何数学 prerequisite, 只构建神经网络的完整思维框架.</p>
+</blockquote>
+<section id="change-of-mind" class="level2">
+<h2 class="anchored" data-anchor-id="change-of-mind">Change of Mind</h2>
+<ul>
+<li><p>I don’t think view neural networks as <em>black boxes</em> does any help towards understanding and inventing new networks.</p></li>
+<li><p>对一个神经网络来说, 我们要站在它的角度考虑 up to what extend it could tell the difference of data? 比如图像处理的神经网络, 它肯定不知道输入的是一张图, 如果是一段文字呢? 如果对于很多类型的数据它都不能区分, 说明这个网络非常 general 但性能肯定很差.</p></li>
+</ul>
+</section>
+<section id="questions" class="level2">
+<h2 class="anchored" data-anchor-id="questions">Questions</h2>
+<ul>
+<li><p>梯度下降和反向传播的关系是什么?</p></li>
+<li><p>我们算梯度是在什么空间里面?</p></li>
+<li><p>梯度下降在 Transformer 里面是如何工作的?</p></li>
+</ul>
+</section>
+<section id="neural-network-is-not-so-different" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="neural-network-is-not-so-different">Neural Network is Not So Different</h2>
+<blockquote class="blockquote">
+<p>目标: 找一个映射.</p>
+</blockquote>
+<p>世界上很多问题其实就是一个复杂的映射, 比如图像识别就是输入是图片, 输出是图片中的各种内容. 只不过这个函数存在于人类的大脑中, 无法写出显式的表达式. 人类想要强行把这个函数的表达式找到! 怎么找呢? 我们看到一棵树, 它为什么是一棵树呢? 每个像素都对它是一棵树做出了贡献, 但好像整体是一棵树又与单个像素毫无关系. 如果这个表达式存在, 那么它肯定非常复杂 (这里不能追求所谓的 “简洁与优美”). 但我们可以缩小一点范围, 用<strong>某种特定形式</strong>的函数来逼近所求. 也就是:</p>
+<blockquote class="blockquote">
+<p>在一堆某种形式的映射里面 (<strong>参数化的函数空间</strong> <span class="math inline">\(\mathcal{\hat{F}}\)</span>) 找到一个映射 <span class="math inline">\(\hat{f}\)</span> 来拟合一个<strong>复杂的映射</strong> <span class="math inline">\(f: \mathcal{X}\to \mathcal{Y}\)</span></p>
+</blockquote>
+<p>人们首先发现长成 <a href="#eq-fcnn" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-fcnn</span></a> 这种样子的映射仿佛有很强的拟合能力, 也就是不管你人脑中的模型有多复杂, 总是可以在下面形式的映射中找到合适的拟合.</p>
+<p><span id="eq-fcnn"><span class="math display">\[
+\hat{f}(x) = \sigma (W^{[L]} \cdots \sigma (W^{[2]} \sigma (W^{[1]} x + b^{[1]}) + b^{[2]}) + \cdots + b^{[L]})
+\tag{1}\]</span></span></p>
+<p><a href="#eq-fcnn" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-fcnn</span></a> 很复杂对吧. 但是它可以用下面的图可视化出来:</p>
+<div id="fig-fcnn-visualization" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-fcnn-visualization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="fcnn.png" class="img-fluid figure-img" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fcnn-visualization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 仅仅是 <a href="#eq-fcnn" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-fcnn</span></a> 的可视化
+</figcaption>
+</figure>
+</div>
+<p>这张图放在这里太 cliché 了, 但是我想说的是: <strong>我们对它太过熟悉了, 以至于认为选择这种参数化方法是理所应当、独一无二的</strong>.</p>
+<p>(FCNN, CNN, Transformer是同一层面上的概念? <a href="https://distill.pub/2021/gnn-intro/#graph-to-tensor">“Differential Model”</a> 我感觉 FCNN 和 CNN 的本质是一样的? CNN 的本质是 pre-trained FCNN (或者说尊重了 <span class="math inline">\(\mathcal{X}\)</span> 结构?))</p>
+<blockquote class="blockquote">
+<p>事实证明形如神经网络的那些参数化函数空间能够拟合绝大多数的复杂映射, 所以无脑选择这样的 <span class="math inline">\(\mathcal{\hat{F}}\)</span> 就行了.</p>
 </blockquote>
 <blockquote class="blockquote">
-<p>★★☆☆☆ <strong>does not represent they are bad! Conversely, they are amazing! Only because I take away fewer information from them.</strong></p>
+<p>如果一个问题可以用以下的框架里面描述, 那么这个问题就可以用神经网络来解决!</p>
 </blockquote>
-<!-- Copy this: ★★★★★☆☆☆☆☆ -->
-<section id="cpu" class="level2">
-<h2 class="anchored" data-anchor-id="cpu">CPU</h2>
+<section id="复杂的映射" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="复杂的映射">「复杂的映射」</h3>
+<p>「复杂的映射」这个思想可以刻画和描述<em>所有</em>以下问题:</p>
 <ul>
-<li><a href="https://icourse.club/uploads/files/96a2b94d4be48285f2605d843a1e6db37da9a944.pdf"><strong>An Introduction to Computing Systems Yale Patt</strong></a>: ★★★★★ 如果你大一想认真学一下计算机组成原理, 信我的, 读它准没错 (<a href="https://sdl.moe">wetABQ</a> 大佬推荐的).
+<li><strong>Classification 分类问题</strong>: <span class="math inline">\(\mathcal{Y}\)</span> 仅仅是没有任何结构的集合.
 <ul>
-<li>本书详细讲了一个简单的 16-bit <a href="https://en.wikipedia.org/wiki/Little_Computer_3">LC-3</a> CPU 的设计, 包括指令集、汇编语言、机器语言、微架构等内容.</li>
+<li>请说出下面例子的 <span class="math inline">\(\mathcal{X}\)</span> 和 <span class="math inline">\(\mathcal{Y}\)</span>:
+<ul>
+<li>Image Classification: 输入一张图片, 判断是猫还是狗还是其它的.</li>
+<li>Face Detection: 输入一张图片, 判断有没有人脸.</li>
+<li>Handwriting Recognition: 输入一张手写的数字, 判断是几. (虽然 <span class="math inline">\(\mathcal{Y}\)</span> 有序结构, 但不关心)</li>
 </ul></li>
-<li><a href="https://www.bilibili.com/video/BV1QXnoexEi5?spm_id_from=333.788.videopod.sections&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3"><strong>Bilibili: RISCV-MCU</strong></a>: ★★★★★ 一个基于 Digital 和 verilog 的 RISC-V CPU 仿真教程, 讲得非常好, 强推!
-<ul>
-<li>本人基于这个项目做了一个 <a href="https://github.com/Marcobisky/my-riscv"><strong>my-riscv</strong></a>.</li>
+<li><span class="math inline">\(\mathcal{X}\)</span> 是所有图片的集合, <span class="math inline">\(\mathcal{Y}\)</span> 是所有类别的集合.</li>
 </ul></li>
+<li><strong>Regression 回归问题</strong>: <span class="math inline">\(\mathcal{Y}\)</span> 有序结构. (Generally speaking, 有拓扑结构<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>)
+<ul>
+<li>请说出下面例子 <span class="citation" data-cites="murphy_2012_machine">[<a href="#ref-murphy_2012_machine" role="doc-biblioref">1</a>]</span> 的 <span class="math inline">\(\mathcal{X}\)</span> 和 <span class="math inline">\(\mathcal{Y}\)</span>:
+<ul>
+<li>Linear Regression: 给定一个标量场, 用线性标量场来拟合. (相当于指定了 <span class="math inline">\(\mathcal{\hat{F}}\)</span>)</li>
+<li>Quantization: 根据市场情况、历史数据等, 预测明天的股票价格.</li>
+<li>预测某个视频观看者年龄.</li>
+<li>根据发送的控制信号, 预测机械臂在三维空间的坐标.</li>
+<li>根据历史湿度、温度等天气信息, 预测某地明天的温度.</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;序结构诱导的拓扑称为 <strong>Alexandrov 拓扑</strong>.</p></div></div></section>
+<section id="参数化" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="参数化">参数化</h3>
+<blockquote class="blockquote">
+<p>如果一个函数空间的所有元素都能用形式上相同的式子表达 (这个式子里面有一些可变的参数), 那么这个函数空间就是<strong>参数化</strong>的.</p>
+</blockquote>
+<ul>
+<li><p>Linear Regression 的参数化函数空间同构<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>于 <span class="math inline">\(\mathbb{R}^2\)</span>:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="linear-regression-iso.png" class="img-fluid figure-img" style="width:60.0%"></p>
+<figcaption>同构的 Mental picture</figcaption>
+</figure>
+</div></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;在拓扑向量空间的意义上: <span class="math display">\[\{f: \mathbb{R}\to \mathbb{R} \mid f(x) = wx + b, w, b \in \mathbb{R}\} \simeq \{(w, b) \mid w, b \in \mathbb{R}\}\]</span></p></div></div><ul>
+<li>某个 CNN 的参数化函数空间同构于 <span class="math inline">\(\mathbb{R}^{200}\)</span>:</li>
 </ul>
 </section>
-<section id="neural-network" class="level2">
-<h2 class="anchored" data-anchor-id="neural-network">Neural Network</h2>
-<ul>
-<li><p><a href="https://animatedai.github.io"><strong>Animated AI</strong></a>: ★★★★★ 可视化了以下概念: Convolution, Padding, Stride, Groups, Depthwise, Depthwise-Separable, Pixel shuffle. 图像处理肯定会用到.</p></li>
-<li><p><a href="https://www.bilibili.com/video/BV1gKwAeWEo4?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3"><strong>YOLO V1 Bilibili 讲解</strong></a>: ★★★★★ 非常清楚, 强推.</p></li>
-<li><p><a href="https://distill.pub/2021/gnn-intro/"><strong>A Gentle Introduction to GNN</strong></a>: 图神经网络入门.</p>
-<ul>
-<li><a href="https://distill.pub/2021/understanding-gnns/"><strong>Understanding Convolutions on Graphs</strong></a></li>
-</ul></li>
-</ul>
 </section>
-<section id="fpga-理论" class="level2">
-<h2 class="anchored" data-anchor-id="fpga-理论">FPGA 理论</h2>
-<ul>
-<li><p><a href="https://hdlbits.01xz.net/wiki/Main_Page"><strong>HDLBits</strong></a>: ★★★★★ 一个在线的 HDL 练习网站. 如果你对 verilog 一无所知, 直接上这个网站绝对没错.</p></li>
-<li><p><a href="https://github.com/LeiWang1999/FPGA?tab=readme-ov-file"><strong>FPGA</strong></a>: ★☆☆☆☆ 用来学习 FPGA 的资料库.</p>
-<ul>
-<li><a href="https://leiblog.wang/static/FPGA/books/00《Artix7修炼秘籍》-MIA701第一季.pdf">Verilog 语法 (Artix7修炼秘籍)</a></li>
-</ul></li>
-</ul>
+<section id="如何设计-mathcalhatf" class="level2">
+<h2 class="anchored" data-anchor-id="如何设计-mathcalhatf">如何设计 <span class="math inline">\(\mathcal{\hat{F}}\)</span> ?</h2>
+<blockquote class="blockquote">
+<p>即如何「设计」神经网络.</p>
+</blockquote>
+<section id="尊重-mathcalx-mathcaly-中元素的结构" class="level3">
+<h3 class="anchored" data-anchor-id="尊重-mathcalx-mathcaly-中元素的结构">尊重 <span class="math inline">\(\mathcal{X}, \mathcal{Y}\)</span> 中元素的结构</h3>
+<p>(升维、ask a lot of binary questions、编解码器、激活函数用什么类型 这些的联系是什么?)</p>
+<p>(curse of dimension怎么解决?)</p>
+<p>如果 <span class="math inline">\(\mathcal{X}\)</span> 是一张图片的话, 我们有 “相邻” 点这种概念, 也就是说输入进 <span class="math inline">\(\hat{f}\)</span> 的对象内部是有某些结构的, 但是 FCNN (a.k.a., MLP) 并不知道这些结构.</p>
+<p>(引出 CNN 和 GNN)</p>
 </section>
-<section id="hls-design-fpga-并行编程" class="level2">
-<h2 class="anchored" data-anchor-id="hls-design-fpga-并行编程">HLS Design FPGA 并行编程</h2>
-<ul>
-<li><a href="https://kastner.ucsd.edu/hlsbook/"><strong>Parallel Programming for FPGAs</strong></a>: ★★★★☆ Xilinx 研究院的 Steve 首席工程师与 UCSD 的 Ryan Kastner 教授团队合作, 推出了这本开源书, 全书通过 10 个算法实现案例完整的介绍了通过 HLS 工具利用 C/C++ 语言快速实现高性能 FPGA 实现的过程.
-<ul>
-<li><a href="https://xupsh.github.io/pp4fpgas-cn/01-Introduction.html"><strong>FPGA 并行编程中文版</strong></a>, <a href="https://github.com/xupsh/pp4fpgas-cn?tab=readme-ov-file"><strong>中文版 github repo</strong></a></li>
-</ul></li>
-</ul>
 </section>
-<section id="gpu" class="level2">
-<h2 class="anchored" data-anchor-id="gpu">GPU</h2>
-<ul>
-<li><p><a href="https://github.com/adam-maj/tiny-gpu"><strong>tiny-gpu</strong></a>: ★★☆☆☆ 一个小型的 GPU 实现.</p></li>
-<li><p><a href="https://github.com/hughperkins/VeriGPU"><strong>VeriGPU</strong></a>: ★☆☆☆☆ 一个复杂点的 GPU 实现, 不适合用来入门.</p></li>
-</ul>
+<section id="如何找到-hatf" class="level2">
+<h2 class="anchored" data-anchor-id="如何找到-hatf">如何找到 <span class="math inline">\(\hat{f}\)</span> ?</h2>
+<blockquote class="blockquote">
+<p>即如何「训练」神经网络.</p>
+</blockquote>
+<p>(梯度下降, 各种优化器)</p>
+<p>(梯度消失问题怎么解决、正则化、ResNet, 为什么ResNet有效等等话题)</p>
 
 
+<div id="refs" class="references csl-bib-body" role="list">
+<div id="ref-murphy_2012_machine" class="csl-entry" role="listitem">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Murphy KP (2012) Machine learning : A probabilistic perspective. Mit Press</div>
+</div>
+</div>
 </section>
+
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -933,13 +1060,13 @@ ul.task-list li input[type="checkbox"] {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../index.html" class="pagination-link" aria-label="Introduction 引入">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction 引入</span></span>
+      <a href="../cc-gpu/cc-gpu.html" class="pagination-link" aria-label="GPU 原理速成">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">GPU 原理速成</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../glossary/glossary.html" class="pagination-link" aria-label="Glossary 名词解释">
-        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Glossary 名词解释</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../yolo/yolo.html" class="pagination-link" aria-label="YOLO Object Detection 目标检测">
+        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">YOLO Object Detection 目标检测</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

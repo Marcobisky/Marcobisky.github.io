@@ -1,27 +1,14 @@
 ---
-author: Marcobisky
-title: Neural Network 神经网络到底在干什么
-draft: true
-description: Zen mode updating 佛系更新中
-date: 2025-7-19
-# image: cover.png
-categories:
-    - Machine-Learning
-    - CN-blogs
-format: 
-    html: default
-
-bibliography: refs.bib
-bibliographystyle: ieee
-nocite: |
-    @*
+title: The Essence of NN 神经网络的本质
 ---
 
-> 写这篇博客的动机: 学习神经网络的资源一般就是论文和书籍, 论文 not self-contained, 书籍 self-contained 但是会加入很多基础知识导致思维不连贯. 以下内容不会介绍任何数学 prerequisite, 只构建神经网络的完整思维框架.
+> 写这篇文章的动机: 学习神经网络的资源一般就是论文和书籍, 论文 not self-contained, 书籍 self-contained 但是会加入很多基础知识导致思维不连贯. 以下内容不会介绍任何数学 prerequisite, 只构建神经网络的完整思维框架.
 
 ## Change of Mind
 
 - I don't think view neural networks as *black boxes* does any help towards understanding and inventing new networks.
+
+- 对一个神经网络来说, 我们要站在它的角度考虑 up to what extend it could tell the difference of data? 比如图像处理的神经网络, 它肯定不知道输入的是一张图, 如果是一段文字呢? 如果对于很多类型的数据它都不能区分, 说明这个网络非常 general 但性能肯定很差.
 
 ## Questions
 
@@ -36,7 +23,7 @@ nocite: |
 
 > 目标: 找一个映射.
 
-世界上很多问题其实就是一个复杂的映射, 比如图像识别就是输入是图片, 输出是图片中的各种内容. 只不过这个函数存在于人类的大脑中, 无法写出显式的表达式. 如果这个表达式存在, 那么它肯定很复杂 (这里不能追求所谓的 “简洁与优美”). 人类想要强行把这个函数的表达式找到! 怎么找呢? 不可能遍历完世界上所有的函数对吧, 但是我们缩小一点范围, 用**某种特定形式**的函数来逼近所求. 也就是:
+世界上很多问题其实就是一个复杂的映射, 比如图像识别就是输入是图片, 输出是图片中的各种内容. 只不过这个函数存在于人类的大脑中, 无法写出显式的表达式. 人类想要强行把这个函数的表达式找到! 怎么找呢? 我们看到一棵树, 它为什么是一棵树呢? 每个像素都对它是一棵树做出了贡献, 但好像整体是一棵树又与单个像素毫无关系. 如果这个表达式存在, 那么它肯定非常复杂 (这里不能追求所谓的 “简洁与优美”). 但我们可以缩小一点范围, 用**某种特定形式**的函数来逼近所求. 也就是:
 
 > 在一堆某种形式的映射里面 (**参数化的函数空间** $\mathcal{\hat{F}}$) 找到一个映射 $\hat{f}$ 来拟合一个**复杂的映射** $f: \mathcal{X}\to \mathcal{Y}$
 
@@ -52,8 +39,7 @@ $${#eq-fcnn}
 
 这张图放在这里太 cliché 了, 但是我想说的是: **我们对它太过熟悉了, 以至于认为选择这种参数化方法是理所应当、独一无二的**.
 
-
-
+(FCNN, CNN, Transformer是同一层面上的概念? ["Differential Model"](https://distill.pub/2021/gnn-intro/#graph-to-tensor) 我感觉 FCNN 和 CNN 的本质是一样的? CNN 的本质是 pre-trained FCNN (或者说尊重了 $\mathcal{X}$ 结构?))
 
 > 事实证明形如神经网络的那些参数化函数空间能够拟合绝大多数的复杂映射, 所以无脑选择这样的 $\mathcal{\hat{F}}$ 就行了.
 
@@ -101,10 +87,18 @@ $${#eq-fcnn}
 
 ### 尊重 $\mathcal{X}, \mathcal{Y}$ 中元素的结构
 
-如果 $\mathcal{X}$ 是一张图片的话, 我们有 “相邻” 点这种概念, 也就是说输入进 $\hat{f}$ 的对象内部是有某些结构的, 但是 FCNN 并不知道这些结构.
+(升维、ask a lot of binary questions、编解码器、激活函数用什么类型 这些的联系是什么?)
+
+(curse of dimension怎么解决?)
+
+如果 $\mathcal{X}$ 是一张图片的话, 我们有 “相邻” 点这种概念, 也就是说输入进 $\hat{f}$ 的对象内部是有某些结构的, 但是 FCNN (a.k.a., MLP) 并不知道这些结构.
 
 (引出 CNN 和 GNN)
 
 ## 如何找到 $\hat{f}$ ?
 
 > 即如何「训练」神经网络.
+
+(梯度下降, 各种优化器)
+
+(梯度消失问题怎么解决、正则化、ResNet, 为什么ResNet有效等等话题)
