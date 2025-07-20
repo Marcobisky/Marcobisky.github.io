@@ -10,7 +10,18 @@ categories:
     - CN-blogs
 format: 
     html: default
+
+bibliography: refs.bib
+bibliographystyle: ieee
+nocite: |
+    @*
 ---
+
+> 写这篇博客的动机: 学习神经网络的资源一般就是论文和书籍, 论文 not self-contained, 书籍 self-contained 但是会加入很多基础知识导致思维不连贯. 以下内容不会介绍任何数学 prerequisite, 只构建神经网络的完整思维框架.
+
+## Change of Mind
+
+- I don't think view neural networks as *black boxes* does any help towards understanding and inventing new networks.
 
 ## Questions
 
@@ -23,7 +34,77 @@ format:
 
 ## Neural Network is Not So Different
 
-> 神经网络就是一个**参数化**的**函数空间**, 目标就是拟合一个复杂的映射.
+> 目标: 找一个映射.
 
-线性回归是神经网络:
+世界上很多问题其实就是一个复杂的映射, 比如图像识别就是输入是图片, 输出是图片中的各种内容. 只不过这个函数存在于人类的大脑中, 无法写出显式的表达式. 如果这个表达式存在, 那么它肯定很复杂 (这里不能追求所谓的 “简洁与优美”). 人类想要强行把这个函数的表达式找到! 怎么找呢? 不可能遍历完世界上所有的函数对吧, 但是我们缩小一点范围, 用**某种特定形式**的函数来逼近所求. 也就是:
 
+> 在一堆某种形式的映射里面 (**参数化的函数空间** $\mathcal{\hat{F}}$) 找到一个映射 $\hat{f}$ 来拟合一个**复杂的映射** $f: \mathcal{X}\to \mathcal{Y}$
+
+人们首先发现长成 @eq-fcnn 这种样子的映射仿佛有很强的拟合能力, 也就是不管你人脑中的模型有多复杂, 总是可以在下面形式的映射中找到合适的拟合.
+
+$$
+\hat{f}(x) = \sigma (W^{[L]} \cdots \sigma (W^{[2]} \sigma (W^{[1]} x + b^{[1]}) + b^{[2]}) + \cdots + b^{[L]})
+$${#eq-fcnn}
+
+@eq-fcnn 很复杂对吧. 但是它可以用下面的图可视化出来:
+
+![仅仅是 @eq-fcnn 的可视化](fcnn.png){#fig-fcnn-visualization width=60%}
+
+这张图放在这里太 cliché 了, 但是我想说的是: **我们对它太过熟悉了, 以至于认为选择这种参数化方法是理所应当、独一无二的**.
+
+
+
+
+> 事实证明形如神经网络的那些参数化函数空间能够拟合绝大多数的复杂映射, 所以无脑选择这样的 $\mathcal{\hat{F}}$ 就行了.
+
+> 如果一个问题可以用以下的框架里面描述, 那么这个问题就可以用神经网络来解决!
+
+### 「复杂的映射」
+
+「复杂的映射」这个思想可以刻画和描述*所有*以下问题:
+
+- **Classification 分类问题**: $\mathcal{Y}$ 仅仅是没有任何结构的集合.
+    - 请说出下面例子的 $\mathcal{X}$ 和 $\mathcal{Y}$:
+        - Image Classification: 输入一张图片, 判断是猫还是狗还是其它的.
+        - Face Detection: 输入一张图片, 判断有没有人脸.
+        - Handwriting Recognition: 输入一张手写的数字, 判断是几. (虽然 $\mathcal{Y}$ 有序结构, 但不关心)
+    - $\mathcal{X}$ 是所有图片的集合, $\mathcal{Y}$ 是所有类别的集合.
+- **Regression 回归问题**: $\mathcal{Y}$ 有序结构. (Generally speaking, 有拓扑结构[^order2topology])
+    - 请说出下面例子 @murphy_2012_machine 的 $\mathcal{X}$ 和 $\mathcal{Y}$:
+        - Linear Regression: 给定一个标量场, 用线性标量场来拟合. (相当于指定了 $\mathcal{\hat{F}}$)
+        - Quantization: 根据市场情况、历史数据等, 预测明天的股票价格.
+        - 预测某个视频观看者年龄.
+        - 根据发送的控制信号, 预测机械臂在三维空间的坐标.
+        - 根据历史湿度、温度等天气信息, 预测某地明天的温度.
+
+
+[^order2topology]: 序结构诱导的拓扑称为 **Alexandrov 拓扑**.
+
+### 参数化
+
+> 如果一个函数空间的所有元素都能用形式上相同的式子表达 (这个式子里面有一些可变的参数), 那么这个函数空间就是**参数化**的.
+
+- Linear Regression 的参数化函数空间同构[^iso]于 $\mathbb{R}^2$:
+
+    ![同构的 Mental picture](linear-regression-iso.png){width=60%}
+
+
+[^iso]: 在拓扑向量空间的意义上: $$\{f: \mathbb{R}\to \mathbb{R} \mid f(x) = wx + b, w, b \in \mathbb{R}\} \simeq \{(w, b) \mid w, b \in \mathbb{R}\}$$
+
+- 某个 CNN 的参数化函数空间同构于 $\mathbb{R}^{200}$:
+
+
+
+## 如何设计 $\mathcal{\hat{F}}$ ?
+
+> 即如何「设计」神经网络.
+
+### 尊重 $\mathcal{X}, \mathcal{Y}$ 中元素的结构
+
+如果 $\mathcal{X}$ 是一张图片的话, 我们有 “相邻” 点这种概念, 也就是说输入进 $\hat{f}$ 的对象内部是有某些结构的, 但是 FCNN 并不知道这些结构.
+
+(引出 CNN 和 GNN)
+
+## 如何找到 $\hat{f}$ ?
+
+> 即如何「训练」神经网络.
