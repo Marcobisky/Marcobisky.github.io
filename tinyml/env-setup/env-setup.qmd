@@ -401,3 +401,32 @@ sudo icesprog blink.bin
 - HLS 开发界面 (好像还能接受?)
 
     ![HLS 界面](hls-ide.png)
+
+
+## SBT 安装 (Ubuntu 24.04)
+
+[**VexRiscv**](https://github.com/SpinalHDL/VexRiscv?tab=readme-ov-file) 是 CFU-Playground 的一个重要子模块, 它是一个 RISC-V 软核 CPU 内核, 用 SpinalHDL 写的. 我们需要安装 Scala Build Tool (SBT) 来将 `.scala` 文件转换为 RTL 代码. 但官方文档会安装很多不必要的工具, 如果只要装 SBT 的话, 可以在 Ubuntu 24.04 执行:
+
+```bash
+# 更新包管理器
+sudo apt-get update
+
+# 安装Java JDK 8 (SpinalHDL需要)
+sudo apt-get install openjdk-8-jdk -y
+
+# 设置Java版本（如果系统有多个Java版本）
+sudo update-alternatives --config java
+sudo update-alternatives --config javac
+
+# 安装SBT (Scala构建工具)
+echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
+curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo apt-key add
+sudo apt-get update
+sudo apt-get install sbt
+```
+
+验证安装:
+
+```bash
+sbt --version
+```
