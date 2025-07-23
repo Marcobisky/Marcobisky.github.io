@@ -59,7 +59,7 @@
     "href": "resources/resources.html#cpu",
     "title": "Resources 学习资料汇总",
     "section": "",
-    "text": "An Introduction to Computing Systems Yale Patt: ★★★★★ 如果你大一想认真学一下计算机组成原理, 信我的, 读它准没错 (wetABQ 大佬推荐的).\n\n本书详细讲了一个简单的 16-bit LC-3 CPU 的设计, 包括指令集、汇编语言、机器语言、微架构等内容.\n\nBilibili: RISCV-MCU: ★★★★★ 一个基于 Digital 和 verilog 的 RISC-V CPU 仿真教程, 讲得非常好, 强推!\n\n本人基于这个项目做了一个 my-riscv.",
+    "text": "An Introduction to Computing Systems Yale Patt: ★★★★★ 如果你大一想认真学一下计算机组成原理, 信我的, 读它准没错 (wetABQ 大佬推荐的).\n\n本书详细讲了一个简单的 16-bit LC-3 CPU 的设计, 包括指令集、汇编语言、机器语言、微架构等内容.\n\nBilibili: RISCV-MCU: ★★★★★ 一个基于 Digital 和 verilog 的 RISC-V CPU 仿真教程, 讲得非常好, 强推!\n\n本人基于这个项目做了一个 my-riscv.\n\nThe “Basic” Pipelined CPU: ★★★★★ 讲了 CPU 流水线 5 个阶段的工作原理.\n\nDr. Chun Yan Cheung Lectures: ★★★★★ 强推!!!",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Resources 学习资料汇总</span>"
@@ -279,7 +279,7 @@
     "href": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
     "title": "CPU 原理速成",
     "section": "CPU 是如何成为现在这个样子的?",
-    "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n第一阶段: 分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n第二阶段\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n\n\n\n\n\n1. Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill\n\n\n2. Slchoi (2025) Multi-cycle implementation & pipelining",
+    "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n流水线\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n在每两个 phase 之间插入一些受始终控制的寄存器:\n\nIF-ID 之间: 当前指令, PC 值 (jal 要用)\nID-EX 之间: 指令类型, rs1, rs2, rd, imm.\n\n\n\n\n第三阶段\n\n总线\n\nAXI4, AHB, APB\n\n\nCache\n\n\nMemory\n\n内存: working memory, main memory\nDRAM & SSD 内存与硬盘\n\n读写速度 (3000 倍): 17 ns vs 50 ms, 超音速飞机和龟速\n容量: 16GB vs 4TB\n\nSIMM & DIMM\n\nDIMM (Dual In-line Memory Module)\n\n\n\n\n\n\n1. Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill\n\n\n2. Slchoi (2025) Multi-cycle implementation & pipelining",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>CPU 原理速成</span>"
@@ -477,7 +477,7 @@
     "href": "env-setup/env-setup.html#sbt-安装-ubuntu-24.04",
     "title": "FPGA 开发环境配置",
     "section": "SBT 安装 (Ubuntu 24.04)",
-    "text": "SBT 安装 (Ubuntu 24.04)\nVexRiscv 是 CFU-Playground 的一个重要子模块, 它是一个 RISC-V 软核 CPU 内核, 用 SpinalHDL 写的. 我们需要安装 Scala Build Tool (SBT) 来将 .scala 文件转换为 RTL 代码. 但官方文档会安装很多不必要的工具, 如果只要装 SBT 的话, 可以在 Ubuntu 24.04 执行:\n# 更新包管理器\nsudo apt-get update\n\n# 安装Java JDK 8 (SpinalHDL需要)\nsudo apt-get install openjdk-8-jdk -y\n\n# 设置Java版本（如果系统有多个Java版本）\nsudo update-alternatives --config java\nsudo update-alternatives --config javac\n\n# 安装SBT (Scala构建工具)\necho \"deb https://repo.scala-sbt.org/scalasbt/debian all main\" | sudo tee /etc/apt/sources.list.d/sbt.list\ncurl -sL \"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823\" | sudo apt-key add\nsudo apt-get update\nsudo apt-get install sbt\n验证安装:\nsbt --version",
+    "text": "SBT 安装 (Ubuntu 24.04)\nVexRiscv 是 CFU-Playground 的一个重要子模块, 它是一个 RISC-V 软核 CPU 内核, 用 SpinalHDL 写的. 我们需要安装 Scala Build Tool (SBT) 来将 .scala 文件转换为 RTL 代码. 但官方文档会安装很多不必要的工具, 如果只要装 SBT 的话, 可以在 Ubuntu 24.04 执行:\n# 更新包管理器\nsudo apt-get update\n\n# 安装Java JDK 8 (SpinalHDL需要)\nsudo apt-get install openjdk-8-jdk -y\n\n# 设置Java版本（如果系统有多个Java版本）\nsudo update-alternatives --config java\nsudo update-alternatives --config javac\n\n# 安装SBT (Scala构建工具)\necho \"deb https://repo.scala-sbt.org/scalasbt/debian all main\" | sudo tee /etc/apt/sources.list.d/sbt.list\ncurl -sL \"https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823\" | sudo apt-key add\nsudo apt-get update\nsudo apt-get install sbt\n验证安装:\nsbt --version\n生成 VexRiscv 的 RTL 代码:\ngit clone https://github.com/SpinalHDL/VexRiscv.git\ncd VexRiscv\nsbt \"runMain vexriscv.demo.GenFull\"\n运行完会在根目录产生 VexRiscv.v 文件, 导入 Vivado 即可.",
     "crumbs": [
       "Environment Setup",
       "<span class='chapter-number'>4</span>  <span class='chapter-title'>FPGA 开发环境配置</span>"
@@ -492,6 +492,17 @@
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>Digital Circuit and Verilog 数字电路与 Verilog</span>"
+    ]
+  },
+  {
+    "objectID": "glossary/glossary.html#cpu-terms",
+    "href": "glossary/glossary.html#cpu-terms",
+    "title": "Glossary 名词解释",
+    "section": "CPU Terms",
+    "text": "CPU Terms\n\nPSR (Program Status Register): 程序状态寄存器. 有 NZVC (Negative, Zero, Overflow, Carry) 四个标志位.",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
     ]
   }
 ]

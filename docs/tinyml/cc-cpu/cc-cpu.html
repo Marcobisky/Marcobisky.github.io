@@ -449,8 +449,11 @@ div.csl-indent {
   <li><a href="#change-of-mind" id="toc-change-of-mind" class="nav-link active" data-scroll-target="#change-of-mind">Change of Mind</a></li>
   <li><a href="#cpu-是如何成为现在这个样子的" id="toc-cpu-是如何成为现在这个样子的" class="nav-link" data-scroll-target="#cpu-是如何成为现在这个样子的">CPU 是如何成为现在这个样子的?</a>
   <ul class="collapse">
-  <li><a href="#第一阶段-分而治之-穷举-控制信号" id="toc-第一阶段-分而治之-穷举-控制信号" class="nav-link" data-scroll-target="#第一阶段-分而治之-穷举-控制信号">第一阶段: 分而治之, 穷举 + 控制信号</a></li>
-  <li><a href="#第二阶段" id="toc-第二阶段" class="nav-link" data-scroll-target="#第二阶段">第二阶段</a></li>
+  <li><a href="#分而治之-穷举-控制信号" id="toc-分而治之-穷举-控制信号" class="nav-link" data-scroll-target="#分而治之-穷举-控制信号">分而治之, 穷举 + 控制信号</a></li>
+  <li><a href="#流水线" id="toc-流水线" class="nav-link" data-scroll-target="#流水线">流水线</a></li>
+  <li><a href="#第三阶段" id="toc-第三阶段" class="nav-link" data-scroll-target="#第三阶段">第三阶段</a></li>
+  <li><a href="#cache" id="toc-cache" class="nav-link" data-scroll-target="#cache">Cache</a></li>
+  <li><a href="#memory" id="toc-memory" class="nav-link" data-scroll-target="#memory">Memory</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -493,8 +496,8 @@ div.csl-indent {
 <blockquote class="blockquote">
 <p>The following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.</p>
 </blockquote>
-<section id="第一阶段-分而治之-穷举-控制信号" class="level3">
-<h3 class="anchored" data-anchor-id="第一阶段-分而治之-穷举-控制信号">第一阶段: 分而治之, 穷举 + 控制信号</h3>
+<section id="分而治之-穷举-控制信号" class="level3">
+<h3 class="anchored" data-anchor-id="分而治之-穷举-控制信号">分而治之, 穷举 + 控制信号</h3>
 <ul>
 <li><p><strong>分而治之</strong>: 一条指令的执行可以拆分为这几个阶段 (phase):</p>
 <ul>
@@ -563,10 +566,40 @@ Figure&nbsp;1: 为了提升指令执行效率引入了 Pipeline <span class="cit
 <li><p>这样的 CPU: simple, general, 但是 not efficient!</p></li>
 </ul>
 </section>
-<section id="第二阶段" class="level3">
-<h3 class="anchored" data-anchor-id="第二阶段">第二阶段</h3>
+<section id="流水线" class="level3">
+<h3 class="anchored" data-anchor-id="流水线">流水线</h3>
 <ul>
-<li><strong>Pipeline 流水线</strong>: 见 <a href="#fig-single-mult-pipelined" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-single-mult-pipelined</span></a>.</li>
+<li><p><strong>Pipeline 流水线</strong>: 见 <a href="#fig-single-mult-pipelined" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-single-mult-pipelined</span></a>.</p></li>
+<li><p>在每两个 phase 之间插入一些受始终控制的寄存器:</p>
+<ul>
+<li>IF-ID 之间: 当前指令, PC 值 (<code>jal</code> 要用)</li>
+<li>ID-EX 之间: 指令类型, rs1, rs2, rd, imm.</li>
+</ul></li>
+</ul>
+</section>
+<section id="第三阶段" class="level3">
+<h3 class="anchored" data-anchor-id="第三阶段">第三阶段</h3>
+<ul>
+<li><strong>总线</strong></li>
+</ul>
+<p>AXI4, AHB, APB</p>
+</section>
+<section id="cache" class="level3">
+<h3 class="anchored" data-anchor-id="cache">Cache</h3>
+</section>
+<section id="memory" class="level3">
+<h3 class="anchored" data-anchor-id="memory">Memory</h3>
+<ul>
+<li><p>内存: working memory, main memory</p></li>
+<li><p>DRAM &amp; SSD 内存与硬盘</p>
+<ul>
+<li>读写速度 (3000 倍): 17 ns vs 50 ms, 超音速飞机和龟速</li>
+<li>容量: 16GB vs 4TB</li>
+</ul></li>
+<li><p>SIMM &amp; DIMM</p>
+<ul>
+<li>DIMM (Dual In-line Memory Module)</li>
+</ul></li>
 </ul>
 
 
