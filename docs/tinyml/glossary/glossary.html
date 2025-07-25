@@ -109,6 +109,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -641,8 +670,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="ml-terms" class="level2">
 <h2 class="anchored" data-anchor-id="ml-terms">ML Terms</h2>
 <ul>
+<li><p><strong>MSE (Mean Squared Error)</strong>: 可用作 Loss function.</p></li>
 <li><p><strong>AUC (Area Under Curve)</strong>: 二分类模型的性能评估指标, 越大越好.</p></li>
+<li><p><strong>F-score</strong>: 二分类 (正类、负类) 模型的性能评估指标.</p>
+<ul>
+<li><p><strong>TP (True Positive)</strong>: 正类被正确分类为正类.</p></li>
+<li><p><strong>FP (False Positive)</strong>: 负类被错误分类为正类.</p></li>
+<li><p><strong>FN (False Negative)</strong>: 正类被错误分类为负类.</p></li>
+<li><p><strong>Recall 召回率</strong>: <span class="math inline">\(TP/TP+FP\)</span></p></li>
+<li><p><strong>Precision 精确率</strong>: <span class="math inline">\(TP/TP+FN\)</span></p></li>
+<li><p><strong>F1-score</strong>: Recall 和 Precision 的调和平均 (F-<span class="math inline">\(\beta\)</span> score 的特例)</p></li>
+<li><p><strong>F-<span class="math inline">\(\beta\)</span> score</strong>: 仅仅是给 recall 加了权重.</p>
+<p><img src="F-score.png" class="img-fluid"></p></li>
+</ul></li>
 <li><p><strong>Hyperparameter 超参数</strong>: 模型训练前需要设置的参数, 如学习率、batch size、层数, etc.</p></li>
+<li><p><strong>A/B Test</strong>: 类似双盲实验, 比如研究修改按钮颜色能否提升点击率? 新模型是否真的比旧模型好? 可以用这种方法进行对比实验.</p></li>
 </ul>
 </section>
 <section id="cpu-terms" class="level2">

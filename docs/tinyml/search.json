@@ -200,23 +200,23 @@
   {
     "objectID": "verilog/verilog.html",
     "href": "verilog/verilog.html",
-    "title": "Digital Circuit and Verilog 数字电路与 Verilog",
+    "title": "HDL 硬件描述语言",
     "section": "",
     "text": "Change of Mind",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Digital Circuit and Verilog 数字电路与 Verilog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
     ]
   },
   {
     "objectID": "verilog/verilog.html#verilog",
     "href": "verilog/verilog.html#verilog",
-    "title": "Digital Circuit and Verilog 数字电路与 Verilog",
+    "title": "HDL 硬件描述语言",
     "section": "Verilog",
-    "text": "Verilog\n\nInside a Module 模块内部\n\n定义一个模块 (缩进随意, 这不是 python):\nmodule my_AND (input wire a, b, output wire c);\n    wire not_a = ~a;\n    assign c = not_a & b;\nendmodule\nassign\n\n多个 assign 执行没有顺序, 同时进行.\nassign 是 “continuous assignment”, 右值变化时, 左值跟着变化.\n\nOperation 运算符:\nassign my_out = ~my_in; // bit-wise NOT, `!`: logical NOT.\nassign my_out = my_a & my_b; // bit-wise AND, `&&`: logical AND.\nassign my_out = my_a | my_b; // bit-wise OR, `||`: logical OR.\nassign my_out = my_a ^ my_b; // bit-wise XOR. 没有 logical XOR.\nwire tmp = 7'd3; // tmp = 0000011\noutput [15:0] out;\nassign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100\nSignal Types 信号类型:\n\nConventional 常规写法\nwire my_in1;\ninput wire my_in2;  // `input`, `output`: port type. 仅仅说明 `my_in` 不是内部信号而是模块的输入信号.\nwire [31:0] inst;\nwire [6:0] opcode;\nassign opcode = inst[6:0];\nreg [5:-1] my_reg; // index 可以是负数.\nwire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!\nassign my_wire = 4'b1010;\nUnconventional 非常规写法\noutput my_out; // output wire my_out;\nassign a = 3'b110;  // a = 110\nassign b = a;       // b =   0  implicitly-created wire\nassign c = b;       // c = 001  &lt;-- bug\n\n\n\n\nHierarchy of Modules 模块之间\n(If, else if 是有顺序的!!!)\n(procedure 一定要放在 always 块中吗?)\n(一定要避免浮空状态! verilog 中如何体现默认电平? 用 else (if 当中) 或者 default (case 当中), 或者利用 always 的顺序性先提前赋值 (推荐!!).)\n这样写会发生什么:\nmodule top (input my_in, output my_out);\n    assign my_out = 0;\n    assign my_out = 1;\nendmodule\n(为什么 wire 类型不能在 always 里面被赋值?)\nmodule top (input my_in, output reg my_out);\n    always @(*) begin\n        my_out = 0;\n        my_out = 1; // This is valid! (Always block 按顺序执行)\n    end\nendmodule",
+    "text": "Verilog\n\nassign\n\n多个 assign 执行没有顺序, 同时进行.\nassign 是 “continuous assignment”, 右值变化时, 左值跟着变化.\n\nOperation 运算符: ~, ! (logical), &, && (logical), |, || (logical), ^ (XOR).\nif, else if 是有顺序的!!!\n(procedure 一定要放在 always 块中吗?)\n(为什么 wire 类型不能在 always 里面被赋值?)\nalways 块中的代码是顺序执行的 (但在 always 块外的代码是并行执行的).\nmodule top (input my_in, output reg my_out);\n    always @(*) begin\n        my_out = 0;\n        my_out = 1; // This is valid! (Always block 按顺序执行)\n    end\nendmodule\n\nLatch 推断: 下面如果 cpu_overheated = 0 则默认会让 shut_off_computer 保持上一个值, 这就是 latch 推断.\nalways @(*) begin\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n有时我们就是需要这种推断, 但为了避免, 可以利用always 的顺序性先提前赋值:\nalways @(*) begin\n    shut_off_computer = 0; // 先提前赋值\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n\nConcatenation:\nassign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100\nindex 可以是负数:\nreg [5:-1] my_reg; // index 可以是负数.\nwire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!\ninput a 默认为 wire.\nbegin end 在只有一行代码时可以省略 (相当于 C 中的 {}).\nwire 不能在 always 块中被赋值. reg 才能在 always 中被赋值.\nwire a;\nalways @(*) begin\n    assign a = 1; // Error!\nend\nwire a;\nalways @(*) begin\n    a &lt;= 1; // Not an error, `a` is viewed as a reg.\nend\nSynchronous and Asynchronous Reset:\n\nsynchronous reset:\nalways @(posedge clk) begin\n    if (reset)\n        ...\nend\nasynchronous reset:\nalways @(posedge clk or posedge reset) begin\n    if (reset)\n        ...\nend\n\nor 只能在 always 块中使用, if () 中要用 ||.\nInference 和 Instantiation:\n\nInference: 通过 always 块的内容推断出一个模块的功能.\nInstantiation: 显式地实例化一个模块, 通过 module_name instance_name (port_map) 的方式.\n\n循环群结构 (Torus, etc) 如果用 % 运算符来处理会消耗大量资源, 尽量用 if 语句:\nif (mm == 8'd59) begin\n    mm &lt;= 8'd0;\nend\n\n如果用 % 运算符来处理:\n\n-1 % 16 的结果是 -1, 而不是 15 (所以 (a-1)%16 应该写成 (a+15)%16).\n1~12 的循环先转换为 0~11 的循环, 再换元.\n\n\nBCD (Binary-Coded Decimal): 一种从 0 到 9 的计数器, 输出是四位二进制编码的十进制数.\nBlocking 和 Non-blocking assignments:\n\n=: Blocking assignment, 若在 always 块中使用, 则必须按照顺序执行!\n&lt;=: Non-blocking assignment, 在 always 块中使用时, 会同时执行所有赋值. (一般 always 里面都用这个!)\n\n\n\nVerilog Testbench\n`timescale 1ns / 1ps // #1 代表 1ns, 最精确可以到 #1.001\n`timescale 1ns / 1ns // #1 代表 1ns, #1.01 等是不合法的\n\n$stop //停下来",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Digital Circuit and Verilog 数字电路与 Verilog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
     ]
   },
   {
@@ -455,7 +455,7 @@
     "href": "glossary/glossary.html#ml-terms",
     "title": "Glossary 名词解释",
     "section": "ML Terms",
-    "text": "ML Terms\n\nAUC (Area Under Curve): 二分类模型的性能评估指标, 越大越好.\nHyperparameter 超参数: 模型训练前需要设置的参数, 如学习率、batch size、层数, etc.",
+    "text": "ML Terms\n\nMSE (Mean Squared Error): 可用作 Loss function.\nAUC (Area Under Curve): 二分类模型的性能评估指标, 越大越好.\nF-score: 二分类 (正类、负类) 模型的性能评估指标.\n\nTP (True Positive): 正类被正确分类为正类.\nFP (False Positive): 负类被错误分类为正类.\nFN (False Negative): 正类被错误分类为负类.\nRecall 召回率: \\(TP/TP+FP\\)\nPrecision 精确率: \\(TP/TP+FN\\)\nF1-score: Recall 和 Precision 的调和平均 (F-\\(\\beta\\) score 的特例)\nF-\\(\\beta\\) score: 仅仅是给 recall 加了权重.\n\n\nHyperparameter 超参数: 模型训练前需要设置的参数, 如学习率、batch size、层数, etc.\nA/B Test: 类似双盲实验, 比如研究修改按钮颜色能否提升点击率? 新模型是否真的比旧模型好? 可以用这种方法进行对比实验.",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
@@ -464,12 +464,12 @@
   {
     "objectID": "verilog/verilog.html#change-of-mind",
     "href": "verilog/verilog.html#change-of-mind",
-    "title": "Digital Circuit and Verilog 数字电路与 Verilog",
+    "title": "HDL 硬件描述语言",
     "section": "",
     "text": "Hardware does not “execute” the lines of code in sequence.",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>Digital Circuit and Verilog 数字电路与 Verilog</span>"
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
     ]
   },
   {

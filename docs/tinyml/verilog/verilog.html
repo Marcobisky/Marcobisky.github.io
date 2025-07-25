@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Digital Circuit and Verilog 数字电路与 Verilog – TinyML</title>
+<title>HDL 硬件描述语言 – TinyML</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -292,7 +292,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../verilog/verilog.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../verilog/verilog.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Digital Circuit and Verilog 数字电路与 Verilog</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../verilog/verilog.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../verilog/verilog.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">HDL 硬件描述语言</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -378,7 +378,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../verilog/verilog.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Digital Circuit and Verilog 数字电路与 Verilog</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">HDL 硬件描述语言</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -465,10 +465,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#change-of-mind" id="toc-change-of-mind" class="nav-link active" data-scroll-target="#change-of-mind">Change of Mind</a></li>
   <li><a href="#verilog" id="toc-verilog" class="nav-link" data-scroll-target="#verilog">Verilog</a>
   <ul class="collapse">
-  <li><a href="#inside-a-module-模块内部" id="toc-inside-a-module-模块内部" class="nav-link" data-scroll-target="#inside-a-module-模块内部">Inside a Module 模块内部</a></li>
-  <li><a href="#hierarchy-of-modules-模块之间" id="toc-hierarchy-of-modules-模块之间" class="nav-link" data-scroll-target="#hierarchy-of-modules-模块之间">Hierarchy of Modules 模块之间</a></li>
+  <li><a href="#verilog-testbench" id="toc-verilog-testbench" class="nav-link" data-scroll-target="#verilog-testbench">Verilog Testbench</a></li>
   </ul></li>
-  <li><a href="#testbench" id="toc-testbench" class="nav-link" data-scroll-target="#testbench">Testbench</a></li>
   </ul>
 </nav>
     </div>
@@ -476,9 +474,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../verilog/verilog.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../verilog/verilog.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Digital Circuit and Verilog 数字电路与 Verilog</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../verilog/verilog.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../verilog/verilog.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">HDL 硬件描述语言</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Digital Circuit and Verilog 数字电路与 Verilog</h1>
+<h1 class="title">HDL 硬件描述语言</h1>
 </div>
 
 
@@ -503,73 +501,98 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="verilog" class="level2">
 <h2 class="anchored" data-anchor-id="verilog">Verilog</h2>
-<section id="inside-a-module-模块内部" class="level3">
-<h3 class="anchored" data-anchor-id="inside-a-module-模块内部">Inside a Module 模块内部</h3>
 <ul>
-<li><p>定义一个模块 (缩进随意, 这不是 python):</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> my_AND <span class="op">(</span><span class="dt">input</span> <span class="dt">wire</span> a<span class="op">,</span> b<span class="op">,</span> <span class="dt">output</span> <span class="dt">wire</span> c<span class="op">);</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">wire</span> not_a <span class="op">=</span> <span class="op">~</span>a<span class="op">;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> c <span class="op">=</span> not_a <span class="op">&amp;</span> b<span class="op">;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><code>assign</code></p>
 <ul>
 <li>多个 <code>assign</code> 执行<strong>没有顺序</strong>, 同时进行.</li>
 <li><code>assign</code> 是 “continuous assignment”, 右值变化时, 左值跟着变化.</li>
 </ul></li>
-<li><p><strong>Operation 运算符</strong>:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> my_out <span class="op">=</span> <span class="op">~</span>my_in<span class="op">;</span> <span class="co">// bit-wise NOT, `!`: logical NOT.</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> my_out <span class="op">=</span> my_a <span class="op">&amp;</span> my_b<span class="op">;</span> <span class="co">// bit-wise AND, `&amp;&amp;`: logical AND.</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> my_out <span class="op">=</span> my_a <span class="op">|</span> my_b<span class="op">;</span> <span class="co">// bit-wise OR, `||`: logical OR.</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> my_out <span class="op">=</span> my_a <span class="op">^</span> my_b<span class="op">;</span> <span class="co">// bit-wise XOR. 没有 logical XOR.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> tmp <span class="op">=</span> <span class="bn">7'd3</span><span class="op">;</span> <span class="co">// tmp = 0000011</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">output</span> <span class="op">[</span><span class="dv">15</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> out<span class="op">;</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> out <span class="op">=</span> <span class="op">{</span>tmp<span class="op">,</span> <span class="op">{</span><span class="dv">3</span><span class="op">{</span><span class="bn">3'b100</span><span class="op">}}};</span> <span class="co">// Concatenation, out = 0000011 100 100 100</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p><strong>Signal Types 信号类型</strong>:</p>
+<li><p><strong>Operation 运算符</strong>: <code>~</code>, <code>!</code> (logical), <code>&amp;</code>, <code>&amp;&amp;</code> (logical), <code>|</code>, <code>||</code> (logical), <code>^</code> (XOR).</p></li>
+<li><p><code>if, else if</code> 是有顺序的!!!</p></li>
+<li><p>(procedure 一定要放在 always 块中吗?)</p></li>
+<li><p>(为什么 wire 类型不能在 always 里面被赋值?)</p></li>
+<li><p><code>always</code> 块中的代码是<strong>顺序执行</strong>的 (但在 <code>always</code> 块外的代码是<strong>并行执行</strong>的).</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> top <span class="op">(</span><span class="dt">input</span> my_in<span class="op">,</span> <span class="dt">output</span> <span class="dt">reg</span> my_out<span class="op">);</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        my_out <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        my_out <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// This is valid! (Always block 按顺序执行)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
-<li><p>Conventional 常规写法</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> my_in1<span class="op">;</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">input</span> <span class="dt">wire</span> my_in2<span class="op">;</span>  <span class="co">// `input`, `output`: port type. 仅仅说明 `my_in` 不是内部信号而是模块的输入信号.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> <span class="op">[</span><span class="dv">31</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> inst<span class="op">;</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> <span class="op">[</span><span class="dv">6</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> opcode<span class="op">;</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> opcode <span class="op">=</span> inst<span class="op">[</span><span class="dv">6</span><span class="op">:</span><span class="dv">0</span><span class="op">];</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">reg</span> <span class="op">[</span><span class="dv">5</span><span class="op">:-</span><span class="dv">1</span><span class="op">]</span> my_reg<span class="op">;</span> <span class="co">// index 可以是负数.</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> <span class="op">[</span><span class="dv">0</span><span class="op">:</span><span class="dv">3</span><span class="op">]</span> my_wire<span class="op">;</span> <span class="co">// Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> my_wire <span class="op">=</span> <span class="bn">4'b1010</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p>Unconventional 非常规写法</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">output</span> my_out<span class="op">;</span> <span class="co">// output wire my_out;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb8"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> a <span class="op">=</span> <span class="bn">3'b110</span><span class="op">;</span>  <span class="co">// a = 110</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> b <span class="op">=</span> a<span class="op">;</span>       <span class="co">// b =   0  implicitly-created wire</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> c <span class="op">=</span> b<span class="op">;</span>       <span class="co">// c = 001  &lt;-- bug</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Latch 推断</strong>: 下面如果 <code>cpu_overheated = 0</code> 则默认会让 <code>shut_off_computer</code> 保持上一个值, 这就是 latch 推断.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>cpu_overheated<span class="op">)</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        shut_off_computer <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>有时我们就是需要这种推断, 但为了避免, 可以利用always 的顺序性先提前赋值:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    shut_off_computer <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// 先提前赋值</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>cpu_overheated<span class="op">)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        shut_off_computer <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul></li>
+<li><p><strong>Concatenation</strong>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> out <span class="op">=</span> <span class="op">{</span>tmp<span class="op">,</span> <span class="op">{</span><span class="dv">3</span><span class="op">{</span><span class="bn">3'b100</span><span class="op">}}};</span> <span class="co">// Concatenation, out = 0000011 100 100 100</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>index 可以是负数:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">reg</span> <span class="op">[</span><span class="dv">5</span><span class="op">:-</span><span class="dv">1</span><span class="op">]</span> my_reg<span class="op">;</span> <span class="co">// index 可以是负数.</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> <span class="op">[</span><span class="dv">0</span><span class="op">:</span><span class="dv">3</span><span class="op">]</span> my_wire<span class="op">;</span> <span class="co">// Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><code>input a</code> 默认为 <code>wire</code>.</p></li>
+<li><p><code>begin end</code> 在只有一行代码时可以省略 (相当于 C 中的 <code>{}</code>).</p></li>
+<li><p><code>wire</code> 不能在 <code>always</code> 块中被赋值. <code>reg</code> 才能在 <code>always</code> 中被赋值.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> a<span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> a <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Error!</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> a<span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    a <span class="op">&lt;=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Not an error, `a` is viewed as a reg.</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Synchronous and Asynchronous Reset</strong>:</p>
+<ul>
+<li><p>synchronous reset:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>reset<span class="op">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        ...</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>asynchronous reset:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk <span class="dt">or</span> <span class="kw">posedge</span> reset<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>reset<span class="op">)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>        ...</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul></li>
+<li><p><code>or</code> <strong>只能</strong>在 <code>always</code> 块中使用, <code>if ()</code> 中要用 <code>||</code>.</p></li>
+<li><p><strong>Inference</strong> 和 <strong>Instantiation</strong>:</p>
+<ul>
+<li><strong>Inference</strong>: 通过 <code>always</code> 块的内容推断出一个模块的功能.</li>
+<li><strong>Instantiation</strong>: 显式地实例化一个模块, 通过 <code>module_name instance_name (port_map)</code> 的方式.</li>
+</ul></li>
+<li><p>循环群结构 (Torus, etc) 如果用 <code>%</code> 运算符来处理会消耗大量资源, <strong>尽量用 <code>if</code> 语句</strong>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="op">(</span>mm <span class="op">==</span> <span class="bn">8'd59</span><span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    mm <span class="op">&lt;=</span> <span class="bn">8'd0</span><span class="op">;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>如果用 <code>%</code> 运算符来处理:
+<ul>
+<li><code>-1 % 16</code> 的结果是 <code>-1</code>, 而不是 <code>15</code> (所以 <code>(a-1)%16</code> 应该写成 <code>(a+15)%16</code>).</li>
+<li>1~12 的循环先转换为 0~11 的循环, 再换元.</li>
+</ul></li>
+</ul></li>
+<li><p><strong>BCD (Binary-Coded Decimal)</strong>: 一种从 0 到 9 的计数器, 输出是四位二进制编码的十进制数.</p></li>
+<li><p><strong>Blocking 和 Non-blocking assignments</strong>:</p>
+<ul>
+<li><code>=</code>: Blocking assignment, 若在 <code>always</code> 块中使用, 则必须按照顺序执行!</li>
+<li><code>&lt;=</code>: Non-blocking assignment, 在 <code>always</code> 块中使用时, 会同时执行所有赋值. (一般 <code>always</code> 里面都用这个!)</li>
 </ul></li>
 </ul>
-</section>
-<section id="hierarchy-of-modules-模块之间" class="level3">
-<h3 class="anchored" data-anchor-id="hierarchy-of-modules-模块之间">Hierarchy of Modules 模块之间</h3>
-<p>(If, else if 是有顺序的!!!)</p>
-<p>(procedure 一定要放在 always 块中吗?)</p>
-<p>(一定要避免浮空状态! verilog 中如何体现默认电平? 用 else (if 当中) 或者 default (case 当中), 或者利用 always 的顺序性先提前赋值 (推荐!!).)</p>
-<p>这样写会发生什么:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> top <span class="op">(</span><span class="dt">input</span> my_in<span class="op">,</span> <span class="dt">output</span> my_out<span class="op">);</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> my_out <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> my_out <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>(为什么 wire 类型不能在 always 里面被赋值?)</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> top <span class="op">(</span><span class="dt">input</span> my_in<span class="op">,</span> <span class="dt">output</span> <span class="dt">reg</span> my_out<span class="op">);</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        my_out <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>        my_out <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// This is valid! (Always block 按顺序执行)</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-</section>
-<section id="testbench" class="level2">
-<h2 class="anchored" data-anchor-id="testbench">Testbench</h2>
+<section id="verilog-testbench" class="level3">
+<h3 class="anchored" data-anchor-id="verilog-testbench">Verilog Testbench</h3>
 <div class="sourceCode" id="cb11"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ot">`timescale 1ns / 1ps </span><span class="co">// #1 代表 1ns, 最精确可以到 #1.001</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ot">`timescale 1ns / 1ns </span><span class="co">// #1 代表 1ns, #1.01 等是不合法的</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="dt">$stop</span> <span class="co">//停下来</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

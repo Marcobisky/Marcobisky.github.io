@@ -1,5 +1,5 @@
 ---
-title: "Digital Circuit and Verilog 数字电路与 Verilog"
+title: "HDL 硬件描述语言"
 ---
 
 ## Change of Mind
@@ -8,98 +8,126 @@ title: "Digital Circuit and Verilog 数字电路与 Verilog"
 
 ## Verilog
 
-
-### Inside a Module 模块内部
-
-- 定义一个模块 (缩进随意, 这不是 python):
-
-    ```verilog
-    module my_AND (input wire a, b, output wire c);
-        wire not_a = ~a;
-        assign c = not_a & b;
-    endmodule
-    ```
-
 - `assign`
     - 多个 `assign` 执行**没有顺序**, 同时进行.
     - `assign` 是 "continuous assignment", 右值变化时, 左值跟着变化.
 
-- **Operation 运算符**:
+- **Operation 运算符**: `~`, `!` (logical), `&`, `&&` (logical), `|`, `||` (logical), `^` (XOR).
+
+
+- `if, else if` 是有顺序的!!!
+
+- (procedure 一定要放在 always 块中吗?)
+
+
+- (为什么 wire 类型不能在 always 里面被赋值?)
+
+- `always` 块中的代码是**顺序执行**的 (但在 `always` 块外的代码是**并行执行**的).
 
     ```verilog
-    assign my_out = ~my_in; // bit-wise NOT, `!`: logical NOT.
-    assign my_out = my_a & my_b; // bit-wise AND, `&&`: logical AND.
-    assign my_out = my_a | my_b; // bit-wise OR, `||`: logical OR.
-    assign my_out = my_a ^ my_b; // bit-wise XOR. 没有 logical XOR.
+    module top (input my_in, output reg my_out);
+        always @(*) begin
+            my_out = 0;
+            my_out = 1; // This is valid! (Always block 按顺序执行)
+        end
+    endmodule
     ```
+
+    - **Latch 推断**: 下面如果 `cpu_overheated = 0` 则默认会让 `shut_off_computer` 保持上一个值, 这就是 latch 推断.
+
+        ```verilog
+        always @(*) begin
+            if (cpu_overheated)
+                shut_off_computer = 1;
+        end
+        ```
+        有时我们就是需要这种推断, 但为了避免, 可以利用always 的顺序性先提前赋值:
+        
+        ```verilog
+        always @(*) begin
+            shut_off_computer = 0; // 先提前赋值
+            if (cpu_overheated)
+                shut_off_computer = 1;
+        end
+        ```
+
+- **Concatenation**: 
+
     ```verilog
-    wire tmp = 7'd3; // tmp = 0000011
-    output [15:0] out;
     assign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100
     ```
 
-- **Signal Types 信号类型**: 
-    - Conventional 常规写法
+- index 可以是负数:
 
-        ```verilog
-        wire my_in1;
-        input wire my_in2;  // `input`, `output`: port type. 仅仅说明 `my_in` 不是内部信号而是模块的输入信号.
-        ```
-        ```verilog
-        wire [31:0] inst;
-        wire [6:0] opcode;
-        assign opcode = inst[6:0];
-        ```
-        ```verilog
-        reg [5:-1] my_reg; // index 可以是负数.
-        wire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!
-        assign my_wire = 4'b1010;
-        ```
+    ```verilog
+    reg [5:-1] my_reg; // index 可以是负数.
+    wire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!
+    ```
 
-    - Unconventional 非常规写法
+- `input a` 默认为 `wire`.
 
-        ```verilog
-        output my_out; // output wire my_out;
-        ```
-        ```verilog
-        assign a = 3'b110;  // a = 110
-        assign b = a;       // b =   0  implicitly-created wire
-        assign c = b;       // c = 001  <-- bug
-        ```
+- `begin end` 在只有一行代码时可以省略 (相当于 C 中的 `{}`).
 
-
-
-### Hierarchy of Modules 模块之间
-
-
-(If, else if 是有顺序的!!!)
-
-(procedure 一定要放在 always 块中吗?)
-
-(一定要避免浮空状态! verilog 中如何体现默认电平? 用 else (if 当中) 或者 default (case 当中), 或者利用 always 的顺序性先提前赋值 (推荐!!).)
-
-这样写会发生什么:
-
-```verilog
-module top (input my_in, output my_out);
-    assign my_out = 0;
-    assign my_out = 1;
-endmodule
-```
-
-(为什么 wire 类型不能在 always 里面被赋值?)
-
-```verilog
-module top (input my_in, output reg my_out);
+- `wire` 不能在 `always` 块中被赋值. `reg` 才能在 `always` 中被赋值.
+    
+    ```verilog
+    wire a;
     always @(*) begin
-        my_out = 0;
-        my_out = 1; // This is valid! (Always block 按顺序执行)
+        assign a = 1; // Error!
     end
-endmodule
-```
+    ```
+    ```verilog
+    wire a;
+    always @(*) begin
+        a <= 1; // Not an error, `a` is viewed as a reg.
+    end
+    ```
 
+- **Synchronous and Asynchronous Reset**:
 
-## Testbench
+    - synchronous reset: 
+
+        ```verilog
+        always @(posedge clk) begin
+            if (reset)
+                ...
+        end
+        ```
+
+    - asynchronous reset: 
+
+        ```verilog
+        always @(posedge clk or posedge reset) begin
+            if (reset)
+                ...
+        end
+        ```
+
+- `or` **只能**在 `always` 块中使用, `if ()` 中要用 `||`.
+
+- **Inference** 和 **Instantiation**:
+    - **Inference**: 通过 `always` 块的内容推断出一个模块的功能.
+    - **Instantiation**: 显式地实例化一个模块, 通过 `module_name instance_name (port_map)` 的方式.
+
+ - 循环群结构 (Torus, etc) 如果用 `%` 运算符来处理会消耗大量资源, **尽量用 `if` 语句**:
+
+    ```verilog
+    if (mm == 8'd59) begin
+        mm <= 8'd0;
+    end
+    ```
+
+    - 如果用 `%` 运算符来处理:
+        - `-1 % 16` 的结果是 `-1`, 而不是 `15` (所以 `(a-1)%16` 应该写成 `(a+15)%16`).
+        - 1~12 的循环先转换为 0~11 的循环, 再换元.
+
+- **BCD (Binary-Coded Decimal)**: 一种从 0 到 9 的计数器, 输出是四位二进制编码的十进制数.
+
+- **Blocking 和 Non-blocking assignments**:
+    - `=`: Blocking assignment, 若在 `always` 块中使用, 则必须按照顺序执行!
+    - `<=`: Non-blocking assignment, 在 `always` 块中使用时, 会同时执行所有赋值. (一般 `always` 里面都用这个!)
+
+### Verilog Testbench
 
 ```verilog
 `timescale 1ns / 1ps // #1 代表 1ns, 最精确可以到 #1.001
@@ -107,4 +135,3 @@ endmodule
 
 $stop //停下来
 ```
-
