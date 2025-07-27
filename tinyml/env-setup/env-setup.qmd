@@ -440,3 +440,104 @@ sbt "runMain vexriscv.demo.GenFull"
 ```
 
 运行完会在根目录产生 `VexRiscv.v` 文件, 导入 Vivado 即可.
+
+
+
+## YSYX 跟踪环境搭建 (MacOS 和 Ubuntu 24.04)
+
+为了同时在 MacOS 和 Ubuntu 24.04 进行 YSYX 作业的提交, 先在 MacOS 上生成一堆密钥:
+
+```bash
+ssh-keygen
+```
+
+名字可以随便起, 比如: `~/.ssh/id_ysyx_ed25519` 和 `~/.ssh/id_ysyx_ed25519.pub` 即可, 私钥不要设置密码 (按 Enter 即可). 公钥添加到 GitHub 的 SSH keys 中. 执行:
+
+```bash
+nslookup github.com
+```
+
+如果输出类似:
+
+```zsh
+Server:		198.18.0.2
+Address:	198.18.0.2#53
+
+Non-authoritative answer:
+Name:	github.com
+Address: 198.18.0.57
+```
+
+说明网络环境存在 DNS 劫持 (可能是梯子把 把 `github.com` 映射成了假的 IP 地址 `198.18.0.57`, 所以你的设备根本没法访问 GitHub 的真实服务器 (导致 SSH 失败)). 解决方法: 配置 ~/.ssh/config 走端口 443:
+
+```{filename="~/.ssh/config"}
+# Add this to your ~/.ssh/config file
+Host github.com
+    HostName ssh.github.com
+    Port 443
+    User git
+    IdentityFile ~/.ssh/id_ysyx_ed25519
+    IdentitiesOnly yes
+```
+
+运行:
+
+```bash
+ssh -T git@github.com
+```
+
+如果输出:
+
+```bash
+Hi <YourName>! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+说明 SSH 连接成功. 然后按照 [YSYX E3](https://ysyx.oscc.cc/docs/2407/e/3.html) 执行:
+
+```bash
+git clone -b master git@github.com:OSCPU/ysyx-workbench.git
+```
+
+即可. 按照官方的说法先玩一下, 把该执行的都执行了, 比如:
+
+```bash
+git branch -m master
+bash init.sh nemu
+bash init.sh abstract-machine
+```
+
+等等 (让他先有一些 git log). 然后创建一个 Private 的 GitHub Repo, 与你本地的 `ysyx-workbench` 目录关联:
+
+```bash
+# 先把原来的 origin 改个名字，比如 oscpu
+git remote rename origin oscpu
+
+# 然后添加你自己的仓库为新的 origin
+git remote add origin https://github.com/<Yourname>/ysyx-workbench.git
+```
+
+然后 push 到 `origin` (不是 `oscpu`) 即可.
+
+在 Ubuntu 24.04 上, 同样将文件 `~/.ssh/id_ysyx_ed25519` 复制过去, 然后执行:
+
+```bash
+chmod 600 ~/.ssh/id_ysyx_ed25519
+ls -la ~/.ssh/id_ysyx_ed25519
+chmod 700 ~/.ssh
+ls -ld ~/.ssh
+ssh -T git@github.com
+```
+
+如果成功, 将你自己的 `ysyx-workbench` 仓库 clone 到 Ubuntu 上:
+
+```bash
+git clone git@github.com:<Yourname>/ysyx-workbench.git
+```
+
+可以通过
+
+```bash
+git log tracer-ysyx
+```
+
+查看系统跟踪日志.
