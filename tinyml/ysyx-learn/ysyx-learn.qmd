@@ -1,0 +1,78 @@
+---
+title: "YSYX 学习记录"
+---
+
+## E4 & PA1 学习记录
+
+### 2025-7-28
+
+- 运行
+
+    ```bash
+    make ARCH=native mainargs=t run
+    ```
+
+    的时候报错识别不到 `<SDL.h>` 头文件, 需要安装 `libsdl2-dev` 包即可.
+
+    ```bash
+    sudo apt install libsdl2-dev
+    ```
+
+- **Statement Expression**: GCC 提供的一种语法扩展:
+
+    ```c
+    int x = ({
+        int a = 3;
+        int b = 4;
+        a + b;
+    });  // x == 7
+    ```
+
+- **Macro 宏**:
+
+    ```c
+    // 宏可以带参数
+    #define add(a, b) ((a) + (b))
+
+    int x = add(3, 4);  // 展开为 ((3) + (4)) → 7
+    ```
+
+    ```c
+    // 宏参数连接 (只是字符串的连接)
+    #define FIELD(name) mystruct_##name
+
+    int mystruct_id = 42;
+    int x = FIELD(id);  // → int x = mystruct_id;
+    ```
+
+- **`static`** 关键字:
+
+    - 函数内调用:
+
+    ```c
+    #include <stdio.h>
+
+    void counter() {
+        static int count = 0;  // 只初始化一次，生命周期贯穿整个程序
+        count++;
+        printf("count = %d\n", count);
+    }
+
+    int main() {
+        counter();  // 输出 1
+        counter();  // 输出 2
+        counter();  // 输出 3
+        return 0;
+    }
+    ```
+
+    - 函数外调用:
+
+    ```c
+    // file1.c
+    static int hidden_var = 42;  // 只能在 file1.c 中使用
+
+    static void hidden_func() {
+        // 只能在 file1.c 中被调用, 外部文件不能 extern 这个函数
+    }
+    ```
