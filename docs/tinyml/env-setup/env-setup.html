@@ -475,7 +475,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#vivado-vitis-hls-安装-ubuntu-24.04" id="toc-vivado-vitis-hls-安装-ubuntu-24.04" class="nav-link" data-scroll-target="#vivado-vitis-hls-安装-ubuntu-24.04">Vivado &amp; Vitis HLS 安装 (Ubuntu 24.04)</a></li>
   <li><a href="#sbt-安装-ubuntu-24.04" id="toc-sbt-安装-ubuntu-24.04" class="nav-link" data-scroll-target="#sbt-安装-ubuntu-24.04">SBT 安装 (Ubuntu 24.04)</a></li>
-  <li><a href="#ysyx-跟踪环境搭建-macos-和-ubuntu-24.04" id="toc-ysyx-跟踪环境搭建-macos-和-ubuntu-24.04" class="nav-link" data-scroll-target="#ysyx-跟踪环境搭建-macos-和-ubuntu-24.04">YSYX 跟踪环境搭建 (MacOS 和 Ubuntu 24.04)</a></li>
+  <li><a href="#ysyx-环境搭建" id="toc-ysyx-环境搭建" class="nav-link" data-scroll-target="#ysyx-环境搭建">YSYX 环境搭建</a>
+  <ul class="collapse">
+  <li><a href="#跟踪环境搭建-macos-和-ubuntu-24.04" id="toc-跟踪环境搭建-macos-和-ubuntu-24.04" class="nav-link" data-scroll-target="#跟踪环境搭建-macos-和-ubuntu-24.04">跟踪环境搭建 (MacOS 和 Ubuntu 24.04)</a></li>
+  <li><a href="#nemu-环境搭建-ubuntu-24.04" id="toc-nemu-环境搭建-ubuntu-24.04" class="nav-link" data-scroll-target="#nemu-环境搭建-ubuntu-24.04">NEMU 环境搭建 (Ubuntu 24.04)</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -867,8 +871,10 @@ Figure&nbsp;1: Vitis 的 GUI 在 Ubuntu 24.04 上打不开
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="ex">sbt</span> <span class="st">"runMain vexriscv.demo.GenFull"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>运行完会在根目录产生 <code>VexRiscv.v</code> 文件, 导入 Vivado 即可.</p>
 </section>
-<section id="ysyx-跟踪环境搭建-macos-和-ubuntu-24.04" class="level2">
-<h2 class="anchored" data-anchor-id="ysyx-跟踪环境搭建-macos-和-ubuntu-24.04">YSYX 跟踪环境搭建 (MacOS 和 Ubuntu 24.04)</h2>
+<section id="ysyx-环境搭建" class="level2">
+<h2 class="anchored" data-anchor-id="ysyx-环境搭建">YSYX 环境搭建</h2>
+<section id="跟踪环境搭建-macos-和-ubuntu-24.04" class="level3">
+<h3 class="anchored" data-anchor-id="跟踪环境搭建-macos-和-ubuntu-24.04">跟踪环境搭建 (MacOS 和 Ubuntu 24.04)</h3>
 <p>为了同时在 MacOS 和 Ubuntu 24.04 进行 YSYX 作业的提交, 先在 MacOS 上生成一堆密钥:</p>
 <div class="sourceCode" id="cb31"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ssh-keygen</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>名字可以随便起, 比如: <code>~/.ssh/id_ysyx_ed25519</code> 和 <code>~/.ssh/id_ysyx_ed25519.pub</code> 即可, 私钥不要设置密码 (按 Enter 即可). 公钥添加到 GitHub 的 SSH keys 中. 执行:</p>
@@ -921,8 +927,35 @@ Host github.com
 <p>可以通过</p>
 <div class="sourceCode" id="cb42"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> log tracer-ysyx</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>查看系统跟踪日志.</p>
+</section>
+<section id="nemu-环境搭建-ubuntu-24.04" class="level3">
+<h3 class="anchored" data-anchor-id="nemu-环境搭建-ubuntu-24.04">NEMU 环境搭建 (Ubuntu 24.04)</h3>
+<p>如果 <code>make run</code> 失败, 则可能需要:</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="va">$NEMU_HOME</span> <span class="co"># 如果没有输出, 则需要设置 NEMU_HOME 环境变量</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">"export NEMU_HOME=/home/marcobisky/LocalFiles/LIYUN/proj/ysyx-workbench/nemu"</span> <span class="op">&gt;&gt;</span> ~/.bashrc <span class="co"># 换成你的 nemu 路径</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> ~/.bashrc <span class="kw">&amp;&amp;</span> <span class="bu">echo</span> <span class="va">$NEMU_HOME</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> menuconfig <span class="co"># 如果失败, 则安装缺失的库然后重新运行.</span></span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt update <span class="kw">&amp;&amp;</span> <span class="fu">sudo</span> apt install bison flex</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> run <span class="co"># 如果失败, 则需要检查错误信息并安装缺失的库, 比如:</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> apt install libreadline-dev</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>make run</code> 运行后会有一个断言失败, 这是故意的练习提示:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="ex">Welcome</span> to riscv32-NEMU!</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="ex">For</span> help, type <span class="st">"help"</span></span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a><span class="ex">[src/monitor/monitor.c:35</span> welcome] Exercise: Please remove me in the source code and compile NEMU again.</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="ex">riscv32-nemu-interpreter:</span> src/monitor/monitor.c:36: welcome: Assertion <span class="kw">`</span><span class="ex">0</span><span class="st">' failed.</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a><span class="st">make: *** [/home/marcobisky/LocalFiles/LIYUN/proj/ysyx-workbench/nemu/scripts/native.mk:38: run] Aborted (core dumped)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>删除以下行即可:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>src/monitor/monitor.c</strong></pre>
+</div>
+<pre data-filename="src/monitor/monitor.c"><code>    assert(0);</code></pre>
+</div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

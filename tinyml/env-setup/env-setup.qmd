@@ -443,7 +443,9 @@ sbt "runMain vexriscv.demo.GenFull"
 
 
 
-## YSYX 跟踪环境搭建 (MacOS 和 Ubuntu 24.04)
+## YSYX 环境搭建
+
+### 跟踪环境搭建 (MacOS 和 Ubuntu 24.04)
 
 为了同时在 MacOS 和 Ubuntu 24.04 进行 YSYX 作业的提交, 先在 MacOS 上生成一堆密钥:
 
@@ -541,3 +543,36 @@ git log tracer-ysyx
 ```
 
 查看系统跟踪日志.
+
+
+### NEMU 环境搭建 (Ubuntu 24.04)
+
+如果 `make run` 失败, 则可能需要:
+
+```bash
+echo $NEMU_HOME # 如果没有输出, 则需要设置 NEMU_HOME 环境变量
+echo "export NEMU_HOME=/home/marcobisky/LocalFiles/LIYUN/proj/ysyx-workbench/nemu" >> ~/.bashrc # 换成你的 nemu 路径
+source ~/.bashrc && echo $NEMU_HOME
+
+make menuconfig # 如果失败, 则安装缺失的库然后重新运行.
+sudo apt update && sudo apt install bison flex
+
+make run # 如果失败, 则需要检查错误信息并安装缺失的库, 比如:
+sudo apt install libreadline-dev
+```
+
+`make run` 运行后会有一个断言失败, 这是故意的练习提示:
+
+```bash
+Welcome to riscv32-NEMU!
+For help, type "help"
+[src/monitor/monitor.c:35 welcome] Exercise: Please remove me in the source code and compile NEMU again.
+riscv32-nemu-interpreter: src/monitor/monitor.c:36: welcome: Assertion `0' failed.
+make: *** [/home/marcobisky/LocalFiles/LIYUN/proj/ysyx-workbench/nemu/scripts/native.mk:38: run] Aborted (core dumped)
+```
+
+删除以下行即可:
+
+```{filename="src/monitor/monitor.c"}
+    assert(0);
+```

@@ -499,7 +499,7 @@
     "href": "glossary/glossary.html#cpu-terms",
     "title": "Glossary 名词解释",
     "section": "CPU Terms",
-    "text": "CPU Terms\n\nPSR (Program Status Register): 程序状态寄存器. 有 NZVC (Negative, Zero, Overflow, Carry) 四个标志位.\nNPC (New Processor Core): ysyx 里面指我们自己设计的处理器.",
+    "text": "CPU Terms\n\nPSR (Program Status Register): 程序状态寄存器. 有 NZVC (Negative, Zero, Overflow, Carry) 四个标志位.\nBenchmark: 基准测试. 用于测试系统或工具的功能/性能.",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
@@ -521,10 +521,32 @@
     "href": "glossary/glossary.html#c-compile-terms",
     "title": "Glossary 名词解释",
     "section": "C Compile Terms",
-    "text": "C Compile Terms\n\nLLVM IR (Intermediate Representation): 一种中间表示形式, 用于编译器优化和代码生成.\n\ngcc 和 clang 都是 C 语言的编译器, 但是他们的 IR 不一样. gcc: GIMPLE, clang: LLVM IR.\n\n\n\n\n\n\n1. YSYX (2025) E5 从 RTL 代码到可流片版图 | 官方文档",
+    "text": "C Compile Terms\n\nLLVM IR (Intermediate Representation): 一种中间表示形式, 用于编译器优化和代码生成.\n\ngcc 和 clang 都是 C 语言的编译器, 但是他们的 IR 不一样. gcc: GIMPLE, clang: LLVM IR.",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+    ]
+  },
+  {
+    "objectID": "glossary/glossary.html#ysyx-terms",
+    "href": "glossary/glossary.html#ysyx-terms",
+    "title": "Glossary 名词解释",
+    "section": "YSYX Terms",
+    "text": "YSYX Terms\n\nAM (Abstraction Machine): 抽象机, 用程序模拟的硬件计算机.\nNPC (New Processor Core): 指我们自己设计的处理器.\n\n\n\n\n\n1. YSYX (2025) E5 从 RTL 代码到可流片版图 | 官方文档",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+    ]
+  },
+  {
+    "objectID": "env-setup/env-setup.html#ysyx-环境搭建",
+    "href": "env-setup/env-setup.html#ysyx-环境搭建",
+    "title": "FPGA 开发环境配置",
+    "section": "YSYX 环境搭建",
+    "text": "YSYX 环境搭建\n\n跟踪环境搭建 (MacOS 和 Ubuntu 24.04)\n为了同时在 MacOS 和 Ubuntu 24.04 进行 YSYX 作业的提交, 先在 MacOS 上生成一堆密钥:\nssh-keygen\n名字可以随便起, 比如: ~/.ssh/id_ysyx_ed25519 和 ~/.ssh/id_ysyx_ed25519.pub 即可, 私钥不要设置密码 (按 Enter 即可). 公钥添加到 GitHub 的 SSH keys 中. 执行:\nnslookup github.com\n如果输出类似:\nServer:     198.18.0.2\nAddress:    198.18.0.2#53\n\nNon-authoritative answer:\nName:   github.com\nAddress: 198.18.0.57\n说明网络环境存在 DNS 劫持 (可能是梯子把 把 github.com 映射成了假的 IP 地址 198.18.0.57, 所以你的设备根本没法访问 GitHub 的真实服务器 (导致 SSH 失败)). 解决方法: 配置 ~/.ssh/config 走端口 443:\n\n\n~/.ssh/config\n\n# Add this to your ~/.ssh/config file\nHost github.com\n    HostName ssh.github.com\n    Port 443\n    User git\n    IdentityFile ~/.ssh/id_ysyx_ed25519\n    IdentitiesOnly yes\n\n运行:\nssh -T git@github.com\n如果输出:\nHi &lt;YourName&gt;! You've successfully authenticated, but GitHub does not provide shell access.\n说明 SSH 连接成功. 然后按照 YSYX E3 执行:\ngit clone -b master git@github.com:OSCPU/ysyx-workbench.git\n即可. 按照官方的说法先玩一下, 把该执行的都执行了, 比如:\ngit branch -m master\nbash init.sh nemu\nbash init.sh abstract-machine\n等等 (让他先有一些 git log). 然后创建一个 Private 的 GitHub Repo, 与你本地的 ysyx-workbench 目录关联:\n# 先把原来的 origin 改个名字，比如 oscpu\ngit remote rename origin oscpu\n\n# 然后添加你自己的仓库为新的 origin\ngit remote add origin https://github.com/&lt;Yourname&gt;/ysyx-workbench.git\n然后 push 到 origin (不是 oscpu) 即可.\n在 Ubuntu 24.04 上, 同样将文件 ~/.ssh/id_ysyx_ed25519 复制过去, 然后执行:\nchmod 600 ~/.ssh/id_ysyx_ed25519\nls -la ~/.ssh/id_ysyx_ed25519\nchmod 700 ~/.ssh\nls -ld ~/.ssh\nssh -T git@github.com\n如果成功, 将你自己的 ysyx-workbench 仓库 clone 到 Ubuntu 上:\ngit clone git@github.com:&lt;Yourname&gt;/ysyx-workbench.git\n可以通过\ngit log tracer-ysyx\n查看系统跟踪日志.\n\n\nNEMU 环境搭建 (Ubuntu 24.04)\n如果 make run 失败, 则可能需要:\necho $NEMU_HOME # 如果没有输出, 则需要设置 NEMU_HOME 环境变量\necho \"export NEMU_HOME=/home/marcobisky/LocalFiles/LIYUN/proj/ysyx-workbench/nemu\" &gt;&gt; ~/.bashrc # 换成你的 nemu 路径\nsource ~/.bashrc && echo $NEMU_HOME\n\nmake menuconfig # 如果失败, 则安装缺失的库然后重新运行.\nsudo apt update && sudo apt install bison flex\n\nmake run # 如果失败, 则需要检查错误信息并安装缺失的库, 比如:\nsudo apt install libreadline-dev\nmake run 运行后会有一个断言失败, 这是故意的练习提示:\nWelcome to riscv32-NEMU!\nFor help, type \"help\"\n[src/monitor/monitor.c:35 welcome] Exercise: Please remove me in the source code and compile NEMU again.\nriscv32-nemu-interpreter: src/monitor/monitor.c:36: welcome: Assertion `0' failed.\nmake: *** [/home/marcobisky/LocalFiles/LIYUN/proj/ysyx-workbench/nemu/scripts/native.mk:38: run] Aborted (core dumped)\n删除以下行即可:\n\n\nsrc/monitor/monitor.c\n\n    assert(0);",
+    "crumbs": [
+      "Environment Setup",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>FPGA 开发环境配置</span>"
     ]
   }
 ]
