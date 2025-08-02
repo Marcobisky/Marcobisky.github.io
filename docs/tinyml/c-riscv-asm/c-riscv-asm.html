@@ -55,7 +55,26 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -474,7 +493,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#编译过程" id="toc-编译过程" class="nav-link active" data-scroll-target="#编译过程">编译过程</a></li>
+  <li><a href="#c-编译过程" id="toc-c-编译过程" class="nav-link active" data-scroll-target="#c-编译过程">C 编译过程</a></li>
+  <li><a href="#汇编语言" id="toc-汇编语言" class="nav-link" data-scroll-target="#汇编语言">汇编语言</a></li>
   </ul>
 </nav>
     </div>
@@ -514,8 +534,8 @@ Fortran -&gt; | llvm-gcc | ---&gt; | llvm-opt | ---&gt; |  llvm-arm  | -&gt; ARM
            +----------+  |                 |   +------------+
 Haskell -&gt; |    GHC   | -+                 +-&gt; | llvm-riscv | -&gt; RISC-V
            +----------+  LLVM IR      LLRM IR  +------------+</code></pre>
-<section id="编译过程" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="编译过程">编译过程</h2>
+<section id="c-编译过程" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="c-编译过程">C 编译过程</h2>
 <ul>
 <li>gcc 编译选项:
 <ul>
@@ -648,8 +668,36 @@ Key to Flags:
 <span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">2a:</span>   <span class="dv">6105</span>                    addi    <span class="kw">sp</span><span class="op">,</span><span class="kw">sp</span><span class="op">,</span><span class="dv">32</span></span>
 <span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">2c:</span>   <span class="dv">8082</span>                    <span class="kw">ret</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+</section>
+<section id="汇编语言" class="level2">
+<h2 class="anchored" data-anchor-id="汇编语言">汇编语言</h2>
+<ul>
+<li><p>基本格式:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>label<span class="op">&gt;</span><span class="fu">:</span> <span class="op">&lt;</span>operation<span class="op">&gt;</span> <span class="co"># &lt;comment&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><code>&lt;operation&gt;</code> 的类型 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">1</a>]</span>:
+<ul>
+<li><p>instruction (指令)</p></li>
+<li><p>pseudo-instruction (伪指令): <code>li x6, 5</code>, <code>nop</code>, RISCV 中有定义</p></li>
+<li><p>directive (伪操作): <code>.macro ... .endm</code>, <code>.end</code>, <code>.text</code>, <code>.global _start</code> 告知汇编器的指示, 与 RISCV 规范无关.</p></li>
+<li><p>macro (宏):</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.macro</span> do_nothing</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">nop</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">.endm</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">_start:</span> do_nothing <span class="co"># 调用宏, 汇编器会将它展开</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul></li>
+</ul></li>
+<li><p>标签其实表示地址:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">_start:</span> li x6<span class="op">,</span> <span class="dv">5</span> <span class="co"># _start 标签其实就是这条指令的地址</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
 
 
+<div id="refs" class="references csl-bib-body" role="list">
+<div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Lazyparser (2025) <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">Compilation and linker</a></div>
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->

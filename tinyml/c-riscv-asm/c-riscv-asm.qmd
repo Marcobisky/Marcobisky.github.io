@@ -17,7 +17,7 @@ Haskell -> |    GHC   | -+                 +-> | llvm-riscv | -> RISC-V
            +----------+  LLVM IR      LLRM IR  +------------+
 ```
 
-## 编译过程
+## C 编译过程
 
 - gcc 编译选项:
     - `-E`: 只预处理, 不编译.
@@ -79,3 +79,32 @@ riscv32-unknown-elf-objdump -S hello.o > disassembly.s # 反汇编, 并输出到
 ```{.s filename="disassembly.s"}
 {{< include code/disassembly.s >}}
 ```
+
+## 汇编语言
+
+- 基本格式:
+
+	```s
+	<label>: <operation> # <comment>
+	```
+
+	- `<operation>` 的类型 @Lazyparser_2025_bilibili:
+		- instruction (指令)
+		- pseudo-instruction (伪指令): `li x6, 5`, `nop`, RISCV 中有定义
+		- directive (伪操作): `.macro ... .endm`, `.end`, `.text`, `.global _start` 告知汇编器的指示, 与 RISCV 规范无关.
+		- macro (宏):
+
+			```s
+			.macro do_nothing
+				nop
+			.endm
+
+			_start: do_nothing # 调用宏, 汇编器会将它展开
+			```
+
+- 标签其实表示地址:
+
+	```s
+	_start: li x6, 5 # _start 标签其实就是这条指令的地址
+	```
+
