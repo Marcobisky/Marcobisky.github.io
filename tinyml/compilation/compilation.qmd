@@ -17,6 +17,7 @@ Haskell -> |    GHC   | -+                 +-> | llvm-riscv | -> RISC-V
            +----------+  LLVM IR      LLRM IR  +------------+
 ```
 
+## 编译过程
 
 - gcc 编译选项:
     - `-E`: 只预处理, 不编译.
@@ -30,3 +31,51 @@ Haskell -> |    GHC   | -+                 +-> | llvm-riscv | -> RISC-V
 :::{.column-margin}    
 ![编译过程](compilation.png)
 :::
+
+装好 RISCV 编译工具链, 创建一个简单的 C 语言程序 `hello.c`:
+
+```{.c filename="hello.c"}
+{{< include code/hello.c >}}
+```
+
+运行:
+
+```bash
+riscv32-unknown-elf-gcc -c hello.c -o hello.o # 只编译, 不链接
+```
+
+用 `riscv32-unknown-elf-readelf` 查看生成的 `.o` 文件:
+
+```bash
+riscv32-unknown-elf-readelf -h hello.o > header_info.log # 查看 Header 信息, 并输出到文件
+```
+
+得到:
+
+```{.log filename="header_info.log"}
+{{< include code/header_info.log >}}
+```
+
+再查看 Section 信息:
+
+```bash
+riscv32-unknown-elf-readelf -S hello.o > section_info.log # 查看 Section 信息, 并输出到文件
+```
+
+得到:
+
+```{.log filename="section_info.log"}
+{{< include code/section_info.log >}}
+```
+
+对 `.o` 文件进行反汇编:
+
+```bash
+riscv32-unknown-elf-objdump -S hello.o > disassembly.s # 反汇编, 并输出到文件
+```
+
+得到:
+
+```{.s filename="disassembly.s"}
+{{< include code/disassembly.s >}}
+```
