@@ -17,6 +17,36 @@ Haskell -> |    GHC   | -+                 +-> | llvm-riscv | -> RISC-V
            +----------+  LLVM IR      LLRM IR  +------------+
 ```
 
+- `volatile` 关键字: 告诉编译器不要优化这个语句.
+
+- 在 C 中插入汇编代码 @Lazyparser_2025_bilibili:
+	- 一般我们不会显式地指明用哪些寄存器或者内存地址, 让编译器来决定!
+
+	```c
+	// 相当于 add c, a, b
+	// r 代表用寄存器来做对应 (m 表示用内存来做对应)
+	int foo (int a, int b)
+	{
+		int c;
+		asm volatile (
+			"add %0, %1, %2\n" // 指令内容用双引号
+			: "=r" (c) // 输出
+			: "r" (a), "r" (b) // 输入
+		);
+		return c;
+	}
+	```
+
+	也可以用:
+
+	```c
+	asm volatile (
+		"add %[sum], %[add1], %[add2]\n"
+		: [sum] "=r" (c) // 输出
+		: [add1] "r" (a), [add2] "r" (b) // 输入
+	);
+	```
+
 ## C 编译过程
 
 - Compiler, Assembler, Linker:
@@ -86,7 +116,7 @@ riscv32-unknown-elf-objdump -S hello.o > disassembly.s # 反汇编, 并输出到
 {{< include code/disassembly.s >}}
 ```
 
-## 汇编语言
+## RISCV 汇编语言
 
 - 基本格式:
 
