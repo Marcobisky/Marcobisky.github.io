@@ -187,11 +187,33 @@
     ]
   },
   {
+    "objectID": "glossary/glossary.html#riscv",
+    "href": "glossary/glossary.html#riscv",
+    "title": "Glossary 名词解释",
+    "section": "RISCV",
+    "text": "RISCV\n\nABI (Abstract Binary Interface): 抽象二进制接口. 比如寄存器的使用约定 (比如函数传参用 a0~a7), 数据类型大小 (char 占几个字节等), 函数调用约定, 内存对齐等.\nHart (Hardware Thread): 硬件线程, 指一个独立的处理器核心, 包括一套流水线, 寄存器, PC 等等 (今后将不提处理器核心这个概念, 只提 Hart).\nPMP (Physical Memory Protection): 物理内存保护.",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+    ]
+  },
+  {
     "objectID": "glossary/glossary.html#c-compile-terms",
     "href": "glossary/glossary.html#c-compile-terms",
     "title": "Glossary 名词解释",
     "section": "C Compile Terms",
     "text": "C Compile Terms\n\ngcc (GNU Compiler Collection): GNU 编译器集合, 包括 C、C++、Go 等编程语言的编译器.\nGDB (GNU Debugger): GNU 调试器. 支持 Assembly, C/C++, Go, Rust 等.\nLLVM IR (Intermediate Representation): 一种中间表或式, 用于编译器优化和代码生成.\n\ngcc 和 clang 都是 C 语言的编译器, 但是他们的 IR 不一样. gcc: GIMPLE, clang: LLVM IR.\n\nelf (Executable Linkable Format): 可执行链接格式. 包含 .o, a.out, .so 等文件.\n\nBinutils (Binary Utilities): elf 文件处理相关工具, 包括:\n\nobjdump: 反汇编工具.\nobjcopy: 执行文件格式转换. elf 中还包含了很多运行时不需要的信息, objcopy 可将这些信息去掉生成 bin 文件.\nreadelf: 显示更多 elf 格式文件的信息.\nar: tar, 将多个文件打包成一个大文件.\n\n\n\n\n\n\n\n\nELF 文件格式 [2]\n\n\n\nCross Compilation: 交叉编译, 即在另一台机器上面开发手里面的这台机器 (嵌入式开发, 或在 MacOS 编写 RISCV 的操作系统).\n\n构建 (build) 系统: 生成可执行程序的计算机.\n主机 (host) 系统: 运行可执行程序的计算机.\n目标 (target) 系统: 可执行程序运行的计算机架构\n\n\n\n\n\n\n\n交叉编译",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+    ]
+  },
+  {
+    "objectID": "glossary/glossary.html#operating-system-terms",
+    "href": "glossary/glossary.html#operating-system-terms",
+    "title": "Glossary 名词解释",
+    "section": "Operating System Terms",
+    "text": "Operating System Terms\n\nRTOS (Real-Time Operating System): 实时操作系统, 用于嵌入式系统.\n\nFreeRTOS: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV [2].\nRT-Thread: 也是一个 RTOS",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
@@ -275,319 +297,11 @@
     ]
   },
   {
-    "objectID": "verilog/verilog.html",
-    "href": "verilog/verilog.html",
-    "title": "HDL 硬件描述语言",
-    "section": "",
-    "text": "Change of Mind",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
-    ]
-  },
-  {
-    "objectID": "verilog/verilog.html#change-of-mind",
-    "href": "verilog/verilog.html#change-of-mind",
-    "title": "HDL 硬件描述语言",
-    "section": "",
-    "text": "Hardware does not “execute” the lines of code in sequence.",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
-    ]
-  },
-  {
-    "objectID": "verilog/verilog.html#verilog",
-    "href": "verilog/verilog.html#verilog",
-    "title": "HDL 硬件描述语言",
-    "section": "Verilog",
-    "text": "Verilog\n\nassign\n\n多个 assign 执行没有顺序, 同时进行.\nassign 是 “continuous assignment”, 右值变化时, 左值跟着变化.\n\nOperation 运算符: ~, ! (logical), &, && (logical), |, || (logical), ^ (XOR).\nif, else if 是有顺序的!!!\n(procedure 一定要放在 always 块中吗?)\n(为什么 wire 类型不能在 always 里面被赋值?)\nalways 块中的代码是顺序执行的 (但在 always 块外的代码是并行执行的).\nmodule top (input my_in, output reg my_out);\n    always @(*) begin\n        my_out = 0;\n        my_out = 1; // This is valid! (Always block 按顺序执行)\n    end\nendmodule\n\nLatch 推断: 下面如果 cpu_overheated = 0 则默认会让 shut_off_computer 保持上一个值, 这就是 latch 推断.\nalways @(*) begin\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n有时我们就是需要这种推断, 但为了避免, 可以利用always 的顺序性先提前赋值:\nalways @(*) begin\n    shut_off_computer = 0; // 先提前赋值\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n\nConcatenation:\nassign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100\nindex 可以是负数:\nreg [5:-1] my_reg; // index 可以是负数.\nwire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!\ninput a 默认为 wire.\nbegin end 在只有一行代码时可以省略 (相当于 C 中的 {}).\nwire 不能在 always 块中被赋值. reg 才能在 always 中被赋值.\nwire a;\nalways @(*) begin\n    assign a = 1; // Error!\nend\nwire a;\nalways @(*) begin\n    a &lt;= 1; // Not an error, `a` is viewed as a reg.\nend\nSynchronous and Asynchronous Reset:\n\nsynchronous reset:\nalways @(posedge clk) begin\n    if (reset)\n        ...\nend\nasynchronous reset:\nalways @(posedge clk or posedge reset) begin\n    if (reset)\n        ...\nend\n\nor 只能在 always 块中使用, if () 中要用 ||.\nInference 和 Instantiation:\n\nInference: 通过 always 块的内容推断出一个模块的功能.\nInstantiation: 显式地实例化一个模块, 通过 module_name instance_name (port_map) 的方式.\n\n循环群结构 (Torus, etc) 如果用 % 运算符来处理会消耗大量资源, 尽量用 if 语句:\nif (mm == 8'd59) begin\n    mm &lt;= 8'd0;\nend\n\n如果用 % 运算符来处理:\n\n-1 % 16 的结果是 -1, 而不是 15 (所以 (a-1)%16 应该写成 (a+15)%16).\n1~12 的循环先转换为 0~11 的循环, 再换元.\n\n\nBCD (Binary-Coded Decimal): 一种从 0 到 9 的计数器, 输出是四位二进制编码的十进制数.\nBlocking 和 Non-blocking assignments:\n\n=: Blocking assignment, 若在 always 块中使用, 则必须按照顺序执行!\n&lt;=: Non-blocking assignment, 在 always 块中使用时, 会同时执行所有赋值. (一般 always 里面都用这个!)\n\n\n\nVerilog Testbench\n`timescale 1ns / 1ps // #1 代表 1ns, 最精确可以到 #1.001\n`timescale 1ns / 1ns // #1 代表 1ns, #1.01 等是不合法的\n\n$stop //停下来",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
-    ]
-  },
-  {
-    "objectID": "cc-fpga/cc-fpga.html",
-    "href": "cc-fpga/cc-fpga.html",
-    "title": "FPGA 原理速成",
-    "section": "",
-    "text": "FPGA Structure 结构",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>FPGA 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-fpga/cc-fpga.html#fpga-structure-结构",
-    "href": "cc-fpga/cc-fpga.html#fpga-structure-结构",
-    "title": "FPGA 原理速成",
-    "section": "",
-    "text": "PL (Programmable Logic) 可编程部分\n这个部分是一个 FPGA 开发板 “软” 的部分, 即可以通过 verilog 来控制硬件电路的部分. 要理清一下几个概念:\n\nBLE (Basic Logic Element): 基本逻辑单元. LUT 和 FF 的「经典」的组合.\n\n见 Figure fig-ble, 方框代表 LUT (Look up Table), 本质上就是一个 Mux (Multiplexer, 多路选择器).\n红色的位置将来的 bitstream 会写入 (用来配置这个 BLE 的功能), i0-i3 是这个 BLE 的输入, 右边是输出.\n\n\n\n\n\n\nFigure 1: 这个 BLE 由 LUT-4 和 D-FF 组成\n\n\n\n\nCLB (Configurable Logic Block, Xilinx) 可配置逻辑块: 一个或者多个 BLE 的组合.\n\n也叫 Slice (Vivado HLS) 或 LAB (Logic Array Block) 或 ALM (Adaptive Logic Module, Intel).\n\n\n\n\n\n\n\n\n由 1 个 BLE 构成的 CLB (e.g. Xilinx Spartan 6)\n\n\n\n\n\n\n\n由 4 个 BLE 构成的 CLB\n\n\n\n\n\n\nSB (SwitchBox): 连接不同 CLB 的开关盒.\n\n\n\n\n\n\nFigure 2: Slice (蓝色) 和其周围的 SB (SwitchBox) [1]\n\n\n\n\n\n\n\n\n\nFigure fig-slice-sb 的放大结构\n\n\n\n\nPS (Processing System) 处理器部分\n不要认为一个开发板只有 “软” 部分, 有些经常用的模块会用硬件 “焊死” 在板子上 (Heterogenous 异构). 这些硬件通过 I/O 口与 PL 部分通信, 比如:\n\n\n\nZYNQ PS 和 PL 通过 AXI 通信",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>FPGA 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-fpga/cc-fpga.html#编译过程",
-    "href": "cc-fpga/cc-fpga.html#编译过程",
-    "title": "FPGA 原理速成",
-    "section": "编译过程",
-    "text": "编译过程\n\nSynthesis 综合\n\n动机: FPGA 不懂 “行为”, 它需要的是 “你想用哪些门, 怎么连线”. 所以 Synthesis 是将你写的 .v 逻辑翻译成各种 Logic gates 应该如何连接 (门级网表) 的过程 (以 .json 格式输出).\n\n\n\n\n\n1. Kastner R, Matai J, Neuendorffer S (2018) Parallel Programming for FPGAs. ArXiv e-prints",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>FPGA 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-cpu/cc-cpu.html",
-    "href": "cc-cpu/cc-cpu.html",
-    "title": "CPU 原理速成",
-    "section": "",
-    "text": "Change of Mind",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>CPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-cpu/cc-cpu.html#change-of-mind",
-    "href": "cc-cpu/cc-cpu.html#change-of-mind",
-    "title": "CPU 原理速成",
-    "section": "",
-    "text": "对于有时钟的电路, 我们应该想象成: 电路的状态只在时钟的上升沿「瞬间」变化. 时钟的上升沿发生时电路做了两件事情:\n\n前一个时钟周期的计算结果该锁存的 锁存到寄存器 中.\n下一个时钟周期的结果瞬间计算出来并 放在线上 (他们目前还不能被 CPU “看到”).",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>CPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
-    "href": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
-    "title": "CPU 原理速成",
-    "section": "CPU 是如何成为现在这个样子的?",
-    "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n流水线\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n在每两个 phase 之间插入一些受始终控制的寄存器:\n\nIF-ID 之间: 当前指令, PC 值 (jal 要用)\nID-EX 之间: 指令类型, rs1, rs2, rd, imm.\n\n\n\n\n第三阶段\n\n总线\n\nAXI4, AHB, APB\n\n\nCache\n\n\nMemory\n\n内存: working memory, main memory\nDRAM & SSD 内存与硬盘\n\n读写速度 (3000 倍): 17 ns vs 50 ms, 超音速飞机和龟速\n容量: 16GB vs 4TB\n\nSIMM & DIMM\n\nDIMM (Dual In-line Memory Module)\n\n\n\n\n\n\n1. Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill\n\n\n2. Slchoi (2025) Multi-cycle implementation & pipelining",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>CPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-gpu/cc-gpu.html",
-    "href": "cc-gpu/cc-gpu.html",
-    "title": "GPU 原理速成",
-    "section": "",
-    "text": "Useful Links\nOngoing",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>GPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "yolo/yolo.html",
-    "href": "yolo/yolo.html",
-    "title": "YOLO Object Detection 目标检测",
-    "section": "",
-    "text": "Task Objective 任务目标",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
-    ]
-  },
-  {
-    "objectID": "yolo/yolo.html#task-objective-任务目标",
-    "href": "yolo/yolo.html#task-objective-任务目标",
-    "title": "YOLO Object Detection 目标检测",
-    "section": "",
-    "text": "识别东西是什么\n将东西的位置框起来\n\n\n两类方法\n解决这个问题的方法有两类:\n\nOne-stage: 推理速度快, 可实时\n\nE.g., YOLO, SSD, RetinaNet\n\nTwo-stage: 准确率高\n\nRegion Proposal 候选区: 先从图片中提取出可能包含目标的 1000-2000 个区域, 然后对每个候选区进行目标对象识别操作.\nE.g., Faster R-CNN, Mask R-CNN, Cascade R-CNN\n\n\n\n\n\nOne stage 和 Two stage 流程框图对比\n\n\n\n\n\n\n\nMSCOCO 数据集有物体名字和位置标注\n\n\n\n\n损失函数\n\n\n\n交并比用来衡量预测地好不好",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
-    ]
-  },
-  {
-    "objectID": "yolo/yolo.html#yolo-v1",
-    "href": "yolo/yolo.html#yolo-v1",
-    "title": "YOLO Object Detection 目标检测",
-    "section": "YOLO V1",
-    "text": "YOLO V1\n\nNetwork Structure 网络结构\n\n\n\n\n\n\nFigure 1: YOLO V1 的网络结构 [1]\n\n\n\n\n\n\n\n\n\nFigure 2: Figure fig-yolo-v1 的 Back-Bone 网络其实是若干的卷积网络 [2]\n\n\n\n说明:\n\nFigure fig-back-bone: -s-2 表示 stride 步长为 2.\n输入输出:\n\n输入是一张正方形的图片 (长宽像素各为 \\(448\\), 有 3 个通道: RGB).\n输出的 tensor 大小为 \\(7 \\times 7 \\times 30\\)\n\n\n\n\nLabel Tensor 标签张量\n\nMSCOCO 数据集需要先转换成另外一种形式 (Figure fig-yolo-v1-data-labeling) 再喂给 TOLO V1 神经网络 (即换一种形式打标签而已).\n\n\n\n\n\n\nFigure 3: YOLO V1: \\(S = 7\\), 总共\n\n\n\n每张图片都有 \\(S \\times S = 49\\) 个 grid cell, 每一个 grid cell 都被一个 \\(30 \\times 1\\) 的向量描述, 相当于一张图片都对应了一个 \\(7 \\times 7 \\times 30\\) 的 label tensor.\n\nFigure fig-back-bone 中网络的输出也是一个 \\(7 \\times 7 \\times 30\\) 的 tensor, 但这是 Prediction Tensor 预测张量 (sec-prediction-tensor), 不能混为一谈.\n\n如果有两个物体的中心点都落在同一个 grid cell 中, YOLO V1 只会保留其中一个.\n\n\n\nPrediction Tensor 预测张量\n\n\n\n\n1. 上下求索电子Er (2025) [YOLO V1] 数据标注和输出张量_哔哩哔哩_bilibili\n\n\n2. Redmon J, Divvala S, Girshick R, Farhadi A (2016) You only look once: Unified, real-time object detection",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
-    ]
-  },
-  {
-    "objectID": "hls-design/HLS-design.html",
-    "href": "hls-design/HLS-design.html",
-    "title": "HLS Design FPGA 并行编程",
-    "section": "",
-    "text": "Test\nOngoing",
-    "crumbs": [
-      "ML Accelerators",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>HLS Design FPGA 并行编程</span>"
-    ]
-  },
-  {
-    "objectID": "cfu-proj-struct/cfu-proj-struct.html",
-    "href": "cfu-proj-struct/cfu-proj-struct.html",
-    "title": "CFU-Playground 工程结构",
-    "section": "",
-    "text": "Folder 文件夹描述",
-    "crumbs": [
-      "CFU Playground",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
-    ]
-  },
-  {
-    "objectID": "cfu-proj-struct/cfu-proj-struct.html#folder-文件夹描述",
-    "href": "cfu-proj-struct/cfu-proj-struct.html#folder-文件夹描述",
-    "title": "CFU-Playground 工程结构",
-    "section": "",
-    "text": "soc: 存放一个完整的 CPU 的 verilog 设计.\n\n有很多种 CPU, 比如带或不带 CFU 接口的.",
-    "crumbs": [
-      "CFU Playground",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
-    ]
-  },
-  {
-    "objectID": "hdl/hdl.html",
-    "href": "hdl/hdl.html",
-    "title": "HDL 硬件描述语言",
-    "section": "",
-    "text": "Change of Mind",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
-    ]
-  },
-  {
-    "objectID": "hdl/hdl.html#change-of-mind",
-    "href": "hdl/hdl.html#change-of-mind",
-    "title": "HDL 硬件描述语言",
-    "section": "",
-    "text": "Hardware does not “execute” the lines of code in sequence.",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
-    ]
-  },
-  {
-    "objectID": "hdl/hdl.html#verilog",
-    "href": "hdl/hdl.html#verilog",
-    "title": "HDL 硬件描述语言",
-    "section": "Verilog",
-    "text": "Verilog\n\nassign\n\n多个 assign 执行没有顺序, 同时进行.\nassign 是 “continuous assignment”, 右值变化时, 左值跟着变化.\n\nOperation 运算符: ~, ! (logical), &, && (logical), |, || (logical), ^ (XOR).\nif, else if 是有顺序的!!!\n(procedure 一定要放在 always 块中吗?)\n(为什么 wire 类型不能在 always 里面被赋值?)\nalways 块中的代码是顺序执行的 (但在 always 块外的代码是并行执行的).\nmodule top (input my_in, output reg my_out);\n    always @(*) begin\n        my_out = 0;\n        my_out = 1; // This is valid! (Always block 按顺序执行)\n    end\nendmodule\n\nLatch 推断: 下面如果 cpu_overheated = 0 则默认会让 shut_off_computer 保持上一个值, 这就是 latch 推断.\nalways @(*) begin\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n有时我们就是需要这种推断, 但为了避免, 可以利用always 的顺序性先提前赋值:\nalways @(*) begin\n    shut_off_computer = 0; // 先提前赋值\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n\nConcatenation:\nassign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100\nindex 可以是负数:\nreg [5:-1] my_reg; // index 可以是负数.\nwire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!\ninput a 默认为 wire.\nbegin end 在只有一行代码时可以省略 (相当于 C 中的 {}).\nwire 不能在 always 块中被赋值. reg 才能在 always 中被赋值.\nwire a;\nalways @(*) begin\n    assign a = 1; // Error!\nend\nwire a;\nalways @(*) begin\n    a &lt;= 1; // Not an error, `a` is viewed as a reg.\nend\nSynchronous and Asynchronous Reset:\n\nsynchronous reset:\nalways @(posedge clk) begin\n    if (reset)\n        ...\nend\nasynchronous reset:\nalways @(posedge clk or posedge reset) begin\n    if (reset)\n        ...\nend\n\nor 只能在 always 块中使用, if () 中要用 ||.\nInference 和 Instantiation:\n\nInference: 通过 always 块的内容推断出一个模块的功能.\nInstantiation: 显式地实例化一个模块, 通过 module_name instance_name (port_map) 的方式.\n\n循环群结构 (Torus, etc) 如果用 % 运算符来处理会消耗大量资源, 尽量用 if 语句:\nif (mm == 8'd59) begin\n    mm &lt;= 8'd0;\nend\n\n如果用 % 运算符来处理:\n\n-1 % 16 的结果是 -1, 而不是 15 (所以 (a-1)%16 应该写成 (a+15)%16).\n1~12 的循环先转换为 0~11 的循环, 再换元.\n\n\nBCD (Binary-Coded Decimal): 一种从 0 到 9 的计数器, 输出是四位二进制编码的十进制数.\nBlocking 和 Non-blocking assignments:\n\n=: Blocking assignment, 若在 always 块中使用, 则必须按照顺序执行!\n&lt;=: Non-blocking assignment, 在 always 块中使用时, 会同时执行所有赋值. (一般 always 里面都用这个!)\n\n\n\nVerilog Testbench\n`timescale 1ns / 1ps // #1 代表 1ns, 最精确可以到 #1.001\n`timescale 1ns / 1ns // #1 代表 1ns, #1.01 等是不合法的\n\n$stop //停下来",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
-    ]
-  },
-  {
-    "objectID": "hdl/hdl.html#chisel",
-    "href": "hdl/hdl.html#chisel",
-    "title": "HDL 硬件描述语言",
-    "section": "Chisel",
-    "text": "Chisel\n\n+&: 如果 io.in_a 和 io.in_b 为 4.W 时, 则 sum 为 5.W (带溢出).\nval sum = io.in_a +& io.in_b\n允许多个 := 赋值到同一个输出:\nio.out := 0.U\nio.out := 1.U // 覆盖上一个\nif 和 when 的区别:\n\nif 用来在编译阶段决定电路是哪一种\nwhen 用来生成固定的 verilog 电路, 相当于 verilog 的 if.",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
-    ]
-  },
-  {
-    "objectID": "glossary/glossary.html#riscv",
-    "href": "glossary/glossary.html#riscv",
-    "title": "Glossary 名词解释",
-    "section": "RISCV",
-    "text": "RISCV\n\nABI (Abstract Binary Interface): 抽象二进制接口. 比如寄存器的使用约定 (比如函数传参用 a0~a7), 数据类型大小 (char 占几个字节等), 函数调用约定, 内存对齐等.\nHart (Hardware Thread): 硬件线程, 指一个独立的处理器核心, 包括一套流水线, 寄存器, PC 等等 (今后将不提处理器核心这个概念, 只提 Hart).\nPMP (Physical Memory Protection): 物理内存保护.",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
-    ]
-  },
-  {
-    "objectID": "compilation/compilation.html",
-    "href": "compilation/compilation.html",
-    "title": "C 语言编译",
-    "section": "",
-    "text": "编译过程\n装好 RISCV 编译工具链, 创建一个简单的 C 语言程序 hello.c:\n运行:\n用 riscv32-unknown-elf-readelf 查看生成的 .o 文件:\n得到:\n再查看 Section 信息:\n得到:\n对 .o 文件进行反汇编:\n得到:",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>C 语言编译</span>"
-    ]
-  },
-  {
-    "objectID": "compilation/compilation.html#编译过程",
-    "href": "compilation/compilation.html#编译过程",
-    "title": "C 语言编译",
-    "section": "",
-    "text": "gcc 编译选项:\n\n-E: 只预处理, 不编译.\n-S: 生成汇编代码 (.s 文件)\n-c: 只编译, 不链接. (生成 .o 文件)\n-o &lt;file&gt;: 指定输出文件名.\n-g: 在输出的文件中加入支持调试的信息.\n-v (verbose): 显示编译过程中的详细信息.\n\n\n\n\n\n\n\n编译过程\n\n\n\n\n\nhello.c\n\n#include &lt;stdio.h&gt;\n\nint global_init = 0x11111111;\nconst int global_const = 0x22222222;\n\nvoid main()\n{\n    static int static_var = 0x33333333;\n    static int static_var_uninit;\n    int auto_var = 0x44444444;\n    printf(\"hello world!\\n\");\n    return;\n}\n\n\nriscv32-unknown-elf-gcc -c hello.c -o hello.o # 只编译, 不链接\n\nriscv32-unknown-elf-readelf -h hello.o &gt; header_info.log # 查看 Header 信息, 并输出到文件\n\n\n\nheader_info.log\n\nELF Header:\n  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 \n  Class:                             ELF32\n  Data:                              2's complement, little endian\n  Version:                           1 (current)\n  OS/ABI:                            UNIX - System V\n  ABI Version:                       0\n  Type:                              REL (Relocatable file)\n  Machine:                           RISC-V\n  Version:                           0x1\n  Entry point address:               0x0\n  Start of program headers:          0 (bytes into file)\n  Start of section headers:          916 (bytes into file)\n  Flags:                             0x5, RVC, double-float ABI\n  Size of this header:               52 (bytes)\n  Size of program headers:           0 (bytes)\n  Number of program headers:         0\n  Size of section headers:           40 (bytes)\n  Number of section headers:         14\n  Section header string table index: 13\n\n\n\nriscv32-unknown-elf-readelf -S hello.o &gt; section_info.log # 查看 Section 信息, 并输出到文件\n\n\n\nsection_info.log\n\nThere are 14 section headers, starting at offset 0x394:\n\nSection Headers:\n  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            00000000 000000 000000 00      0   0  0\n  [ 1] .text             PROGBITS        00000000 000034 00002e 00  AX  0   0  2\n  [ 2] .rela.text        RELA            00000000 0002d8 000048 0c   I 11   1  4\n  [ 3] .data             PROGBITS        00000000 000062 000000 00  WA  0   0  1\n  [ 4] .bss              NOBITS          00000000 000064 000004 00  WA  0   0  4\n  [ 5] .sdata            PROGBITS        00000000 000064 000008 00  WA  0   0  4\n  [ 6] .srodata          PROGBITS        00000000 00006c 000004 00   A  0   0  4\n  [ 7] .rodata           PROGBITS        00000000 000070 00000d 00   A  0   0  4\n  [ 8] .comment          PROGBITS        00000000 00007d 00001a 01  MS  0   0  1\n  [ 9] .note.GNU-stack   PROGBITS        00000000 000097 000000 00      0   0  1\n  [10] .riscv.attributes RISCV_ATTRIBUTE 00000000 000097 000066 00      0   0  1\n  [11] .symtab           SYMTAB          00000000 000100 000130 10     12  15  4\n  [12] .strtab           STRTAB          00000000 000230 0000a7 00      0   0  1\n  [13] .shstrtab         STRTAB          00000000 000320 000074 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), p (processor specific)\n\n\n\nriscv32-unknown-elf-objdump -S hello.o &gt; disassembly.s # 反汇编, 并输出到文件\n\n\n\ndisassembly.s\n\n\nhello.o:     file format elf32-littleriscv\n\n\nDisassembly of section .text:\n\n00000000 &lt;main&gt;:\n   0:   1101                    addi    sp,sp,-32\n   2:   ce06                    sw  ra,28(sp)\n   4:   cc22                    sw  s0,24(sp)\n   6:   1000                    addi    s0,sp,32\n   8:   444447b7            lui a5,0x44444\n   c:   44478793            addi    a5,a5,1092 # 44444444 &lt;static_var.0+0x44444440&gt;\n  10:   fef42623            sw  a5,-20(s0)\n  14:   000007b7            lui a5,0x0\n  18:   00078513            mv  a0,a5\n  1c:   00000097            auipc   ra,0x0\n  20:   000080e7            jalr    ra # 1c &lt;main+0x1c&gt;\n  24:   0001                    nop\n  26:   40f2                    lw  ra,28(sp)\n  28:   4462                    lw  s0,24(sp)\n  2a:   6105                    addi    sp,sp,32\n  2c:   8082                    ret",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>C 语言编译</span>"
-    ]
-  },
-  {
-    "objectID": "open-src-tools/open-src-tools.html",
-    "href": "open-src-tools/open-src-tools.html",
-    "title": "Open Source 开源工具",
-    "section": "",
-    "text": "Behavioral Simulation 行为仿真",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Open Source 开源工具</span>"
-    ]
-  },
-  {
-    "objectID": "open-src-tools/open-src-tools.html#behavioral-simulation-行为仿真",
-    "href": "open-src-tools/open-src-tools.html#behavioral-simulation-行为仿真",
-    "title": "Open Source 开源工具",
-    "section": "",
-    "text": "即: NOT board-specific 的仿真.\n\n\n用到的工具:",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Open Source 开源工具</span>"
-    ]
-  },
-  {
-    "objectID": "open-src-tools/open-src-tools.html#makefile",
-    "href": "open-src-tools/open-src-tools.html#makefile",
-    "title": "Open Source 开源工具",
-    "section": "Makefile",
-    "text": "Makefile\n\n格式:\ntarget: prerequisites\n    recipe\n缺省规则\n.DEFAULT_GOAL := all\nall: ...\n伪规则\n.PHONY: all clean\nAppend:\nCFLAGS += -Wall -O2\n改后缀名:\nSRCS_ASM = start.S\nOBJS = $(SRCS_ASM:.S=.o)\n冒号前面和后面:\n%.o : %.c\n    $(CC) $(CFLAGS) -c $&lt; -o $@\n\n% 为通配符, 意思是每当你需要一个 .o 文件, 并且当前目录下有对应的 .c 文件时, 就用下面的命令来生成它\n$&lt;: 第一个依赖文件\n$@: 目标文件\n$^: 所有依赖文件\n$?: 所有比目标文件新的依赖文件",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Open Source 开源工具</span>"
-    ]
-  },
-  {
-    "objectID": "open-src-tools/open-src-tools.html#qemu-模拟器",
-    "href": "open-src-tools/open-src-tools.html#qemu-模拟器",
-    "title": "Open Source 开源工具",
-    "section": "QEMU 模拟器",
-    "text": "QEMU 模拟器",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Open Source 开源工具</span>"
-    ]
-  },
-  {
     "objectID": "c-riscv-asm/c-riscv-asm.html",
     "href": "c-riscv-asm/c-riscv-asm.html",
     "title": "C 和 RISCV 汇编",
     "section": "",
     "text": "C 编译过程\n装好 RISCV 编译工具链, 创建一个简单的 C 语言程序 hello.c:\n运行:\n用 riscv32-unknown-elf-readelf 查看生成的 .o 文件:\n得到:\n再查看 Section 信息:\n得到:\n对 .o 文件进行反汇编:\n得到:",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
-    ]
-  },
-  {
-    "objectID": "c-riscv-asm/c-riscv-asm.html#编译过程",
-    "href": "c-riscv-asm/c-riscv-asm.html#编译过程",
-    "title": "C 和 RISCV 汇编",
-    "section": "",
-    "text": "gcc 编译选项:\n\n-E: 只预处理, 不编译.\n-S: 生成汇编代码 (.s 文件)\n-c: 只编译, 不链接. (生成 .o 文件)\n-o &lt;file&gt;: 指定输出文件名.\n-g: 在输出的文件中加入支持调试的信息.\n-v (verbose): 显示编译过程中的详细信息.\n\n\n\n\n\n\n\n编译过程\n\n\n\n\n\nhello.c\n\n#include &lt;stdio.h&gt;\n\nint global_init = 0x11111111;\nconst int global_const = 0x22222222;\n\nvoid main()\n{\n    static int static_var = 0x33333333;\n    static int static_var_uninit;\n    int auto_var = 0x44444444;\n    printf(\"hello world!\\n\");\n    return;\n}\n\n\nriscv32-unknown-elf-gcc -c hello.c -o hello.o # 只编译, 不链接\n\nriscv32-unknown-elf-readelf -h hello.o &gt; header_info.log # 查看 Header 信息, 并输出到文件\n\n\n\nheader_info.log\n\nELF Header:\n  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 \n  Class:                             ELF32\n  Data:                              2's complement, little endian\n  Version:                           1 (current)\n  OS/ABI:                            UNIX - System V\n  ABI Version:                       0\n  Type:                              REL (Relocatable file)\n  Machine:                           RISC-V\n  Version:                           0x1\n  Entry point address:               0x0\n  Start of program headers:          0 (bytes into file)\n  Start of section headers:          916 (bytes into file)\n  Flags:                             0x5, RVC, double-float ABI\n  Size of this header:               52 (bytes)\n  Size of program headers:           0 (bytes)\n  Number of program headers:         0\n  Size of section headers:           40 (bytes)\n  Number of section headers:         14\n  Section header string table index: 13\n\n\n\nriscv32-unknown-elf-readelf -S hello.o &gt; section_info.log # 查看 Section 信息, 并输出到文件\n\n\n\nsection_info.log\n\nThere are 14 section headers, starting at offset 0x394:\n\nSection Headers:\n  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            00000000 000000 000000 00      0   0  0\n  [ 1] .text             PROGBITS        00000000 000034 00002e 00  AX  0   0  2\n  [ 2] .rela.text        RELA            00000000 0002d8 000048 0c   I 11   1  4\n  [ 3] .data             PROGBITS        00000000 000062 000000 00  WA  0   0  1\n  [ 4] .bss              NOBITS          00000000 000064 000004 00  WA  0   0  4\n  [ 5] .sdata            PROGBITS        00000000 000064 000008 00  WA  0   0  4\n  [ 6] .srodata          PROGBITS        00000000 00006c 000004 00   A  0   0  4\n  [ 7] .rodata           PROGBITS        00000000 000070 00000d 00   A  0   0  4\n  [ 8] .comment          PROGBITS        00000000 00007d 00001a 01  MS  0   0  1\n  [ 9] .note.GNU-stack   PROGBITS        00000000 000097 000000 00      0   0  1\n  [10] .riscv.attributes RISCV_ATTRIBUTE 00000000 000097 000066 00      0   0  1\n  [11] .symtab           SYMTAB          00000000 000100 000130 10     12  15  4\n  [12] .strtab           STRTAB          00000000 000230 0000a7 00      0   0  1\n  [13] .shstrtab         STRTAB          00000000 000320 000074 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), p (processor specific)\n\n\n\nriscv32-unknown-elf-objdump -S hello.o &gt; disassembly.s # 反汇编, 并输出到文件\n\n\n\ndisassembly.s\n\n\nhello.o:     file format elf32-littleriscv\n\n\nDisassembly of section .text:\n\n00000000 &lt;main&gt;:\n   0:   1101                    addi    sp,sp,-32\n   2:   ce06                    sw  ra,28(sp)\n   4:   cc22                    sw  s0,24(sp)\n   6:   1000                    addi    s0,sp,32\n   8:   444447b7            lui a5,0x44444\n   c:   44478793            addi    a5,a5,1092 # 44444444 &lt;static_var.0+0x44444440&gt;\n  10:   fef42623            sw  a5,-20(s0)\n  14:   000007b7            lui a5,0x0\n  18:   00078513            mv  a0,a5\n  1c:   00000097            auipc   ra,0x0\n  20:   000080e7            jalr    ra # 1c &lt;main+0x1c&gt;\n  24:   0001                    nop\n  26:   40f2                    lw  ra,28(sp)\n  28:   4462                    lw  s0,24(sp)\n  2a:   6105                    addi    sp,sp,32\n  2c:   8082                    ret",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
@@ -605,11 +319,11 @@
     ]
   },
   {
-    "objectID": "c-riscv-asm/c-riscv-asm.html#汇编语言",
-    "href": "c-riscv-asm/c-riscv-asm.html#汇编语言",
+    "objectID": "c-riscv-asm/c-riscv-asm.html#riscv-汇编语言",
+    "href": "c-riscv-asm/c-riscv-asm.html#riscv-汇编语言",
     "title": "C 和 RISCV 汇编",
-    "section": "汇编语言",
-    "text": "汇编语言\n\n基本格式:\n&lt;label&gt;: &lt;operation&gt; # &lt;comment&gt;\n\n&lt;operation&gt; 的类型 [1]:\n\ninstruction (指令)\npseudo-instruction (伪指令): li x6, 5, nop, RISCV 中有定义\ndirective (伪操作): .macro ... .endm, .end, .text, .global _start 告知汇编器的指示, 与 RISCV 规范无关.\nmacro (宏):\n.macro do_nothing\n    nop\n.endm\n\n_start: do_nothing # 调用宏, 汇编器会将它展开\n\n\n标签其实表示地址:\n_start: li x6, 5 # _start 标签其实就是这条指令的地址\n\n\n\n\n\n1. Lazyparser (2025) Compilation and linker",
+    "section": "RISCV 汇编语言",
+    "text": "RISCV 汇编语言\n\n基本格式:\n&lt;label&gt;: &lt;operation&gt; # &lt;comment&gt;\n\n&lt;operation&gt; 的类型 [1]:\n\ninstruction (指令)\npseudo-instruction (伪指令): li x6, 5, nop, RISCV 中有定义\ndirective (伪操作): .macro ... .endm, .end, .text, .global _start 告知汇编器的指示, 与 RISCV 规范无关.\nmacro (宏):\n.macro do_nothing\n    nop\n.endm\n\n_start: do_nothing # 调用宏, 汇编器会将它展开\n\n\n标签其实表示地址:\n_start: li x6, 5 # _start 标签其实就是这条指令的地址\n\n\n\n\n\n1. Lazyparser (2025) Compilation and linker",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>5</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
@@ -627,17 +341,6 @@
     ]
   },
   {
-    "objectID": "riscv/riscv.html#指令类型",
-    "href": "riscv/riscv.html#指令类型",
-    "title": "RISCV ISA",
-    "section": "指令类型",
-    "text": "指令类型\n\nALU 运算\n\nOne category of instructions is arithmetic operations (abbr. aluop), which is just doing things between GPRs.\nCommonly Used aluop instructions:\nlui t0, 0x40000     ;t0 = 0x40000 &lt;&lt; 12 (load upper 20 bits of the imm)\n\nadd t0, t1, t2      ;t0 = t1 + t2\nsub t0, t1, t2      ;t0 = t1 - t2 (no imm version)\nor t0, t1, t2       ;t0 = t1 | t2\nand t0, t1, t2      ;t0 = t1 & t2\nxor t0, t1, t2      ;t0 = t1 ^ t2\n\naddi t0, t1, 10     ;t0 = t1 + 10 (decimal)\nori t0, t1, 0xF     ;t0 = t1 | 0xF\nandi t0, t1, 0xF    ;t0 = t1 & 0xF\nxori t0, t1, 0xF    ;t0 = t1 ^ 0xF\n\nsll t0, t1, t2      ;t0 = t1 &lt;&lt; t2 (shift left logical)\nsrl t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right logical)\nsra t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right arithmetic, preserve sign)\n\nslli t0, t1, 2      ;t0 = t1 &lt;&lt; 2\nsrli t0, t1, 2      ;t0 = t1 &gt;&gt; 2\nsrai t0, t1, 2      ;t0 = t1 &gt;&gt; 2 (preserve sign)\n\nslt t0, t1, t2      ;t0 = (t1 &lt; t2) (set if less than signed)\nsltu t0, t1, t2     ;t0 = (t1 &lt; t2) (set if less than unsigned)\n\nslti t0, t1, -5     ;t0 = (t1 &lt; -5) (imm signed)\nsltiu t0, t1, 10    ;t0 = (t1 &lt; 10) (imm unsigned)\n\n\n\nCSR 寄存器及其操作\n\nIntroduction\n\nCSR (Control and Status Registers)\nAre accessed using CSR instructions, not via memory-mapped I/O like GPIO registers.\nGPRs can be accessed at any privilege level, while CSRs are defined at a specific privilege level and can only be accessed by that level and any levels of higher privilege.\nEvery CSR has a unique address, each 32 bits share one address (instead of 8 bits).\nCSR addresses are 12-bits, meaning that up to 4,096 CSRs can be implemented (\\(2^12 = 4096\\)). The bits in a CSR address define its accessibility, use, and CSR number. \nWhile GPRs are used for storing data used to perform operations, CSRs typically modify the behavior of a hart (i.e. “Control”) or inform of its state and attributes (i.e. “Status”), or both.\nWARL (Write any, read legal): Some field in a CPU register that allows any value to be written, but when read back, it returns only a valid (legal) value. For example, in MPP[12:11] field in mstatus register, we have:\n\n\n\n\nWrite Attempt (MPP)\nStored Value (MPP field)\n\n\n\n\n00 (User)\n✅ 00 (User mode)\n\n\n11 (Machine)\n✅ 11 (Machine mode)\n\n\n01 (Illegal)\n🔄 Returns 00 or 11 (Legal)\n\n\n10 (Illegal)\n🔄 Returns 00 or 11 (Legal)\n\n\n\n\nCSRs related intimitely to interrupts and exceptions (interrupts are external (“asynchronise”), exceptions are internal (“synchronise”, usually through software or timer), some place confuse them though, but it’s okay).\n\n\n\nCommonly Used CSRs and their sub-fields\nThe registers are labelled in this format: reg (addr, reset_val).\n\n\n\nPart of the registers\n\n\n\nmstatus (0x300, 0x00001800): Machine Status (lower 32 bits), controls global interrupt enable and privilege modes.\n\n\nmstatus.MPP[12:11]: Machine Previous Priviledge mode. When an mret is executed, the privilege mode is change to this value.\nmstatus.MIE[3]: Machine (global) Interrupt Enable.\nmstatus.MPIE[7]: Machine previous Interrupt Enable. When an interrupt occurs, the content in mstatus.MIE is loaded into this bit (and for simplicity, mstatus.MIE is changed to 0, so no other interrupts is allowed to come in), and after the interrupt is processed (after mret), this bit is restored into mstatus.MIE again.\n\n\nmisa (0x301, depends on RV32 and M_EXT):\nmie (0x304, 0x00000000): Machine Interrupt Enable, enables specific interrupts (not global). Also you should have a look at mip (0x344).\nmip (0x344): Machine Interrupt Pending Register, indicates which specific interrupts are pending. \n\nMSIP/MSIE[3]: Machine Software Interrupt Pending/Enable\nMTIP/MTIE[7]: Machine Timer Interrupt Pending/Enable\nMEIP/MEIE[11]: Machine External Interrupt Pending/Enable\n\nmtvec (0x305, ): Machine Trap-Handler Base Address, specifies where the CPU jumps on an interrupt/exception. \n\nMODE[1:0]:\n\n00: Direct. All traps (either interrupts or exceptions) set PC directly to BASE.\n01: Vectored. Exceptions will set PC directly to BASE, while (asynchronous) interrupts will set PC to BASE+4*mcause.Exception Code (See mcause register.)\nothers: invalid.\n\n\nmepc (0x341, 0x00000000): Machine Exception Program Counter, saves the address of the interrupted instruction.\n\nWhen an interrupt occurs, the current PC + 1 is saved in mepc.\nWhen an exception is encountered, the current PC is saved in mepc. (Why? The exception may triggered by the instruction at the current PC, maybe we solve the exception in the interrupt handler, so give it another chance to execute that instruction again.)\n\nand the core jumps to the exception address. When a mret instruction is executed, the value from mepc replaces the current program counter.\nmcause (0x342): Machine Trap Cause, identifies the cause of the interrupt/exception. \n\nInterrupt[31]:\n\n1: Exceptions\n0: Interrupts\n\nException Code[30:0]: (pay special attention to the number 3/7/11)\n\n\n\n\n\n\n\n\nInterrupt[31]\nException Code[30:0]\nDescription\n\n\n\n\n1\n0, 2, 4, 6, 8, 10, 12, 14-15\nReserved\n\n\n1\n1 / 3\nSupervisor/Machine software interrupt\n\n\n1\n5 / 7\nSupervisor/Machine timer interrupt\n\n\n1\n9 / 11\nSupervisor/Machine external interrupt\n\n\n1\n13\nCounter-overflow interrupt\n\n\n1\n≥16\nDesignated for platform use\n\n\n0\n0\nInstruction address misaligned\n\n\n0\n1\nInstruction access fault\n\n\n0\n2\nIllegal instruction\n\n\n0\n3\nBreakpoint\n\n\n0\n4\nLoad address misaligned\n\n\n0\n5\nLoad access fault\n\n\n0\n6 / 7\nStore/AMO address/access fault\n\n\n0\n8 / 9 / 11\nEnvironment call from U/S/M-mode\n\n\n0\n10, 14, 17, 20-23, 32-47, ≥64\nReserved\n\n\n0\n12\nInstruction page fault\n\n\n0\n13\nLoad page fault\n\n\n0\n15\nStore/AMO page fault\n\n\n0\n16\nDouble trap\n\n\n0\n18\nSoftware check\n\n\n0\n19\nHardware error\n\n\n0\n24-31, 48-63\nDesignated for custom use\n\n\n\n\nmtval (0x343): Machine Trap Value, provides extra information about exceptions (their addresses and so on)\n\n\n\nCommonly Used CSR instructions\n;register version:\ncsrrw x5, mstatus, x10  ;x5 = mstatus (read), mstatus = x10 (write)\ncsrw mtvec, t0          ;mtvec = t0 (write only)\ncsrrs x5, mie, x10      ;x5 = mie (read), mie |= x10 (set)\ncsrrc x5, mie, x10      ;x5 = mie (read), mie &= x10 (clear)\n\n;imm version:\ncsrrwi x5, mstatus, 0x1 ;x5 = mstatus (read), mstatus = 0x1 (write imm)\ncsrrsi x5, mie, 0x1     ;x5 = mie (read), mie |= 0x1 (set imm)\ncsrrc x5, mie, 0x1      ;x5 = mie (read), mie &= 0x1 (clear imm)\nConvenient pseudo-instructions:\ncsrr rd, csr    ;csrrs rd, csr, x0\ncsrw csr, rs    ;csrrw x0, csr, rs\ncsrs csr, rs    ;csrrs x0, csr, rs\ncsrc csr, rs    ;csrrc x0, csr, rs\ncsrwi csr, imm  ;csrrwi x0, csr, imm\ncsrsi csr, imm  ;csrrsi x0, csr, imm\ncsrci csr, imm  ;csrrci x0, csr, imm\n\n\n\nGPRs 通用寄存器\n\nIntroduction\nThe 32 registers in RISC-V are called general-purpose registers (GPRs, or “integer registers”). They are used for various purposes, such as holding data, addresses, or temporary values during program execution. These registers are 32 bits wide in the RV32I ISA and are identified as x0 to x31.\nEach register has a conventional name that indicates its intended usage, although these names are just conventions, and you can use them for other purposes if needed.\n\n\n\n通用寄存器的 ABI 规范\n\n\n\n\nPartial Explanations\n\nra\nPurpose: Stores the return address for function calls.\njal ra, function_label  # Jump to function_label and store return address in ra\nret                     # Return to the address in ra\nsp\nPurpose: Points to the top of the stack (used for dynamic memory allocation during function calls).\naddi sp, sp, -16      # Allocate 16 bytes on the stack\nsw t0, 0(sp)          # Store t0 at the top of the stack\nlw t0, 0(sp)          # Retrieve t0 from the stack\naddi sp, sp, 16       # Deallocate 16 bytes\ngp\nPurpose: Points to global and static data in memory.\nlw t0, 0(gp)         # Load a value from the global data section\ntp\nPurpose: Points to thread-local storage (used in multi-threaded programs).\nlw t0, 0(tp)         # Load a thread-specific value\nt0-t6\nPurpose: Temporary values, not preserved across function calls.\n\n\n\n\n跳转指令\n\nIntroduction\nOne category of instructions is jump operations (abbr. jmpop), which is just changing the value of PC (or some GPRs by the way)\n\n\nCommonly Used aluop instructions\n; unconditional:\njal ra, 0x10        ;ra = PC + 4, PC += 0x10 (link and jump, should be laj)\njalr ra, 8(t0)      ;ra = PC + 4, PC += t0+8 (wrt a register)\n\n; conditional:\nbeq t0, t1, 0x8     ;PC += 0x8 if t0 == t1 (branch if equal)\nbne t0, t1, 0x8     ;PC += 0x8 if t0 != t1 (branch if not equal)\nblt t0, t1, 0x8     ;PC += 0x8 if t0 &lt; t1 (signed less than)\nbge t0, t1, 0x8     ;PC += 0x8 if t0 &gt;= t1 (signed greater or equal)\nbltu t0, t1, 0x8    ;PC += 0x8 if t0 &lt; t1 (unsigned less than)\nbgeu t0, t1, 0x8    ;PC += 0x8 if t0 &gt;= t1 (unsigned greater or equal)\n\nauipc t0, 0x1000    ;t0 = PC + (0x1000 &lt;&lt; 12) (add upper imm and PC to a reg)\n\n\nNotes\nload:\n    lbu a1, 0(t1)\n    sb a1, 0(t2)\n    addi t1, t1, 1\n    addi t2, t2, 1\n    bltu t2, t3, load\nIf lbu a1, 0(t1) is at location 0x8000001a, then this line: bltu t2, t3, load does NOT mean\nPC += 0x8000001a if t2 &lt; t3\nbut\nPC = 0x8000001a if t2 &lt; t3\n(done by the smart compiler!)\n\n\n\nMachine Mode\n\nIntroduction\nOne category of instructions is machine operations (abbr. machineop), which is a set of privileged instructions in the RISC-V privileged architecture. These instructions are all related to the CSRs, so make sure you are familiar with those registers first.\n\n\nRISCV Privilege Levels from High to Low\n\nDebug (D)\nMachine (M): “must-have”\nSupervisor (S)\n\nHypervisor-extended Supervisor (HS)\nVirtual Supervisor (VS)\nVirtual User (VU)\n\nUser (U)\n\n\n\nCommonly Used machineop instructions\n\nmret: Return from Machine-mode to Supervisor-mode (or User-mode). Steps:\n\nRestore the privilege mode:\n\nThe processor sets the current privilege mode based on MPP from mstatus.\nMPP is cleared to user mode (00) or supervisor mode (01) if applicable.\n\nRestore the interrupt enable status:\n\nThe MIE bit in mstatus is set to MPIE.\nThe MPIE bit is cleared (0).\n\nRestore the program counter (PC):\n\nThe PC is set to the value stored in mepc, resuming execution where it was interrupted.\n\n\n\n\n\n\n内存操作\n\nIntroduction\nOne category of instructions is memory operations (abbr. memop), which is just exchanging data between GPRs to memory locations.\nSo naturally, these signals are crucial for storing a data into memory:\n\nWE: Write enable. Whenever a memop intruction is detected, the memory block needs to be enabled.\n[31:0] data_mem: the 32-bit data to be stored.\n[31:0] mem_addr: where to be stored.\n[3:0] storebytes_size: Store a byte (0001), half word (0011), or a word (1111)?\n\n\n\nCommonly Used memop instructions\nlui t0, 0x40000 ;t0 = 0x40000 &lt;&lt; 12b (load unsigned imm)\nlb t0, 1(a0)    ;t0 = mem[a0 + 1] (load byte)\nlh t0, 2(a0)    ;t0 = mem[a0 + 2] (load half word)\nlw t0, 4(a0)    ;t0 = mem[a0 + 4] (load word)\nlbu t0, 1(a0)   ;unsigned (zero extending)\nlhu t0, 2(a0)   ;unsigned (zero extending)\n\nsb t0, 1(a0)    ;mem[a0 + 1] = t0 (store byte)\nsh t0, 2(a0)    ;mem[a0 + 2] = t0 (store half word)\nsw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>RISCV ISA</span>"
-    ]
-  },
-  {
     "objectID": "riscv/riscv.html#riscv-extensions",
     "href": "riscv/riscv.html#riscv-extensions",
     "title": "RISCV ISA",
@@ -649,25 +352,14 @@
     ]
   },
   {
-    "objectID": "glossary/glossary.html#operating-system-terms",
-    "href": "glossary/glossary.html#operating-system-terms",
-    "title": "Glossary 名词解释",
-    "section": "Operating System Terms",
-    "text": "Operating System Terms\n\nRTOS (Real-Time Operating System): 实时操作系统, 用于嵌入式系统.\n\nFreeRTOS: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV [2].\nRT-Thread: 也是一个 RTOS",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
-    ]
-  },
-  {
-    "objectID": "c-riscv-asm/c-riscv-asm.html#riscv-汇编语言",
-    "href": "c-riscv-asm/c-riscv-asm.html#riscv-汇编语言",
-    "title": "C 和 RISCV 汇编",
-    "section": "RISCV 汇编语言",
-    "text": "RISCV 汇编语言\n\n基本格式:\n&lt;label&gt;: &lt;operation&gt; # &lt;comment&gt;\n\n&lt;operation&gt; 的类型 [1]:\n\ninstruction (指令)\npseudo-instruction (伪指令): li x6, 5, nop, RISCV 中有定义\ndirective (伪操作): .macro ... .endm, .end, .text, .global _start 告知汇编器的指示, 与 RISCV 规范无关.\nmacro (宏):\n.macro do_nothing\n    nop\n.endm\n\n_start: do_nothing # 调用宏, 汇编器会将它展开\n\n\n标签其实表示地址:\n_start: li x6, 5 # _start 标签其实就是这条指令的地址\n\n\n\n\n\n1. Lazyparser (2025) Compilation and linker",
+    "objectID": "riscv/riscv.html#指令类型",
+    "href": "riscv/riscv.html#指令类型",
+    "title": "RISCV ISA",
+    "section": "指令类型",
+    "text": "指令类型\n\nALU 运算\n\nOne category of instructions is arithmetic operations (abbr. aluop), which is just doing things between GPRs.\nCommonly Used aluop instructions:\nlui t0, 0x40000     ;t0 = 0x40000 &lt;&lt; 12 (load upper 20 bits of the imm)\n\nadd t0, t1, t2      ;t0 = t1 + t2\nsub t0, t1, t2      ;t0 = t1 - t2 (no imm version)\nor t0, t1, t2       ;t0 = t1 | t2\nand t0, t1, t2      ;t0 = t1 & t2\nxor t0, t1, t2      ;t0 = t1 ^ t2\n\naddi t0, t1, 10     ;t0 = t1 + 10 (decimal)\nori t0, t1, 0xF     ;t0 = t1 | 0xF\nandi t0, t1, 0xF    ;t0 = t1 & 0xF\nxori t0, t1, 0xF    ;t0 = t1 ^ 0xF\n\nsll t0, t1, t2      ;t0 = t1 &lt;&lt; t2 (shift left logical)\nsrl t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right logical)\nsra t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right arithmetic, preserve sign)\n\nslli t0, t1, 2      ;t0 = t1 &lt;&lt; 2\nsrli t0, t1, 2      ;t0 = t1 &gt;&gt; 2\nsrai t0, t1, 2      ;t0 = t1 &gt;&gt; 2 (preserve sign)\n\nslt t0, t1, t2      ;t0 = (t1 &lt; t2) (set if less than signed)\nsltu t0, t1, t2     ;t0 = (t1 &lt; t2) (set if less than unsigned)\n\nslti t0, t1, -5     ;t0 = (t1 &lt; -5) (imm signed)\nsltiu t0, t1, 10    ;t0 = (t1 &lt; 10) (imm unsigned)\n\n\n\nCSR 寄存器及其操作\n\nIntroduction\n\nCSR (Control and Status Registers)\nAre accessed using CSR instructions, not via memory-mapped I/O like GPIO registers.\nGPRs can be accessed at any privilege level, while CSRs are defined at a specific privilege level and can only be accessed by that level and any levels of higher privilege.\nEvery CSR has a unique address, each 32 bits share one address (instead of 8 bits).\nCSR addresses are 12-bits, meaning that up to 4,096 CSRs can be implemented (\\(2^12 = 4096\\)). The bits in a CSR address define its accessibility, use, and CSR number. \nWhile GPRs are used for storing data used to perform operations, CSRs typically modify the behavior of a hart (i.e. “Control”) or inform of its state and attributes (i.e. “Status”), or both.\nWARL (Write any, read legal): Some field in a CPU register that allows any value to be written, but when read back, it returns only a valid (legal) value. For example, in MPP[12:11] field in mstatus register, we have:\n\n\n\n\nWrite Attempt (MPP)\nStored Value (MPP field)\n\n\n\n\n00 (User)\n✅ 00 (User mode)\n\n\n11 (Machine)\n✅ 11 (Machine mode)\n\n\n01 (Illegal)\n🔄 Returns 00 or 11 (Legal)\n\n\n10 (Illegal)\n🔄 Returns 00 or 11 (Legal)\n\n\n\n\nCSRs related intimitely to interrupts and exceptions (interrupts are external (“asynchronise”), exceptions are internal (“synchronise”, usually through software or timer), some place confuse them though, but it’s okay).\n\n\n\nCommonly Used CSRs and their sub-fields\nThe registers are labelled in this format: reg (addr, reset_val).\n\n\n\nPart of the registers\n\n\n\nmstatus (0x300, 0x00001800): Machine Status (lower 32 bits), controls global interrupt enable and privilege modes.\n\n\nmstatus.MPP[12:11]: Machine Previous Priviledge mode. When an mret is executed, the privilege mode is change to this value.\nmstatus.MIE[3]: Machine (global) Interrupt Enable.\nmstatus.MPIE[7]: Machine previous Interrupt Enable. When an interrupt occurs, the content in mstatus.MIE is loaded into this bit (and for simplicity, mstatus.MIE is changed to 0, so no other interrupts is allowed to come in), and after the interrupt is processed (after mret), this bit is restored into mstatus.MIE again.\n\n\nmisa (0x301, depends on RV32 and M_EXT):\nmie (0x304, 0x00000000): Machine Interrupt Enable, enables specific interrupts (not global). Also you should have a look at mip (0x344).\nmip (0x344): Machine Interrupt Pending Register, indicates which specific interrupts are pending. \n\nMSIP/MSIE[3]: Machine Software Interrupt Pending/Enable\nMTIP/MTIE[7]: Machine Timer Interrupt Pending/Enable\nMEIP/MEIE[11]: Machine External Interrupt Pending/Enable\n\nmtvec (0x305, ): Machine Trap-Handler Base Address, specifies where the CPU jumps on an interrupt/exception. \n\nMODE[1:0]:\n\n00: Direct. All traps (either interrupts or exceptions) set PC directly to BASE.\n01: Vectored. Exceptions will set PC directly to BASE, while (asynchronous) interrupts will set PC to BASE+4*mcause.Exception Code (See mcause register.)\nothers: invalid.\n\n\nmepc (0x341, 0x00000000): Machine Exception Program Counter, saves the address of the interrupted instruction.\n\nWhen an interrupt occurs, the current PC + 1 is saved in mepc.\nWhen an exception is encountered, the current PC is saved in mepc. (Why? The exception may triggered by the instruction at the current PC, maybe we solve the exception in the interrupt handler, so give it another chance to execute that instruction again.)\n\nand the core jumps to the exception address. When a mret instruction is executed, the value from mepc replaces the current program counter.\nmcause (0x342): Machine Trap Cause, identifies the cause of the interrupt/exception. \n\nInterrupt[31]:\n\n1: Exceptions\n0: Interrupts\n\nException Code[30:0]: (pay special attention to the number 3/7/11)\n\n\n\n\n\n\n\n\nInterrupt[31]\nException Code[30:0]\nDescription\n\n\n\n\n1\n0, 2, 4, 6, 8, 10, 12, 14-15\nReserved\n\n\n1\n1 / 3\nSupervisor/Machine software interrupt\n\n\n1\n5 / 7\nSupervisor/Machine timer interrupt\n\n\n1\n9 / 11\nSupervisor/Machine external interrupt\n\n\n1\n13\nCounter-overflow interrupt\n\n\n1\n≥16\nDesignated for platform use\n\n\n0\n0\nInstruction address misaligned\n\n\n0\n1\nInstruction access fault\n\n\n0\n2\nIllegal instruction\n\n\n0\n3\nBreakpoint\n\n\n0\n4\nLoad address misaligned\n\n\n0\n5\nLoad access fault\n\n\n0\n6 / 7\nStore/AMO address/access fault\n\n\n0\n8 / 9 / 11\nEnvironment call from U/S/M-mode\n\n\n0\n10, 14, 17, 20-23, 32-47, ≥64\nReserved\n\n\n0\n12\nInstruction page fault\n\n\n0\n13\nLoad page fault\n\n\n0\n15\nStore/AMO page fault\n\n\n0\n16\nDouble trap\n\n\n0\n18\nSoftware check\n\n\n0\n19\nHardware error\n\n\n0\n24-31, 48-63\nDesignated for custom use\n\n\n\n\nmtval (0x343): Machine Trap Value, provides extra information about exceptions (their addresses and so on)\n\n\n\nCommonly Used CSR instructions\n;register version:\ncsrrw x5, mstatus, x10  ;x5 = mstatus (read), mstatus = x10 (write)\ncsrw mtvec, t0          ;mtvec = t0 (write only)\ncsrrs x5, mie, x10      ;x5 = mie (read), mie |= x10 (set)\ncsrrc x5, mie, x10      ;x5 = mie (read), mie &= x10 (clear)\n\n;imm version:\ncsrrwi x5, mstatus, 0x1 ;x5 = mstatus (read), mstatus = 0x1 (write imm)\ncsrrsi x5, mie, 0x1     ;x5 = mie (read), mie |= 0x1 (set imm)\ncsrrc x5, mie, 0x1      ;x5 = mie (read), mie &= 0x1 (clear imm)\nConvenient pseudo-instructions:\ncsrr rd, csr    ;csrrs rd, csr, x0\ncsrw csr, rs    ;csrrw x0, csr, rs\ncsrs csr, rs    ;csrrs x0, csr, rs\ncsrc csr, rs    ;csrrc x0, csr, rs\ncsrwi csr, imm  ;csrrwi x0, csr, imm\ncsrsi csr, imm  ;csrrsi x0, csr, imm\ncsrci csr, imm  ;csrrci x0, csr, imm\n\n\n\nGPRs 通用寄存器\n\nIntroduction\nThe 32 registers in RISC-V are called general-purpose registers (GPRs, or “integer registers”). They are used for various purposes, such as holding data, addresses, or temporary values during program execution. These registers are 32 bits wide in the RV32I ISA and are identified as x0 to x31.\nEach register has a conventional name that indicates its intended usage, although these names are just conventions, and you can use them for other purposes if needed.\n\n\n\n通用寄存器的 ABI 规范\n\n\n\n\nPartial Explanations\n\nra\nPurpose: Stores the return address for function calls.\njal ra, function_label  # Jump to function_label and store return address in ra\nret                     # Return to the address in ra\nsp\nPurpose: Points to the top of the stack (used for dynamic memory allocation during function calls).\naddi sp, sp, -16      # Allocate 16 bytes on the stack\nsw t0, 0(sp)          # Store t0 at the top of the stack\nlw t0, 0(sp)          # Retrieve t0 from the stack\naddi sp, sp, 16       # Deallocate 16 bytes\ngp\nPurpose: Points to global and static data in memory.\nlw t0, 0(gp)         # Load a value from the global data section\ntp\nPurpose: Points to thread-local storage (used in multi-threaded programs).\nlw t0, 0(tp)         # Load a thread-specific value\nt0-t6\nPurpose: Temporary values, not preserved across function calls.\n\n\n\n\n跳转指令\n\nIntroduction\nOne category of instructions is jump operations (abbr. jmpop), which is just changing the value of PC (or some GPRs by the way)\n\n\nCommonly Used aluop instructions\n; unconditional:\njal ra, 0x10        ;ra = PC + 4, PC += 0x10 (link and jump, should be laj)\njalr ra, 8(t0)      ;ra = PC + 4, PC += t0+8 (wrt a register)\n\n; conditional:\nbeq t0, t1, 0x8     ;PC += 0x8 if t0 == t1 (branch if equal)\nbne t0, t1, 0x8     ;PC += 0x8 if t0 != t1 (branch if not equal)\nblt t0, t1, 0x8     ;PC += 0x8 if t0 &lt; t1 (signed less than)\nbge t0, t1, 0x8     ;PC += 0x8 if t0 &gt;= t1 (signed greater or equal)\nbltu t0, t1, 0x8    ;PC += 0x8 if t0 &lt; t1 (unsigned less than)\nbgeu t0, t1, 0x8    ;PC += 0x8 if t0 &gt;= t1 (unsigned greater or equal)\n\nauipc t0, 0x1000    ;t0 = PC + (0x1000 &lt;&lt; 12) (add upper imm and PC to a reg)\n\n\nNotes\nload:\n    lbu a1, 0(t1)\n    sb a1, 0(t2)\n    addi t1, t1, 1\n    addi t2, t2, 1\n    bltu t2, t3, load\nIf lbu a1, 0(t1) is at location 0x8000001a, then this line: bltu t2, t3, load does NOT mean\nPC += 0x8000001a if t2 &lt; t3\nbut\nPC = 0x8000001a if t2 &lt; t3\n(done by the smart compiler!)\n\n\n\nMachine Mode\n\nIntroduction\nOne category of instructions is machine operations (abbr. machineop), which is a set of privileged instructions in the RISC-V privileged architecture. These instructions are all related to the CSRs, so make sure you are familiar with those registers first.\n\n\nRISCV Privilege Levels from High to Low\n\nDebug (D)\nMachine (M): “must-have”\nSupervisor (S)\n\nHypervisor-extended Supervisor (HS)\nVirtual Supervisor (VS)\nVirtual User (VU)\n\nUser (U)\n\n\n\nCommonly Used machineop instructions\n\nmret: Return from Machine-mode to Supervisor-mode (or User-mode). Steps:\n\nRestore the privilege mode:\n\nThe processor sets the current privilege mode based on MPP from mstatus.\nMPP is cleared to user mode (00) or supervisor mode (01) if applicable.\n\nRestore the interrupt enable status:\n\nThe MIE bit in mstatus is set to MPIE.\nThe MPIE bit is cleared (0).\n\nRestore the program counter (PC):\n\nThe PC is set to the value stored in mepc, resuming execution where it was interrupted.\n\n\n\n\n\n\n内存操作\n\nIntroduction\nOne category of instructions is memory operations (abbr. memop), which is just exchanging data between GPRs to memory locations.\nSo naturally, these signals are crucial for storing a data into memory:\n\nWE: Write enable. Whenever a memop intruction is detected, the memory block needs to be enabled.\n[31:0] data_mem: the 32-bit data to be stored.\n[31:0] mem_addr: where to be stored.\n[3:0] storebytes_size: Store a byte (0001), half word (0011), or a word (1111)?\n\n\n\nCommonly Used memop instructions\nlui t0, 0x40000 ;t0 = 0x40000 &lt;&lt; 12b (load unsigned imm)\nlb t0, 1(a0)    ;t0 = mem[a0 + 1] (load byte)\nlh t0, 2(a0)    ;t0 = mem[a0 + 2] (load half word)\nlw t0, 4(a0)    ;t0 = mem[a0 + 4] (load word)\nlbu t0, 1(a0)   ;unsigned (zero extending)\nlhu t0, 2(a0)   ;unsigned (zero extending)\n\nsb t0, 1(a0)    ;mem[a0 + 1] = t0 (store byte)\nsh t0, 2(a0)    ;mem[a0 + 2] = t0 (store half word)\nsw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>RISCV ISA</span>"
     ]
   },
   {
@@ -679,6 +371,237 @@
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>OS 操作系统原理</span>"
+    ]
+  },
+  {
+    "objectID": "hdl/hdl.html",
+    "href": "hdl/hdl.html",
+    "title": "HDL 硬件描述语言",
+    "section": "",
+    "text": "Change of Mind",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+    ]
+  },
+  {
+    "objectID": "hdl/hdl.html#change-of-mind",
+    "href": "hdl/hdl.html#change-of-mind",
+    "title": "HDL 硬件描述语言",
+    "section": "",
+    "text": "Hardware does not “execute” the lines of code in sequence.",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+    ]
+  },
+  {
+    "objectID": "hdl/hdl.html#verilog",
+    "href": "hdl/hdl.html#verilog",
+    "title": "HDL 硬件描述语言",
+    "section": "Verilog",
+    "text": "Verilog\n\nassign\n\n多个 assign 执行没有顺序, 同时进行.\nassign 是 “continuous assignment”, 右值变化时, 左值跟着变化.\n\nOperation 运算符: ~, ! (logical), &, && (logical), |, || (logical), ^ (XOR).\nif, else if 是有顺序的!!!\n(procedure 一定要放在 always 块中吗?)\n(为什么 wire 类型不能在 always 里面被赋值?)\nalways 块中的代码是顺序执行的 (但在 always 块外的代码是并行执行的).\nmodule top (input my_in, output reg my_out);\n    always @(*) begin\n        my_out = 0;\n        my_out = 1; // This is valid! (Always block 按顺序执行)\n    end\nendmodule\n\nLatch 推断: 下面如果 cpu_overheated = 0 则默认会让 shut_off_computer 保持上一个值, 这就是 latch 推断.\nalways @(*) begin\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n有时我们就是需要这种推断, 但为了避免, 可以利用always 的顺序性先提前赋值:\nalways @(*) begin\n    shut_off_computer = 0; // 先提前赋值\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n\nConcatenation:\nassign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100\nindex 可以是负数:\nreg [5:-1] my_reg; // index 可以是负数.\nwire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!\ninput a 默认为 wire.\nbegin end 在只有一行代码时可以省略 (相当于 C 中的 {}).\nwire 不能在 always 块中被赋值. reg 才能在 always 中被赋值.\nwire a;\nalways @(*) begin\n    assign a = 1; // Error!\nend\nwire a;\nalways @(*) begin\n    a &lt;= 1; // Not an error, `a` is viewed as a reg.\nend\nSynchronous and Asynchronous Reset:\n\nsynchronous reset:\nalways @(posedge clk) begin\n    if (reset)\n        ...\nend\nasynchronous reset:\nalways @(posedge clk or posedge reset) begin\n    if (reset)\n        ...\nend\n\nor 只能在 always 块中使用, if () 中要用 ||.\nInference 和 Instantiation:\n\nInference: 通过 always 块的内容推断出一个模块的功能.\nInstantiation: 显式地实例化一个模块, 通过 module_name instance_name (port_map) 的方式.\n\n循环群结构 (Torus, etc) 如果用 % 运算符来处理会消耗大量资源, 尽量用 if 语句:\nif (mm == 8'd59) begin\n    mm &lt;= 8'd0;\nend\n\n如果用 % 运算符来处理:\n\n-1 % 16 的结果是 -1, 而不是 15 (所以 (a-1)%16 应该写成 (a+15)%16).\n1~12 的循环先转换为 0~11 的循环, 再换元.\n\n\nBCD (Binary-Coded Decimal): 一种从 0 到 9 的计数器, 输出是四位二进制编码的十进制数.\nBlocking 和 Non-blocking assignments:\n\n=: Blocking assignment, 若在 always 块中使用, 则必须按照顺序执行!\n&lt;=: Non-blocking assignment, 在 always 块中使用时, 会同时执行所有赋值. (一般 always 里面都用这个!)\n\n\n\nVerilog Testbench\n`timescale 1ns / 1ps // #1 代表 1ns, 最精确可以到 #1.001\n`timescale 1ns / 1ns // #1 代表 1ns, #1.01 等是不合法的\n\n$stop //停下来",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+    ]
+  },
+  {
+    "objectID": "hdl/hdl.html#chisel",
+    "href": "hdl/hdl.html#chisel",
+    "title": "HDL 硬件描述语言",
+    "section": "Chisel",
+    "text": "Chisel\n\n+&: 如果 io.in_a 和 io.in_b 为 4.W 时, 则 sum 为 5.W (带溢出).\nval sum = io.in_a +& io.in_b\n允许多个 := 赋值到同一个输出:\nio.out := 0.U\nio.out := 1.U // 覆盖上一个\nif 和 when 的区别:\n\nif 用来在编译阶段决定电路是哪一种\nwhen 用来生成固定的 verilog 电路, 相当于 verilog 的 if.",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+    ]
+  },
+  {
+    "objectID": "cc-fpga/cc-fpga.html",
+    "href": "cc-fpga/cc-fpga.html",
+    "title": "FPGA 原理速成",
+    "section": "",
+    "text": "FPGA Structure 结构",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-fpga/cc-fpga.html#fpga-structure-结构",
+    "href": "cc-fpga/cc-fpga.html#fpga-structure-结构",
+    "title": "FPGA 原理速成",
+    "section": "",
+    "text": "PL (Programmable Logic) 可编程部分\n这个部分是一个 FPGA 开发板 “软” 的部分, 即可以通过 verilog 来控制硬件电路的部分. 要理清一下几个概念:\n\nBLE (Basic Logic Element): 基本逻辑单元. LUT 和 FF 的「经典」的组合.\n\n见 Figure fig-ble, 方框代表 LUT (Look up Table), 本质上就是一个 Mux (Multiplexer, 多路选择器).\n红色的位置将来的 bitstream 会写入 (用来配置这个 BLE 的功能), i0-i3 是这个 BLE 的输入, 右边是输出.\n\n\n\n\n\n\nFigure 1: 这个 BLE 由 LUT-4 和 D-FF 组成\n\n\n\n\nCLB (Configurable Logic Block, Xilinx) 可配置逻辑块: 一个或者多个 BLE 的组合.\n\n也叫 Slice (Vivado HLS) 或 LAB (Logic Array Block) 或 ALM (Adaptive Logic Module, Intel).\n\n\n\n\n\n\n\n\n由 1 个 BLE 构成的 CLB (e.g. Xilinx Spartan 6)\n\n\n\n\n\n\n\n由 4 个 BLE 构成的 CLB\n\n\n\n\n\n\nSB (SwitchBox): 连接不同 CLB 的开关盒.\n\n\n\n\n\n\nFigure 2: Slice (蓝色) 和其周围的 SB (SwitchBox) [1]\n\n\n\n\n\n\n\n\n\nFigure fig-slice-sb 的放大结构\n\n\n\n\nPS (Processing System) 处理器部分\n不要认为一个开发板只有 “软” 部分, 有些经常用的模块会用硬件 “焊死” 在板子上 (Heterogenous 异构). 这些硬件通过 I/O 口与 PL 部分通信, 比如:\n\n\n\nZYNQ PS 和 PL 通过 AXI 通信",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-fpga/cc-fpga.html#编译过程",
+    "href": "cc-fpga/cc-fpga.html#编译过程",
+    "title": "FPGA 原理速成",
+    "section": "编译过程",
+    "text": "编译过程\n\nSynthesis 综合\n\n动机: FPGA 不懂 “行为”, 它需要的是 “你想用哪些门, 怎么连线”. 所以 Synthesis 是将你写的 .v 逻辑翻译成各种 Logic gates 应该如何连接 (门级网表) 的过程 (以 .json 格式输出).\n\n\n\n\n\n1. Kastner R, Matai J, Neuendorffer S (2018) Parallel Programming for FPGAs. ArXiv e-prints",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cpu/cc-cpu.html",
+    "href": "cc-cpu/cc-cpu.html",
+    "title": "CPU 原理速成",
+    "section": "",
+    "text": "Change of Mind",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>CPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cpu/cc-cpu.html#change-of-mind",
+    "href": "cc-cpu/cc-cpu.html#change-of-mind",
+    "title": "CPU 原理速成",
+    "section": "",
+    "text": "对于有时钟的电路, 我们应该想象成: 电路的状态只在时钟的上升沿「瞬间」变化. 时钟的上升沿发生时电路做了两件事情:\n\n前一个时钟周期的计算结果该锁存的 锁存到寄存器 中.\n下一个时钟周期的结果瞬间计算出来并 放在线上 (他们目前还不能被 CPU “看到”).",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>CPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
+    "href": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
+    "title": "CPU 原理速成",
+    "section": "CPU 是如何成为现在这个样子的?",
+    "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n流水线\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n在每两个 phase 之间插入一些受始终控制的寄存器:\n\nIF-ID 之间: 当前指令, PC 值 (jal 要用)\nID-EX 之间: 指令类型, rs1, rs2, rd, imm.\n\n\n\n\n第三阶段\n\n总线\n\nAXI4, AHB, APB\n\n\nCache\n\n\nMemory\n\n内存: working memory, main memory\nDRAM & SSD 内存与硬盘\n\n读写速度 (3000 倍): 17 ns vs 50 ms, 超音速飞机和龟速\n容量: 16GB vs 4TB\n\nSIMM & DIMM\n\nDIMM (Dual In-line Memory Module)\n\n\n\n\n\n\n1. Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill\n\n\n2. Slchoi (2025) Multi-cycle implementation & pipelining",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>CPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-gpu/cc-gpu.html",
+    "href": "cc-gpu/cc-gpu.html",
+    "title": "GPU 原理速成",
+    "section": "",
+    "text": "Useful Links\nOngoing",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>GPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "open-src-tools/open-src-tools.html",
+    "href": "open-src-tools/open-src-tools.html",
+    "title": "Open Source 开源工具",
+    "section": "",
+    "text": "Behavioral Simulation 行为仿真",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Open Source 开源工具</span>"
+    ]
+  },
+  {
+    "objectID": "open-src-tools/open-src-tools.html#behavioral-simulation-行为仿真",
+    "href": "open-src-tools/open-src-tools.html#behavioral-simulation-行为仿真",
+    "title": "Open Source 开源工具",
+    "section": "",
+    "text": "即: NOT board-specific 的仿真.\n\n\n用到的工具:",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Open Source 开源工具</span>"
+    ]
+  },
+  {
+    "objectID": "open-src-tools/open-src-tools.html#makefile",
+    "href": "open-src-tools/open-src-tools.html#makefile",
+    "title": "Open Source 开源工具",
+    "section": "Makefile",
+    "text": "Makefile\n\n格式:\ntarget: prerequisites\n    recipe\n缺省规则\n.DEFAULT_GOAL := all\nall: ...\n伪规则\n.PHONY: all clean\nAppend:\nCFLAGS += -Wall -O2\n改后缀名:\nSRCS_ASM = start.S\nOBJS = $(SRCS_ASM:.S=.o)\n冒号前面和后面:\n%.o : %.c\n    $(CC) $(CFLAGS) -c $&lt; -o $@\n\n% 为通配符, 意思是每当你需要一个 .o 文件, 并且当前目录下有对应的 .c 文件时, 就用下面的命令来生成它\n$&lt;: 第一个依赖文件\n$@: 目标文件\n$^: 所有依赖文件\n$?: 所有比目标文件新的依赖文件",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Open Source 开源工具</span>"
+    ]
+  },
+  {
+    "objectID": "open-src-tools/open-src-tools.html#qemu-模拟器",
+    "href": "open-src-tools/open-src-tools.html#qemu-模拟器",
+    "title": "Open Source 开源工具",
+    "section": "QEMU 模拟器",
+    "text": "QEMU 模拟器",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Open Source 开源工具</span>"
+    ]
+  },
+  {
+    "objectID": "yolo/yolo.html",
+    "href": "yolo/yolo.html",
+    "title": "YOLO Object Detection 目标检测",
+    "section": "",
+    "text": "Task Objective 任务目标",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
+    ]
+  },
+  {
+    "objectID": "yolo/yolo.html#task-objective-任务目标",
+    "href": "yolo/yolo.html#task-objective-任务目标",
+    "title": "YOLO Object Detection 目标检测",
+    "section": "",
+    "text": "识别东西是什么\n将东西的位置框起来\n\n\n两类方法\n解决这个问题的方法有两类:\n\nOne-stage: 推理速度快, 可实时\n\nE.g., YOLO, SSD, RetinaNet\n\nTwo-stage: 准确率高\n\nRegion Proposal 候选区: 先从图片中提取出可能包含目标的 1000-2000 个区域, 然后对每个候选区进行目标对象识别操作.\nE.g., Faster R-CNN, Mask R-CNN, Cascade R-CNN\n\n\n\n\n\nOne stage 和 Two stage 流程框图对比\n\n\n\n\n\n\n\nMSCOCO 数据集有物体名字和位置标注\n\n\n\n\n损失函数\n\n\n\n交并比用来衡量预测地好不好",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
+    ]
+  },
+  {
+    "objectID": "yolo/yolo.html#yolo-v1",
+    "href": "yolo/yolo.html#yolo-v1",
+    "title": "YOLO Object Detection 目标检测",
+    "section": "YOLO V1",
+    "text": "YOLO V1\n\nNetwork Structure 网络结构\n\n\n\n\n\n\nFigure 1: YOLO V1 的网络结构 [1]\n\n\n\n\n\n\n\n\n\nFigure 2: Figure fig-yolo-v1 的 Back-Bone 网络其实是若干的卷积网络 [2]\n\n\n\n说明:\n\nFigure fig-back-bone: -s-2 表示 stride 步长为 2.\n输入输出:\n\n输入是一张正方形的图片 (长宽像素各为 \\(448\\), 有 3 个通道: RGB).\n输出的 tensor 大小为 \\(7 \\times 7 \\times 30\\)\n\n\n\n\nLabel Tensor 标签张量\n\nMSCOCO 数据集需要先转换成另外一种形式 (Figure fig-yolo-v1-data-labeling) 再喂给 TOLO V1 神经网络 (即换一种形式打标签而已).\n\n\n\n\n\n\nFigure 3: YOLO V1: \\(S = 7\\), 总共\n\n\n\n每张图片都有 \\(S \\times S = 49\\) 个 grid cell, 每一个 grid cell 都被一个 \\(30 \\times 1\\) 的向量描述, 相当于一张图片都对应了一个 \\(7 \\times 7 \\times 30\\) 的 label tensor.\n\nFigure fig-back-bone 中网络的输出也是一个 \\(7 \\times 7 \\times 30\\) 的 tensor, 但这是 Prediction Tensor 预测张量 (sec-prediction-tensor), 不能混为一谈.\n\n如果有两个物体的中心点都落在同一个 grid cell 中, YOLO V1 只会保留其中一个.\n\n\n\nPrediction Tensor 预测张量\n\n\n\n\n1. 上下求索电子Er (2025) [YOLO V1] 数据标注和输出张量_哔哩哔哩_bilibili\n\n\n2. Redmon J, Divvala S, Girshick R, Farhadi A (2016) You only look once: Unified, real-time object detection",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
+    ]
+  },
+  {
+    "objectID": "hls-design/HLS-design.html",
+    "href": "hls-design/HLS-design.html",
+    "title": "HLS Design FPGA 并行编程",
+    "section": "",
+    "text": "Test\nOngoing",
+    "crumbs": [
+      "ML Accelerators",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>HLS Design FPGA 并行编程</span>"
+    ]
+  },
+  {
+    "objectID": "cfu-proj-struct/cfu-proj-struct.html",
+    "href": "cfu-proj-struct/cfu-proj-struct.html",
+    "title": "CFU-Playground 工程结构",
+    "section": "",
+    "text": "Folder 文件夹描述",
+    "crumbs": [
+      "CFU Playground",
+      "<span class='chapter-number'>15</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
+    ]
+  },
+  {
+    "objectID": "cfu-proj-struct/cfu-proj-struct.html#folder-文件夹描述",
+    "href": "cfu-proj-struct/cfu-proj-struct.html#folder-文件夹描述",
+    "title": "CFU-Playground 工程结构",
+    "section": "",
+    "text": "soc: 存放一个完整的 CPU 的 verilog 设计.\n\n有很多种 CPU, 比如带或不带 CFU 接口的.",
+    "crumbs": [
+      "CFU Playground",
+      "<span class='chapter-number'>15</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
     ]
   }
 ]
