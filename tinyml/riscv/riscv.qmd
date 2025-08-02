@@ -1,0 +1,346 @@
+---
+title: "RISCV ISA"
+---
+
+> Exported from Notion, may not be well-organized.
+
+## RISCV Extensions
+
+
+In RISC-V, extensions are optional instruction sets that extend the base ISA (RV32I, 32-bit integer instructions) to add extra functionality. 
+
+Some extensions are listed here:
+
+| Extension | Meaning                          | Purpose                                      |
+|-----------|----------------------------------|----------------------------------------------|
+| M         | Integer Multiplication & Division| Adds mul, div, rem instructions              |
+| A         | Atomic Instructions              | Adds atomic memory operations (e.g., amoadd.w)|
+| F         | Single-Precision Floating Point  | Supports float (32-bit) operations           |
+| D         | Double-Precision Floating Point  | Supports double (64-bit) operations          |
+| C         | Compressed Instructions          | Reduces code size (e.g., c.add, c.sw)        |
+
+For example, RV32IMAC → A 32-bit RISC-V CPU with Integer (I), Multiply (M), Atomic (A), and Compressed (C) extensions. RV32IMAFD can be reduced to written as RV32G.
+
+- `Zicsr`: Z (Standard), I (Integer), CSR (Support read and write to CSRs)
+
+
+## 指令类型
+
+### ALU 运算
+
+- One category of instructions is arithmetic operations (abbr. aluop), which is just doing things between GPRs.
+
+- Commonly Used aluop instructions:
+
+    ```assembly
+    lui t0, 0x40000     ;t0 = 0x40000 << 12 (load upper 20 bits of the imm)
+
+    add t0, t1, t2      ;t0 = t1 + t2
+    sub t0, t1, t2      ;t0 = t1 - t2 (no imm version)
+    or t0, t1, t2       ;t0 = t1 | t2
+    and t0, t1, t2      ;t0 = t1 & t2
+    xor t0, t1, t2      ;t0 = t1 ^ t2
+
+    addi t0, t1, 10     ;t0 = t1 + 10 (decimal)
+    ori t0, t1, 0xF     ;t0 = t1 | 0xF
+    andi t0, t1, 0xF    ;t0 = t1 & 0xF
+    xori t0, t1, 0xF    ;t0 = t1 ^ 0xF
+
+    sll t0, t1, t2      ;t0 = t1 << t2 (shift left logical)
+    srl t0, t1, t2      ;t0 = t1 >> t2 (shift right logical)
+    sra t0, t1, t2      ;t0 = t1 >> t2 (shift right arithmetic, preserve sign)
+
+    slli t0, t1, 2      ;t0 = t1 << 2
+    srli t0, t1, 2      ;t0 = t1 >> 2
+    srai t0, t1, 2      ;t0 = t1 >> 2 (preserve sign)
+
+    slt t0, t1, t2      ;t0 = (t1 < t2) (set if less than signed)
+    sltu t0, t1, t2     ;t0 = (t1 < t2) (set if less than unsigned)
+
+    slti t0, t1, -5     ;t0 = (t1 < -5) (imm signed)
+    sltiu t0, t1, 10    ;t0 = (t1 < 10) (imm unsigned)
+    ```
+
+### CSR 寄存器及其操作
+
+#### Introduction
+
+- CSR (Control and Status Registers)
+- Are accessed using CSR instructions, not via memory-mapped I/O like GPIO registers.
+- GPRs can be accessed at any privilege level, while CSRs are defined at a specific privilege level and can only be accessed by that level and any levels of higher privilege.
+- Every CSR has a unique address, each 32 bits share one address (instead of 8 bits).
+- CSR addresses are 12-bits, meaning that up to 4,096 CSRs can be implemented ($2^12 = 4096$). The bits in a CSR address define its accessibility, use, and CSR number.
+![https://danielmangum.com/posts/risc-v-bytes-privilege-levels/](csr-addr-def.png)
+
+- While GPRs are used for storing data used to perform operations, CSRs typically modify the behavior of a hart (i.e. “Control”) or inform of its state and attributes (i.e. “Status”), or both.
+
+- `WARL` (Write any, read legal): Some field in a CPU register that allows **any** value to be **written**, but when **read** back, it returns only a **valid (legal)** value. For example, in `MPP[12:11]` field in `mstatus` register, we have:
+
+| Write Attempt (MPP) | Stored Value (MPP field) |
+|---------------------|--------------------------|
+| 00 (User)           | ✅ 00 (User mode)        |
+| 11 (Machine)        | ✅ 11 (Machine mode)     |
+| 01 (Illegal)        | 🔄 Returns 00 or 11 (Legal) |
+| 10 (Illegal)        | 🔄 Returns 00 or 11 (Legal) |
+
+- CSRs related intimitely to interrupts and exceptions (interrupts are external ("asynchronise"), exceptions are internal ("synchronise", usually through software or timer), some place confuse them though, but it's okay).
+
+#### Commonly Used CSRs and their sub-fields
+
+The registers are labelled in this format: `reg (addr, reset_val)`.
+
+![Part of the registers](common-csrs.png)
+
+1. `mstatus (0x300, 0x00001800)`: Machine Status (lower 32 bits), controls global interrupt enable and privilege modes.
+
+- `mstatus.MPP[12:11]`: Machine Previous Priviledge mode. When an mret is executed, the privilege mode is change to this value.
+- `mstatus.MIE[3]`: Machine (*global*) Interrupt Enable.
+- `mstatus.MPIE[7]`: Machine previous Interrupt Enable. When an interrupt occurs, the content in `mstatus.MIE` is loaded into this bit (and for simplicity, `mstatus.MIE` is changed to 0, so no other interrupts is allowed to come in), and after the interrupt is processed (after `mret`), this bit is restored into `mstatus.MIE` again.
+
+2. `misa (0x301, depends on RV32 and M_EXT)`: 
+
+3.	`mie (0x304, 0x00000000)`: Machine Interrupt Enable, enables *specific* interrupts (not *global*). Also you should have a look at `mip (0x344)`.
+
+4.	`mip (0x344)`: Machine Interrupt Pending Register, indicates which *specific* interrupts are pending.
+![`mip` and `mie`](mip_mie.png)
+
+    - `MSIP/MSIE[3]`: Machine Software Interrupt Pending/Enable
+    - `MTIP/MTIE[7]`: Machine Timer Interrupt Pending/Enable
+    - `MEIP/MEIE[11]`: Machine External Interrupt Pending/Enable
+
+5.	`mtvec (0x305, )`: Machine Trap-Handler Base Address, specifies where the CPU jumps on an interrupt/exception.
+![`mtvec`](mtvec.png)
+
+    - `MODE[1:0]`: 
+        - 00: Direct. All traps (either interrupts or exceptions) set `PC` *directly* to `BASE`.
+        - 01: Vectored. Exceptions will set `PC` *directly* to `BASE`, while (asynchronous) interrupts will set `PC` to `BASE`+4*`mcause.Exception Code` (See `mcause` register.)
+        - others: invalid.
+
+6.	`mepc (0x341, 0x00000000)`: Machine Exception Program Counter, saves the address of the interrupted instruction. 
+    - When an interrupt occurs, the current PC + 1 is saved in `mepc`.
+    - When an exception is encountered, the current PC is saved in `mepc`. (Why? The exception may triggered by the instruction at the current PC, maybe we solve the exception in the interrupt handler, so give it another chance to execute that instruction again.)
+    
+    and the core jumps to the exception address. When a `mret` instruction is executed, the value from `mepc` replaces the current program counter. 
+
+7.	`mcause (0x342)`: Machine Trap Cause, identifies the cause of the interrupt/exception.
+![`mcause`](mcause.png)
+
+    - `Interrupt[31]`: 
+        - 1: Exceptions
+        - 0: Interrupts
+    - `Exception Code[30:0]`: (pay special attention to the number 3/7/11)
+
+        | `Interrupt[31]` | `Exception Code[30:0]`       | Description                        |
+        |-----------|----------------------|------------------------------------|
+        | 1         | 0, 2, 4, 6, 8, 10, 12, 14-15  | *Reserved* |
+        | 1         | 1 / 3                | Supervisor/Machine software interrupt  |
+        | 1         | 5 / 7                | Supervisor/Machine timer interrupt    |
+        | 1         | 9 / 11               | Supervisor/Machine external interrupt |
+        | 1         | 13                   | Counter-overflow interrupt        |
+        | 1         | ≥16                  | *Designated for platform use*     |
+        | 0         | 0                     | Instruction address misaligned    |
+        | 0         | 1                     | Instruction access fault          |
+        | 0         | 2                     | Illegal instruction               |
+        | 0         | 3                     | Breakpoint                        |
+        | 0         | 4                     | Load address misaligned           |
+        | 0         | 5                     | Load access fault                 |
+        | 0         | 6 / 7                 | Store/AMO address/access fault    |
+        | 0         | 8 / 9 / 11            | Environment call from U/S/M-mode  |
+        | 0         | 10, 14, 17, 20-23, 32-47, ≥64 | *Reserved* |
+        | 0         | 12                    | Instruction page fault            |
+        | 0         | 13                    | Load page fault                   |
+        | 0         | 15                    | Store/AMO page fault              |
+        | 0         | 16                    | Double trap                       |
+        | 0         | 18                    | Software check                    |
+        | 0         | 19                    | Hardware error                    |
+        | 0         | 24-31, 48-63           | *Designated for custom use*       |
+
+8.	`mtval (0x343)`: Machine Trap Value, provides extra information about exceptions (their addresses and so on)
+
+
+
+#### Commonly Used CSR instructions
+
+```assembly
+;register version:
+csrrw x5, mstatus, x10  ;x5 = mstatus (read), mstatus = x10 (write)
+csrw mtvec, t0          ;mtvec = t0 (write only)
+csrrs x5, mie, x10      ;x5 = mie (read), mie |= x10 (set)
+csrrc x5, mie, x10      ;x5 = mie (read), mie &= x10 (clear)
+
+;imm version:
+csrrwi x5, mstatus, 0x1 ;x5 = mstatus (read), mstatus = 0x1 (write imm)
+csrrsi x5, mie, 0x1     ;x5 = mie (read), mie |= 0x1 (set imm)
+csrrc x5, mie, 0x1      ;x5 = mie (read), mie &= 0x1 (clear imm)
+```
+
+Convenient pseudo-instructions:
+
+```assembly
+csrr rd, csr    ;csrrs rd, csr, x0
+csrw csr, rs    ;csrrw x0, csr, rs
+csrs csr, rs    ;csrrs x0, csr, rs
+csrc csr, rs    ;csrrc x0, csr, rs
+csrwi csr, imm  ;csrrwi x0, csr, imm
+csrsi csr, imm  ;csrrsi x0, csr, imm
+csrci csr, imm  ;csrrci x0, csr, imm
+```
+
+### GPRs 通用寄存器
+
+#### Introduction
+
+The 32 registers in RISC-V are called general-purpose registers (GPRs, or "integer registers"). They are used for various purposes, such as holding data, addresses, or temporary values during program execution. These registers are 32 bits wide in the RV32I ISA and are identified as x0 to x31.
+
+Each register has a conventional name that indicates its intended usage, although these names are just conventions, and you can use them for other purposes if needed.
+
+![](gprs.png)
+
+#### Partial Explanations
+
+- `ra`
+
+    Purpose: Stores the return address for function calls.
+
+    ```assembly
+    jal ra, function_label  # Jump to function_label and store return address in ra
+    ret                     # Return to the address in ra
+    ```
+
+- `sp`
+
+    Purpose: Points to the top of the stack (used for dynamic memory allocation during function calls).
+
+    ```assembly
+    addi sp, sp, -16      # Allocate 16 bytes on the stack
+    sw t0, 0(sp)          # Store t0 at the top of the stack
+    lw t0, 0(sp)          # Retrieve t0 from the stack
+    addi sp, sp, 16       # Deallocate 16 bytes
+    ```
+
+- `gp`
+
+    Purpose: Points to global and static data in memory.
+
+    ```assembly
+    lw t0, 0(gp)         # Load a value from the global data section
+    ```
+
+- `tp`
+
+    Purpose: Points to thread-local storage (used in multi-threaded programs).
+
+    ```assembly
+    lw t0, 0(tp)         # Load a thread-specific value
+    ```
+
+- `t0-t6`
+
+    Purpose: Temporary values, not preserved across function calls.
+
+### 跳转指令
+
+#### Introduction
+
+One category of instructions is jump operations (abbr. jmpop), which is just changing the value of PC (or some GPRs by the way)
+
+#### Commonly Used aluop instructions
+
+```assembly
+; unconditional:
+jal ra, 0x10        ;ra = PC + 4, PC += 0x10 (link and jump, should be laj)
+jalr ra, 8(t0)      ;ra = PC + 4, PC += t0+8 (wrt a register)
+
+; conditional:
+beq t0, t1, 0x8     ;PC += 0x8 if t0 == t1 (branch if equal)
+bne t0, t1, 0x8     ;PC += 0x8 if t0 != t1 (branch if not equal)
+blt t0, t1, 0x8     ;PC += 0x8 if t0 < t1 (signed less than)
+bge t0, t1, 0x8     ;PC += 0x8 if t0 >= t1 (signed greater or equal)
+bltu t0, t1, 0x8    ;PC += 0x8 if t0 < t1 (unsigned less than)
+bgeu t0, t1, 0x8    ;PC += 0x8 if t0 >= t1 (unsigned greater or equal)
+
+auipc t0, 0x1000    ;t0 = PC + (0x1000 << 12) (add upper imm and PC to a reg)
+```
+
+#### Notes
+
+```assembly
+load:
+    lbu a1, 0(t1)
+    sb a1, 0(t2)
+    addi t1, t1, 1
+    addi t2, t2, 1
+    bltu t2, t3, load
+```
+
+If `lbu a1, 0(t1)` is at location 0x8000001a, then this line: `bltu t2, t3, load` does NOT mean 
+
+```assembly
+PC += 0x8000001a if t2 < t3
+```
+
+but 
+
+```assembly
+PC = 0x8000001a if t2 < t3
+```
+
+(done by the smart compiler!)
+
+### Machine Mode
+
+#### Introduction
+
+One category of instructions is machine operations (abbr. machineop), which is a set of *privileged* instructions in the RISC-V privileged architecture. These instructions are all related to the [CSRs](csr.md), so make sure you are familiar with those registers first.
+
+#### RISCV Privilege Levels from High to Low
+
+* Debug (D)
+* Machine (M): "must-have"
+* Supervisor (S)
+    - Hypervisor-extended Supervisor (HS)
+    - Virtual Supervisor (VS)
+    - Virtual User (VU)
+* User (U)
+
+#### Commonly Used machineop instructions
+
+- `mret`: Return from Machine-mode to Supervisor-mode (or User-mode). Steps:
+
+    1. Restore the privilege mode:
+        - The processor sets the current privilege mode based on MPP from mstatus.
+        - MPP is cleared to user mode (00) or supervisor mode (01) if applicable.
+    2. Restore the interrupt enable status:
+        - The MIE bit in mstatus is set to MPIE.
+        - The MPIE bit is cleared (0).
+    3. Restore the program counter (PC):
+        - The PC is set to the value stored in mepc, resuming execution where it was interrupted.
+
+
+### 内存操作
+
+#### Introduction
+
+One category of instructions is memory operations (abbr. memop), which is just exchanging data between GPRs to memory locations.
+
+So naturally, these signals are crucial for storing a data into memory:
+
+- `WE`: Write enable. Whenever a memop intruction is detected, the memory block needs to be enabled.
+- `[31:0] data_mem`: the 32-bit data to be stored.
+- `[31:0] mem_addr`: where to be stored.
+- `[3:0] storebytes_size`: Store a byte (0001), half word (0011), or a word (1111)?
+
+#### Commonly Used memop instructions
+
+```assembly
+lui t0, 0x40000 ;t0 = 0x40000 << 12b (load unsigned imm)
+lb t0, 1(a0)    ;t0 = mem[a0 + 1] (load byte)
+lh t0, 2(a0)    ;t0 = mem[a0 + 2] (load half word)
+lw t0, 4(a0)    ;t0 = mem[a0 + 4] (load word)
+lbu t0, 1(a0)   ;unsigned (zero extending)
+lhu t0, 2(a0)   ;unsigned (zero extending)
+
+sb t0, 1(a0)    ;mem[a0 + 1] = t0 (store byte)
+sh t0, 2(a0)    ;mem[a0 + 2] = t0 (store half word)
+sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)
+```

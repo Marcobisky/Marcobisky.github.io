@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>C 和 RISCV 汇编 – TinyML</title>
+<title>RISCV ISA – TinyML</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,61 +20,7 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-/* CSS for citations */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-}
-.hanging-indent div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}</style>
+</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -84,8 +30,8 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../riscv/riscv.html" rel="next">
-<link href="../env-setup/env-setup.html" rel="prev">
+<link href="../hdl/hdl.html" rel="next">
+<link href="../c-riscv-asm/c-riscv-asm.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -128,10 +74,39 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
-<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -311,7 +286,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">C 和 RISCV 汇编</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../riscv/riscv.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">RISCV ISA</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -396,13 +371,13 @@ div.csl-indent {
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../c-riscv-asm/c-riscv-asm.html" class="sidebar-item-text sidebar-link active">
+  <a href="../c-riscv-asm/c-riscv-asm.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">C 和 RISCV 汇编</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../riscv/riscv.html" class="sidebar-item-text sidebar-link">
+  <a href="../riscv/riscv.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">RISCV ISA</span></span></a>
   </div>
 </li>
@@ -499,18 +474,26 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#c-编译过程" id="toc-c-编译过程" class="nav-link active" data-scroll-target="#c-编译过程">C 编译过程</a></li>
-  <li><a href="#汇编语言" id="toc-汇编语言" class="nav-link" data-scroll-target="#汇编语言">汇编语言</a></li>
+  <li><a href="#riscv-extensions" id="toc-riscv-extensions" class="nav-link active" data-scroll-target="#riscv-extensions">RISCV Extensions</a></li>
+  <li><a href="#指令类型" id="toc-指令类型" class="nav-link" data-scroll-target="#指令类型">指令类型</a>
+  <ul class="collapse">
+  <li><a href="#alu-运算" id="toc-alu-运算" class="nav-link" data-scroll-target="#alu-运算">ALU 运算</a></li>
+  <li><a href="#csr-寄存器及其操作" id="toc-csr-寄存器及其操作" class="nav-link" data-scroll-target="#csr-寄存器及其操作">CSR 寄存器及其操作</a></li>
+  <li><a href="#gprs-通用寄存器" id="toc-gprs-通用寄存器" class="nav-link" data-scroll-target="#gprs-通用寄存器">GPRs 通用寄存器</a></li>
+  <li><a href="#跳转指令" id="toc-跳转指令" class="nav-link" data-scroll-target="#跳转指令">跳转指令</a></li>
+  <li><a href="#machine-mode" id="toc-machine-mode" class="nav-link" data-scroll-target="#machine-mode">Machine Mode</a></li>
+  <li><a href="#内存操作" id="toc-内存操作" class="nav-link" data-scroll-target="#内存操作">内存操作</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content page-columns page-full" id="quarto-document-content">
+<main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">C 和 RISCV 汇编</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../riscv/riscv.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">RISCV ISA</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">C 和 RISCV 汇编</h1>
+<h1 class="title">RISCV ISA</h1>
 </div>
 
 
@@ -527,188 +510,479 @@ div.csl-indent {
 </header>
 
 
+<blockquote class="blockquote">
+<p>Exported from Notion, may not be well-organized.</p>
+</blockquote>
+<section id="riscv-extensions" class="level2">
+<h2 class="anchored" data-anchor-id="riscv-extensions">RISCV Extensions</h2>
+<p>In RISC-V, extensions are optional instruction sets that extend the base ISA (RV32I, 32-bit integer instructions) to add extra functionality.</p>
+<p>Some extensions are listed here:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 37%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Extension</th>
+<th>Meaning</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>M</td>
+<td>Integer Multiplication &amp; Division</td>
+<td>Adds mul, div, rem instructions</td>
+</tr>
+<tr class="even">
+<td>A</td>
+<td>Atomic Instructions</td>
+<td>Adds atomic memory operations (e.g., amoadd.w)</td>
+</tr>
+<tr class="odd">
+<td>F</td>
+<td>Single-Precision Floating Point</td>
+<td>Supports float (32-bit) operations</td>
+</tr>
+<tr class="even">
+<td>D</td>
+<td>Double-Precision Floating Point</td>
+<td>Supports double (64-bit) operations</td>
+</tr>
+<tr class="odd">
+<td>C</td>
+<td>Compressed Instructions</td>
+<td>Reduces code size (e.g., c.add, c.sw)</td>
+</tr>
+</tbody>
+</table>
+<p>For example, RV32IMAC → A 32-bit RISC-V CPU with Integer (I), Multiply (M), Atomic (A), and Compressed (C) extensions. RV32IMAFD can be reduced to written as RV32G.</p>
 <ul>
-<li><strong>IR (Intermediate Representation)</strong>: 中间代码的作用: 相当于有一个中间缓冲, 可以看成编译器的前端, 通过增加这一个模块, 可以让编译器的前端和后端解耦, 方便支持多种语言和多种目标架构.</li>
+<li><code>Zicsr</code>: Z (Standard), I (Integer), CSR (Support read and write to CSRs)</li>
 </ul>
-<pre><code>             frontend                              backend
-           +----------+                        +------------+
-      C -&gt; |  Clang   | -+                 +-&gt; |  llvm-x86  | -&gt; x86
-           +----------+  |                 |   +------------+
-           +----------+  +-&gt; +----------+ -+   +------------+
-Fortran -&gt; | llvm-gcc | ---&gt; | llvm-opt | ---&gt; |  llvm-arm  | -&gt; ARM
-           +----------+  +-&gt; +----------+ -+   +------------+
-           +----------+  |                 |   +------------+
-Haskell -&gt; |    GHC   | -+                 +-&gt; | llvm-riscv | -&gt; RISC-V
-           +----------+  LLVM IR      LLRM IR  +------------+</code></pre>
-<section id="c-编译过程" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="c-编译过程">C 编译过程</h2>
+</section>
+<section id="指令类型" class="level2">
+<h2 class="anchored" data-anchor-id="指令类型">指令类型</h2>
+<section id="alu-运算" class="level3">
+<h3 class="anchored" data-anchor-id="alu-运算">ALU 运算</h3>
 <ul>
-<li><p>Compiler, Assembler, Linker:</p>
-<ul>
-<li>Watch <a href="https://www.youtube.com/watch?v=FD_nuXkhWbY">this video</a></li>
-</ul>
-<p><img src="compile-process.png" class="img-fluid" style="width:90.0%"></p></li>
-<li><p>gcc 编译选项:</p>
-<ul>
-<li><code>-E</code>: 只预处理, 不编译.</li>
-<li><code>-S</code>: 生成汇编代码 (<code>.s</code> 文件)</li>
-<li><code>-c</code>: 只编译, 不链接. (生成 <code>.o</code> 文件)</li>
-<li><code>-o &lt;file&gt;</code>: 指定输出文件名.</li>
-<li><code>-g</code>: 在输出的文件中加入支持调试的信息.</li>
-<li><code>-v</code> (verbose): 显示编译过程中的详细信息.</li>
-</ul></li>
-</ul>
+<li><p>One category of instructions is arithmetic operations (abbr. aluop), which is just doing things between GPRs.</p></li>
+<li><p>Commonly Used aluop instructions:</p>
+<pre class="assembly"><code>lui t0, 0x40000     ;t0 = 0x40000 &lt;&lt; 12 (load upper 20 bits of the imm)
 
-<div class="no-row-height column-margin column-container"><div class="">
+add t0, t1, t2      ;t0 = t1 + t2
+sub t0, t1, t2      ;t0 = t1 - t2 (no imm version)
+or t0, t1, t2       ;t0 = t1 | t2
+and t0, t1, t2      ;t0 = t1 &amp; t2
+xor t0, t1, t2      ;t0 = t1 ^ t2
+
+addi t0, t1, 10     ;t0 = t1 + 10 (decimal)
+ori t0, t1, 0xF     ;t0 = t1 | 0xF
+andi t0, t1, 0xF    ;t0 = t1 &amp; 0xF
+xori t0, t1, 0xF    ;t0 = t1 ^ 0xF
+
+sll t0, t1, t2      ;t0 = t1 &lt;&lt; t2 (shift left logical)
+srl t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right logical)
+sra t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right arithmetic, preserve sign)
+
+slli t0, t1, 2      ;t0 = t1 &lt;&lt; 2
+srli t0, t1, 2      ;t0 = t1 &gt;&gt; 2
+srai t0, t1, 2      ;t0 = t1 &gt;&gt; 2 (preserve sign)
+
+slt t0, t1, t2      ;t0 = (t1 &lt; t2) (set if less than signed)
+sltu t0, t1, t2     ;t0 = (t1 &lt; t2) (set if less than unsigned)
+
+slti t0, t1, -5     ;t0 = (t1 &lt; -5) (imm signed)
+sltiu t0, t1, 10    ;t0 = (t1 &lt; 10) (imm unsigned)</code></pre></li>
+</ul>
+</section>
+<section id="csr-寄存器及其操作" class="level3">
+<h3 class="anchored" data-anchor-id="csr-寄存器及其操作">CSR 寄存器及其操作</h3>
+<section id="introduction" class="level4">
+<h4 class="anchored" data-anchor-id="introduction">Introduction</h4>
+<ul>
+<li><p>CSR (Control and Status Registers)</p></li>
+<li><p>Are accessed using CSR instructions, not via memory-mapped I/O like GPIO registers.</p></li>
+<li><p>GPRs can be accessed at any privilege level, while CSRs are defined at a specific privilege level and can only be accessed by that level and any levels of higher privilege.</p></li>
+<li><p>Every CSR has a unique address, each 32 bits share one address (instead of 8 bits).</p></li>
+<li><p>CSR addresses are 12-bits, meaning that up to 4,096 CSRs can be implemented (<span class="math inline">\(2^12 = 4096\)</span>). The bits in a CSR address define its accessibility, use, and CSR number. <img src="csr-addr-def.png" class="img-fluid" alt="https://danielmangum.com/posts/risc-v-bytes-privilege-levels/"></p></li>
+<li><p>While GPRs are used for storing data used to perform operations, CSRs typically modify the behavior of a hart (i.e.&nbsp;“Control”) or inform of its state and attributes (i.e.&nbsp;“Status”), or both.</p></li>
+<li><p><code>WARL</code> (Write any, read legal): Some field in a CPU register that allows <strong>any</strong> value to be <strong>written</strong>, but when <strong>read</strong> back, it returns only a <strong>valid (legal)</strong> value. For example, in <code>MPP[12:11]</code> field in <code>mstatus</code> register, we have:</p></li>
+</ul>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Write Attempt (MPP)</th>
+<th>Stored Value (MPP field)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>00 (User)</td>
+<td>✅ 00 (User mode)</td>
+</tr>
+<tr class="even">
+<td>11 (Machine)</td>
+<td>✅ 11 (Machine mode)</td>
+</tr>
+<tr class="odd">
+<td>01 (Illegal)</td>
+<td>🔄 Returns 00 or 11 (Legal)</td>
+</tr>
+<tr class="even">
+<td>10 (Illegal)</td>
+<td>🔄 Returns 00 or 11 (Legal)</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>CSRs related intimitely to interrupts and exceptions (interrupts are external (“asynchronise”), exceptions are internal (“synchronise”, usually through software or timer), some place confuse them though, but it’s okay).</li>
+</ul>
+</section>
+<section id="commonly-used-csrs-and-their-sub-fields" class="level4">
+<h4 class="anchored" data-anchor-id="commonly-used-csrs-and-their-sub-fields">Commonly Used CSRs and their sub-fields</h4>
+<p>The registers are labelled in this format: <code>reg (addr, reset_val)</code>.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="compilation.png" class="img-fluid figure-img"></p>
-<figcaption>编译过程</figcaption>
+<p><img src="common-csrs.png" class="img-fluid figure-img"></p>
+<figcaption>Part of the registers</figcaption>
 </figure>
 </div>
-</div></div><p>装好 RISCV 编译工具链, 创建一个简单的 C 语言程序 <code>hello.c</code>:</p>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>hello.c</strong></pre>
-</div>
-<div class="sourceCode" id="cb2" data-filename="hello.c"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> global_init <span class="op">=</span> <span class="bn">0x11111111</span><span class="op">;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="dt">const</span> <span class="dt">int</span> global_const <span class="op">=</span> <span class="bn">0x22222222</span><span class="op">;</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> main<span class="op">()</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="dt">int</span> static_var <span class="op">=</span> <span class="bn">0x33333333</span><span class="op">;</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">static</span> <span class="dt">int</span> static_var_uninit<span class="op">;</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> auto_var <span class="op">=</span> <span class="bn">0x44444444</span><span class="op">;</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">"hello world!</span><span class="sc">\n</span><span class="st">"</span><span class="op">);</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span><span class="op">;</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>运行:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">riscv32-unknown-elf-gcc</span> <span class="at">-c</span> hello.c <span class="at">-o</span> hello.o <span class="co"># 只编译, 不链接</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>用 <code>riscv32-unknown-elf-readelf</code> 查看生成的 <code>.o</code> 文件:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">riscv32-unknown-elf-readelf</span> <span class="at">-h</span> hello.o <span class="op">&gt;</span> header_info.log <span class="co"># 查看 Header 信息, 并输出到文件</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>得到:</p>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>header_info.log</strong></pre>
-</div>
-<pre class="log" data-filename="header_info.log"><code>ELF Header:
-  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 
-  Class:                             ELF32
-  Data:                              2's complement, little endian
-  Version:                           1 (current)
-  OS/ABI:                            UNIX - System V
-  ABI Version:                       0
-  Type:                              REL (Relocatable file)
-  Machine:                           RISC-V
-  Version:                           0x1
-  Entry point address:               0x0
-  Start of program headers:          0 (bytes into file)
-  Start of section headers:          916 (bytes into file)
-  Flags:                             0x5, RVC, double-float ABI
-  Size of this header:               52 (bytes)
-  Size of program headers:           0 (bytes)
-  Number of program headers:         0
-  Size of section headers:           40 (bytes)
-  Number of section headers:         14
-  Section header string table index: 13
-</code></pre>
-</div>
-<p>再查看 Section 信息:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">riscv32-unknown-elf-readelf</span> <span class="at">-S</span> hello.o <span class="op">&gt;</span> section_info.log <span class="co"># 查看 Section 信息, 并输出到文件</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>得到:</p>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>section_info.log</strong></pre>
-</div>
-<pre class="log" data-filename="section_info.log"><code>There are 14 section headers, starting at offset 0x394:
-
-Section Headers:
-  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
-  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
-  [ 1] .text             PROGBITS        00000000 000034 00002e 00  AX  0   0  2
-  [ 2] .rela.text        RELA            00000000 0002d8 000048 0c   I 11   1  4
-  [ 3] .data             PROGBITS        00000000 000062 000000 00  WA  0   0  1
-  [ 4] .bss              NOBITS          00000000 000064 000004 00  WA  0   0  4
-  [ 5] .sdata            PROGBITS        00000000 000064 000008 00  WA  0   0  4
-  [ 6] .srodata          PROGBITS        00000000 00006c 000004 00   A  0   0  4
-  [ 7] .rodata           PROGBITS        00000000 000070 00000d 00   A  0   0  4
-  [ 8] .comment          PROGBITS        00000000 00007d 00001a 01  MS  0   0  1
-  [ 9] .note.GNU-stack   PROGBITS        00000000 000097 000000 00      0   0  1
-  [10] .riscv.attributes RISCV_ATTRIBUTE 00000000 000097 000066 00      0   0  1
-  [11] .symtab           SYMTAB          00000000 000100 000130 10     12  15  4
-  [12] .strtab           STRTAB          00000000 000230 0000a7 00      0   0  1
-  [13] .shstrtab         STRTAB          00000000 000320 000074 00      0   0  1
-Key to Flags:
-  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
-  L (link order), O (extra OS processing required), G (group), T (TLS),
-  C (compressed), x (unknown), o (OS specific), E (exclude),
-  D (mbind), p (processor specific)
-</code></pre>
-</div>
-<p>对 <code>.o</code> 文件进行反汇编:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">riscv32-unknown-elf-objdump</span> <span class="at">-S</span> hello.o <span class="op">&gt;</span> disassembly.s <span class="co"># 反汇编, 并输出到文件</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>得到:</p>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>disassembly.s</strong></pre>
-</div>
-<div class="sourceCode" id="cb9" data-filename="disassembly.s"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>hello.o<span class="fu">:</span>     file format elf32<span class="op">-</span>littleriscv</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>Disassembly of section <span class="fu">.text:</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="dv">00000000</span> <span class="op">&lt;</span>main<span class="op">&gt;</span><span class="fu">:</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>   <span class="fu">0:</span>   <span class="dv">1101</span>                    addi    <span class="kw">sp</span><span class="op">,</span><span class="kw">sp</span><span class="op">,-</span><span class="dv">32</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>   <span class="fu">2:</span>   ce06                    sw  ra<span class="op">,</span><span class="dv">28</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>   <span class="fu">4:</span>   cc22                    sw  s0<span class="op">,</span><span class="dv">24</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>   <span class="fu">6:</span>   <span class="dv">1000</span>                    addi    s0<span class="op">,</span><span class="kw">sp</span><span class="op">,</span><span class="dv">32</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>   <span class="fu">8:</span>   <span class="dv">444447</span>b7            lui a5<span class="op">,</span><span class="bn">0x44444</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>   <span class="fu">c:</span>   <span class="dv">44478793</span>            addi    a5<span class="op">,</span>a5<span class="op">,</span><span class="dv">1092</span> <span class="co"># 44444444 &lt;static_var.0+0x44444440&gt;</span></span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">10:</span>   fef42623            sw  a5<span class="op">,-</span><span class="dv">20</span><span class="op">(</span>s0<span class="op">)</span></span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">14:</span>   <span class="dv">000007</span>b7            lui a5<span class="op">,</span><span class="bn">0x0</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">18:</span>   <span class="dv">00078513</span>            mv  a0<span class="op">,</span>a5</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">1c:</span>   <span class="dv">00000097</span>            auipc   ra<span class="op">,</span><span class="bn">0x0</span></span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">20:</span>   <span class="dv">000080</span>e7            jalr    ra <span class="co"># 1c &lt;main+0x1c&gt;</span></span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">24:</span>   <span class="dv">0001</span>                    <span class="kw">nop</span></span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">26:</span>   <span class="dv">40</span>f2                    lw  ra<span class="op">,</span><span class="dv">28</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">28:</span>   <span class="dv">4462</span>                    lw  s0<span class="op">,</span><span class="dv">24</span><span class="op">(</span><span class="kw">sp</span><span class="op">)</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">2a:</span>   <span class="dv">6105</span>                    addi    <span class="kw">sp</span><span class="op">,</span><span class="kw">sp</span><span class="op">,</span><span class="dv">32</span></span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">2c:</span>   <span class="dv">8082</span>                    <span class="kw">ret</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="汇编语言" class="level2">
-<h2 class="anchored" data-anchor-id="汇编语言">汇编语言</h2>
+<ol type="1">
+<li><code>mstatus (0x300, 0x00001800)</code>: Machine Status (lower 32 bits), controls global interrupt enable and privilege modes.</li>
+</ol>
 <ul>
-<li><p>基本格式:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>label<span class="op">&gt;</span><span class="fu">:</span> <span class="op">&lt;</span>operation<span class="op">&gt;</span> <span class="co"># &lt;comment&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ul>
-<li><code>&lt;operation&gt;</code> 的类型 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">1</a>]</span>:
-<ul>
-<li><p>instruction (指令)</p></li>
-<li><p>pseudo-instruction (伪指令): <code>li x6, 5</code>, <code>nop</code>, RISCV 中有定义</p></li>
-<li><p>directive (伪操作): <code>.macro ... .endm</code>, <code>.end</code>, <code>.text</code>, <code>.global _start</code> 告知汇编器的指示, 与 RISCV 规范无关.</p></li>
-<li><p>macro (宏):</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.macro</span> do_nothing</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">nop</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">.endm</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="fu">_start:</span> do_nothing <span class="co"># 调用宏, 汇编器会将它展开</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-</ul></li>
-</ul></li>
-<li><p>标签其实表示地址:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">_start:</span> li x6<span class="op">,</span> <span class="dv">5</span> <span class="co"># _start 标签其实就是这条指令的地址</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><code>mstatus.MPP[12:11]</code>: Machine Previous Priviledge mode. When an mret is executed, the privilege mode is change to this value.</li>
+<li><code>mstatus.MIE[3]</code>: Machine (<em>global</em>) Interrupt Enable.</li>
+<li><code>mstatus.MPIE[7]</code>: Machine previous Interrupt Enable. When an interrupt occurs, the content in <code>mstatus.MIE</code> is loaded into this bit (and for simplicity, <code>mstatus.MIE</code> is changed to 0, so no other interrupts is allowed to come in), and after the interrupt is processed (after <code>mret</code>), this bit is restored into <code>mstatus.MIE</code> again.</li>
 </ul>
+<ol start="2" type="1">
+<li><p><code>misa (0x301, depends on RV32 and M_EXT)</code>:</p></li>
+<li><p><code>mie (0x304, 0x00000000)</code>: Machine Interrupt Enable, enables <em>specific</em> interrupts (not <em>global</em>). Also you should have a look at <code>mip (0x344)</code>.</p></li>
+<li><p><code>mip (0x344)</code>: Machine Interrupt Pending Register, indicates which <em>specific</em> interrupts are pending. <img src="mip_mie.png" class="img-fluid" alt="mip and mie"></p>
+<ul>
+<li><code>MSIP/MSIE[3]</code>: Machine Software Interrupt Pending/Enable</li>
+<li><code>MTIP/MTIE[7]</code>: Machine Timer Interrupt Pending/Enable</li>
+<li><code>MEIP/MEIE[11]</code>: Machine External Interrupt Pending/Enable</li>
+</ul></li>
+<li><p><code>mtvec (0x305, )</code>: Machine Trap-Handler Base Address, specifies where the CPU jumps on an interrupt/exception. <img src="mtvec.png" class="img-fluid" alt="mtvec"></p>
+<ul>
+<li><code>MODE[1:0]</code>:
+<ul>
+<li>00: Direct. All traps (either interrupts or exceptions) set <code>PC</code> <em>directly</em> to <code>BASE</code>.</li>
+<li>01: Vectored. Exceptions will set <code>PC</code> <em>directly</em> to <code>BASE</code>, while (asynchronous) interrupts will set <code>PC</code> to <code>BASE</code>+4*<code>mcause.Exception Code</code> (See <code>mcause</code> register.)</li>
+<li>others: invalid.</li>
+</ul></li>
+</ul></li>
+<li><p><code>mepc (0x341, 0x00000000)</code>: Machine Exception Program Counter, saves the address of the interrupted instruction.</p>
+<ul>
+<li>When an interrupt occurs, the current PC + 1 is saved in <code>mepc</code>.</li>
+<li>When an exception is encountered, the current PC is saved in <code>mepc</code>. (Why? The exception may triggered by the instruction at the current PC, maybe we solve the exception in the interrupt handler, so give it another chance to execute that instruction again.)</li>
+</ul>
+<p>and the core jumps to the exception address. When a <code>mret</code> instruction is executed, the value from <code>mepc</code> replaces the current program counter.</p></li>
+<li><p><code>mcause (0x342)</code>: Machine Trap Cause, identifies the cause of the interrupt/exception. <img src="mcause.png" class="img-fluid" alt="mcause"></p>
+<ul>
+<li><p><code>Interrupt[31]</code>:</p>
+<ul>
+<li>1: Exceptions</li>
+<li>0: Interrupts</li>
+</ul></li>
+<li><p><code>Exception Code[30:0]</code>: (pay special attention to the number 3/7/11)</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 31%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>Interrupt[31]</code></th>
+<th><code>Exception Code[30:0]</code></th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0, 2, 4, 6, 8, 10, 12, 14-15</td>
+<td><em>Reserved</em></td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>1 / 3</td>
+<td>Supervisor/Machine software interrupt</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>5 / 7</td>
+<td>Supervisor/Machine timer interrupt</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>9 / 11</td>
+<td>Supervisor/Machine external interrupt</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>13</td>
+<td>Counter-overflow interrupt</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>≥16</td>
+<td><em>Designated for platform use</em></td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>0</td>
+<td>Instruction address misaligned</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>1</td>
+<td>Instruction access fault</td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>2</td>
+<td>Illegal instruction</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>3</td>
+<td>Breakpoint</td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>4</td>
+<td>Load address misaligned</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>5</td>
+<td>Load access fault</td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>6 / 7</td>
+<td>Store/AMO address/access fault</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>8 / 9 / 11</td>
+<td>Environment call from U/S/M-mode</td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>10, 14, 17, 20-23, 32-47, ≥64</td>
+<td><em>Reserved</em></td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>12</td>
+<td>Instruction page fault</td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>13</td>
+<td>Load page fault</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>15</td>
+<td>Store/AMO page fault</td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>16</td>
+<td>Double trap</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>18</td>
+<td>Software check</td>
+</tr>
+<tr class="odd">
+<td>0</td>
+<td>19</td>
+<td>Hardware error</td>
+</tr>
+<tr class="even">
+<td>0</td>
+<td>24-31, 48-63</td>
+<td><em>Designated for custom use</em></td>
+</tr>
+</tbody>
+</table></li>
+</ul></li>
+<li><p><code>mtval (0x343)</code>: Machine Trap Value, provides extra information about exceptions (their addresses and so on)</p></li>
+</ol>
+</section>
+<section id="commonly-used-csr-instructions" class="level4">
+<h4 class="anchored" data-anchor-id="commonly-used-csr-instructions">Commonly Used CSR instructions</h4>
+<pre class="assembly"><code>;register version:
+csrrw x5, mstatus, x10  ;x5 = mstatus (read), mstatus = x10 (write)
+csrw mtvec, t0          ;mtvec = t0 (write only)
+csrrs x5, mie, x10      ;x5 = mie (read), mie |= x10 (set)
+csrrc x5, mie, x10      ;x5 = mie (read), mie &amp;= x10 (clear)
+
+;imm version:
+csrrwi x5, mstatus, 0x1 ;x5 = mstatus (read), mstatus = 0x1 (write imm)
+csrrsi x5, mie, 0x1     ;x5 = mie (read), mie |= 0x1 (set imm)
+csrrc x5, mie, 0x1      ;x5 = mie (read), mie &amp;= 0x1 (clear imm)</code></pre>
+<p>Convenient pseudo-instructions:</p>
+<pre class="assembly"><code>csrr rd, csr    ;csrrs rd, csr, x0
+csrw csr, rs    ;csrrw x0, csr, rs
+csrs csr, rs    ;csrrs x0, csr, rs
+csrc csr, rs    ;csrrc x0, csr, rs
+csrwi csr, imm  ;csrrwi x0, csr, imm
+csrsi csr, imm  ;csrrsi x0, csr, imm
+csrci csr, imm  ;csrrci x0, csr, imm</code></pre>
+</section>
+</section>
+<section id="gprs-通用寄存器" class="level3">
+<h3 class="anchored" data-anchor-id="gprs-通用寄存器">GPRs 通用寄存器</h3>
+<section id="introduction-1" class="level4">
+<h4 class="anchored" data-anchor-id="introduction-1">Introduction</h4>
+<p>The 32 registers in RISC-V are called general-purpose registers (GPRs, or “integer registers”). They are used for various purposes, such as holding data, addresses, or temporary values during program execution. These registers are 32 bits wide in the RV32I ISA and are identified as x0 to x31.</p>
+<p>Each register has a conventional name that indicates its intended usage, although these names are just conventions, and you can use them for other purposes if needed.</p>
+<p><img src="gprs.png" class="img-fluid"></p>
+</section>
+<section id="partial-explanations" class="level4">
+<h4 class="anchored" data-anchor-id="partial-explanations">Partial Explanations</h4>
+<ul>
+<li><p><code>ra</code></p>
+<p>Purpose: Stores the return address for function calls.</p>
+<pre class="assembly"><code>jal ra, function_label  # Jump to function_label and store return address in ra
+ret                     # Return to the address in ra</code></pre></li>
+<li><p><code>sp</code></p>
+<p>Purpose: Points to the top of the stack (used for dynamic memory allocation during function calls).</p>
+<pre class="assembly"><code>addi sp, sp, -16      # Allocate 16 bytes on the stack
+sw t0, 0(sp)          # Store t0 at the top of the stack
+lw t0, 0(sp)          # Retrieve t0 from the stack
+addi sp, sp, 16       # Deallocate 16 bytes</code></pre></li>
+<li><p><code>gp</code></p>
+<p>Purpose: Points to global and static data in memory.</p>
+<pre class="assembly"><code>lw t0, 0(gp)         # Load a value from the global data section</code></pre></li>
+<li><p><code>tp</code></p>
+<p>Purpose: Points to thread-local storage (used in multi-threaded programs).</p>
+<pre class="assembly"><code>lw t0, 0(tp)         # Load a thread-specific value</code></pre></li>
+<li><p><code>t0-t6</code></p>
+<p>Purpose: Temporary values, not preserved across function calls.</p></li>
+</ul>
+</section>
+</section>
+<section id="跳转指令" class="level3">
+<h3 class="anchored" data-anchor-id="跳转指令">跳转指令</h3>
+<section id="introduction-2" class="level4">
+<h4 class="anchored" data-anchor-id="introduction-2">Introduction</h4>
+<p>One category of instructions is jump operations (abbr. jmpop), which is just changing the value of PC (or some GPRs by the way)</p>
+</section>
+<section id="commonly-used-aluop-instructions" class="level4">
+<h4 class="anchored" data-anchor-id="commonly-used-aluop-instructions">Commonly Used aluop instructions</h4>
+<pre class="assembly"><code>; unconditional:
+jal ra, 0x10        ;ra = PC + 4, PC += 0x10 (link and jump, should be laj)
+jalr ra, 8(t0)      ;ra = PC + 4, PC += t0+8 (wrt a register)
+
+; conditional:
+beq t0, t1, 0x8     ;PC += 0x8 if t0 == t1 (branch if equal)
+bne t0, t1, 0x8     ;PC += 0x8 if t0 != t1 (branch if not equal)
+blt t0, t1, 0x8     ;PC += 0x8 if t0 &lt; t1 (signed less than)
+bge t0, t1, 0x8     ;PC += 0x8 if t0 &gt;= t1 (signed greater or equal)
+bltu t0, t1, 0x8    ;PC += 0x8 if t0 &lt; t1 (unsigned less than)
+bgeu t0, t1, 0x8    ;PC += 0x8 if t0 &gt;= t1 (unsigned greater or equal)
+
+auipc t0, 0x1000    ;t0 = PC + (0x1000 &lt;&lt; 12) (add upper imm and PC to a reg)</code></pre>
+</section>
+<section id="notes" class="level4">
+<h4 class="anchored" data-anchor-id="notes">Notes</h4>
+<pre class="assembly"><code>load:
+    lbu a1, 0(t1)
+    sb a1, 0(t2)
+    addi t1, t1, 1
+    addi t2, t2, 1
+    bltu t2, t3, load</code></pre>
+<p>If <code>lbu a1, 0(t1)</code> is at location 0x8000001a, then this line: <code>bltu t2, t3, load</code> does NOT mean</p>
+<pre class="assembly"><code>PC += 0x8000001a if t2 &lt; t3</code></pre>
+<p>but</p>
+<pre class="assembly"><code>PC = 0x8000001a if t2 &lt; t3</code></pre>
+<p>(done by the smart compiler!)</p>
+</section>
+</section>
+<section id="machine-mode" class="level3">
+<h3 class="anchored" data-anchor-id="machine-mode">Machine Mode</h3>
+<section id="introduction-3" class="level4">
+<h4 class="anchored" data-anchor-id="introduction-3">Introduction</h4>
+<p>One category of instructions is machine operations (abbr. machineop), which is a set of <em>privileged</em> instructions in the RISC-V privileged architecture. These instructions are all related to the <a href="csr.md">CSRs</a>, so make sure you are familiar with those registers first.</p>
+</section>
+<section id="riscv-privilege-levels-from-high-to-low" class="level4">
+<h4 class="anchored" data-anchor-id="riscv-privilege-levels-from-high-to-low">RISCV Privilege Levels from High to Low</h4>
+<ul>
+<li>Debug (D)</li>
+<li>Machine (M): “must-have”</li>
+<li>Supervisor (S)
+<ul>
+<li>Hypervisor-extended Supervisor (HS)</li>
+<li>Virtual Supervisor (VS)</li>
+<li>Virtual User (VU)</li>
+</ul></li>
+<li>User (U)</li>
+</ul>
+</section>
+<section id="commonly-used-machineop-instructions" class="level4">
+<h4 class="anchored" data-anchor-id="commonly-used-machineop-instructions">Commonly Used machineop instructions</h4>
+<ul>
+<li><p><code>mret</code>: Return from Machine-mode to Supervisor-mode (or User-mode). Steps:</p>
+<ol type="1">
+<li>Restore the privilege mode:
+<ul>
+<li>The processor sets the current privilege mode based on MPP from mstatus.</li>
+<li>MPP is cleared to user mode (00) or supervisor mode (01) if applicable.</li>
+</ul></li>
+<li>Restore the interrupt enable status:
+<ul>
+<li>The MIE bit in mstatus is set to MPIE.</li>
+<li>The MPIE bit is cleared (0).</li>
+</ul></li>
+<li>Restore the program counter (PC):
+<ul>
+<li>The PC is set to the value stored in mepc, resuming execution where it was interrupted.</li>
+</ul></li>
+</ol></li>
+</ul>
+</section>
+</section>
+<section id="内存操作" class="level3">
+<h3 class="anchored" data-anchor-id="内存操作">内存操作</h3>
+<section id="introduction-4" class="level4">
+<h4 class="anchored" data-anchor-id="introduction-4">Introduction</h4>
+<p>One category of instructions is memory operations (abbr. memop), which is just exchanging data between GPRs to memory locations.</p>
+<p>So naturally, these signals are crucial for storing a data into memory:</p>
+<ul>
+<li><code>WE</code>: Write enable. Whenever a memop intruction is detected, the memory block needs to be enabled.</li>
+<li><code>[31:0] data_mem</code>: the 32-bit data to be stored.</li>
+<li><code>[31:0] mem_addr</code>: where to be stored.</li>
+<li><code>[3:0] storebytes_size</code>: Store a byte (0001), half word (0011), or a word (1111)?</li>
+</ul>
+</section>
+<section id="commonly-used-memop-instructions" class="level4">
+<h4 class="anchored" data-anchor-id="commonly-used-memop-instructions">Commonly Used memop instructions</h4>
+<pre class="assembly"><code>lui t0, 0x40000 ;t0 = 0x40000 &lt;&lt; 12b (load unsigned imm)
+lb t0, 1(a0)    ;t0 = mem[a0 + 1] (load byte)
+lh t0, 2(a0)    ;t0 = mem[a0 + 2] (load half word)
+lw t0, 4(a0)    ;t0 = mem[a0 + 4] (load word)
+lbu t0, 1(a0)   ;unsigned (zero extending)
+lhu t0, 2(a0)   ;unsigned (zero extending)
+
+sb t0, 1(a0)    ;mem[a0 + 1] = t0 (store byte)
+sh t0, 2(a0)    ;mem[a0 + 2] = t0 (store half word)
+sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)</code></pre>
 
 
-<div id="refs" class="references csl-bib-body" role="list">
-<div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
-<div class="csl-left-margin">1. </div><div class="csl-right-inline">Lazyparser (2025) <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">Compilation and linker</a></div>
-</div>
-</div>
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -1126,13 +1400,13 @@ Key to Flags:
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../env-setup/env-setup.html" class="pagination-link" aria-label="FPGA 开发环境配置">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">FPGA 开发环境配置</span></span>
+      <a href="../c-riscv-asm/c-riscv-asm.html" class="pagination-link" aria-label="C 和 RISCV 汇编">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">C 和 RISCV 汇编</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../riscv/riscv.html" class="pagination-link" aria-label="RISCV ISA">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">RISCV ISA</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../hdl/hdl.html" class="pagination-link" aria-label="HDL 硬件描述语言">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">HDL 硬件描述语言</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
