@@ -114,7 +114,7 @@
     "href": "resources/resources.html#gpu",
     "title": "Resources 学习资料汇总",
     "section": "GPU",
-    "text": "GPU\n\ntiny-gpu: ★★☆☆☆ 一个小型的 GPU 实现.\nVeriGPU: ★☆☆☆☆ 一个复杂点的 GPU 实现, 不适合用来入门.",
+    "text": "GPU\n\ntiny-gpu: ★★☆☆☆ 一个小型的 GPU 实现.\nVeriGPU: ★☆☆☆☆ 一个复杂点的 GPU 实现, 不适合用来入门.\nStanford CS336: ★★★★★ Stanford 的 Language Modeling from Scratch 课程.",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Resources 学习资料汇总</span>"
@@ -609,10 +609,98 @@
     "href": "cc-gpu/cc-gpu.html#cuda",
     "title": "GPU 原理速成",
     "section": "",
-    "text": "2026 年之前 GPU 只能做特定的函数运算, 2026 年之后引入了 GPGPU (General Purpose GPU), 有一整套库函数来对 GPU 进行编程.\n\nCUDA: Compute Unified Device Architecture (NVIDIA, 闭源)\nOpenCL: Open Computing Language (开源)\n\nGPU device memory 可以被所有 CUDA 核心共享:\n\n\n\nNVidia GPU 架构 [1]\n\n\n连接有 GPU 的 CPU 二者的 memory 是不共享的 [1], 二者之间的数据由 DMA 搬运.\n\n\n\nSeperate memory systems [1]\n\n\n\n\n\n\n\n1. Cheung SY (2025) Lecture notes on computer science courses: Computer architecture (CS355)",
+    "text": "2026 年之前 GPU 只能做特定的函数运算, 2026 年之后引入了 GPGPU (General Purpose GPU), 有一整套库函数来对 GPU 进行编程.\n\nCUDA: Compute Unified Device Architecture (NVIDIA, 闭源)\nOpenCL: Open Computing Language (开源)\n\nGPU device memory 可以被所有 CUDA 核心共享:\n\n\n\nNVidia GPU 架构 [1]\n\n\n连接有 GPU 的 CPU 二者的 memory 是不共享的 [1], 二者之间的数据由 DMA 搬运.\n\n\n\nSeperate memory systems [1]\n\n\nKernel functions [1]:\n\n__host__: 默认在 CPU (host) 上运行的函数.\n__global__: 在 GPU 上运行, 可被 CPU 调用的函数.\n__device__: 在 GPU 上运行, 只能被 GPU 调用的函数.\n\n\n\n\n\n\n1. Cheung SY (2025) Lecture notes on computer science courses: Computer architecture (CS355)",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>11</span>  <span class='chapter-title'>GPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "glossary/glossary.html#gpu-terms",
+    "href": "glossary/glossary.html#gpu-terms",
+    "title": "Glossary 名词解释",
+    "section": "GPU Terms",
+    "text": "GPU Terms\n\nKernel: 在 GPU 上运行的函数.",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html",
+    "href": "nn-essence/nn-essence.html",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "",
+    "text": "Change of Mind",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#change-of-mind",
+    "href": "nn-essence/nn-essence.html#change-of-mind",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "",
+    "text": "I don’t think view neural networks as black boxes does any help towards understanding and inventing new networks.\n对一个神经网络来说, 我们要站在它的角度考虑 up to what extend it could tell the difference of data? 比如图像处理的神经网络, 它肯定不知道输入的是一张图, 如果是一段文字呢? 如果对于很多类型的数据它都不能区分, 说明这个网络非常 general 但性能肯定很差.",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#questions",
+    "href": "nn-essence/nn-essence.html#questions",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "Questions",
+    "text": "Questions\n\n梯度下降和反向传播的关系是什么?\n我们算梯度是在什么空间里面?\n梯度下降在 Transformer 里面是如何工作的?",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#neural-network-is-not-so-different",
+    "href": "nn-essence/nn-essence.html#neural-network-is-not-so-different",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "Neural Network is Not So Different",
+    "text": "Neural Network is Not So Different\n\n目标: 找一个映射.\n\n世界上很多问题其实就是一个复杂的映射, 比如图像识别就是输入是图片, 输出是图片中的各种内容. 只不过这个函数存在于人类的大脑中, 无法写出显式的表达式. 人类想要强行把这个函数的表达式找到! 怎么找呢? 我们看到一棵树, 它为什么是一棵树呢? 每个像素都对它是一棵树做出了贡献, 但好像整体是一棵树又与单个像素毫无关系. 如果这个表达式存在, 那么它肯定非常复杂 (这里不能追求所谓的 “简洁与优美”). 但我们可以缩小一点范围, 用某种特定形式的函数来逼近所求. 也就是:\n\n在一堆某种形式的映射里面 (参数化的函数空间 \\(\\mathcal{\\hat{F}}\\)) 找到一个映射 \\(\\hat{f}\\) 来拟合一个复杂的映射 \\(f: \\mathcal{X}\\to \\mathcal{Y}\\)\n\n人们首先发现长成 Equation eq-fcnn 这种样子的映射仿佛有很强的拟合能力, 也就是不管你人脑中的模型有多复杂, 总是可以在下面形式的映射中找到合适的拟合.\n\\[\n\\hat{f}(x) = \\sigma (W^{[L]} \\cdots \\sigma (W^{[2]} \\sigma (W^{[1]} x + b^{[1]}) + b^{[2]}) + \\cdots + b^{[L]})\n\\tag{1}\\]\nEquation eq-fcnn 很复杂对吧. 但是它可以用下面的图可视化出来:\n\n\n\n\n\n\nFigure 1: 仅仅是 Equation eq-fcnn 的可视化\n\n\n\n这张图放在这里太 cliché 了, 但是我想说的是: 我们对它太过熟悉了, 以至于认为选择这种参数化方法是理所应当、独一无二的.\n(FCNN, CNN, Transformer是同一层面上的概念? FCNN 能做到的事情很多, 但是太general 了, 所以先猜测什么样的结构能更好地揭示规律 (比如卷积 (尊重了 \\(\\mathcal{X}\\) 结构从而很可能能加速神经网络发现规律的过程?), 再比如 GNN), 然后加入它们来 帮助神经网络发现规律? “Differential Model” 我感觉 FCNN 和 CNN 的本质是一样的? CNN 的本质是 pre-trained FCNN (或者说?))\n\n事实证明形如神经网络的那些参数化函数空间能够拟合绝大多数的复杂映射, 所以无脑选择这样的 \\(\\mathcal{\\hat{F}}\\) 就行了.\n\n\n如果一个问题可以用以下的框架里面描述, 那么这个问题就可以用神经网络来解决!\n\n\n「复杂的映射」\n「复杂的映射」这个思想可以刻画和描述所有以下问题:\n\nClassification 分类问题: \\(\\mathcal{Y}\\) 仅仅是没有任何结构的集合.\n\n请说出下面例子的 \\(\\mathcal{X}\\) 和 \\(\\mathcal{Y}\\):\n\nImage Classification: 输入一张图片, 判断是猫还是狗还是其它的.\nFace Detection: 输入一张图片, 判断有没有人脸.\nHandwriting Recognition: 输入一张手写的数字, 判断是几. (虽然 \\(\\mathcal{Y}\\) 有序结构, 但不关心)\n\n\\(\\mathcal{X}\\) 是所有图片的集合, \\(\\mathcal{Y}\\) 是所有类别的集合.\n\nRegression 回归问题: \\(\\mathcal{Y}\\) 有序结构. (Generally speaking, 有拓扑结构1)\n\n请说出下面例子 [1] 的 \\(\\mathcal{X}\\) 和 \\(\\mathcal{Y}\\):\n\nLinear Regression: 给定一个标量场, 用线性标量场来拟合. (相当于指定了 \\(\\mathcal{\\hat{F}}\\))\nQuantization: 根据市场情况、历史数据等, 预测明天的股票价格.\n预测某个视频观看者年龄.\n根据发送的控制信号, 预测机械臂在三维空间的坐标.\n根据历史湿度、温度等天气信息, 预测某地明天的温度.\n\n\n\n1 序结构诱导的拓扑称为 Alexandrov 拓扑.\n\n参数化\n\n如果一个函数空间的所有元素都能用形式上相同的式子表达 (这个式子里面有一些可变的参数), 那么这个函数空间就是参数化的.\n\n\nLinear Regression 的参数化函数空间同构2于 \\(\\mathbb{R}^2\\):\n\n\n\n同构的 Mental picture\n\n\n\n2 在拓扑向量空间的意义上: \\[\\{f: \\mathbb{R}\\to \\mathbb{R} \\mid f(x) = wx + b, w, b \\in \\mathbb{R}\\} \\simeq \\{(w, b) \\mid w, b \\in \\mathbb{R}\\}\\]\n某个 CNN 的参数化函数空间同构于 \\(\\mathbb{R}^{200}\\):",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#如何设计-mathcalhatf",
+    "href": "nn-essence/nn-essence.html#如何设计-mathcalhatf",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "如何设计 \\(\\mathcal{\\hat{F}}\\) ?",
+    "text": "如何设计 \\(\\mathcal{\\hat{F}}\\) ?\n\n即如何「设计」神经网络.\n\n\n尊重 \\(\\mathcal{X}, \\mathcal{Y}\\) 中元素的结构\n(升维、ask a lot of binary questions、编解码器、激活函数用什么类型 这些的联系是什么?)\n(\\(\\mathcal{X}\\) 为图片集合、文字、电路板、声音时分别有什么结构?)\n(curse of dimension怎么解决?)\n如果 \\(\\mathcal{X}\\) 是一张图片的话, 我们有 “相邻” 点这种概念, 也就是说输入进 \\(\\hat{f}\\) 的对象内部是有某些结构的, 但是 FCNN (a.k.a., MLP) 并不知道这些结构.\n(引出 CNN 和 GNN)",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#如何找到-hatf",
+    "href": "nn-essence/nn-essence.html#如何找到-hatf",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "如何找到 \\(\\hat{f}\\) ?",
+    "text": "如何找到 \\(\\hat{f}\\) ?\n\n即如何「训练」神经网络.\n\n(梯度下降, 各种优化器)\n(梯度消失问题怎么解决、正则化、ResNet, 为什么ResNet有效等等话题)",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#杂项",
+    "href": "nn-essence/nn-essence.html#杂项",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "杂项",
+    "text": "杂项\n\n我发现要以线性的顺序来写这篇 blog 的话会增加很多不必要的复杂性, 所以接下来我直接按照本人的学习顺序进行整理.\n\n\nCNN Padding:\n为了解决输入输出大小不一致的问题, 可以引入 Padding.\n\n\n\n不同的 Padding, Pytorch 的默认为 zero padding (最常用 [2])\n\n\n要将各种问题设计成用机器学习的方法的 idea 非常重要. 它往往是一篇论文的核心 idea. 比如 word2vec 中提到的方法.\n\n\n\n\n\n1. Murphy KP (2012) Machine learning : A probabilistic perspective. Mit Press\n\n\n2. Lab MH (2025) Lecture 2 - basics of neural networks (MIT 6.5940, fall 2023)",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
     ]
   }
 ]
