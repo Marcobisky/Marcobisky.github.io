@@ -686,15 +686,16 @@ window.Quarto = {
 <p>该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!</p>
 </blockquote>
 <ul>
-<li><p><a href="https://github.com/verilator/verilator"><strong>verilator</strong></a>: 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行<strong>仿真</strong>, 模拟出时钟、寄存器逻辑、外设交互等行为.</p></li>
+<li><p><a href="https://github.com/verilator/verilator"><strong>verilator</strong></a>: 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行<strong>仿真</strong>, 模拟出时钟、寄存器逻辑、外设交互等行为.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">verilator</span> <span class="at">-cc</span> blink.v <span class="co"># 生成 obj_dir/ 其中含有转换好的 C++ 代码</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><a href="https://github.com/steveicarus/iverilog"><strong>iverilog (Icarus Verilog)</strong></a>: 也是仿真 (但不输出 C 代码):</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">iverilog</span> <span class="at">-o</span> blink.vvp blink.v blink_tb.v</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 生成 vcd 文件可配合 GTKWave 查看波形</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">vvp</span> blink.vvp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">iverilog</span> <span class="at">-o</span> blink.vvp blink.v blink_tb.v</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 生成 vcd 文件可配合 GTKWave 查看波形</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">vvp</span> blink.vvp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><a href="https://github.com/trabucayre/openFPGALoader"><strong>openFPGALoader</strong></a>: 用于将比特流烧录到 FPGA (但不能调试).</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 示例：</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openFPGALoader</span> <span class="at">-b</span> arty arty_bitstream.bit      <span class="co"># SRAM 加载</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">openFPGALoader</span> <span class="at">-b</span> arty <span class="at">-f</span> arty_bitstream.bit   <span class="co"># 写入 flash</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 示例：</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openFPGALoader</span> <span class="at">-b</span> arty arty_bitstream.bit      <span class="co"># SRAM 加载</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="ex">openFPGALoader</span> <span class="at">-b</span> arty <span class="at">-f</span> arty_bitstream.bit   <span class="co"># 写入 flash</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><a href="https://github.com/openocd-org/openocd"><strong>openocd</strong></a>: Open On-Chip Debugger. 用于调试 FPGA 的工具. 支持 JTAG 接口.</p></li>
 <li><p>三个端到端的工具链:</p>
 <ul>
@@ -702,14 +703,14 @@ window.Quarto = {
 <li><p><a href="https://github.com/YosysHQ"><strong>yosysHQ (Yosys Open SYnthesis Suite Headquarters)</strong></a>: yyds!! 一个开源的 EDA 工具链. 子项目包括:</p>
 <ul>
 <li><p><a href="https://github.com/YosysHQ/icestorm"><strong>icestorm</strong></a>: 用于针对 Lattice iCE40 FPGA 实现完全的端到端开源流程, 从 Verilog 到 bitstream, 再烧写到 FPGA 板卡上. 以下每一个命令都是一个单独的 repo!!</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># yosys 综合 (将 verilog 转换为网表 .json)</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">yosys</span> <span class="at">-p</span> <span class="st">'synth_ice40 -top blink -json blink.json'</span> blink.v</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="ex">nextpnr-ice40</span> <span class="at">--up5k</span> <span class="at">--json</span> blink.json <span class="at">--pcf</span> blink.pcf <span class="at">--asc</span> blink.asc</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># icepack 打包 (生成 bitstream .bin)</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="ex">icepack</span> blink.asc blink.bin</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># icesprog 烧写 (将 bitstream 写入 FPGA)</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> icesprog blink.bin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># yosys 综合 (将 verilog 转换为网表 .json)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">yosys</span> <span class="at">-p</span> <span class="st">'synth_ice40 -top blink -json blink.json'</span> blink.v</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">nextpnr-ice40</span> <span class="at">--up5k</span> <span class="at">--json</span> blink.json <span class="at">--pcf</span> blink.pcf <span class="at">--asc</span> blink.asc</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># icepack 打包 (生成 bitstream .bin)</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="ex">icepack</span> blink.asc blink.bin</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># icesprog 烧写 (将 bitstream 写入 FPGA)</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> icesprog blink.bin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
 <li><p><a href="https://github.com/chipsalliance/f4pga"><strong>F4PGA</strong></a>: 以前叫 <code>Symbiflow</code>, 旨在为多家 FPGA 供应商 (Xilinx 7 系列、Lattice iCE40/ECP5、QuickLogic EOS S3 等) 提供统一、功能完备、可扩展且无需专有软件的端到端开发流程.</p>
 <ul>
@@ -741,6 +742,7 @@ window.Quarto = {
 </ul></li>
 <li><p><strong>Hyperparameter 超参数</strong>: 模型训练前需要设置的参数, 如学习率、batch size、层数, etc.</p></li>
 <li><p><strong>A/B Test</strong>: 类似双盲实验, 比如研究修改按钮颜色能否提升点击率? 新模型是否真的比旧模型好? 可以用这种方法进行对比实验.</p></li>
+<li><p><strong>TVM, XLA</strong>: 机器学习编译器.</p></li>
 </ul>
 </section>
 <section id="cpu-terms" class="level2 page-columns page-full">
