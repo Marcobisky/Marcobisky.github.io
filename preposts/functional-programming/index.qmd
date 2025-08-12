@@ -1,0 +1,86 @@
+---
+author: Marcobisky
+title: Functional Programming Notes 函数式编程笔记
+description: None
+date: 2025-8-11
+# image: cover.png
+categories:
+    - Programming
+format: 
+    html: default
+---
+
+## Haskell
+
+- **Imperative and declarative programming**: 命令式编程和声明式编程.
+    - 命令式编程: 写出解决问题的具体步骤.
+    - 声明式编程: 仅仅是描述问题.
+
+- **Lazy evaluation**: 惰性求值, 只有在需要的时候才计算表达式的值.
+    - 如果每个 `func` 花费的时间为 1 year, 则:
+
+    ```haskell
+    -- This takes 2 years
+    func arg = 
+        let x = func 1 arg
+            y = func 2 arg
+            z = func 3 arg
+        in
+        if z then x else y
+    ```
+
+    ```c
+    // This takes 3 years
+    int func(int arg) {
+        int x = func(1, arg);
+        int y = func(2, arg);
+        int z = func(3, arg);
+        
+        if (z) return x;
+        else return y;
+    }
+    ```
+
+
+- Functions
+
+```haskell
+my_in_range :: Integer -> Integer -> Integer -> Bool
+my_in_range min max x = x >= min && x <= max
+```
+
+这相当于:
+
+$$
+\begin{aligned}
+\text{my\_in\_range}: \mathbb{Z}^3 &\to \mathbb{B} \\
+(\min, \max, x) &\mapsto (x \geq \min) \land (x \leq \max)
+\end{aligned}
+$$
+
+也可以写成:
+
+```haskell
+my_in_range min max x =
+    let in_lower_bound = min <= x
+        in_upper_bound = max >= x
+    in
+    in_lower_bound && in_upper_bound
+```
+
+或者:
+
+```haskell
+my_in_range min max x = ilb && iub
+    where
+        ilb = min <= x
+        iub = max >= x
+```
+
+```haskell
+my_in_range min max x =
+    if ilb then iub else False
+    where
+        ilb = min <= x
+        iub = max >= x
+```
