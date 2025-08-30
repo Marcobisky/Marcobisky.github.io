@@ -1,0 +1,42 @@
+---
+draft: true
+author: Marcobisky
+title: Reinforcement Learning 强化学习笔记
+description: Updating
+date: 2025-8-29
+# image: cover.webp
+categories:
+    - machine-learning
+format: 
+    html: default
+---
+
+## 乱序
+
+- Inspired by how human learns ("biologically inspired")
+
+- 目标: 在某个**环境 (Environment)** 下, 在什么**状态 (State)** 下采取什么**行动 (Action)** (称为**策略 (Policy)**) 能获得最大的**奖励 (Reward)**
+    - **训练老鼠出迷宫**: Environment 是迷宫, State 是老鼠的位置, Action 是老鼠的移动方向, Reward 是老鼠找到出口的奖励.
+    - **训练机器下围棋**: Environment 是围棋棋盘, State 是棋盘的当前布局, Action 是落子的选择, Reward 是胜负结果 (sparse reward, 也可以是人为在比赛过程中添加的奖励 (**reward shaping**)).
+        - Rewarding shaping 也极有可能限制 agent 的能力上限. 在新一代的 AlphaGo 中, 尽量减少人为的 reward shaping.
+    - **训练四轴无人机稳定飞行**: Environment 是飞行环境, State 是无人机的姿态, Action 是无人机的控制指令, Reward 是无人机飞行稳定性的评价 (如保持在一定高度和位置).
+    - Policy 是 **概率性的 (probabilistic)**: 因为 Environment 是概率性的! 比如下围棋中对手采取的行动不仅仅是 $s$ 的确定函数! $$\pi(a, s) \equiv \mathbb{P}(a|s)$$
+    - **Action space** 和 **State space** 可以是离散的 (chess game), 或连续的 (无人机控制).
+
+- Semi-supervised Learning: 半监督学习. Reward 很少 (Reward = Time-delayed label), 要经历很多次状态转移和行动后才能获得 (而不是每次行动都能获得, 即监督学习)
+    - 比如下围棋, 一般要经历上千次 Action 之后才能获得奖励, 如果失败, 哪些步骤是错误的? 如果成功, 哪些步骤的序列是正确的? 这些都很难追溯, 是强化学习的核心.
+
+- **Discounted Return**: Agent 的动作可以看成一个随机过程, 对于特定的某次实验 (realization), 可以事后诸葛亮地定义一个状态的价值比如 $s_1$:
+    $$
+    U (s_1) = r_1 + \gamma r_2 + \gamma^2 r_3 + \ldots + \gamma^{n-1} r_n
+    $$
+
+- **Value of a state $V_\pi(s)$**: 每当我们确定一个 policy $\pi$, 整个系统就可以开始运行了 (虽然是概率性的, 但是这个概率模型不会变). 从某状态例如 $s_1$ 开始, 所有可能的运行轨迹 (realization) 可以用一颗以 $s_1$ 为根的树表示. 某状态 $s_1$ 的价值 $V_\pi(s_1)$ 就是每条轨迹的期望:
+$$
+V_\pi(s_1) = \mathbb{E} [U(s_1)]
+$$
+
+## Dichotomy
+
+## Deep Reinforcement Learning
+
