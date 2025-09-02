@@ -559,6 +559,8 @@ window.Quarto = {
   <li><a href="#operating-system-terms" id="toc-operating-system-terms" class="nav-link" data-scroll-target="#operating-system-terms">Operating System Terms</a></li>
   <li><a href="#ysyx-terms" id="toc-ysyx-terms" class="nav-link" data-scroll-target="#ysyx-terms">YSYX Terms</a></li>
   <li><a href="#analoggym-terms" id="toc-analoggym-terms" class="nav-link" data-scroll-target="#analoggym-terms">AnalogGYM Terms</a></li>
+  <li><a href="#integrated-circuit-terms" id="toc-integrated-circuit-terms" class="nav-link" data-scroll-target="#integrated-circuit-terms">Integrated Circuit Terms</a></li>
+  <li><a href="#integrated-circuit-terms-1" id="toc-integrated-circuit-terms-1" class="nav-link" data-scroll-target="#integrated-circuit-terms-1">Integrated Circuit Terms</a></li>
   </ul>
 </nav>
     </div>
@@ -659,7 +661,10 @@ window.Quarto = {
 </ul></li>
 <li><strong>Chisel</strong>: 另一种 HDL.</li>
 <li><strong>Scalac</strong>: Scala 编译器.</li>
-<li><strong>sbt</strong>: Scala Build Tool. 配置依赖、插件和调用 scalac.</li>
+<li><strong>sbt</strong>: Scala Build导出 Tool. 配置依赖、插件和调用 scalac. 会在指定目录下面生成 <code>.v</code> 或 <code>.sv</code> 文件.
+<ul>
+<li><strong>.fir</strong>: FIRRTL (Flexible Intermediate Representation for RTL) 文件, 一种用于硬件设计的中间表示 (加上 <code>--dump-fir</code> 选项即可, <code>dump</code> 一般表示「导出」).</li>
+</ul></li>
 <li><strong>Mill</strong>: 跟 sbt 类似, 但更轻量.</li>
 </ul></li>
 <li><strong>Amaranth</strong>: 一个 Python 库, 也是用于硬件描述和设计. 可生成 Verilog 代码.</li>
@@ -756,6 +761,7 @@ window.Quarto = {
 <li><p><strong>FP32</strong>: 32 位浮点数, 1 位符号位, 8 位指数位, 23 位尾数位, 精度高, 计算速度慢.</p></li>
 <li><p><strong>BF16</strong>: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位, 精度低, 计算速度快.</p></li>
 <li><p><strong>DAG (Directed Acyclic Graph)</strong>: 有向无环图, 用来可视化一次计算过程 (哪些数据先算, 后面的数据依赖哪些数据).</p></li>
+<li><p><strong>tiled 分块</strong>:</p></li>
 </ul>
 </section>
 <section id="cpu-terms" class="level2 page-columns page-full">
@@ -779,6 +785,7 @@ window.Quarto = {
 <ul>
 <li><strong>TLB (Translation Lookaside Buffer)</strong>: 很像 CPU 的 Cache, 用于加速虚拟地址到物理地址的转换. 也有 TLB miss, TLB hit, spacial locality, temporal locality, etc. 这些概念.</li>
 </ul></li>
+<li><strong>PPA (Power, Performance, Area)</strong>: 三个重要的设计指标.</li>
 </ul>
 </section>
 <section id="gpu-terms" class="level2">
@@ -868,7 +875,14 @@ window.Quarto = {
 <li><p><strong>FOM (Figure of Merit)</strong>: 性能指标.</p></li>
 <li><p><strong>PVT (Process, Voltage, Temperature)</strong>: 影响电路性能的三个主要因素.</p>
 <ul>
-<li><strong>Process</strong>: 工艺, e.g., TT, SS, FF, FS, SF</li>
+<li><strong>Process</strong>: 工艺角, e.g.,
+<ul>
+<li>TT (Typical-Typical): 典型工艺角, NMOS 和 PMOS 都是典型速度设计的目标工艺角</li>
+<li>FF (Fast-Fast): 快-快工艺角, NMOS 和 PMOS 都比典型值快, 功耗通常较高，速度快</li>
+<li>SS (Slow-Slow): 慢-慢工艺角, NMOS 和 PMOS 都比典型值慢, 功耗较低，但速度慢</li>
+<li>FS (Fast-Slow): 快-慢工艺角, NMOS 快，PMOS 慢, 不对称的工艺条件</li>
+<li>SF (Slow-Fast): 慢-快工艺角, NMOS 慢，PMOS 快, 另一种不对称条件NMOS慢，PMOS快</li>
+</ul></li>
 </ul></li>
 <li><p><strong>GAT (Graph Attention Network)</strong></p></li>
 <li><p><strong>PDK (Process Development Kit)</strong>: 工艺开发套件.</p>
@@ -876,7 +890,19 @@ window.Quarto = {
 <li><strong>NDA (Non-Disclosure Agreement)</strong>: 商业 PDK 必须对模型文件、器件参数、仿真结果保密 (这是将 ML 应用于电路设计的最大瓶颈之一 <span class="citation" data-cites="li_2023_design">[<a href="#ref-li_2023_design" role="doc-biblioref">3</a>]</span>).</li>
 <li><strong>SKY130</strong>: 开源 PDK, 由 Google 和 SkyWater Technology 在 2020 年共同开发的 130nm 开源工艺平台.</li>
 </ul></li>
-<li><p><strong>RGCN (Relational Graph Convolutional Network)</strong>: 关系图卷积网络.</p></li>
+</ul>
+</section>
+<section id="integrated-circuit-terms" class="level2">
+<h2 class="anchored" data-anchor-id="integrated-circuit-terms">Integrated Circuit Terms</h2>
+<ul>
+<li><strong>VLSI (Very Large Scale Integration)</strong>: 超大规模集成电路.</li>
+<li><strong>RGCN (Relational Graph Convolutional Network)</strong>: 关系图卷积网络.</li>
+</ul>
+</section>
+<section id="integrated-circuit-terms-1" class="level2">
+<h2 class="anchored" data-anchor-id="integrated-circuit-terms-1">Integrated Circuit Terms</h2>
+<ul>
+<li><strong>VLSI (Very Large Scale Integration)</strong>: 超大规模集成电路.</li>
 </ul>
 
 
