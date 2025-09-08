@@ -73,6 +73,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../styles.css">
 <link rel="stylesheet" href="cv2.css">
@@ -326,7 +355,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#awards" id="toc-awards" class="nav-link" data-scroll-target="#awards">AWARDS</a></li>
   <li><a href="#interests" id="toc-interests" class="nav-link" data-scroll-target="#interests">INTERESTS</a></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="cv-latex/cv-latex.pdf"><i class="bi bi-link-45deg"></i>Download PDF</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content page-columns page-full column-page-left" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
@@ -340,13 +369,19 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>University of Electronic Science and Technology of China (UESTC)</strong> <span class="cvdate">(<em>Sept 2022 — Present</em>)</span></p>
 <p><strong>University of Glasgow, Dual Degree Program</strong> <span class="cvdate">(<em>Sept 2022 — present</em>)</span></p>
 <ul>
-<li><strong>Major</strong>: Electronic and Computer Engineering; <a href="https://marcobisky.moe/cv/score.pdf">GPA: 3.87/4.0, Ranking: 7/165 (Top 4%)</a></li>
+<li><strong>Major</strong>: Electronic and Computer Engineering; <a href="https://marcobisky.moe/cv/score.pdf">GPA: 3.87/4.0, Ranking: 2/164 (Top 1%)</a></li>
 <li><strong>Relevant Coursework</strong>: Signals and Systems, Stochastic Processes, Artificial Intelligence and Machine Learning, Information Theory, Electrodynamics, Digital Circuit Design, etc.</li>
 <li><strong>Online Course</strong>: Abstract Algebra, Complex Analysis, Differential Geometry, Control Theory, etc.</li>
 </ul>
 </section>
 <section id="research" class="level2">
 <h2 class="anchored" data-anchor-id="research">RESEARCH</h2>
+<p><strong>GAT-based Multi-Task RL for Robust PVT-Aware Analog Design</strong> <span class="cvdate">(<em>On going</em>)</span></p>
+<ul>
+<li>Proposed a GAT-based multi-task Reinforcement Learning framework to optimize analog circuits under diverse PVT corners.</li>
+<li>Modeled PVT conditions as graph nodes, enabling adaptive attention to corner-specific bottlenecks.</li>
+<li>Reduced specific violations by <span class="math inline">\(19\times\)</span> and simulations by <span class="math inline">\(69\%\)</span> on <a href="https://github.com/CODA-Team/AnalogGym"><code>AnalogGym</code></a> benchmarks.</li>
+</ul>
 <p><strong><a href="../tinyml/index.html">System-level Co-Design of RISCV Accelerators for TinyML at the Edge</a></strong> <span class="cvdate">(<em>On going</em>)</span></p>
 <ul>
 <li>Designing and implementing hardware-accelerated TinyML kernels that are adaptable and efficient for edge computing scenarios using <code>Chisel</code>, <code>Verilog</code>, <code>Python</code> and <code>C++</code>.</li>
@@ -389,7 +424,7 @@ ul.task-list li input[type="checkbox"] {
 </div></div><ul>
 <li>Designed and simulated an entire RISCV 32-bit CPU from scratch in <code>Digital</code> Software for working principle visualization.</li>
 <li>Supported basic peripherals: GPIOs, IIC, UART, etc.</li>
-<li>Simple boot ROM in assembly, minimal interrupt service for running a Linux kernel.</li>
+<li>Implemented a simple boot ROM in assembly, minimal interrupt service for running a Linux kernel.</li>
 </ul>
 <p><strong><a href="https://github.com/Marcobisky/ame-entropy-source-coding">Adaptive Markov Entropy Source Encoding</a></strong> <span class="cvdate">(<em>Oct 2024 — Nov 2024</em>)</span></p>
 
@@ -402,7 +437,7 @@ ul.task-list li input[type="checkbox"] {
 <li>Originally-designed the second-order Markov Adapative Approximation (AME) to perform source coding of <em>the Game of Thrones</em> using <code>Python</code> and <code>Matlab</code>.</li>
 <li>Evaluated and compared the performance of AME, Huffman and Fano coding.</li>
 </ul>
-<p><strong><a href="https://github.com/Marcobisky/CNN-for-mbed">CNN for Mbed</a></strong> <span class="cvdate">(<em>Feb 2024 — May 2024</em>)</span></p>
+<p><strong><a href="https://github.com/Marcobisky/CNN-for-mbed">CNN for Embedded Systems</a></strong> <span class="cvdate">(<em>Feb 2024 — May 2024</em>)</span></p>
 
 <div class="no-row-height column-margin column-container"><div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -411,7 +446,7 @@ ul.task-list li input[type="checkbox"] {
 </figure>
 </div></div><ul>
 <li>Integrated a convolutional neural network (CNN) into an MCU using <code>C</code> in <code>MbedOS</code>.</li>
-<li>Smart fall detection, body temperature monitoring and real-time data visualization for patients.</li>
+<li>Enabled smart fall detection, body temperature monitoring and real-time data visualization for patients.</li>
 </ul>
 <p><strong>Human Voice Recognition Smart Car</strong> <span class="cvdate">(<em>Sept 2023 — Dec 2023</em>)</span></p>
 
@@ -421,7 +456,7 @@ ul.task-list li input[type="checkbox"] {
 <figcaption>Voice-controlled car</figcaption>
 </figure>
 </div></div><ul>
-<li>Designed and implemented a small car capable of recognizing human voice commands and performing corresponding actions including moving forwards/backwards, turning/sliding left/right using standard library in <code>C</code> on STM32F103.</li>
+<li>Designed and implemented a voice-controlled car on STM32F103 using C standard libraries, supporting actions such as moving forwards/backwards, turning/sliding left/right.</li>
 <li>Led a 4-member team in the project.</li>
 </ul>
 <p><strong>Digital Door Lock for Dormitory</strong> <span class="cvdate">(<em>Sept 2023 — Oct 2023</em>)</span></p>
@@ -432,13 +467,14 @@ ul.task-list li input[type="checkbox"] {
 <figcaption>Smart lock tested on breadboard</figcaption>
 </figure>
 </div></div><ul>
-<li>Designed and implemented an embedded digital door lock system in <code>C++</code> on Nucleo L432KC MCU. Basic functions include manually setting up password, automatically lock for repeated wrong passwords, OLED message displaying, etc.</li>
+<li>Designed and implemented an embedded digital door lock system in on Nucleo L432KC MCU.</li>
+<li>Developed basic functions include manually setting up password, automatically lock for repeated wrong passwords, OLED message displaying, etc.</li>
 <li>Led a 3-member team in the project.</li>
 </ul>
 <p><strong>First Place in “XinTong Cup” Electronic Design Competition</strong> <span class="cvdate">(<em>Sept 2022 — Oct 2022</em>)</span></p>
 <ul>
 <li>Designed and implemented a 8-key music player using register-based development in <code>Keil C51</code> on STC89C52 MCU.</li>
-<li>Functionality includes single note/chord playing, recording, replay and rewind capability, etc.</li>
+<li>Developed functions includes single note/chord playing, recording, replay and rewind capability, etc.</li>
 </ul>
 </section>
 <section id="academic-recordfullscore" class="level2">
