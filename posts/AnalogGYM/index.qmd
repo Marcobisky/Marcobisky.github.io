@@ -1,0 +1,134 @@
+---
+draft: true
+author: Marcobisky
+title: GAT-Based Multi-Task RL for Robust Analog Sizing via PVT Variation-Aware Attention Sampling
+description: Updating
+date: 2025-9-8
+# image: cover.webp
+categories:
+    - Paper
+format: 
+    html: default
+---
+
+## AnalogGYM Environment Setup 环境配置
+
+```bash
+cd RGNN_RL
+conda env create -f environment.yml
+```
+
+如果有问题, 可能是网络连接的问题:
+
+```bash
+ping -c 3 8.8.8.8
+conda config --add channels conda-forge
+conda config --add channels pytorch
+conda env create -f environment.yml
+conda activate analoggym-env
+pip install torch_cluster-1.6.1+pt113cpu-cp310-cp310-linux_x86_64.whl torch_scatter-2.1.1+pt113cpu-cp310-cp310-linux_x86_64.whl torch_sparse-0.6.17+pt113cpu-cp310-cp310-linux_x86_64.whl torch_spline_conv-1.2.2+pt113cpu-cp310-cp310-linux_x86_64.whl
+```
+
+若环境配置成功, 执行以下命令测试:
+
+```bash
+conda activate analoggym-env
+python main_AMP.py
+```
+
+### 手动升级 `ngspice`
+
+在 [ngspice 官网](https://sourceforge.net/projects/ngspice/) 下载最新的 `ngspice-45.2.tar.gz`, 解压后执行:
+
+```bash
+cd ~/Downloads/ngspice-45.2
+sudo apt update && sudo apt install -y build-essential autoconf automake libtool bison flex libreadline-dev libx11-dev libxaw7-dev libfftw3-dev # 安装依赖项
+./configure --with-x --enable-xspice --enable-cider --enable-openmp --prefix=/usr/local # 配置 ngspice
+cd ~/Downloads/ngspice-45.2 && make -j$(nproc) # 编译
+sudo make install # 安装
+sudo ldconfig # 更新动态链接库缓存
+ngspice --version # 检查版本
+```
+
+应该输出的是 45.2 版本而不是 41:
+
+```bash
+******
+** ngspice-45.2 : Circuit level simulation program
+** Compiled with KLU Direct Linear Solver
+** The U. C. Berkeley CAD Group
+** Copyright 1985-1994, Regents of the University of California.
+** Copyright 2001-2025, The ngspice team.
+** Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html
+** Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html
+** Creation Date: Mon Sep 15 15:59:22 UTC 2025
+******
+```
+
+如果不是, 检查是否还在用 conda 的 `ngspice`:
+
+```bash
+which ngspice
+```
+
+如果不是类似:
+
+```bash
+/usr/local/bin/ngspice
+```
+
+则很可能还在用 conda 里面下载的! 这个跟环境变量的优先级有关, 可以暂时将这个 `bin` 路径添加到 `PATH` 的开头:
+
+```bash
+export PATH="/usr/local/bin:$PATH"
+ngspice --version
+```
+
+为了永久让这个改变生效, 执行:
+
+```bash
+mkdir -p $CONDA_PREFIX/etc/conda/activate.d
+echo 'export PATH="/usr/local/bin:$PATH"' > $CONDA_PREFIX/etc/conda/activate.d/ngspice.sh
+mkdir -p $CONDA_PREFIX/etc/conda/deactivate.d
+echo 'export PATH=$(echo $PATH | sed "s|/usr/local/bin:||g")' > $CONDA_PREFIX/etc/conda/deactivate.d/ngspice.sh
+cd .../AnalogGYM/RGNN_RL # 改成你自己的目录
+which ngspice
+ngspice --version
+```
+
+版本应该为 45.2 即可.
+
+## Motivation
+
+> 我们给出 RL, GAT (GNN and attention) 的动机
+
+- 背景: 在模拟电路设计中, 由于工艺、温度和电压 (PVT) 的变化, 电路性能可能会受到影响. 
+
+- 目标: 给定一个特定的电路 (神经模糊控制放大器, AMP_NMCF), 
+
+## Circuit
+
+需要优化的电路被封装成 `ckt_graphs.py` 中的对象 `GraphAMPNMCF`, 其中部分重要的参数:
+
+- `num_nodes = 29`: 29 个节点
+    - `action_dim = 24`: 24 个 MOSFET (M0 ~ M23)
+        - `action`: (24,) 描述了电路的一个动作
+    - 剩下 5 个节点为: Vdd, GND, lb, C0, C1
+- `num_node_features = 12`: 每个节点有 12 个特征, 不同种类的元件格式不一样:
+    - MOSFET: `[0, 0, 0, 0, 0, id_norm, gm_norm, gds_norm, vth_norm, vdsat_norm, vds_norm, vgs_norm]`, 归一化的 (漏极电流, 跨导, 输出导纳, 阈值电压, 饱和电压, 漏源电压, 栅源电压)
+    - 电源 Vdd: `[self.Vdd, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
+    - 地 GND: `[0, self.GND, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
+    - 偏置电流 lb: `[0, 0, self.lb, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
+    - 电容 C0: `[0, 0, 0, OP_C0_norm, 0, 0, 0, 0, 0, 0, 0, 0]`
+    - 电容 C1: `[0, 0, 0, 0, OP_C1_norm, 0, 0, 0, 0, 0, 0, 0]`
+- `state`: (29, 12) 描述了电路的一种状态
+- `observation`: (29, 12) ??
+- `info`: (11, ) ??
+
+
+
+## RL
+
+- Agent
+
+- State Space
