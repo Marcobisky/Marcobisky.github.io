@@ -1,4 +1,6 @@
 import random
+import subprocess
+import webbrowser
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -18,6 +20,10 @@ class TicTacToeAgent:
         self.buffer = []
         self.steps = 0
         self.writer = SummaryWriter('runs/tic_tac_toe_dqn')
+        
+        # Auto-start TensorBoard
+        subprocess.Popen(['tensorboard', '--logdir=runs', '--port=6008'])
+        webbrowser.open('http://localhost:6008')
 
     # Update the network once
     def train_step(self):
