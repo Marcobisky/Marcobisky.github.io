@@ -3,13 +3,17 @@ draft: true
 author: Marcobisky
 title: GAT-Based Multi-Task RL for Robust Analog Sizing via PVT Variation-Aware Attention Sampling
 description: Updating
-date: 2025-9-8
+date: 2025-9-16
 # image: cover.webp
 categories:
     - Paper
 format: 
     html: default
 ---
+
+## Glossary
+
+- **DCOP analysis**: 直流工作点 (Operating Point) 分析.
 
 ## AnalogGYM Environment Setup 环境配置
 
@@ -111,14 +115,17 @@ ngspice --version
 需要优化的电路被封装成 `ckt_graphs.py` 中的对象 `GraphAMPNMCF`, 其中部分重要的参数:
 
 - `num_nodes = 29`: 29 个节点
-    - `action_dim = 24`: 24 个 MOSFET (M0 ~ M23)
-        - `action`: (24,) 描述了电路的一个动作
-    - 剩下 5 个节点为: Vdd, GND, lb, C0, C1
+    - 24 个 MOSFET (M0 ~ M23)
+    - 剩下 5 个节点为: Vdd, GND, Ib, C0, C1
+
+- `action_dim = 24`: 24 个动作, 每个 MOSFET 有三个动作可以操作 (W 沟道宽度, L 沟道长度, M 并联数), 共 72 个动作, 但是电路很多地方是对称的, 最后只需要调整 M0, M8, M10, M11, M17, M21, M23 (共 21), 加上 Ib, M_C0, M_C1, 24 个动作.
+    - `action`: (24,) 描述了电路的一个动作
+
 - `num_node_features = 12`: 每个节点有 12 个特征, 不同种类的元件格式不一样:
     - MOSFET: `[0, 0, 0, 0, 0, id_norm, gm_norm, gds_norm, vth_norm, vdsat_norm, vds_norm, vgs_norm]`, 归一化的 (漏极电流, 跨导, 输出导纳, 阈值电压, 饱和电压, 漏源电压, 栅源电压)
     - 电源 Vdd: `[self.Vdd, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
     - 地 GND: `[0, self.GND, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
-    - 偏置电流 lb: `[0, 0, self.lb, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
+    - 偏置电流 Ib: `[0, 0, self.lb, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
     - 电容 C0: `[0, 0, 0, OP_C0_norm, 0, 0, 0, 0, 0, 0, 0, 0]`
     - 电容 C1: `[0, 0, 0, 0, OP_C1_norm, 0, 0, 0, 0, 0, 0, 0]`
 - `state`: (29, 12) 描述了电路的一种状态
