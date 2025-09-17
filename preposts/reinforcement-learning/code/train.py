@@ -2,6 +2,7 @@ import random
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.tensorboard.writer import SummaryWriter
 from models import Net
 from utils import *
 from config import Config
@@ -16,8 +17,9 @@ class TicTacToeAgent:
         self.criterion = nn.MSELoss()
         self.buffer = []
         self.steps = 0
+        self.writer = SummaryWriter('runs/tic_tac_toe_dqn')
 
-    # 训练一个step
+    # Update the network once
     def train_step(self):
         if len(self.buffer) < self.config.batch_size: 
             return
@@ -43,8 +45,10 @@ class TicTacToeAgent:
         self.steps += 1
         if self.steps % self.config.update_target_every == 0:
             self.target_net.load_state_dict(self.net.state_dict())
+        
+        return loss.item()
 
-    # 自我对弈训练
+    # Training by self-play
     def train(self):
         for episode in range(self.config.num_episodes):
             board = [0]*9
@@ -55,8 +59,8 @@ class TicTacToeAgent:
             whos_turn = 0  # To track whose turn it is
             history = [] # To store (s, a, r, s2, done) tuples
             
-            while result is None: 
-                s = board.copy()  # 保存当前状态作为 s
+            while result is None: # Game not over
+                s = board.copy()  # Save current board state
                 
                 if whos_turn % 2 == 0:  # AI's turn
                     idx_ai = select_action(board, self.net, self.config.epsilon)
@@ -74,25 +78,25 @@ class TicTacToeAgent:
                 
                 if if_load_history(result, whos_turn):
                     done = True if result is not None else False
-                    history.append((s, idx_ai, reward, board.copy(), done))  # s 是动作前，s2 是动作后
+                    history.append((s, idx_ai, reward, board.copy(), done)) # Store this experience
                 
-            # 存入buffer并训练
+            # Game ended, transmit all history to buffer
             for transition in history:
                 self.buffer.append(transition)
-            if len(self.buffer) > self.config.buffer_size:
+            if len(self.buffer) > self.config.buffer_size: # Keep buffer size in limit
                 self.buffer = self.buffer[-self.config.buffer_size:]
-            self.train_step()
+            loss = self.train_step()
+            
+            # Log to tensorboard every 100 episodes
+            if episode % 100 == 0 and loss is not None:
+                self.writer.add_scalar('Loss/Episode', loss, episode)
 
         print("Training completed.")
-        
-    # def visualize_train(self):
-        
+        self.writer.close()
+                
     
-        
+    # Start play with updated network
     def interactive_play(self):
-        """
-        与训练好的AI进行交互式游戏
-        """
         print("欢迎与AI进行井字棋对战！")
         print("输入0-8选择位置，棋盘位置如下：")
         print("0|1|2")
