@@ -1,6 +1,9 @@
 from train import TicTacToeAgent
 
 def main():
+    # Delete runs/ directory
+    # shutil.rmtree('runs/', ignore_errors=True)
+
     agent = TicTacToeAgent()
         
     agent.train()

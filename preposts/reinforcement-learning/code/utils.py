@@ -35,7 +35,7 @@ def env_move(board):
 # Result to reward
 def result_to_reward(result):
     if result == 0: # Tie
-        return 0.1
+        return 0
     elif result == 1: # AI Win
         return 1
     elif result == -1: # Opponent Win

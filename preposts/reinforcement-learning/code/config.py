@@ -4,9 +4,11 @@ class Config:
     buffer_size = 10000
     batch_size = 64
     gamma = 0.99
-    epsilon = 0.1
-    update_target_every = 1000
-    learning_rate = 1e-3
+    epsilon_start = 1.0
+    epsilon_end = 0.01
+    epsilon_decay = 0.995
+    update_target_every = 100
+    learning_rate = 1e-4
     
     # 训练参数
-    num_episodes = 50000
+    num_episodes = 40000

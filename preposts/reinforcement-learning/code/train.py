@@ -19,7 +19,14 @@ class TicTacToeAgent:
         self.criterion = nn.MSELoss()
         self.buffer = []
         self.steps = 0
+        self.epsilon = self.config.epsilon_start
         self.writer = SummaryWriter('runs/tic_tac_toe_dqn')
+        
+        # Initialize networks with small weights
+        for m in self.net.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight, gain=0.1)
+                nn.init.constant_(m.bias, 0)
         
         # Auto-start TensorBoard
         subprocess.Popen(['tensorboard', '--logdir=runs', '--port=6008'])
@@ -42,10 +49,16 @@ class TicTacToeAgent:
         with torch.no_grad():
             q_next = self.target_net(s2).max(1)[0]  # 下一状态的最大Q值
             q_target = r + self.config.gamma * q_next * (~done)
+            # Clamp target values to prevent explosion
+            q_target = torch.clamp(q_target, -10, 10)
         
         loss = self.criterion(q_values, q_target)
         self.opt.zero_grad()
         loss.backward()
+        
+        # Gradient clipping to prevent explosion
+        torch.nn.utils.clip_grad_norm_(self.net.parameters(), max_norm=0.5)
+        
         self.opt.step()
 
         self.steps += 1
@@ -69,7 +82,7 @@ class TicTacToeAgent:
                 s = board.copy()  # Save current board state
                 
                 if whos_turn % 2 == 0:  # AI's turn
-                    idx_ai = select_action(board, self.net, self.config.epsilon)
+                    idx_ai = select_action(board, self.net, self.epsilon)
                     board[idx_ai] = player
                     result = check_win(board)
                     reward = result_to_reward(result)
@@ -91,11 +104,18 @@ class TicTacToeAgent:
                 self.buffer.append(transition)
             if len(self.buffer) > self.config.buffer_size: # Keep buffer size in limit
                 self.buffer = self.buffer[-self.config.buffer_size:]
+            
+            # Train once per episode (reduced frequency)
+            loss = None
             loss = self.train_step()
+            
+            # Decay epsilon
+            self.epsilon = max(self.config.epsilon_end, self.epsilon * self.config.epsilon_decay)
             
             # Log to tensorboard every 100 episodes
             if episode % 100 == 0 and loss is not None:
                 self.writer.add_scalar('Loss/Episode', loss, episode)
+                self.writer.add_scalar('Epsilon/Episode', self.epsilon, episode)
 
         print("Training completed.")
         self.writer.close()
