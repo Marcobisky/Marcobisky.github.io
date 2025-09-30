@@ -10,7 +10,539 @@
 <atom:link href="https://marcobisky.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Getting better every second!</description>
 <generator>quarto-1.7.32</generator>
-<lastBuildDate>Mon, 04 Aug 2025 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 24 Sep 2025 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>YOPO – You Only Pick Once</title>
+  <dc:creator>Marcobisky </dc:creator>
+  <link>https://marcobisky.github.io/posts/yopo/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="objective" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="objective"><span class="header-section-number">1</span> Objective</h2>
+<p>The aim is to implement a simple yet effective object tracking algorithm that does not rely on neural networks. We are given several frames from a video of a street, the task is to first pick a car from the first frame, then track the car in the subsequent frames.</p>
+</section>
+<section id="ideas" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="ideas"><span class="header-section-number">2</span> Ideas</h2>
+<p>There are three problems to solve in this task:</p>
+<section id="object-changing" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="object-changing"><span class="header-section-number">2.1</span> Object Changing</h3>
+<p><strong>Problem</strong>: The shape and color of the object may change over time. If we use a fixed template (from the first frame) to search for the object in all subsequent frames, the matching score will drop significantly and eventually fail to capture the object.</p>
+<p><strong>Solution</strong>: <strong><em>Update the template (kernel)</em></strong>. Whenever we find the object with a high confidence, we update the template (also called the kernel) with the newly found object. Therefore making the kernel adaptive to the changing object.</p>
+</section>
+<section id="high-computational-cost" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="high-computational-cost"><span class="header-section-number">2.2</span> High Computational Cost</h3>
+<p><strong>Problem</strong>: If we search for the object in the whole image, the computational cost is exteremely high.</p>
+<p><strong>Solution</strong>: <strong><em>Use prior knowledge</em></strong>. In real-world streets, the position (or velocity) and the shape of the car change extremely slowly given a high frame rate. Therefore, we could potentially use the history of the car to predict its position in the next frame, and only search for the car in a small region around the predicted position.</p>
+</section>
+<section id="finding-matching-score" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="finding-matching-score"><span class="header-section-number">2.3</span> Finding Matching Score</h3>
+<p><strong>Problem</strong>: How do you find a “confidence” matching score between the kernel and a candidate region? Using inner products?</p>
+<p><strong>Solution</strong>: <strong><em>Normalized Cross-Correlation (NCC)</em></strong>. Inner product is almost the answer except that the outcome is sensitive to brightness. For example, the inner product between the two images in Figure&nbsp;1 and Figure&nbsp;2 is <img src="https://latex.codecogs.com/png.latex?2706529500.0"> and <img src="https://latex.codecogs.com/png.latex?770488300.0"> respectively, though they look exactly the same respectively.</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-bright" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bright-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/bright.jpg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bright-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Inner product = 2706529500.0
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-dark" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dark-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/dark.jpg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dark-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Inner product = 770488300.0
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<p>Therefore, we need to <strong>normalize</strong> the inner product: Suppose <img src="https://latex.codecogs.com/png.latex?T">, <img src="https://latex.codecogs.com/png.latex?W"> are two images of size <img src="https://latex.codecogs.com/png.latex?h%5Ctimes%20w">. We consider them as a long vector in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5E%7Bhw%7D"> instead of matrices. First of all, they are “above the horizon” (non-negative), so we subtract the mean value from each image to make them “zero-mean”:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0AT%20&amp;%5Cto%20%5Ctilde%7BT%7D%20=%20T%20-%20%5Cmu_T%20%5Cquad%20%5Cleft(%5Cmu_T%20=%20%5Cfrac%7B1%7D%7Bhw%7D%20%5Csum_%7Bi%7D%20T_i%5Cright)%20%5C%5C%0AW%20&amp;%5Cto%20%5Ctilde%7BW%7D%20=%20W%20-%20%5Cmu_W%20%5Cquad%20%5Cleft(%5Cmu_W%20=%20%5Cfrac%7B1%7D%7Bhw%7D%20%5Csum_%7Bi%7D%20W_i%5Cright)%0A%5Cend%7Baligned%7D%0A"></p>
+<p>Then, define the NCC (normalized cross-correlation) between <img src="https://latex.codecogs.com/png.latex?T"> and <img src="https://latex.codecogs.com/png.latex?W"> as the <img src="https://latex.codecogs.com/png.latex?%5Ccos%20%5Cangle%20(%5Ctilde%7BT%7D,%20%5Ctilde%7BW%7D)">, i.e.,</p>
+<p><span id="eq-ncc"><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%5Ctext%7BNCC%7D(T,%20W)%20:&amp;=%20%5Cfrac%7B%5Clangle%20%5Ctilde%7BT%7D,%20%5Ctilde%7BW%7D%20%5Crangle%7D%7B%5C%7C%5Ctilde%7BT%7D%5C%7C_2%20%5C%7C%5Ctilde%7BW%7D%5C%7C_2%7D%20%5C%5C%0A&amp;=%20%5Cfrac%7B%5Csum_i%20(T_i%20-%20%5Cmu_T)(W_i%20-%20%5Cmu_W)%7D%7B%5Csqrt%7B%5Csum_i%20(T_i%20-%20%5Cmu_T)%5E2%7D%20%5Csqrt%7B%5Csum_i%20(W_i%20-%20%5Cmu_W)%5E2%7D%7D%20%5C%5C%0A&amp;%5Cin%20%5B-1,%201%5D%0A%5Cend%7Baligned%7D%0A%5Ctag%7B1%7D"></span></p>
+</section>
+</section>
+<section id="methodology" class="level2 page-columns page-full" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="methodology"><span class="header-section-number">3</span> Methodology</h2>
+<p>The overall algorithm is summarized in the flowchart Figure&nbsp;3, which is explained in detail in the following sections.</p>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-flow-diagram" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-flow-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/flow-diagram.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-flow-diagram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Algorithm Flowchart
+</figcaption>
+</figure>
+</div>
+</div></div><section id="sec-mod1" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="sec-mod1"><span class="header-section-number">3.1</span> Predict the Next Search Window Center</h3>
+<ul>
+<li><p><strong>First frame</strong>: Since the object’s speed and direction are initially unknown, we manually select the object in the first frame and use its center as the initial search location.</p></li>
+<li><p><strong>Second frame</strong>: Once we identify the object in the second frame (via Section&nbsp;3.2), we now have two locations, which allows us to compute an initial velocity vector <img src="https://latex.codecogs.com/png.latex?v_1"> (the green arrow in Figure&nbsp;4).</p></li>
+<li><p><strong>Third frame</strong>: We directly use <img src="https://latex.codecogs.com/png.latex?v_1"> to predict the center of the search area in the third frame. After finding a best kernel in the third frame, we have another velocity vector <img src="https://latex.codecogs.com/png.latex?v_2">. We then average <img src="https://latex.codecogs.com/png.latex?v_1"> and <img src="https://latex.codecogs.com/png.latex?v_2"> to get a more stable velocity estimate: <img src="https://latex.codecogs.com/png.latex?%0A%20%20v_3%20%5Capprox%20%5Calpha%20v_2%20+%20(1-%5Calpha)%20v_1%20%5Cquad%20(%5Calpha%20%5Cin%20%5B0,1%5D)%0A%20%20"></p></li>
+<li><p><strong>Subsequent frames</strong>: Use <img src="https://latex.codecogs.com/png.latex?v_%7Bn-1%7D"> to predict the center of the search area in the <img src="https://latex.codecogs.com/png.latex?(n+1)">-th frame. After finding a best kernel in the <img src="https://latex.codecogs.com/png.latex?(n+1)">-th frame, we have another velocity vector <img src="https://latex.codecogs.com/png.latex?v_n">. We then average <img src="https://latex.codecogs.com/png.latex?v_n"> and <img src="https://latex.codecogs.com/png.latex?v_%7Bn-1%7D"> to get a more stable velocity estimate: <img src="https://latex.codecogs.com/png.latex?%0A%20%20v_%7Bn+1%7D%20%5Capprox%20%5Calpha%20v_%7Bn%7D%20+%20(1-%5Calpha)%20v_%7Bn-1%7D%20%5Cquad%20(%5Calpha%20%5Cin%20%5B0,1%5D)%0A%20%20"></p></li>
+</ul>
+<div id="fig-moving-avg" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-moving-avg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/moving-avg.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-moving-avg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Motion Prediction
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-mod2" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="sec-mod2"><span class="header-section-number">3.2</span> Local Search with NCC and Kernel Resizing</h3>
+<p>This module receives the predicted search center from Section&nbsp;3.1 and the current kernel image.</p>
+<ul>
+<li><p><strong>Step 1: Local search window</strong> We define a search window of <img src="https://latex.codecogs.com/png.latex?%5Cpm%203"> pixels vertically and horizontally from the predicted center. For each candidate region, we compute the NCC (Normalized Cross-Correlation) score defined in Equation&nbsp;1.</p></li>
+<li><p><strong>Step 2: Kernel resizing</strong> Since the object (a car) may change in size as it moves closer or farther from the camera, we also resize the kernel (both enlarged and shrunk) and repeat the NCC search at each scale.</p></li>
+<li><p><strong>Step 3: Best match selection</strong> We now have three sets of NCC scores (one per kernel scale). We select the candidate with the maximum NCC score across all scales, and define that as the detection result for the current frame.</p></li>
+<li><p><strong>Step 4: Handoff to next stage</strong> The matched region’s location is used to update the predicted trajectory, and the cropped image may or may not be used as the new kernel — this decision is handled in the next module in Section&nbsp;3.3.</p></li>
+</ul>
+<div id="fig-best-match" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-best-match-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/best-match.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-best-match-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: NCC Matching
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-mod3" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="sec-mod3"><span class="header-section-number">3.3</span> Kernel Updating Rule</h3>
+<p>In this module, we address the question: Should we update the kernel image every frame?</p>
+<p>Problem with naïve updates: Simply picking the top-matching region as the new kernel in every frame might lead to error accumulation, especially when the background changes or the match is unreliable.</p>
+<p>Our key principles are:</p>
+<ul>
+<li>Always update the kernel’s location, because tracking requires positional accuracy.</li>
+<li>Only update the kernel’s image if the match quality is sufficiently high.
+<ul>
+<li>Threshold-based strategy:
+<ul>
+<li>Define a threshold for NCC similarity (e.g., <img src="https://latex.codecogs.com/png.latex?%5Ctext%7BNCC%7D_%7B%5Ctext%7Bthres%7D%7D%20=%200.94">).</li>
+<li>If the current best match has a <img src="https://latex.codecogs.com/png.latex?%5Ctext%7BNCC%7D%20%3E%200.94">, it means the match is strong — we update both kernel location and image.</li>
+<li>If <img src="https://latex.codecogs.com/png.latex?%5Ctext%7BNCC%7D%20%3C%200.94">, the match might be unreliable (e.g., due to a temporary background obstruction like a white pole as shown in Figure&nbsp;6). In this case, we only update the position, and retain the previous kernel image for consistency.</li>
+</ul></li>
+</ul></li>
+<li>Example (Figure&nbsp;6):
+<ul>
+<li>Frame 1: <img src="https://latex.codecogs.com/png.latex?%5Ctext%7BNCC%7D%20=%200.99%20%3E%20%5Ctext%7BNCC%7D_%7B%5Ctext%7Bthres%7D%7D">: update both position and image.</li>
+<li>Frame 2: <img src="https://latex.codecogs.com/png.latex?%5Ctext%7BNCC%7D%20=%200.89%20%3C%20%5Ctext%7BNCC%7D_%7B%5Ctext%7Bthres%7D%7D">: update only position.</li>
+<li>Frame 3: <img src="https://latex.codecogs.com/png.latex?%5Ctext%7BNCC%7D%20=%200.96%20%3E%20%5Ctext%7BNCC%7D_%7B%5Ctext%7Bthres%7D%7D">: update both.</li>
+</ul></li>
+</ul>
+<p>This adaptive mechanism avoids abrupt kernel drift and helps maintain robustness in challenging tracking conditions.</p>
+<div id="fig-mod3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mod3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/mod3.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mod3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Kernel Updating
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="results" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="results"><span class="header-section-number">4</span> Results</h2>
+<p>As shown in Figure&nbsp;7 and Figure&nbsp;8, our algorithm successfully tracks both a red car and a blue car throughout the video sequence.</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-result-red" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-result-red-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/tracking_red.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-result-red-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Red Car Tracking Demo
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-result-blue" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-result-blue-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/tracking_blue.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-result-blue-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Blue Car Tracking Demo
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-search-red" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-search-red-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/search_space_red.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-search-red-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: NCC scores vs search space (red)
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-search-blue" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-search-blue-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/yopo/search_space_blue.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-search-blue-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: NCC scores vs search space (blue)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="future-work" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="future-work"><span class="header-section-number">5</span> Future Work</h2>
+<ul>
+<li><p><strong>Blocking views</strong>: Our current method struggles when the target is briefly occluded (e.g., by other vehicles or obstacles). Future work could integrate motion prediction with re-identification techniques to maintain tracking through occlusion.</p></li>
+<li><p><strong>Cumulative error</strong>: Due to the iterative nature of kernel updates and position prediction, small errors may accumulate over time. Incorporating global correction mechanisms (e.g., periodic full-frame verification) could help mitigate this drift.</p></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>Projects</category>
+  <category>EN-blogs</category>
+  <guid>https://marcobisky.github.io/posts/yopo/</guid>
+  <pubDate>Wed, 24 Sep 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://marcobisky.github.io/posts/yopo/tracking_red.gif" medium="image" type="image/gif"/>
+</item>
+<item>
+  <title>GAT-Based Multi-Task RL for Robust Analog Sizing via PVT Variation-Aware Attention Sampling</title>
+  <dc:creator>Marcobisky </dc:creator>
+  <link>https://marcobisky.github.io/posts/AnalogGYM/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="glossary" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="glossary"><span class="header-section-number">1</span> Glossary</h2>
+<ul>
+<li><strong>DCOP analysis</strong>: 直流工作点 (Operating Point) 分析.</li>
+</ul>
+</section>
+<section id="analoggym-environment-setup-环境配置" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="analoggym-environment-setup-环境配置"><span class="header-section-number">2</span> AnalogGYM Environment Setup 环境配置</h2>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">cd</span> RGNN_RL</span>
+<span id="cb1-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">conda</span> env create <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-f</span> environment.yml</span></code></pre></div>
+<p>如果有问题, 可能是网络连接的问题:</p>
+<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ping</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-c</span> 3 8.8.8.8</span>
+<span id="cb2-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">conda</span> config <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--add</span> channels conda-forge</span>
+<span id="cb2-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">conda</span> config <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--add</span> channels pytorch</span>
+<span id="cb2-4"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">conda</span> env create <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-f</span> environment.yml</span>
+<span id="cb2-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">conda</span> activate analoggym-env</span>
+<span id="cb2-6"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">pip</span> install torch_cluster-1.6.1+pt113cpu-cp310-cp310-linux_x86_64.whl torch_scatter-2.1.1+pt113cpu-cp310-cp310-linux_x86_64.whl torch_sparse-0.6.17+pt113cpu-cp310-cp310-linux_x86_64.whl torch_spline_conv-1.2.2+pt113cpu-cp310-cp310-linux_x86_64.whl</span></code></pre></div>
+<p>若环境配置成功, 执行以下命令测试:</p>
+<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">conda</span> activate analoggym-env</span>
+<span id="cb3-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">python</span> main_AMP.py</span></code></pre></div>
+<section id="手动升级-ngspice" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="手动升级-ngspice"><span class="header-section-number">2.1</span> 手动升级 <code>ngspice</code></h3>
+<p>在 <a href="https://sourceforge.net/projects/ngspice/">ngspice 官网</a> 下载最新的 <code>ngspice-45.2.tar.gz</code>, 解压后执行:</p>
+<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">cd</span> ~/Downloads/ngspice-45.2</span>
+<span id="cb4-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt update <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">&amp;&amp;</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> apt install <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-y</span> build-essential autoconf automake libtool bison flex libreadline-dev libx11-dev libxaw7-dev libfftw3-dev <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 安装依赖项</span></span>
+<span id="cb4-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">./configure</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--with-x</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--enable-xspice</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--enable-cider</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--enable-openmp</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--prefix</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>/usr/local <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 配置 ngspice</span></span>
+<span id="cb4-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">cd</span> ~/Downloads/ngspice-45.2 <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">&amp;&amp;</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">make</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-j</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$(</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">nproc</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">)</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 编译</span></span>
+<span id="cb4-5"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> make install <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 安装</span></span>
+<span id="cb4-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sudo</span> ldconfig <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 更新动态链接库缓存</span></span>
+<span id="cb4-7"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">ngspice</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--version</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 检查版本</span></span></code></pre></div>
+<p>应该输出的是 45.2 版本而不是 41:</p>
+<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">******</span></span>
+<span id="cb5-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">**</span> ngspice-45.2 : Circuit level simulation program</span>
+<span id="cb5-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">**</span> Compiled with KLU Direct Linear Solver</span>
+<span id="cb5-4"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">**</span> The U. C. Berkeley CAD Group</span>
+<span id="cb5-5"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">**</span> Copyright 1985-1994, Regents of the University of California.</span>
+<span id="cb5-6"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">**</span> Copyright 2001-2025, The ngspice team.</span>
+<span id="cb5-7"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">**</span> Please get your ngspice manual from https://ngspice.sourceforge.io/docs.html</span>
+<span id="cb5-8"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">**</span> Please file your bug-reports at http://ngspice.sourceforge.net/bugrep.html</span>
+<span id="cb5-9"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">**</span> Creation Date: Mon Sep 15 15:59:22 UTC 2025</span>
+<span id="cb5-10"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">******</span></span></code></pre></div>
+<p>如果不是, 检查是否还在用 conda 的 <code>ngspice</code>:</p>
+<div class="sourceCode" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">which</span> ngspice</span></code></pre></div>
+<p>如果不是类似:</p>
+<div class="sourceCode" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">/usr/local/bin/ngspice</span></span></code></pre></div>
+<p>则很可能还在用 conda 里面下载的! 这个跟环境变量的优先级有关, 可以暂时将这个 <code>bin</code> 路径添加到 <code>PATH</code> 的开头:</p>
+<div class="sourceCode" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">export</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">PATH</span><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"/usr/local/bin:</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$PATH</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span></span>
+<span id="cb8-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">ngspice</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--version</span></span></code></pre></div>
+<p>为了永久让这个改变生效, 执行:</p>
+<div class="sourceCode" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mkdir</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-p</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$CONDA_PREFIX</span>/etc/conda/activate.d</span>
+<span id="cb9-2"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">echo</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'export PATH="/usr/local/bin:$PATH"'</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$CONDA_PREFIX</span>/etc/conda/activate.d/ngspice.sh</span>
+<span id="cb9-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mkdir</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">-p</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$CONDA_PREFIX</span>/etc/conda/deactivate.d</span>
+<span id="cb9-4"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">echo</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'export PATH=$(echo $PATH | sed "s|/usr/local/bin:||g")'</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">&gt;</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">$CONDA_PREFIX</span>/etc/conda/deactivate.d/ngspice.sh</span>
+<span id="cb9-5"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">cd</span> .../AnalogGYM/RGNN_RL <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 改成你自己的目录</span></span>
+<span id="cb9-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">which</span> ngspice</span>
+<span id="cb9-7"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">ngspice</span> <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">--version</span></span></code></pre></div>
+<p>版本应该为 45.2 即可.</p>
+</section>
+</section>
+<section id="motivation" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="motivation"><span class="header-section-number">3</span> Motivation</h2>
+<blockquote class="blockquote">
+<p>我们给出 RL, GAT (GNN and attention) 的动机</p>
+</blockquote>
+<ul>
+<li><p>背景: 在模拟电路设计中, 由于工艺、温度和电压 (PVT) 的变化, 电路性能可能会受到影响.</p></li>
+<li><p>目标: 给定一个特定的电路 (神经模糊控制放大器, AMP_NMCF),</p></li>
+</ul>
+</section>
+<section id="circuit" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="circuit"><span class="header-section-number">4</span> Circuit</h2>
+<p>需要优化的电路被封装成 <code>ckt_graphs.py</code> 中的对象 <code>GraphAMPNMCF</code>, 其中部分重要的参数:</p>
+<ul>
+<li><code>num_nodes = 29</code>: 29 个节点
+<ul>
+<li>24 个 MOSFET (M0 ~ M23)</li>
+<li>剩下 5 个节点为: Vdd, GND, Ib, C0, C1</li>
+</ul></li>
+<li><code>action_dim = 24</code>: 24 个动作, 每个 MOSFET 有三个动作可以操作 (W 沟道宽度, L 沟道长度, M 并联数), 共 72 个动作, 但是电路很多地方是对称的, 最后只需要调整 M0, M8, M10, M11, M17, M21, M23 (共 21), 加上 Ib, M_C0, M_C1, 24 个动作.
+<ul>
+<li><code>action</code>: (24,) 描述了电路的一个动作</li>
+</ul></li>
+<li><code>num_node_features = 12</code>: 每个节点有 12 个特征, 不同种类的元件格式不一样:
+<ul>
+<li>MOSFET: <code>[0, 0, 0, 0, 0, id_norm, gm_norm, gds_norm, vth_norm, vdsat_norm, vds_norm, vgs_norm]</code>, 归一化的 (漏极电流, 跨导, 输出导纳, 阈值电压, 饱和电压, 漏源电压, 栅源电压)</li>
+<li>电源 Vdd: <code>[self.Vdd, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]</code></li>
+<li>地 GND: <code>[0, self.GND, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]</code></li>
+<li>偏置电流 Ib: <code>[0, 0, self.lb, 0, 0, 0, 0, 0, 0, 0, 0, 0]</code></li>
+<li>电容 C0: <code>[0, 0, 0, OP_C0_norm, 0, 0, 0, 0, 0, 0, 0, 0]</code></li>
+<li>电容 C1: <code>[0, 0, 0, 0, OP_C1_norm, 0, 0, 0, 0, 0, 0, 0]</code></li>
+</ul></li>
+<li><code>state</code>: (29, 12) 描述了电路的一种状态</li>
+<li><code>observation</code>: (29, 12) ??</li>
+<li><code>info</code>: (11, ) ??</li>
+</ul>
+</section>
+<section id="rl" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="rl"><span class="header-section-number">5</span> RL</h2>
+<ul>
+<li><p>Agent</p></li>
+<li><p>State Space</p></li>
+</ul>
+
+
+</section>
+
+ ]]></description>
+  <category>Paper</category>
+  <guid>https://marcobisky.github.io/posts/AnalogGYM/</guid>
+  <pubDate>Mon, 15 Sep 2025 16:00:00 GMT</pubDate>
+</item>
+<item>
+  <title></title>
+  <dc:creator>Marcobisky </dc:creator>
+  <link>https://marcobisky.github.io/posts/uni-application/</link>
+  <description><![CDATA[ undefined ]]></description>
+  <category>Education</category>
+  <category>CN-blogs</category>
+  <guid>https://marcobisky.github.io/posts/uni-application/</guid>
+  <pubDate>Tue, 05 Aug 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://marcobisky.github.io/posts/uni-application/cover.webp" medium="image" type="image/webp"/>
+</item>
 <item>
   <title>IELTS 笔记</title>
   <dc:creator>Marcobisky </dc:creator>
@@ -538,6 +1070,7 @@ Tips
 
  ]]></description>
   <category>English</category>
+  <category>CN-blogs</category>
   <guid>https://marcobisky.github.io/posts/IELTS/</guid>
   <pubDate>Mon, 04 Aug 2025 16:00:00 GMT</pubDate>
   <media:content url="https://marcobisky.github.io/posts/IELTS/cover.jpeg" medium="image" type="image/jpeg"/>
@@ -13552,1442 +14085,6 @@ Figure&nbsp;3: Superposition of the fields of every point charge inside <img src
   <guid>https://marcobisky.github.io/posts/electrostatics/</guid>
   <pubDate>Thu, 06 Mar 2025 16:00:00 GMT</pubDate>
   <media:content url="https://marcobisky.github.io/posts/electrostatics/point-charge-case.png" medium="image" type="image/png" height="103" width="144"/>
-</item>
-<item>
-  <title>Q&amp;A: Basis vectors are exactly the same as partial derivative operator? 为什么向量等价于微分算子?</title>
-  <dc:creator>Marcobisky </dc:creator>
-  <link>https://marcobisky.github.io/posts/vector-derivation-relation/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="question" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="question"><span class="header-section-number">1</span> Question</h2>
-<p>In differential geometry, we usually see a vector <img src="https://latex.codecogs.com/png.latex?v"> is written as: <img src="https://latex.codecogs.com/png.latex?%0Av%20=%20v%5Ei%20%5Cfrac%7B%5Cpartial%20%7D%7B%5Cpartial%20x%5Ei%7D%20%5Cbigg%5Crvert_p.%0A"></p>
-<p>Why does a vector <em>naturally</em> relates to partial derivatives?</p>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-warning no-icon callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-One-line Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p><img src="https://latex.codecogs.com/png.latex?%0AT_p%20(%5Cmathbb%7BR%7D%5En)%20%5Ccong%20%5Ctext%7BDer%7D_p%20(C%5E%5Cinfty(%5Cmathbb%7BR%7D%5En))%0A"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-</section>
-<section id="solution-from-derivative-to-derivation" class="level2 page-columns page-full" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="solution-from-derivative-to-derivation"><span class="header-section-number">2</span> Solution – From Derivative to Derivation</h2>
-<section id="directional-derivative" class="level3 page-columns page-full" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="directional-derivative"><span class="header-section-number">2.1</span> Directional derivative</h3>
-<p>We know from multivariable calculus that in high dimensions, we could not say the “derivative”, but the <em>directional derivative</em> of a function<sup>1</sup>. The directional derivative is a measure of how quickly the function value vary when we step a tiny nudge along a vector <img src="https://latex.codecogs.com/png.latex?v">. Imagine we are at <img src="https://latex.codecogs.com/png.latex?p"> in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5E3"> and temperature is different everywhere. We are curiously about how this temperature field <img src="https://latex.codecogs.com/png.latex?f"> changes in different directions. we move a tiny proportion<sup>2</sup> along <img src="https://latex.codecogs.com/png.latex?v"> (say <img src="https://latex.codecogs.com/png.latex?%5Cepsilon%20=%200.01%20%5C%25">) and we feel the temperature changes by <img src="https://latex.codecogs.com/png.latex?%5CDelta%20f%20=%20f(p+%5Cepsilon%20v)-f(p)">. So we define the directional derivative of <img src="https://latex.codecogs.com/png.latex?f"> along <img src="https://latex.codecogs.com/png.latex?v"> is <img src="https://latex.codecogs.com/png.latex?%0AD_%7Bv%7D%20f%20%7C_p%20:=%20%5Clim_%7B%5Cepsilon%20%5Cto%200%7D%20%5Cfrac%7B%5CDelta%20f%7D%7B%5Cepsilon%7D.%0A"></p>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;“Scalar field” in fancier term. A scalar field in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5En"> is a map from <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5En"> to <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D">.</p></div><div id="fn2"><p><sup>2</sup>&nbsp;This is important! We are NOT moving a tiny <em>bit</em> but a tiny <em>proportion</em>, which means the length of <img src="https://latex.codecogs.com/png.latex?v"> matters. Because if we move <img src="https://latex.codecogs.com/png.latex?0.01%20%5C%25"> on <img src="https://latex.codecogs.com/png.latex?v"> and <img src="https://latex.codecogs.com/png.latex?2%20v">, <img src="https://latex.codecogs.com/png.latex?f"> will vary <img src="https://latex.codecogs.com/png.latex?%5CDelta%20f"> and <img src="https://latex.codecogs.com/png.latex?2%5CDelta%20f"> and therefore the directional derivative of <img src="https://latex.codecogs.com/png.latex?f"> along <img src="https://latex.codecogs.com/png.latex?2v"> would be doubled! In some books, you will see we force <img src="https://latex.codecogs.com/png.latex?v"> to be unit length, so we will not have this problem. But for me it’s unnecessary.</p></div><div id="fn3"><p><sup>3</sup>&nbsp;We use upper indices to represent coordinate components and lower indices to represent basis vectors, so Equation&nbsp;1 in usually notation is just <img src="https://latex.codecogs.com/png.latex?%0AD_v%20f%20=%20%5Clangle%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%7D%20%5Chat%7B%5Cimath%7D%20+%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20y%7D%20%5Chat%7B%5Cjmath%7D%20+%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20z%7D%20%5Chat%7Bk%7D,%20v_1%20%5Chat%7B%5Cimath%7D%20+%20v_2%20%5Chat%7B%5Cjmath%7D%20+%20v_3%20%5Chat%7Bk%7D%20%5Crangle.%0A"></p></div></div><p>It turns out that there is an explicit formula for directional derivatives: <img src="https://latex.codecogs.com/png.latex?%0AD_%7Bv%7D%20f%20=%20%5Clangle%5Cnabla%20f,%20v%5Crangle,%0A"> i.e., the inner product between the gradient of <img src="https://latex.codecogs.com/png.latex?f"> and <img src="https://latex.codecogs.com/png.latex?v">. The direction of the <img src="https://latex.codecogs.com/png.latex?%5Cnabla%20f"> is the steepest ascend of <img src="https://latex.codecogs.com/png.latex?f"> at <img src="https://latex.codecogs.com/png.latex?p">. In <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5E3">, this can be written as<sup>3</sup> <span id="eq-dvf"><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%20%20%20%20D_v%20f%20&amp;=%20%5Clangle%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%5E1%7D%20e_1%20+%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%5E2%7D%20e_2%20+%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%5E3%7D%20e_3,%20v%5E1%20e_1%20+%20v%5E2%20e_2%20+%20v%5E3%20e_3%20%5Crangle%20%5C%5C%0A%20%20%20%20&amp;=%20v%5E1%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%5E1%7D%20+%20v%5E2%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%5E2%7D%20+%20v%5E3%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%5E3%7D%20%5C%5C%0A%20%20%20%20&amp;=%20%5Csum_i%20v%5Ei%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%5Ei%7D%20%5C%5C%0A%20%20%20%20&amp;=:%20v%5Ei%20%5Cfrac%7B%5Cpartial%20f%7D%7B%5Cpartial%20x%5Ei%7D.%0A%5Cend%7Baligned%7D%0A%5Ctag%7B1%7D"></span></p>
-<p>The last step in Equation&nbsp;1 where we drop the summation notation is a convention called <a href="https://en.wikipedia.org/wiki/Einstein_notation">Einstein notation</a>.</p>
-<p><strong>We could view <img src="https://latex.codecogs.com/png.latex?D_v%20f"> as <img src="https://latex.codecogs.com/png.latex?v"> acts on <img src="https://latex.codecogs.com/png.latex?f">.</strong> Some textbook uses <img src="https://latex.codecogs.com/png.latex?v%5Bf%5D"> to represent this action, i.e., <img src="https://latex.codecogs.com/png.latex?%0Av%5Bf%5D%20:=%20D_v%20f.%0A"></p>
-</section>
-<section id="derivation" class="level3 page-columns page-full" data-number="2.2">
-<h3 data-number="2.2" class="anchored" data-anchor-id="derivation"><span class="header-section-number">2.2</span> Derivation</h3>
-<p>We know a normal derivative satisfy so-called chain rule: <img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7B%5Cmathrm%7Bd%7D%7D%7B%5Cmathrm%7Bd%7Dx%7D(fg)%20=%20%5Cfrac%7B%5Cmathrm%7Bd%7Df%7D%7B%5Cmathrm%7Bd%7Dx%7D%20g%20+%20f%20%5Cfrac%7B%5Cmathrm%7Bd%7Dg%7D%7B%5Cmathrm%7Bd%7Dx%7D.%0A"></p>
-<p>We extract this property and define abstractly the <strong><em>derivation</em></strong> operator on an algebra as follows:</p>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Derivation on an Algebra
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-derivation" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 1</strong></span> Let <img src="https://latex.codecogs.com/png.latex?A"> be an algebra over field <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BF%7D">, a <strong><em>derivation</em></strong> is a linear map <img src="https://latex.codecogs.com/png.latex?D:%20A%20%5Cto%20A"> s.t., <img src="https://latex.codecogs.com/png.latex?%0AD(ab)%20=%20D(a)b%20+%20aD(b).%0A"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<p>It’s obvious that every <img src="https://latex.codecogs.com/png.latex?v"> induces such a derivation on the algebra <img src="https://latex.codecogs.com/png.latex?C%5E%5Cinfty_p"> by a map <img src="https://latex.codecogs.com/png.latex?%5Cphi:%20v%20%5Cmapsto%20D_v">. The question is: <strong>Does every derivation necessarily induced by a vector?</strong></p>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Vectors are Derivations
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="thm-iso" class="callout-thm theorem">
-<p><span class="theorem-title"><strong>Theorem 1</strong></span> The space of all vectors emanating at <img src="https://latex.codecogs.com/png.latex?p"> is isomorphic to the space of all derivations <img src="https://latex.codecogs.com/png.latex?%0AT_p%20(%5Cmathbb%7BR%7D%5En)%20%5Ccong%20%5Ctext%7BDer%7D_p%20(C%5E%5Cinfty(%5Cmathbb%7BR%7D%5En)).%0A"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<p>In other words, every possible derivations on the algebra <img src="https://latex.codecogs.com/png.latex?C%5E%5Cinfty(%5Cmathbb%7BR%7D%5En)"> is some directional derivative along <img src="https://latex.codecogs.com/png.latex?v%20%5Cin%20T_p%20(%5Cmathbb%7BR%7D%5En)">. Under this isomorphism, the basis vectors <img src="https://latex.codecogs.com/png.latex?e_i"> is mapped to the partial derivative operator <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%20%7D%7B%5Cpartial%20x%5Ei%7D">!</p>
-<p>In a general manifold <img src="https://latex.codecogs.com/png.latex?M">, we actually use derivations to <em>define</em> <strong><em>tangent vectors</em></strong> on a manifold<sup>4</sup>. Because the concept of <em>derivations</em> are just functions that satisfy certain property, which is easy to define. While <em>vectors</em> seem exclusively belongs to Euclidean space. So :</p>
-<!-- ----------------------------------------- -->
-<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;<a href="https://www.amazon.sg/Introduction-Manifolds-Loring-W-Tu/dp/1441973990">Tu’s book</a> is a very good book of differential geometry for beginners, check it out!</p></div></div><div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Tangent Vector in a manifold
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-tangent" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 2</strong></span> A tangent vector at a point <img src="https://latex.codecogs.com/png.latex?p"> in a manifold <img src="https://latex.codecogs.com/png.latex?M"> is a derivation at <img src="https://latex.codecogs.com/png.latex?p">.</p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<p>This is common in mathematics. We call this “stereotyping”, ah sorry, “abstraction”. We find two similar concepts (e.g.&nbsp;vectors and directional derivatives) on some object (euclidean space). But one of them (directional derivative) can be easily generalized to another objects (“manifold”). So then Mathematicians use some of its properties back to <em>define</em> itself axiomatically and called it the same name just to confuse people (“tangent vectors”)<sup>5</sup>. Or invent another name (e.g.&nbsp;topological space) just to be intimidating. Anyway, you will feel comfortable once you get used to them.</p>
-
-
-<div class="no-row-height column-margin column-container"><div id="fn5"><p><sup>5</sup>&nbsp;Other examples include <em>topological spaces</em>, <em>groups</em>, <em><img src="https://latex.codecogs.com/png.latex?%5Csigma">-algebra</em>, “<em>measurable spaces</em>”, etc. These are just abstraction of open sets, closed stuff, events, volumes, etc.</p></div></div></section>
-</section>
-
-
- ]]></description>
-  <category>Differential-Geometry</category>
-  <category>EN-blogs</category>
-  <guid>https://marcobisky.github.io/posts/vector-derivation-relation/</guid>
-  <pubDate>Mon, 03 Mar 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://marcobisky.github.io/posts/vector-derivation-relation/cover.png" medium="image" type="image/png" height="84" width="144"/>
-</item>
-<item>
-  <title>What is symmetry? 什么是对称性?</title>
-  <dc:creator>Marcobisky </dc:creator>
-  <link>https://marcobisky.github.io/posts/symmetry/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="sec-sec1" class="level2 page-columns page-full" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="sec-sec1"><span class="header-section-number">1</span> Discover Symmetry</h2>
-<p>You may have noticed these concepts:</p>
-<section id="additive-evenodd-functions" class="level3 page-columns page-full" data-number="1.1">
-<h3 data-number="1.1" class="anchored" data-anchor-id="additive-evenodd-functions"><span class="header-section-number">1.1</span> (Additive) Even/Odd Functions</h3>
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Even/odd complex-valued function
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-complex" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 1</strong></span> A function <img src="https://latex.codecogs.com/png.latex?f:%20%5Cmathbb%7BR%7D%5En%20%5Cto%20%5Cmathbb%7BC%7D"> is called</p>
-<ul>
-<li><strong><em>conjugate symmetric</em></strong> <img src="https://latex.codecogs.com/png.latex?:%5Ciff%20f(-%5Cmathbf%7Bv%7D)%20=%20%5Coverline%7Bf(%5Cmathbf%7Bv%7D)%7D,%20%5Cforall%20%5Cmathbf%7Bv%7D%20%5Cin%20%5Cmathbb%7BR%7D%5En">,</li>
-<li><strong><em>conjugate anti-symmetric</em></strong> <img src="https://latex.codecogs.com/png.latex?:%5Ciff%20-f(-%5Cmathbf%7Bv%7D)%20=%20%5Coverline%7Bf(%5Cmathbf%7Bv%7D)%7D,%20%5Cforall%20%5Cmathbf%7Bv%7D%20%5Cin%20%5Cmathbb%7BR%7D%5En"></li>
-</ul>
-</div>
-</div>
-</div>
-<div id="note-special" class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Special cases of Definition&nbsp;1
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Even/odd real function
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-real" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 2</strong></span> A function <img src="https://latex.codecogs.com/png.latex?f:%20%5Cmathbb%7BR%7D%20%5Cto%20%5Cmathbb%7BR%7D"> is called</p>
-<ul>
-<li><strong><em>even</em></strong> <img src="https://latex.codecogs.com/png.latex?:%5Ciff%20f(-x)%20=%20f(x),%20%5Cforall%20x%20%5Cin%20%5Cmathbb%7BR%7D">,</li>
-<li><strong><em>odd</em></strong> <img src="https://latex.codecogs.com/png.latex?:%5Ciff%20-f(-x)%20=%20f(x),%20%5Cforall%20x%20%5Cin%20%5Cmathbb%7BR%7D"></li>
-</ul>
-</div>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Even/odd multivariate real function
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-realMulti" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 3</strong></span> A function <img src="https://latex.codecogs.com/png.latex?f:%20%5Cmathbb%7BR%7D%5En%20%5Cto%20%5Cmathbb%7BR%7D"> is called</p>
-<ul>
-<li><strong><em>even</em></strong> <img src="https://latex.codecogs.com/png.latex?:%5Ciff%20f(-%5Cmathbf%7Bv%7D)%20=%20f(%5Cmathbf%7Bv%7D),%20%5Cforall%20%5Cmathbf%7Bv%7D%20%5Cin%20%5Cmathbb%7BR%7D%5En">,</li>
-<li><strong><em>odd</em></strong> <img src="https://latex.codecogs.com/png.latex?:%5Ciff%20-f(-%5Cmathbf%7Bv%7D)%20=%20f(%5Cmathbf%7Bv%7D),%20%5Cforall%20%5Cmathbf%7Bv%7D%20%5Cin%20%5Cmathbb%7BR%7D%5En"></li>
-</ul>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Decomposition Property
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="thm-Decom" class="callout-thm theorem">
-<p><span class="theorem-title"><strong>Theorem 1</strong></span> Any function <img src="https://latex.codecogs.com/png.latex?f:%20%5Cmathbb%7BR%7D%5En%20%5Cto%20%5Cmathbb%7BC%7D"> can be decomposed<sup>1</sup> into a symmetric part <img src="https://latex.codecogs.com/png.latex?Sf"> and a anti-symmetric part <img src="https://latex.codecogs.com/png.latex?Af">: <img src="https://latex.codecogs.com/png.latex?%0Af%20=%20%5Cfrac%7BSf%20+%20Af%7D%7B2%7D,%0A"> <img src="https://latex.codecogs.com/png.latex?%0ASf%20:=%20f(%5Cmathbf%7Bv%7D)+%5Coverline%7Bf(-%5Cmathbf%7Bv%7D)%7D,%0A"> <img src="https://latex.codecogs.com/png.latex?%0AAf%20:=%20f(%5Cmathbf%7Bv%7D)-%5Coverline%7Bf(-%5Cmathbf%7Bv%7D)%7D.%0A"></p>
-<p>In fancier language, <img src="https://latex.codecogs.com/png.latex?%0A%5Cmathbb%7BC%7D%5E%7B%5Cmathbb%7BR%7D%5En%7D%20=%20S%5Cmathbb%7BC%7D%5E%7B%5Cmathbb%7BR%7D%5En%7D%20%5Coplus%20A%5Cmathbb%7BC%7D%5E%7B%5Cmathbb%7BR%7D%5En%7D.%0A"></p>
-</div>
-</div>
-</div>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;The reason why I do NOT define <img src="https://latex.codecogs.com/png.latex?Sf%20=%20(f(%5Cmathbf%7Bv%7D)+%5Coverline%7Bf(-%5Cmathbf%7Bv%7D)%7D)/2"> will be clear later.</p></div></div><div id="note-specialthm" class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>As a special case of Theorem&nbsp;1, any function <img src="https://latex.codecogs.com/png.latex?f:%20%5Cmathbb%7BR%7D%20%5Cto%20%5Cmathbb%7BR%7D"> is a sum of an even and an odd function: <img src="https://latex.codecogs.com/png.latex?%0Af%20=%20%5Cfrac%7B(f(x)%20+%20f(-x))+(f(x)%20-%20f(-x))%7D%7B2%7D.%0A"></p>
-</div>
-</div>
-</section>
-<section id="multiplicative-evenodd-functions" class="level3 page-columns page-full" data-number="1.2">
-<h3 data-number="1.2" class="anchored" data-anchor-id="multiplicative-evenodd-functions"><span class="header-section-number">1.2</span> (Multiplicative) Even/Odd Functions</h3>
-<p>There are also multiplicative version of Definition&nbsp;1 and Theorem&nbsp;1:</p>
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Multiplicative version of Definition&nbsp;1
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-complexMul" class="theorem definition">
-<p><span class="theorem-title"><strong>Definition 4</strong></span> A function <img src="https://latex.codecogs.com/png.latex?f:%20(%5Cmathbb%7BR%7D%5E%7B%5Ctimes%7D)%5En%20%5Cto%20%5Cmathbb%7BC%7D"> is called<sup>2</sup></p>
-<ul>
-<li><p><strong><em>Multiplicative conjugate symmetric</em></strong> <img src="https://latex.codecogs.com/png.latex?:%5Ciff%20f(%5Cfrac%7B1%7D%7B%5Cmathbf%7Bv%7D%7D)%20=%20%5Coverline%7Bf(%5Cmathbf%7Bv%7D)%7D,%20%5Cforall%20%5Cmathbf%7Bv%7D%20%5Cin%20%5Cmathbb%7BR%7D%5En">,</p></li>
-<li><p><strong><em>conjugate anti-symmetric</em></strong> <img src="https://latex.codecogs.com/png.latex?:%5Ciff%20%5Cfrac%7B1%7D%7Bf(%5Cfrac%7B1%7D%7B%5Cmathbf%7Bv%7D%7D)%7D%20=%20%5Coverline%7Bf(%5Cmathbf%7Bv%7D)%7D,%20%5Cforall%20%5Cmathbf%7Bv%7D%20%5Cin%20%5Cmathbb%7BR%7D%5En,"></p></li>
-</ul>
-<p>where <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B1%7D%7B%5Cmathbf%7Bv%7D%7D"> is another vector in <img src="https://latex.codecogs.com/png.latex?(%5Cmathbb%7BR%7D%5E%7B%5Ctimes%7D)%5En"> whose components are the reciprocal of those of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bv%7D">.</p>
-</div>
-</div>
-</div>
-<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;<img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5E%7B%5Ctimes%7D%20:=%20%5Cmathbb%7BR%7D%20%5Cbackslash%20%5C%7B0%5C%7D">.</p></div></div><div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Multiplicative version of Decomposition Property
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="thm-DecomMul" class="callout-thm theorem">
-<p><span class="theorem-title"><strong>Theorem 2</strong></span> Any function <img src="https://latex.codecogs.com/png.latex?f:%20(%5Cmathbb%7BR%7D%5E%7B%5Ctimes%7D)%5En%20%5Cto%20%5Cmathbb%7BC%7D"> can be decomposed into a symmetric part <img src="https://latex.codecogs.com/png.latex?S%5E%7B%5Cbullet%7Df"> and a anti-symmetric part <img src="https://latex.codecogs.com/png.latex?A%5E%7B%5Cbullet%7Df">: <img src="https://latex.codecogs.com/png.latex?%0Af%20=%20%5Csqrt%7BS%5E%7B%5Cbullet%7Df%20%5Ccdot%20A%5E%7B%5Cbullet%7Df%7D,%0A"> <img src="https://latex.codecogs.com/png.latex?%0AS%5E%7B%5Cbullet%7Df%20:=%20f(%5Cmathbf%7Bv%7D)%20%5Ccdot%20%5Coverline%7Bf(%5Cmathbf%7Bv%7D%5E%7B-1%7D)%7D,%0A"> <img src="https://latex.codecogs.com/png.latex?%0AA%5E%7B%5Cbullet%7Df%20:=%20%5Cfrac%7Bf(%5Cmathbf%7Bv%7D)%7D%7B%5Coverline%7Bf(%5Cmathbf%7Bv%7D%5E%7B-1%7D)%7D%7D.%0A"></p>
-</div>
-</div>
-</div>
-</section>
-<section id="symmetricalternating-tensor" class="level3 page-columns page-full" data-number="1.3">
-<h3 data-number="1.3" class="anchored" data-anchor-id="symmetricalternating-tensor"><span class="header-section-number">1.3</span> Symmetric/Alternating Tensor</h3>
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Symmetric/Alternating Tensor
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-symtensor" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 5</strong></span> A symmetric rank-<img src="https://latex.codecogs.com/png.latex?k"> tensor <img src="https://latex.codecogs.com/png.latex?f:%20V%5Ek%20%5Cto%20%5Cmathbb%7BR%7D"> is <strong><em>symmetric</em></strong> iff <img src="https://latex.codecogs.com/png.latex?%0Af(v_%7B%5Csigma(1)%7D,%20%5Cdots,%20v_%7B%5Csigma(k)%7D)%20=%20f(v_1,%20%5Cdots,%20v_k)%0A"> for all permutations <img src="https://latex.codecogs.com/png.latex?%5Csigma%20%5Cin%20S_k">.</p>
-<p>It is <strong><em>alternating</em></strong> iff <img src="https://latex.codecogs.com/png.latex?%0Af(v_%7B%5Csigma(1)%7D,%20%5Cdots,%20v_%7B%5Csigma(k)%7D)%20=%20(%5Coperatorname%7Bsgn%7D%20%5Csigma)%20f(v_1,%20%5Cdots,%20v_k)%0A"> for all permutations <img src="https://latex.codecogs.com/png.latex?%5Csigma%20%5Cin%20S_k">.</p>
-</div>
-</div>
-</div>
-<p>Though generally we cannot decompose an arbitrary tensor into a symmetric and alternating part, we could build them by introducing two operators:</p>
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Symmetric/Alternating Operator for Tensors
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-symop" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 6</strong></span> Given <img src="https://latex.codecogs.com/png.latex?%5Cforall%20f:%20V%5Ek%20%5Cto%20%5Cmathbb%7BR%7D">, the operator <img src="https://latex.codecogs.com/png.latex?S"> and <img src="https://latex.codecogs.com/png.latex?A"> defined below always give a symmetric and alternating tensor<sup>3</sup>: <img src="https://latex.codecogs.com/png.latex?%0ASf%20:=%20%5Csum_%7B%5Csigma%20%5Cin%20S_k%7D%20%5Csigma%20f,%0A"> <img src="https://latex.codecogs.com/png.latex?%0AAf%20:=%20%5Csum_%7B%5Csigma%20%5Cin%20S_k%7D%20%5Coperatorname%7Bsgn%7D(%5Csigma)%20%5Csigma%20f.%0A"></p>
-</div>
-</div>
-</div>
-<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;<img src="https://latex.codecogs.com/png.latex?%5Csigma%20f"> is defined by <img src="https://latex.codecogs.com/png.latex?(%5Csigma%20f)(v_1,%20v_2,%20%5Cldots,%20v_k)%20:=%20f(v_%7B%5Csigma(1)%7D,%20v_%7B%5Csigma(2)%7D,%20%5Cldots,%20v_%7B%5Csigma(k)%7D)."></p></div></div></section>
-<section id="matrix" class="level3" data-number="1.4">
-<h3 data-number="1.4" class="anchored" data-anchor-id="matrix"><span class="header-section-number">1.4</span> Matrix</h3>
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Self-adjoint and Skew-adjoint Matrices
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-adjoint" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 7</strong></span> A linear operator <img src="https://latex.codecogs.com/png.latex?%5Cphi%20%5Cin%20%5Coperatorname%7BHom%7D(V)"> is called <strong><em>self-adjoint</em></strong> iff <img src="https://latex.codecogs.com/png.latex?%0A%5Cphi%5EH%20=%20%5Cphi,%0A"> and <strong><em>skew-adjoint</em></strong> iff <img src="https://latex.codecogs.com/png.latex?%0A%5Cphi%5EH%20=%20-%5Cphi.%0A"></p>
-</div>
-</div>
-</div>
-</section>
-</section>
-<section id="symmetry-as-group-action" class="level2 page-columns page-full" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="symmetry-as-group-action"><span class="header-section-number">2</span> Symmetry as Group Action</h2>
-<section id="problem" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="problem"><span class="header-section-number">2.1</span> Problem</h3>
-<p>Is there any way to unify these seemingly “symmetric” concepts? What kind of mathematical object can be symmetrize and and alternate? When does the object itself expressible by only its symmetrized and and alternated ones?</p>
-</section>
-<section id="important-observation" class="level3 page-columns page-full" data-number="2.2">
-<h3 data-number="2.2" class="anchored" data-anchor-id="important-observation"><span class="header-section-number">2.2</span> Important Observation</h3>
-<p>The common thing of the above examples in Section&nbsp;1 is that the domain of the objects (functions, tensors, matrices<sup>4</sup>) could be manipulated by some kind of actions:</p>
-<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;This is left as an exercise.</p></div></div><ul>
-<li><img src="https://latex.codecogs.com/png.latex?f:%20%5Cmathbb%7BR%7D%5En%20%5Cto%20%5Cmathbb%7BC%7D">: additive inversion,</li>
-<li><img src="https://latex.codecogs.com/png.latex?f:%20(%5Cmathbb%7BR%7D%5E%7B%5Ctimes%7D)%5En%20%5Cto%20%5Cmathbb%7BC%7D">: multiplicative inversion,</li>
-<li><img src="https://latex.codecogs.com/png.latex?f:%20V%5Ek%20%5Cto%20%5Cmathbb%7BR%7D">: permutation.</li>
-</ul>
-<p>The first two can be viewed as the 2-element <em>group</em> <img src="https://latex.codecogs.com/png.latex?S_2"> <em>acts</em> on the domain of <img src="https://latex.codecogs.com/png.latex?f">, where <img src="https://latex.codecogs.com/png.latex?S_2"> is the group generated by the operation of “taking inverse”: <img src="https://latex.codecogs.com/png.latex?%0AS_2%20:=%20%5Clangle%5Ccdot%5E%7B-1%7D%5Crangle%20=%20%5C%7Be,%20%5Ccdot%5E%7B-1%7D%5C%7D,%0A"> or equivalently, the <a href="https://en.wikipedia.org/wiki/Permutation_group">permutation group</a> on two letters: <img src="https://latex.codecogs.com/png.latex?%0AS_2%20=%20%5C%7Be,%20(12)%5C%7D.%0A"></p>
-<p>Therefore, in the first two cases, we could define a <img src="https://latex.codecogs.com/png.latex?S_2">-action: <img src="https://latex.codecogs.com/png.latex?%0A(%5Csigma%20f)(%5Cmathbf%7Bv%7D)%20:=%20%5Coverline%7Bf(%5Cmathbf%7Bv%7D%5E%7B-1%7D)%7D,%0A"> where <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7Bv%7D%5E%7B-1%7D"> is either <img src="https://latex.codecogs.com/png.latex?-%5Cmathbf%7Bv%7D"> (additive inverse) or <img src="https://latex.codecogs.com/png.latex?1/%5Cmathbf%7Bv%7D"> (multiplicative inverse).</p>
-<p>Therefore, the definition of the operator <img src="https://latex.codecogs.com/png.latex?S"> and <img src="https://latex.codecogs.com/png.latex?A"> in Definition&nbsp;6 also applies for the first two cases: <img src="https://latex.codecogs.com/png.latex?%0ASf%0A:=%20%5Csum_%7B%5Csigma%20%5Cin%20S_2%7D%20%5Csigma%20f%0A=%20f(%5Cmathbf%7Bv%7D)%20+%20%5Coverline%7Bf(-%5Cmathbf%7Bv%7D)%7D%20%5Cquad%20(%5Ctext%7Bor%20%7D%20f(%5Cmathbf%7Bv%7D)%5Ccdot%20%5Coverline%7Bf(-%5Cmathbf%7Bv%7D)%7D),%0A"> <img src="https://latex.codecogs.com/png.latex?%0AAf%0A:=%20%5Csum_%7B%5Csigma%20%5Cin%20S_k%7D%20%5Coperatorname%7Bsgn%7D(%5Csigma)%20%5Csigma%20f%0A=%20f(%5Cmathbf%7Bv%7D)%20-%20%5Coverline%7Bf(-%5Cmathbf%7Bv%7D)%7D%20%5Cquad%20(%5Ctext%7Bor%20%7D%20%5Cfrac%7Bf(%5Cmathbf%7Bv%7D)%7D%7B%5Coverline%7Bf(%5Cmathbf%7Bv%7D%5E%7B-1%7D)%7D%7D).%0A"></p>
-</section>
-<section id="when-decomposable" class="level3" data-number="2.3">
-<h3 data-number="2.3" class="anchored" data-anchor-id="when-decomposable"><span class="header-section-number">2.3</span> When Decomposable?</h3>
-<p>In the first two cases, <img src="https://latex.codecogs.com/png.latex?f"> can be expressed purely by <img src="https://latex.codecogs.com/png.latex?Sf"> and <img src="https://latex.codecogs.com/png.latex?Af">: <img src="https://latex.codecogs.com/png.latex?%0Af%20=%20%5Cfrac%7BSf%20+%20Af%7D%7B2%7D%20%5Cquad%20(%5Ctext%7Bor%20%7D%20%5Csqrt%7BSf%20%5Ccdot%20Af%7D),%0A"> which is just the <em>average</em> of them! (Arithmetic average and geometric average respectively)</p>
-<p>But we don’t have this relationship for tensors, i.e., not every rank <img src="https://latex.codecogs.com/png.latex?k"> tensor can be purely expressed using <img src="https://latex.codecogs.com/png.latex?Sf"> and <img src="https://latex.codecogs.com/png.latex?Af"> – apart from the case when <img src="https://latex.codecogs.com/png.latex?k%20=%202">: <img src="https://latex.codecogs.com/png.latex?%0Af(v_1,%20v_2)%20=%20%5Cfrac%7B(f(v_1,%20v_2)+f(v_2,%20v_1))+(f(v_1,%20v_2)-f(v_2,%20v_1))%7D%7B2%7D%20=%20%5Cfrac%7BSf%20+%20Af%7D%7B2%7D.%0A"></p>
-<p>What happened when <img src="https://latex.codecogs.com/png.latex?k%20%5Cge%203">?</p>
-<p>Let <img src="https://latex.codecogs.com/png.latex?f:%20V%5E3%20%5Cto%20%5Cmathbb%7BR%7D">, we have <img src="https://latex.codecogs.com/png.latex?%0ASf%20=%20f(v_1,%20v_2,%20v_3)%20+%20f(v_2,%20v_3,%20v_1)%20+%20f(v_3,%20v_1,%20v_2)%20+%20f(v_2,%20v_1,%20v_3)%20+%20f(v_1,%20v_3,%20v_2)%20+%20f(v_3,%20v_2,%20v_1),%0A"> <img src="https://latex.codecogs.com/png.latex?%0AAf%20=%20f(v_1,%20v_2,%20v_3)%20+%20f(v_2,%20v_3,%20v_1)%20+%20f(v_3,%20v_1,%20v_2)%20-%20f(v_2,%20v_1,%20v_3)%20-%20f(v_1,%20v_3,%20v_2)%20-%20f(v_3,%20v_2,%20v_1).%0A"></p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/symmetry/visual-group-action.png" class="img-fluid figure-img"></p>
-<figcaption>Visualize group action</figcaption>
-</figure>
-</div>
-<p>The result <img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7BSf%20+%20Af%7D%7B2%7D%20=%20f(v_1,%20v_2,%20v_3)%20+%20f(v_2,%20v_3,%20v_1)%20+%20f(v_3,%20v_1,%20v_2)%20=%20%5Csum_%7B%5Csigma%20%5Cin%20A_3%7D%20%5Csigma%20f%20%5Cneq%20f,%0A"> where <img src="https://latex.codecogs.com/png.latex?A_3"> is the <a href="https://en.wikipedia.org/wiki/Alternating_group">alternating group</a> (the group of even permutations) on three letters.</p>
-</section>
-<section id="try-yourself" class="level3" data-number="2.4">
-<h3 data-number="2.4" class="anchored" data-anchor-id="try-yourself"><span class="header-section-number">2.4</span> Try Yourself!</h3>
-<div id="exr-try" class="callout-exr theorem exercise">
-<p><span class="theorem-title"><strong>Exercise 1 (<img src="https://latex.codecogs.com/png.latex?S"> and <img src="https://latex.codecogs.com/png.latex?A"> operator for matrices <img src="https://latex.codecogs.com/png.latex?%5Cphi">)</strong></span> Let <img src="https://latex.codecogs.com/png.latex?%5Cphi%20%5Cin%20%5Coperatorname%7BEnd%7D%20(%5Cmathbb%7BC%7D%5En)">, derive the definition of <img src="https://latex.codecogs.com/png.latex?S%5Cphi"> and <img src="https://latex.codecogs.com/png.latex?A%20%5Cphi">.</p>
-</div>
-<div class="callout callout-style-default callout-warning no-icon callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-12-contents" aria-controls="callout-12" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Solution
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-12" class="callout-12-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p><img src="https://latex.codecogs.com/png.latex?%0AS%20%5Cphi%20:=%20%5Cfrac%7B%5Cphi%20+%20%5Cphi%5EH%7D%7B2%7D,%0A"> <img src="https://latex.codecogs.com/png.latex?%0AA%20%5Cphi%20:=%20%5Cfrac%7B%5Cphi%20-%20%5Cphi%5EH%7D%7B2%7D.%0A"></p>
-<p>We also have <img src="https://latex.codecogs.com/png.latex?%0A%5Cphi%20=%20%5Cfrac%7BS%20%5Cphi%20+%20A%20%5Cphi%7D%7B2%7D.%0A"></p>
-</div>
-</div>
-</div>
-
-
-</section>
-</section>
-
-
- ]]></description>
-  <category>Algebra</category>
-  <category>EN-blogs</category>
-  <guid>https://marcobisky.github.io/posts/symmetry/</guid>
-  <pubDate>Sun, 02 Mar 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://marcobisky.github.io/posts/symmetry/cover.png" medium="image" type="image/png" height="151" width="144"/>
-</item>
-<item>
-  <title>JK Flip-flop not Behavioral (VHDL version)</title>
-  <dc:creator>Marcobisky </dc:creator>
-  <link>https://marcobisky.github.io/posts/jk-ff/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="intro" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="intro"><span class="header-section-number">1</span> Intro</h2>
-<p>Most online VHDL descriptions of JK flip-flops (FF) are based on “processes” or circuit functionality (behavioral). Is it possible to simulate them only by constructing the circuit structure of the JK flip-flop?</p>
-</section>
-<section id="jk-ff-review" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="jk-ff-review"><span class="header-section-number">2</span> JK FF Review</h2>
-<p>The circuit structure is JK FF is very familiar to everybody, which is: <img src="https://marcobisky.github.io/posts/jk-ff/JK_struct.png" class="img-fluid"></p>
-<p>The corresponding truth table is shown below:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>C</th>
-<th>J</th>
-<th>K</th>
-<th>Q</th>
-<th>Q̅</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>↑</td>
-<td>0</td>
-<td>0</td>
-<td>latch</td>
-<td>latch</td>
-</tr>
-<tr class="even">
-<td>↑</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-</tr>
-<tr class="odd">
-<td>↑</td>
-<td>1</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr class="even">
-<td>↑</td>
-<td>1</td>
-<td>1</td>
-<td>toggle</td>
-<td>toggle</td>
-</tr>
-<tr class="odd">
-<td>x</td>
-<td>0</td>
-<td>0</td>
-<td>latch</td>
-<td>latch</td>
-</tr>
-<tr class="even">
-<td>x</td>
-<td>0</td>
-<td>1</td>
-<td>latch</td>
-<td>latch</td>
-</tr>
-<tr class="odd">
-<td>x</td>
-<td>1</td>
-<td>0</td>
-<td>latch</td>
-<td>latch</td>
-</tr>
-<tr class="even">
-<td>x</td>
-<td>1</td>
-<td>1</td>
-<td>latch</td>
-<td>latch</td>
-</tr>
-</tbody>
-</table>
-<p>where “latch” represent the <code>Q</code> output remembers whatever the last stored value was. “Toggle” means to flip <code>Q</code>, i.e.&nbsp;0 -&gt; 1, 1 -&gt; 0. “↑” means the clock signal in a leading edge.</p>
-</section>
-<section id="problem" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="problem"><span class="header-section-number">3</span> Problem</h2>
-<section id="first-try" class="level3" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="first-try"><span class="header-section-number">3.1</span> First try</h3>
-<p>Write the following content in <code>JKFF.vhdl</code>:</p>
-<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode vhdl code-with-copy"><code class="sourceCode vhdl"><span id="cb1-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">library</span> IEEE;</span>
-<span id="cb1-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">use</span> IEEE<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span>STD_LOGIC_1164<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">ALL</span>;</span>
-<span id="cb1-3"></span>
-<span id="cb1-4"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">entity</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">JKFF_nodelay</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">is</span></span>
-<span id="cb1-5">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">Port</span> (</span>
-<span id="cb1-6">        J <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;     <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- J input</span></span>
-<span id="cb1-7">        K <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;     <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- K input</span></span>
-<span id="cb1-8">        clk <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;   <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Clock input</span></span>
-<span id="cb1-9">        Q <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">out</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Output Q</span></span>
-<span id="cb1-10">        QN <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">out</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Output QN (complement of Q)</span></span>
-<span id="cb1-11">    );</span>
-<span id="cb1-12"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">end JKFF_nodelay;</span></span>
-<span id="cb1-13"></span>
-<span id="cb1-14"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">architecture</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Structural</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">of</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">JKFF_nodelay</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">is</span></span>
-<span id="cb1-15">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Internal signals for latch and clock gating</span></span>
-<span id="cb1-16">    <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">signal</span> S<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span> R <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Set and Reset inputs for the latch</span></span>
-<span id="cb1-17">    <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">signal</span> Q_int<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span> QN_int <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span> <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>; <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Internal Q and QN for feedback</span></span>
-<span id="cb1-18"></span>
-<span id="cb1-19"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">begin</span></span>
-<span id="cb1-20">    S <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> (J <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">and</span> clk) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">and</span> QN_int;</span>
-<span id="cb1-21">    R <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> (K <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">and</span> clk) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">and</span> Q_int;</span>
-<span id="cb1-22"></span>
-<span id="cb1-23">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- NOR gate-based latch</span></span>
-<span id="cb1-24">    Q_int <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">not</span> (R <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">or</span> QN_int);</span>
-<span id="cb1-25">    QN_int <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">not</span> (S <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">or</span> Q_int);</span>
-<span id="cb1-26"></span>
-<span id="cb1-27">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Outputs</span></span>
-<span id="cb1-28">    Q <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> Q_int;    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Main output</span></span>
-<span id="cb1-29">    QN <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> QN_int;  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Complementary output</span></span>
-<span id="cb1-30"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">end Structural;</span></span></code></pre></div>
-<p>Then write a testbench file to test the behavior of this circuit, you will find it will not work well.</p>
-</section>
-<section id="reason" class="level3" data-number="3.2">
-<h3 data-number="3.2" class="anchored" data-anchor-id="reason"><span class="header-section-number">3.2</span> Reason</h3>
-<p>The reason (probably, only personal view) is that JK FF have two layers of feedback (instead of SR FF, which just have one), since we loop our output <code>Q</code> not only to the NOR gates, but also AND to our initial inputs J and K. This confuse the compiler because the resultant signal changes so fast and maybe not have a stable consequence, so the compiler do not know how to respond to this kind of feedback.</p>
-<p>So we introduce some delay in the gates to simulate the reality closer.</p>
-</section>
-</section>
-<section id="solution" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="solution"><span class="header-section-number">4</span> Solution</h2>
-<section id="adding-delay-in-the-gates" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="adding-delay-in-the-gates"><span class="header-section-number">4.1</span> Adding delay in the gates</h3>
-<p>We write the following content in another file <code>JKFF.vhdl</code>:</p>
-<div class="sourceCode" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode vhdl code-with-copy"><code class="sourceCode vhdl"><span id="cb2-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">library</span> IEEE;</span>
-<span id="cb2-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">use</span> IEEE<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span>STD_LOGIC_1164<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">ALL</span>;</span>
-<span id="cb2-3"></span>
-<span id="cb2-4"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">entity</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">JKFF</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">is</span></span>
-<span id="cb2-5">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">Port</span> (</span>
-<span id="cb2-6">        J <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;     <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- J input</span></span>
-<span id="cb2-7">        K <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;     <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- K input</span></span>
-<span id="cb2-8">        clk <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;   <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Clock input</span></span>
-<span id="cb2-9">        Q <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">out</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Output Q</span></span>
-<span id="cb2-10">        QN <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">out</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Output QN (complement of Q)</span></span>
-<span id="cb2-11">    );</span>
-<span id="cb2-12"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">end JKFF;</span></span>
-<span id="cb2-13"></span>
-<span id="cb2-14"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">architecture</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Structural</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">of</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">JKFF</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">is</span></span>
-<span id="cb2-15">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Internal signals for latch and clock gating</span></span>
-<span id="cb2-16">    <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">signal</span> S<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span> R <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Set and Reset inputs for the latch</span></span>
-<span id="cb2-17">    <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">signal</span> Q_int<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span> QN_int <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span> <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>; <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Internal Q and QN for feedback</span></span>
-<span id="cb2-18"></span>
-<span id="cb2-19"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">begin</span></span>
-<span id="cb2-20">    S <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> (J <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">and</span> clk) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">and</span> QN_int <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">after</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>;</span>
-<span id="cb2-21">    R <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> (K <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">and</span> clk) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">and</span> Q_int <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">after</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>;</span>
-<span id="cb2-22"></span>
-<span id="cb2-23">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- NOR gate-based latch</span></span>
-<span id="cb2-24">    Q_int <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">not</span> (R <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">or</span> QN_int) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">after</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>;</span>
-<span id="cb2-25">    QN_int <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">not</span> (S <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">or</span> Q_int) <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">after</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>;</span>
-<span id="cb2-26"></span>
-<span id="cb2-27">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Outputs</span></span>
-<span id="cb2-28">    Q <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> Q_int;    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Main output</span></span>
-<span id="cb2-29">    QN <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> QN_int;  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Complementary output</span></span>
-<span id="cb2-30"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">end Structural;</span></span></code></pre></div>
-<p>And run the following <code>JKFF_tb.vhdl</code>:</p>
-<div class="sourceCode" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode vhdl code-with-copy"><code class="sourceCode vhdl"><span id="cb3-1"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">library</span> IEEE;</span>
-<span id="cb3-2"><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">use</span> IEEE<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span>STD_LOGIC_1164<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">.</span><span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">ALL</span>;</span>
-<span id="cb3-3"></span>
-<span id="cb3-4"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">entity</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">JKFF_tb</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">is</span></span>
-<span id="cb3-5"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- No ports for testbench</span></span>
-<span id="cb3-6"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">end JKFF_tb;</span></span>
-<span id="cb3-7"></span>
-<span id="cb3-8"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">architecture</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">Behavioral</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">of</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">JKFF_tb</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">is</span></span>
-<span id="cb3-9">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Component declaration</span></span>
-<span id="cb3-10">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">component</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">JKFF</span></span>
-<span id="cb3-11">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">Port</span> (</span>
-<span id="cb3-12">            J <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;</span>
-<span id="cb3-13">            K <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;</span>
-<span id="cb3-14">            clk <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;</span>
-<span id="cb3-15">            Q <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">out</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;</span>
-<span id="cb3-16">            QN <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">out</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span></span>
-<span id="cb3-17">        );</span>
-<span id="cb3-18">    <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">end component;</span></span>
-<span id="cb3-19"></span>
-<span id="cb3-20">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Signals to connect to the JKFF</span></span>
-<span id="cb3-21">    <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">signal</span> J<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span> K<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span> clk <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span> <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>;</span>
-<span id="cb3-22">    <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">signal</span> Q<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span> QN <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span>;</span>
-<span id="cb3-23"></span>
-<span id="cb3-24"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">begin</span></span>
-<span id="cb3-25">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Instantiate the JK Flip-Flop</span></span>
-<span id="cb3-26">    <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">uut</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">JKFF</span></span>
-<span id="cb3-27">        <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">Port Map </span>(</span>
-<span id="cb3-28">            J <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=&gt;</span> J<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span></span>
-<span id="cb3-29">            K <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=&gt;</span> K<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span></span>
-<span id="cb3-30">            clk <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=&gt;</span> clk<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span></span>
-<span id="cb3-31">            Q <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=&gt;</span> Q<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span></span>
-<span id="cb3-32">            QN <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">=&gt;</span> QN</span>
-<span id="cb3-33">        );</span>
-<span id="cb3-34"></span>
-<span id="cb3-35">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Clock generation process</span></span>
-<span id="cb3-36">    <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">clk_gen</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">process</span></span>
-<span id="cb3-37">    <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">begin</span></span>
-<span id="cb3-38">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span> <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">to</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">9</span> <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">loop</span> <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Generate 10 clock cycles</span></span>
-<span id="cb3-39">            clk <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>;</span>
-<span id="cb3-40">            <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">wait</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">9</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>; <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Low for 5 ns</span></span>
-<span id="cb3-41">            clk <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'1'</span>;</span>
-<span id="cb3-42">            <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">wait</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>; <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- High for 5 ns</span></span>
-<span id="cb3-43">        <span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">end loop;</span></span>
-<span id="cb3-44">        <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">wait</span>; <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- End simulation after clock finishes</span></span>
-<span id="cb3-45">    <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">end process;</span></span>
-<span id="cb3-46"></span>
-<span id="cb3-47">    <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Stimulus process to apply test cases</span></span>
-<span id="cb3-48">    <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">stimulus</span><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">process</span></span>
-<span id="cb3-49">    <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">begin</span></span>
-<span id="cb3-50">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Test Case 1: Hold state (J = 0, K = 0)</span></span>
-<span id="cb3-51">        J <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>; K <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>;</span>
-<span id="cb3-52">        <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">wait</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>;</span>
-<span id="cb3-53"></span>
-<span id="cb3-54">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Test Case 2: Set state (J = 1, K = 0)</span></span>
-<span id="cb3-55">        J <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'1'</span>; K <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>;</span>
-<span id="cb3-56">        <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">wait</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>;</span>
-<span id="cb3-57"></span>
-<span id="cb3-58">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Test Case 3: Reset state (J = 0, K = 1)</span></span>
-<span id="cb3-59">        J <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>; K <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'1'</span>;</span>
-<span id="cb3-60">        <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">wait</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>;</span>
-<span id="cb3-61"></span>
-<span id="cb3-62">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Test Case 4: Toggle state (J = 1, K = 1)</span></span>
-<span id="cb3-63">        J <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'1'</span>; K <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'1'</span>;</span>
-<span id="cb3-64">        <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">wait</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">40</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>;</span>
-<span id="cb3-65"></span>
-<span id="cb3-66">        <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Return to Hold state</span></span>
-<span id="cb3-67">        J <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>; K <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>;</span>
-<span id="cb3-68">        <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">wait</span> <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">for</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">ns</span>;</span>
-<span id="cb3-69"></span>
-<span id="cb3-70">        <span class="kw" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">wait</span>; <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- End simulation</span></span>
-<span id="cb3-71">    <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">end process;</span></span>
-<span id="cb3-72"><span class="cf" style="color: #003B4F;
-background-color: null;
-font-weight: bold;
-font-style: inherit;">end Behavioral;</span></span></code></pre></div>
-</section>
-<section id="results" class="level3" data-number="4.2">
-<h3 data-number="4.2" class="anchored" data-anchor-id="results"><span class="header-section-number">4.2</span> Results</h3>
-<p>We will get the following waveform:</p>
-<p><img src="https://marcobisky.github.io/posts/jk-ff/waveform1.png" class="img-fluid"></p>
-<p>There are several strange things happen here:</p>
-<section id="what-happen-before-around-30-ns" class="level4" data-number="4.2.1">
-<h4 data-number="4.2.1" class="anchored" data-anchor-id="what-happen-before-around-30-ns"><span class="header-section-number">4.2.1</span> What happen before around 30 ns?</h4>
-<p>The <code>Q</code> and <code>QN</code> oscillates at the same pace. Why? It’s because both <code>J</code> and <code>K</code> are zero. For a JK FF, this means to remember the last value. But the last value of <code>Q</code> and <code>QN</code> are both zero (we initialize them in the <code>JKFF.vhdl</code> file):</p>
-<div class="sourceCode" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode vhdl code-with-copy"><code class="sourceCode vhdl"><span id="cb4-1"><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">signal</span> Q_int<span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">,</span> QN_int <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span> <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>; <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Internal Q and QN for feedback</span></span></code></pre></div>
-<p>This is invalid and unstable! So they oscillates with a period of 0.2 ns, which is exactly the delay time of the NOR gates.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/jk-ff/waveform2.png" class="img-fluid figure-img"></p>
-<figcaption>Locally zoomed in</figcaption>
-</figure>
-</div>
-<p>OK, if instead we initialize the <code>Q</code> and <code>QN</code> a <em>valid</em> value, say <code>Q_int=0</code> and <code>QN_int=1</code> like this (in <code>JKFF.vhdl</code> file):</p>
-<div class="sourceCode" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode vhdl code-with-copy"><code class="sourceCode vhdl"><span id="cb5-1"><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">signal</span> Q_int <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span> <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'0'</span>; <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Internal Q for feedback</span></span>
-<span id="cb5-2"><span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">signal</span> QN_int <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:</span> <span class="dt" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">STD_LOGIC</span> <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">:=</span> <span class="bn" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">'1'</span>; <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-- Internal QN for feedback</span></span></code></pre></div>
-<p>Since they are <em>valid</em>, hence stable, <code>Q</code> and <code>QN</code> will not oscillates as expected:</p>
-<p><img src="https://marcobisky.github.io/posts/jk-ff/waveform3.png" class="img-fluid"></p>
-</section>
-<section id="why-not-toggle-successfully" class="level4" data-number="4.2.2">
-<h4 data-number="4.2.2" class="anchored" data-anchor-id="why-not-toggle-successfully"><span class="header-section-number">4.2.2</span> Why not toggle successfully?</h4>
-<p>At around <img src="https://latex.codecogs.com/png.latex?t%20=%2070"> ns, both <code>J</code> and <code>K</code> are 1. This means at the leading edge of the clock signal <code>clk</code>, <code>Q</code> and <code>QN</code> should both flipped! But according to the waveform, they tried but failed, with a tiny pulse around that time.</p>
-<p>I tried several <code>clk</code> pulse width and analysed the JK circuit in “slow-motion” carefully (Try this! Very surprising!). Finally I figured it out:</p>
-<p>It’s because JK FF don’t want the <code>clk</code> signal be high for too long. This is because if the <code>clk</code> line hold high for a sufficient long period, the signal at <code>Q</code> and <code>QN</code> will “backpropagate” (Haha just borrow the term) to the inputs, continue to control whether or not the <code>J</code> and <code>K</code> signal should come in. If we increase the so-called “duty-ratio” of the <code>clk</code> signal, we will see these:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/jk-ff/waveform4.png" class="img-fluid figure-img"></p>
-<figcaption>Duty ratio = 0.20</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/jk-ff/waveform5.png" class="img-fluid figure-img"></p>
-<figcaption>Duty ratio = 0.30</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/jk-ff/waveform6.png" class="img-fluid figure-img"></p>
-<figcaption>Duty ratio = 0.40</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/jk-ff/waveform7.png" class="img-fluid figure-img"></p>
-<figcaption>Duty ratio = 0.65</figcaption>
-</figure>
-</div>
-<p>Some value of duty ratio (e.g.&nbsp;0.65) happen to toggle the <code>Q</code> successfully, while others do not.</p>
-<p>You can think of what value could the duty ratio be? (Given the clock cycle and the propagation delay of all gates) This is a very intereting yet tedious problem to consider. But as long as you understand why <code>Q</code> oscillates, you understand this.</p>
-<p>Therefore people say that there are no “JK <em>latches</em>”.</p>
-</section>
-</section>
-</section>
-<section id="conclusion" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="conclusion"><span class="header-section-number">5</span> Conclusion</h2>
-<p>The VHDL realization of a JK FF can be achieved by introducing propagation delay to the gates.</p>
-
-
-</section>
-
- ]]></description>
-  <category>Hardware</category>
-  <category>EN-blogs</category>
-  <guid>https://marcobisky.github.io/posts/jk-ff/</guid>
-  <pubDate>Sat, 07 Dec 2024 16:00:00 GMT</pubDate>
-  <media:content url="https://marcobisky.github.io/posts/jk-ff/mio.png" medium="image" type="image/png" height="105" width="144"/>
 </item>
 </channel>
 </rss>
