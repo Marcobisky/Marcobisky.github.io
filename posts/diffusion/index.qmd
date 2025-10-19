@@ -1,0 +1,51 @@
+---
+draft: true
+author: Marcobisky
+title: Complement for 3b1b's Diffusion Models Video
+description: Updating
+date: 2025-10-19
+image: cover.gif
+categories:
+    - Machine-Learning
+    - CN-blogs
+format: 
+    html: default
+
+bibliography: refs.bib
+bibliographystyle: ieee
+csl: ../../diabetologia.csl # https://github.com/citation-style-language/styles
+---
+
+## Introduction
+
+### Core Ideas in 3b1b's Video
+
+- 引入 Image Space, 这个 Space 大部分地方的图片都没有意义, 极少部分地方的图片是有意义的 (3b1b 视频中用 Spiral 来表示)
+- 生成图片的问题可重述为: 从 Image Space 中任意位置出发, 将其移动到有意义的图片位置.
+
+:::{.column-margin}
+![Image Space 中每个点是有意义图片的概率分布 @Welch_Labs_2025_youtube](image-space.png){#fig-image-space}
+:::
+
+- 训练范式的思考过程:
+    - 直接在 @fig-image-space (@fig-image-space) 中**梯度上升**找到有意义的图像. 但如何知道概率标量场 / 梯度场 ("Score function" @DBLP:journals/corr/abs-2011-13456) 呢?
+    - 为了学到这个梯度场, 用已知有意义的图片不断加噪声 (相当于该图片点在 Image Space 上做 Brownian Motion), 然后设计一个神经网络来**逐步** ("One-step") 学习反过来的过程 @fig-one-step-training . 但这在**统计意义上**相当于直接用起点和终点来训练 @fig-one-step-training-expectation, 用起始点而不用中间点来训练的好处是降低了训练数据的 Variance 的影响.
+    - 为了学习到 "More refined structure of the spiral", 不同程度的 Brownian Motion 需要不同的神经网络进行处理, 也可以理解为给神经网络加入 $t$ 参数 (表示游走的时间长度) @fig-t-parameter.
+
+:::{.column-margin}
+![即使 Brownian Motion 是随机的, 点的移动是有逐步向外扩散的趋势的, 相当于逆过程有向中心靠拢的趋势, 而神经网络大概率可以学到这种趋势](one-step-training.png){#fig-one-step-training}
+:::
+
+:::{.column-margin}
+![利用随机性](one-step-training-expectation.png){#fig-one-step-training-expectation}
+:::
+
+:::{.column-margin}
+![给神经网络加入 $t$ 参数可以学习到 Spiral 更精细的结构](t-parameter.png){#fig-t-parameter}
+:::
+
+### My question
+
+- 如何根据用户的文字描述来生成对应意义的图片? 跟编码和 Cross Attention 有关?
+- 神经网络能学习到 Brownian Motion 的逆过程? Why it works?
+- “给神经网络加入 $t$ 参数”, 具体如何操作?
