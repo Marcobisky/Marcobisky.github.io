@@ -12,10 +12,105 @@
 <generator>quarto-1.7.32</generator>
 <lastBuildDate>Sat, 18 Oct 2025 16:00:00 GMT</lastBuildDate>
 <item>
-  <title></title>
+  <title>Complement for 3b1b’s Diffusion Models Video 扩散模型学习笔记 (更新中)</title>
   <dc:creator>Marcobisky </dc:creator>
   <link>https://marcobisky.github.io/posts/diffusion/</link>
-  <description><![CDATA[ undefined ]]></description>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="introduction" class="level2 page-columns page-full" data-number="1">
+
+<section id="core-ideas-in-3b1bs-video" class="level3 page-columns page-full" data-number="1.1">
+
+<ul>
+<li>引入 <strong>Image Space</strong>, 这个 Space 大部分地方的图片都没有意义, 极少部分地方的图片是有意义的 (3b1b 视频中用 Spiral 来表示)</li>
+<li>生成图片的问题可重述为: 从 Image Space 中任意位置出发, 将其移动到有意义的图片位置.</li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-image-space" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-image-space-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/diffusion/image-space.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-image-space-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Image Space 中每个点是有意义图片的概率分布 <span class="citation" data-cites="Welch_Labs_2025_youtube">[1]</span>
+</figcaption>
+</figure>
+</div>
+</div></div><ul>
+<li>训练范式的思考过程:
+<ul>
+<li>直接在 Figure&nbsp;1 中<strong>梯度上升</strong>找到有意义的图像. 但如何知道概率标量场 / 梯度场 (“Score function” <span class="citation" data-cites="DBLP:journals/corr/abs-2011-13456">[2]</span>) 呢?</li>
+<li>为了学到这个梯度场, 用已知有意义的图片不断加噪声 (相当于该图片点在 Image Space 上做 Brownian Motion), 然后设计一个神经网络来<strong>逐步</strong> (“One-step”) 学习反过来的过程 Figure&nbsp;2 . 但这在<strong>统计意义上</strong>相当于直接用起点和终点来训练 Figure&nbsp;3, 用起始点而不用中间点来训练的好处是降低了训练数据的 Variance 的影响.</li>
+<li>为了学习到 “More refined structure of the spiral”, 不同程度的 Brownian Motion 需要不同的神经网络进行处理, 也可以理解为给神经网络加入 <img src="https://latex.codecogs.com/png.latex?t"> 参数 (表示游走的时间长度) Figure&nbsp;4.</li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout-ncol="3">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div id="fig-one-step-training" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-one-step-training-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/diffusion/one-step-training.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-one-step-training-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 即使 Brownian Motion 是随机的, 点的移动是有逐步向外扩散的趋势的, 相当于逆过程有向中心靠拢的趋势, 而神经网络大概率可以学到这种趋势
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div id="fig-one-step-training-expectation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-one-step-training-expectation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/diffusion/one-step-training-expectation.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-one-step-training-expectation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: 利用随机性
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 33.3%;justify-content: flex-start;">
+<div id="fig-t-parameter" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-t-parameter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/diffusion/t-parameter.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-t-parameter-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: 给神经网络加入 <img src="https://latex.codecogs.com/png.latex?t"> 参数可以学习到 Spiral 更精细的结构
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="my-question" class="level3" data-number="1.2">
+
+<ul>
+<li>如何根据用户的文字描述来生成对应意义的图片? 跟编码和 Cross Attention 有关?</li>
+<li>神经网络能学习到 Brownian Motion 的逆过程? Why it works?</li>
+<li>“给神经网络加入 <img src="https://latex.codecogs.com/png.latex?t"> 参数”, 具体如何操作?</li>
+</ul>
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body">
+<div id="ref-Welch_Labs_2025_youtube" class="csl-entry">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Labs W (2025) <a href="https://www.youtube.com/watch?v=1pgiu--4W3I">The breakthrough behind modern AI image generators | diffusion models part 1 - YouTube</a></div>
+</div>
+<div id="ref-DBLP:journals/corr/abs-2011-13456" class="csl-entry">
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">Song Y, Sohl-Dickstein J, Kingma DP, Kumar A, Ermon S, Poole B (2020) <a href="https://arxiv.org/abs/2011.13456">Score-based generative modeling through stochastic differential equations</a>. CoRR abs/2011.13456</div>
+</div>
+</div></section></div> ]]></description>
   <category>Machine-Learning</category>
   <category>CN-blogs</category>
   <guid>https://marcobisky.github.io/posts/diffusion/</guid>
