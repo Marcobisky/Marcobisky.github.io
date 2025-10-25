@@ -1174,5 +1174,26 @@
     "title": "Complement for 3b1b’s Diffusion Models Video 扩散模型学习笔记 (更新中)",
     "section": "",
     "text": "引入 Image Space, 这个 Space 大部分地方的图片都没有意义, 极少部分地方的图片是有意义的 (3b1b 视频中用 Spiral 来表示)\n生成图片的问题可重述为: 从 Image Space 中任意位置出发, 将其移动到有意义的图片位置.\n\n\n\n\n\n\n\n\n\nFigure 1: Image Space 中每个点是有意义图片的概率分布 [1]\n\n\n\n\n训练范式的思考过程:\n\n直接在 Figure 1 中梯度上升找到有意义的图像. 但如何知道概率标量场 / 梯度场 (“Score function” [2]) 呢?\n为了学到这个梯度场, 用已知有意义的图片不断加噪声 (相当于该图片点在 Image Space 上做 Brownian Motion), 然后设计一个神经网络来逐步 (“One-step”) 学习反过来的过程 Figure 2 . 但这在统计意义上相当于直接用起点和终点来训练 (Figure 3), 用起始点而不用中间点来训练的好处是降低了训练数据的 Variance 的影响.\n为了学习到 “More refined structure of the spiral”, 不同程度的 Brownian Motion 需要不同的神经网络进行处理, 也可以理解为给神经网络加入 \\(t\\) 参数 (表示游走的时间长度) Figure 4.\n\n\n\n\n\n\n\n\n\n\n\nFigure 2: 即使 Brownian Motion 是随机的, 点的移动是有逐步向外扩散的趋势的, 相当于逆过程有向中心靠拢的趋势, 而神经网络大概率可以学到这种趋势\n\n\n\n\n\n\n\n\n\n\n\nFigure 3: 利用随机性\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: 给神经网络加入 \\(t\\) 参数可以学习到 Spiral 更精细的结构\n\n\n\n\n\n\n\n\n\n\n如何根据用户的文字描述来生成对应意义的图片? 跟编码和 Cross Attention 有关?\n神经网络能学习到 Brownian Motion 的逆过程? Why it works?\n“给神经网络加入 \\(t\\) 参数”, 具体如何操作?"
+  },
+  {
+    "objectID": "posts/data-structure-algorithm/index.html",
+    "href": "posts/data-structure-algorithm/index.html",
+    "title": "Data Structure and Algorithm Notes 数据结构与算法笔记",
+    "section": "",
+    "text": "本章语言以 Python 为主, 面试时需要背下文中的函数而不能靠 vibe coding."
+  },
+  {
+    "objectID": "posts/data-structure-algorithm/index.html#timespace-complexity-时间空间复杂度",
+    "href": "posts/data-structure-algorithm/index.html#timespace-complexity-时间空间复杂度",
+    "title": "Data Structure and Algorithm Notes 数据结构与算法笔记",
+    "section": "1 Time/Space Complexity 时间/空间复杂度",
+    "text": "1 Time/Space Complexity 时间/空间复杂度\n\n时间看循环, 空间看数组\n\n\n\nTime Complexity 不 care 系数, 只 care 随着问题 elements 规模的增长 operations 数量的增长情况\n\n\n\n\n\n\\(\\mathcal{O}(n \\log n)\\) 这种想象成循环嵌套, \\(\\mathcal{O}(n+m)\\) 这种想象成循环并列\n\n\n大部分算法停机时间不确定, 用最坏情况来思考复杂度!\n空间复杂度一般都是 \\(\\mathcal{O}(1)\\) 或 \\(\\mathcal{O}(n)\\), \\(\\mathcal{O}(n^2)\\) 比较少, \\(\\mathcal{O}(n)\\) 和 \\(\\mathcal{O}(n\\log n)\\) 非常少.\n\n递归一般会有个 \\(\\mathcal{O}(n)\\), 因为要用到递归栈.\n\n时间和空间是 trade-off 关系, 二者只能求其一. 一般来说, 由于空间 cheap, 时间贵, 所以更看重时间复杂度."
+  },
+  {
+    "objectID": "posts/data-structure-algorithm/index.html#data-structure-数据结构",
+    "href": "posts/data-structure-algorithm/index.html#data-structure-数据结构",
+    "title": "Data Structure and Algorithm Notes 数据结构与算法笔记",
+    "section": "2 Data Structure 数据结构",
+    "text": "2 Data Structure 数据结构\n\n2.1 General 共性\n\n所有数据结构都要考虑1以下做操作 (abbr. ASID) 是否方便 (时间复杂度):\n\nAccess 访问: index 找 element (数组)\nSearch 搜索: element 找 index (数组)\nInsertion 插入\nDeletion 删除\n\n\n1 ITV 请对比两个数据结构.\n\n2.2 Array 数组\n\nArray 数组: 连续内存空间! 相同类型数据!\n\n\n\n\n\n\n\n\n\nFigure 1: 区分元素和索引\n\n\n\n\n区分: Element 元素 vs Index 索引 (Figure 1)\nASID: \\(\\mathcal{O}(1)\\), \\(\\mathcal{O}(n)\\), \\(\\mathcal{O}(n)\\), \\(\\mathcal{O}(n)\\)\n\n适合读多写少的场景.\n但是 append 操作是 \\(\\mathcal{O}(1)\\) 的.\n\n\n\n\n\n\n\n\n\nPython 具体操作方法\n\n\n\nCheck list:\n\ntest\ntest"
   }
 ]

@@ -74,6 +74,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -479,12 +508,64 @@ ul.task-list li input[type="checkbox"] {
 
 
 <ul>
-<li>操作系统:
+<li><p>操作系统:</p>
 <ul>
 <li>狭义: 内核</li>
 <li>广义: 发行版</li>
 </ul></li>
+<li><p>快捷参考表:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Unit</th>
+<th># Bytes</th>
+<th>Hex</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1 KB</td>
+<td><span class="math inline">\(2^{10}\)</span> B</td>
+<td>0x00000400</td>
+</tr>
+<tr class="even">
+<td>4 KB</td>
+<td><span class="math inline">\(2^{12}\)</span> B</td>
+<td>0x00001000</td>
+</tr>
+<tr class="odd">
+<td>1 MB</td>
+<td><span class="math inline">\(2^{20}\)</span> B</td>
+<td>0x00100000</td>
+</tr>
+<tr class="even">
+<td>128 MB</td>
+<td><span class="math inline">\(2^{27}\)</span> B</td>
+<td>0x08000000</td>
+</tr>
+<tr class="odd">
+<td>1 GB</td>
+<td><span class="math inline">\(2^{30}\)</span> B</td>
+<td>0x40000000</td>
+</tr>
+</tbody>
+</table></li>
 </ul>
+<blockquote class="blockquote">
+<p>A <strong>process</strong> is an abstract data structure that represents all of the necessary information to run a program.</p>
+</blockquote>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="process-layout.png" class="img-fluid figure-img"></p>
+<figcaption>一个 Process 初始化后在内存中的结构 和给 OS 的 Process Control Block</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="Multiple-level-queues-scheduling-algorithm-GIF.gif" class="img-fluid figure-img"></p>
+<figcaption>Process Scheduling 进程调度</figcaption>
+</figure>
+</div>
 
 
 

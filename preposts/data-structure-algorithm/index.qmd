@@ -1,0 +1,139 @@
+---
+draft: true
+author: Marcobisky
+title: Data Structure and Algorithm Notes 数据结构与算法笔记
+description: Updating
+date: 2025-10-21
+# image: cover.gif
+categories:
+    - CN-blogs
+format: 
+    html: default
+
+# bibliography: refs.bib
+# bibliographystyle: ieee
+# csl: ../../diabetologia.csl # https://github.com/citation-style-language/styles
+---
+
+> 本章语言以 `Python` 为主, 面试时需要**背下**文中的函数而不能靠 vibe coding. 大部分例子来自 Leetcode 题目.
+
+> 本章 abbr: ITV: Interview 回答方法
+
+## Time/Space Complexity 时间/空间复杂度
+
+- 时间看循环, 空间看数组
+
+    ![Time Complexity 不 care 系数, 只 care 随着问题 elements **规模**的增长 operations 数量的增长情况](time-complexity.png)
+
+    ![$\mathcal{O}(n \log n)$ 这种想象成循环嵌套, $\mathcal{O}(n+m)$ 这种想象成循环并列](time-complexity-mental-picture.png)
+
+- 大部分算法停机时间不确定, 用**最坏情况**来思考复杂度!
+
+- 空间复杂度一般都是 $\mathcal{O}(1)$ 或 $\mathcal{O}(n)$, $\mathcal{O}(n^2)$ 比较少, $\mathcal{O}(n)$ 和 $\mathcal{O}(n\log n)$ 非常少.
+    - 递归一般会有个 $\mathcal{O}(n)$, 因为要用到递归栈.
+
+- 时间和空间是 trade-off 关系, 二者只能求其一. 一般来说, 由于空间 cheap, 时间贵, 所以更看重时间复杂度.
+
+## Data Structure 数据结构
+
+### General 共性
+
+- 所有数据结构都要考虑[^asid]以下做操作 (abbr. ASID) 是否方便 (**时间复杂度**):
+    - **Access 访问**: index 找 element (数组)
+    - **Search 搜索**: element 找 index (数组)
+    - **Insertion 插入**
+    - **Deletion 删除**
+
+[^asid]: **ITV** 请对比两个数据结构.
+
+### Array 数组
+
+- Array 数组: **连续内存**空间! **相同类型**数据!
+
+:::{.column-margin}
+![区分元素和索引](element-index.png){#fig-element-index}
+:::
+
+- 区分: Element 元素 vs Index 索引 (@fig-element-index)
+
+- ASID: $\mathcal{O}(1)$, $\mathcal{O}(n)$, $\mathcal{O}(n)$, $\mathcal{O}(n)$
+    - 适合**读多写少**的场景.
+    - 但是 `append` 操作是 $\mathcal{O}(1)$ 的.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Python 具体操作方法
+
+Check list:
+
+- [ ] **创建数组**
+- [ ] **访问元素**
+- [ ] **更新元素**
+- [ ] **添加元素**: `append(element)`, `insert(index, element)`
+- [ ] **删除元素**: `remove(element)`, `pop(index)`
+- [ ] **获取长度**: `len(array)`
+- [ ] **遍历数组**: `for element in array:`, `enumerate()`, `range()`
+- [ ] **查找元素**: `index(element)`
+- [ ] **数组排序**: `sort(reverse=false)` (从小到大)
+
+:::
+<!-- ----------------------------------------- -->
+
+### Linked List 链表
+
+- Linked List 链表: **不连续内存**空间!
+    - 比数组用的稍微少点.
+    - 由于 Linked List 和 Array 在拓扑上是等价的, 所以也有 element 和 index 的概念.
+
+- 分类: 单向链表, 双向链表
+
+- ASID: $\mathcal{O}(n)$, $\mathcal{O}(n)$, $\mathcal{O}(1)$, $\mathcal{O}(1)$
+    - 适合**写多读少**的场景.
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## Python 具体操作方法
+
+Check list:
+
+- [ ] **创建链表** ("Dick"): `deque()`
+- [ ] **访问元素**: (虽然跟数组一样, 但是时间复杂度是 $\mathcal{O}(n)$)
+- [ ] **更新元素**: 跟数组一样
+- [ ] **添加元素**: `append(element)`, `insert(index, element)` (体会到 `Python` 的方便了吗)
+- [ ] **删除元素**: `remove(element)`, `del`
+- [ ] **获取长度**: `len(linkedlist)`
+- [ ] **查找元素**: `index(element)`
+
+:::
+<!-- ----------------------------------------- -->
+
+### Queue 队列
+
+- Queue 队列: **可看作 LinkedList 的特例**, **FIFO** 羽毛球桶
+    - 用的比较多, 比如 BFS.
+
+- 分类: 单向队列, 双向队列 (Deque)
+
+- ASID: $\mathcal{O}(n)$, $\mathcal{O}(n)$, $\mathcal{O}(1)$, $\mathcal{O}(1)$
+    - 适合**写多读少**的场景.
+
+### Hash Table and Hash Map 哈希表和哈希映射
+
+### Set 集合
+
+
+
+
+## Good Habits
+
+- **Fallback Return**: 保证函数一定有**同类型的空返回值**:
+
+```{.python filename="LC1.two-sum.py"}
+def brute_force(self, nums, target):
+    for i in range(len(nums)):
+        for j in range(i + 1, len(nums)):
+            if nums[i] + nums[j] == target:
+                return [i, j]
+    return [] # Fallback Return
+```
+
