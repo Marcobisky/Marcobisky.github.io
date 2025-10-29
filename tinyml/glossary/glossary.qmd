@@ -39,7 +39,9 @@ title: "Glossary 名词解释"
 - **HPS**: High Performance System. 
     - `PLATFORMS=common_soc sim hps`, 三个平台. `common_soc` 指标准的 FPGA 开发平台; `sim` 指用 Verilator 进行软件仿真.
 
-- **SoC (System on Chip) 片上系统**: 比如 ZYNQ, **一块硅芯片** 就可以实现整个系统的功能 (而不是要组合多个芯片). 
+- **SoC (System on Chip) FPGA 片上系统**: 比如 ZYNQ, **一块硅芯片** 就可以实现整个系统的功能 (而不是要组合多个芯片). 
+
+- **ACAP (Adaptive Compute Acceleration Platform)**: 集成了专用 AI 引擎／DSP阵列、Network-on-chip (NoC)、高带宽存储接口 (如 HBM) 等异构硬件资源 @sali2025realtimefpgabased, 如 Xilinx Versal 系列.
 
 - **IP Core**: Intellectual Property Core. 由一方 (开发者或公司) 设计，并通过许可授权给其他设计者使用。常见的 IP 核包括 CPU 内核、以太网控制器、内存控制器等.
     - **Soft IP**: 软核
@@ -101,6 +103,10 @@ title: "Glossary 名词解释"
 
 - **BLE, CLB (Slice, LAB, ALM), SB**: 见 [FPGA 原理速成](../cc-fpga/cc-fpga.qmd#sec-pl-structure).
 
+- **LUT (Look-Up Table)**: 查找表. 所有写 `Verilog` 的行为一般都会被综合成 LUT + FF 的结构.
+
+- **DSP (Digital Signal Processing) Block**: FPGA 上专门进行数值运算 (乘加) 的硬件模块 (是卷积、矩阵乘法核心).
+    - **LUT-based DSP**: 与 DSP Block 有本质的区别, 综合器会把它看成 LUT + FF 结构, 而不是调用板子上的 DSP Block 硬件资源.
 
 ## Submodules 项目中用到的核心子模块
 
@@ -201,6 +207,15 @@ title: "Glossary 名词解释"
 - **DAG (Directed Acyclic Graph)**: 有向无环图, 用来可视化一次计算过程 (哪些数据先算, 后面的数据依赖哪些数据).
 
 - **tiled 分块**: 
+
+### Computing in ML
+
+- **FLOP (Floating-Point OPeration)**: 一次浮点运算包括一次加/减/乘/除.
+    - **FLOPs (Floating-point Operations)** 
+    - **FLOPS (Floating-point Operations Per Second)**: 
+
+- **MAC (Multiply‑ACcumulate)**: $a \leftarrow a + (b \times c)$ 这种运算, 神经网络中有大量的 MAC 运算. 1 MAC = 2 FLOPs.
+    - `torchprofile` 库可以统计模型中的 FLOPs 和 MACs.
 
 ## CPU Terms
 

@@ -551,7 +551,10 @@ window.Quarto = {
   <li><a href="#fpga-structure-结构" id="toc-fpga-structure-结构" class="nav-link" data-scroll-target="#fpga-structure-结构">FPGA Structure 结构</a></li>
   </ul></li>
   <li><a href="#submodules-项目中用到的核心子模块" id="toc-submodules-项目中用到的核心子模块" class="nav-link" data-scroll-target="#submodules-项目中用到的核心子模块">Submodules 项目中用到的核心子模块</a></li>
-  <li><a href="#ml-terms" id="toc-ml-terms" class="nav-link" data-scroll-target="#ml-terms">ML Terms</a></li>
+  <li><a href="#ml-terms" id="toc-ml-terms" class="nav-link" data-scroll-target="#ml-terms">ML Terms</a>
+  <ul class="collapse">
+  <li><a href="#computing-in-ml" id="toc-computing-in-ml" class="nav-link" data-scroll-target="#computing-in-ml">Computing in ML</a></li>
+  </ul></li>
   <li><a href="#cpu-terms" id="toc-cpu-terms" class="nav-link" data-scroll-target="#cpu-terms">CPU Terms</a></li>
   <li><a href="#gpu-terms" id="toc-gpu-terms" class="nav-link" data-scroll-target="#gpu-terms">GPU Terms</a></li>
   <li><a href="#riscv" id="toc-riscv" class="nav-link" data-scroll-target="#riscv">RISCV</a></li>
@@ -624,13 +627,14 @@ window.Quarto = {
 <ul>
 <li><code>PLATFORMS=common_soc sim hps</code>, 三个平台. <code>common_soc</code> 指标准的 FPGA 开发平台; <code>sim</code> 指用 Verilator 进行软件仿真.</li>
 </ul></li>
-<li><p><strong>SoC (System on Chip) 片上系统</strong>: 比如 ZYNQ, <strong>一块硅芯片</strong> 就可以实现整个系统的功能 (而不是要组合多个芯片).</p></li>
+<li><p><strong>SoC (System on Chip) FPGA 片上系统</strong>: 比如 ZYNQ, <strong>一块硅芯片</strong> 就可以实现整个系统的功能 (而不是要组合多个芯片).</p></li>
+<li><p><strong>ACAP (Adaptive Compute Acceleration Platform)</strong>: 集成了专用 AI 引擎／DSP阵列、Network-on-chip (NoC)、高带宽存储接口 (如 HBM) 等异构硬件资源 <span class="citation" data-cites="sali2025realtimefpgabased">[<a href="#ref-sali2025realtimefpgabased" role="doc-biblioref">1</a>]</span>, 如 Xilinx Versal 系列.</p></li>
 <li><p><strong>IP Core</strong>: Intellectual Property Core. 由一方 (开发者或公司) 设计，并通过许可授权给其他设计者使用。常见的 IP 核包括 CPU 内核、以太网控制器、内存控制器等.</p>
 <ul>
 <li><strong>Soft IP</strong>: 软核</li>
 <li><strong>Hard IP</strong>: 硬核</li>
 </ul></li>
-<li><p><strong><code>.vcd</code>, <code>fst</code></strong>: 波形文件格式, 后者占空间更小, 但只受 GTKWave 支持 <span class="citation" data-cites="Simulation_Time._Putting_2025_oscc">[<a href="#ref-Simulation_Time._Putting_2025_oscc" role="doc-biblioref">1</a>]</span>.</p></li>
+<li><p><strong><code>.vcd</code>, <code>fst</code></strong>: 波形文件格式, 后者占空间更小, 但只受 GTKWave 支持 <span class="citation" data-cites="Simulation_Time._Putting_2025_oscc">[<a href="#ref-Simulation_Time._Putting_2025_oscc" role="doc-biblioref">2</a>]</span>.</p></li>
 </ul>
 </section>
 <section id="interface" class="level3">
@@ -689,7 +693,12 @@ window.Quarto = {
 <section id="fpga-structure-结构" class="level3">
 <h3 class="anchored" data-anchor-id="fpga-structure-结构">FPGA Structure 结构</h3>
 <ul>
-<li><strong>BLE, CLB (Slice, LAB, ALM), SB</strong>: 见 <a href="../cc-fpga/cc-fpga.html#sec-pl-structure">FPGA 原理速成</a>.</li>
+<li><p><strong>BLE, CLB (Slice, LAB, ALM), SB</strong>: 见 <a href="../cc-fpga/cc-fpga.html#sec-pl-structure">FPGA 原理速成</a>.</p></li>
+<li><p><strong>LUT (Look-Up Table)</strong>: 查找表. 所有写 <code>Verilog</code> 的行为一般都会被综合成 LUT + FF 的结构.</p></li>
+<li><p><strong>DSP (Digital Signal Processing) Block</strong>: FPGA 上专门进行数值运算 (乘加) 的硬件模块 (是卷积、矩阵乘法核心).</p>
+<ul>
+<li><strong>LUT-based DSP</strong>: 与 DSP Block 有本质的区别, 综合器会把它看成 LUT + FF 结构, 而不是调用板子上的 DSP Block 硬件资源.</li>
+</ul></li>
 </ul>
 </section>
 </section>
@@ -770,6 +779,20 @@ window.Quarto = {
 <li><p><strong>DAG (Directed Acyclic Graph)</strong>: 有向无环图, 用来可视化一次计算过程 (哪些数据先算, 后面的数据依赖哪些数据).</p></li>
 <li><p><strong>tiled 分块</strong>:</p></li>
 </ul>
+<section id="computing-in-ml" class="level3">
+<h3 class="anchored" data-anchor-id="computing-in-ml">Computing in ML</h3>
+<ul>
+<li><strong>FLOP (Floating-Point OPeration)</strong>: 一次浮点运算包括一次加/减/乘/除.
+<ul>
+<li><strong>FLOPs (Floating-point Operations)</strong></li>
+<li><strong>FLOPS (Floating-point Operations Per Second)</strong>:</li>
+</ul></li>
+<li><strong>MAC (Multiply‑ACcumulate)</strong>: <span class="math inline">\(a \leftarrow a + (b \times c)\)</span> 这种运算, 神经网络中有大量的 MAC 运算. 1 MAC = 2 FLOPs.
+<ul>
+<li><code>torchprofile</code> 库可以统计模型中的 FLOPs 和 MACs.</li>
+</ul></li>
+</ul>
+</section>
 </section>
 <section id="cpu-terms" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="cpu-terms">CPU Terms</h2>
@@ -783,7 +806,7 @@ window.Quarto = {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="endianness.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">2</a>]</span></figcaption>
+<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">3</a>]</span></figcaption>
 </figure>
 </div></li>
 </ul>
@@ -840,7 +863,7 @@ window.Quarto = {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="elf-format.png" class="img-fluid figure-img"></p>
-<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">2</a>]</span></figcaption>
+<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">3</a>]</span></figcaption>
 </figure>
 </div>
 </div></div><ul>
@@ -865,7 +888,7 @@ window.Quarto = {
 <ul>
 <li><strong>RTOS (Real-Time Operating System)</strong>: 实时操作系统, 用于嵌入式系统.
 <ul>
-<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">2</a>]</span>.</li>
+<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">3</a>]</span>.</li>
 <li><strong>RT-Thread</strong>: 也是一个 RTOS</li>
 </ul></li>
 </ul>
@@ -897,7 +920,7 @@ window.Quarto = {
 <li><p><strong>MTRL (Multi-task Reinforcement Learning)</strong>: 多任务强化学习.</p></li>
 <li><p><strong>PDK (Process Development Kit)</strong>: 工艺开发套件.</p>
 <ul>
-<li><strong>NDA (Non-Disclosure Agreement)</strong>: 商业 PDK 必须对模型文件、器件参数、仿真结果保密 (这是将 ML 应用于电路设计的最大瓶颈之一 <span class="citation" data-cites="li_2023_design">[<a href="#ref-li_2023_design" role="doc-biblioref">3</a>]</span>).</li>
+<li><strong>NDA (Non-Disclosure Agreement)</strong>: 商业 PDK 必须对模型文件、器件参数、仿真结果保密 (这是将 ML 应用于电路设计的最大瓶颈之一 <span class="citation" data-cites="li_2023_design">[<a href="#ref-li_2023_design" role="doc-biblioref">4</a>]</span>).</li>
 <li><strong>SKY130</strong>: 开源 PDK, 由 Google 和 SkyWater Technology 在 2020 年共同开发的 130nm 开源工艺平台.</li>
 </ul></li>
 </ul>
@@ -931,14 +954,17 @@ window.Quarto = {
 
 
 <div id="refs" class="references csl-bib-body" role="list">
+<div id="ref-sali2025realtimefpgabased" class="csl-entry" role="listitem">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Sali SM, Meribout M, Majeed AA (2025) <a href="https://arxiv.org/abs/2509.04153">Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations</a></div>
+</div>
 <div id="ref-Simulation_Time._Putting_2025_oscc" class="csl-entry" role="listitem">
-<div class="csl-left-margin">1. </div><div class="csl-right-inline">YSYX (2025) <a href="https://ysyx.oscc.cc/docs/2407/e/5.html#%E6%89%93%E5%8D%B0%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%B3%A2%E5%BD%A2">E5 从 RTL 代码到可流片版图 | 官方文档</a></div>
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">YSYX (2025) <a href="https://ysyx.oscc.cc/docs/2407/e/5.html#%E6%89%93%E5%8D%B0%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%B3%A2%E5%BD%A2">E5 从 RTL 代码到可流片版图 | 官方文档</a></div>
 </div>
 <div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
-<div class="csl-left-margin">2. </div><div class="csl-right-inline">Lazyparser (2025) <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">Compilation and linker</a></div>
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">Lazyparser (2025) <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">Compilation and linker</a></div>
 </div>
 <div id="ref-li_2023_design" class="csl-entry" role="listitem">
-<div class="csl-left-margin">3. </div><div class="csl-right-inline">Li Z, Carusone AC (2023) Design and optimization of low-dropout voltage regulator using relational graph neural network and reinforcement learning in open-source SKY130 process. 2015 IEEE/ACM International Conference on Computer-Aided Design (ICCAD) 01–09. <a href="https://doi.org/10.1109/iccad57390.2023.10323720">https://doi.org/10.1109/iccad57390.2023.10323720</a></div>
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">Li Z, Carusone AC (2023) Design and optimization of low-dropout voltage regulator using relational graph neural network and reinforcement learning in open-source SKY130 process. 2015 IEEE/ACM International Conference on Computer-Aided Design (ICCAD) 01–09. <a href="https://doi.org/10.1109/iccad57390.2023.10323720">https://doi.org/10.1109/iccad57390.2023.10323720</a></div>
 </div>
 </div>
 </section>
