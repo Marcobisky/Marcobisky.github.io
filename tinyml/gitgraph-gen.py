@@ -1,6 +1,8 @@
 import requests
 import os
 
+from traitlets import default
+
 
 OWNER = "Marcobisky"
 REPO  = "my-riscv"
@@ -19,8 +21,12 @@ resp = requests.get(url, headers=headers, params=params)
 resp.raise_for_status()
 commits = resp.json()
 
+# Reverse the commits to show oldest first (chronological order)
+commits = list(reversed(commits))
+
 filename = "my-riscv-gitgraph.mmd"
 with open(filename, "w", encoding="utf-8") as f:
+    f.write("---\nconfig:\n\ttheme: 'default'\n\tthemeVariables:\n\t\t'git0': '#ffb700ff'\n---\n")
     f.write("gitGraph\n")
     for c in commits:
         sha = c["sha"][:7]
