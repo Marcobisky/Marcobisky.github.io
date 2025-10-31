@@ -791,6 +791,26 @@ window.Quarto = {
 <ul>
 <li><code>torchprofile</code> 库可以统计模型中的 FLOPs 和 MACs.</li>
 </ul></li>
+<li><strong>Spase DNN</strong>: 稀疏神经网络, 指网络中有大量的权重为零 (即不参与计算) 的神经网络.
+<ul>
+<li><p>根据稀疏的结构不同, 可分为三类 (见 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a>). 其中 Semi-structured Sparsity 的意思是比如权重矩阵每 <span class="math inline">\(4\)</span> 个权重就有 <span class="math inline">\(2\)</span> 个权重为零 (记做 <span class="math inline">\(2:4\)</span> sparsity) <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">3</a>]</span>.</p>
+<div id="fig-sparsity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sparsity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="sparsity.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sparsity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">3</a>]</span>, 蓝色的格子代表权重为 <span class="math inline">\(0\)</span>
+</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Pruning</strong>: 剪枝, 将神经网络中不重要的权重 (如接近零的权重) 设置为零.</p>
+<ul>
+<li><strong>Unstructured Pruning</strong>: 非结构化剪枝, 移除个别权重, 硬件控制复杂度大.</li>
+<li><strong>Structured Pruning</strong>: 结构化剪枝, 移除整个通道/滤波器/神经元等 <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">3</a>]</span>, 更适合硬件加速.</li>
+<li><strong>Semi-structured Pruning</strong>: 半结构化剪枝, 介于上述两者之间.</li>
+</ul></li>
+</ul></li>
 </ul>
 </section>
 </section>
@@ -806,7 +826,7 @@ window.Quarto = {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="endianness.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">3</a>]</span></figcaption>
+<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">4</a>]</span></figcaption>
 </figure>
 </div></li>
 </ul>
@@ -863,7 +883,7 @@ window.Quarto = {
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="elf-format.png" class="img-fluid figure-img"></p>
-<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">3</a>]</span></figcaption>
+<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">4</a>]</span></figcaption>
 </figure>
 </div>
 </div></div><ul>
@@ -888,7 +908,7 @@ window.Quarto = {
 <ul>
 <li><strong>RTOS (Real-Time Operating System)</strong>: 实时操作系统, 用于嵌入式系统.
 <ul>
-<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">3</a>]</span>.</li>
+<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">4</a>]</span>.</li>
 <li><strong>RT-Thread</strong>: 也是一个 RTOS</li>
 </ul></li>
 </ul>
@@ -920,7 +940,7 @@ window.Quarto = {
 <li><p><strong>MTRL (Multi-task Reinforcement Learning)</strong>: 多任务强化学习.</p></li>
 <li><p><strong>PDK (Process Development Kit)</strong>: 工艺开发套件.</p>
 <ul>
-<li><strong>NDA (Non-Disclosure Agreement)</strong>: 商业 PDK 必须对模型文件、器件参数、仿真结果保密 (这是将 ML 应用于电路设计的最大瓶颈之一 <span class="citation" data-cites="li_2023_design">[<a href="#ref-li_2023_design" role="doc-biblioref">4</a>]</span>).</li>
+<li><strong>NDA (Non-Disclosure Agreement)</strong>: 商业 PDK 必须对模型文件、器件参数、仿真结果保密 (这是将 ML 应用于电路设计的最大瓶颈之一 <span class="citation" data-cites="li_2023_design">[<a href="#ref-li_2023_design" role="doc-biblioref">5</a>]</span>).</li>
 <li><strong>SKY130</strong>: 开源 PDK, 由 Google 和 SkyWater Technology 在 2020 年共同开发的 130nm 开源工艺平台.</li>
 </ul></li>
 </ul>
@@ -960,11 +980,14 @@ window.Quarto = {
 <div id="ref-Simulation_Time._Putting_2025_oscc" class="csl-entry" role="listitem">
 <div class="csl-left-margin">2. </div><div class="csl-right-inline">YSYX (2025) <a href="https://ysyx.oscc.cc/docs/2407/e/5.html#%E6%89%93%E5%8D%B0%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%B3%A2%E5%BD%A2">E5 从 RTL 代码到可流片版图 | 官方文档</a></div>
 </div>
+<div id="ref-sabih2025hardwaresoftwarecodesignriscvextensions" class="csl-entry" role="listitem">
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">Sabih M, Karim A, Wittmann J, Hannig F, Teich J (2025) <a href="https://arxiv.org/abs/2504.19659">Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs</a></div>
+</div>
 <div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
-<div class="csl-left-margin">3. </div><div class="csl-right-inline">Lazyparser (2025) <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">Compilation and linker</a></div>
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">Lazyparser (2025) <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">Compilation and linker</a></div>
 </div>
 <div id="ref-li_2023_design" class="csl-entry" role="listitem">
-<div class="csl-left-margin">4. </div><div class="csl-right-inline">Li Z, Carusone AC (2023) Design and optimization of low-dropout voltage regulator using relational graph neural network and reinforcement learning in open-source SKY130 process. 2015 IEEE/ACM International Conference on Computer-Aided Design (ICCAD) 01–09. <a href="https://doi.org/10.1109/iccad57390.2023.10323720">https://doi.org/10.1109/iccad57390.2023.10323720</a></div>
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">Li Z, Carusone AC (2023) Design and optimization of low-dropout voltage regulator using relational graph neural network and reinforcement learning in open-source SKY130 process. 2015 IEEE/ACM International Conference on Computer-Aided Design (ICCAD) 01–09. <a href="https://doi.org/10.1109/iccad57390.2023.10323720">https://doi.org/10.1109/iccad57390.2023.10323720</a></div>
 </div>
 </div>
 </section>

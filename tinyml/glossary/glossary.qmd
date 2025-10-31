@@ -217,6 +217,16 @@ title: "Glossary 名词解释"
 - **MAC (Multiply‑ACcumulate)**: $a \leftarrow a + (b \times c)$ 这种运算, 神经网络中有大量的 MAC 运算. 1 MAC = 2 FLOPs.
     - `torchprofile` 库可以统计模型中的 FLOPs 和 MACs.
 
+- **Spase DNN**: 稀疏神经网络, 指网络中有大量的权重为零 (即不参与计算) 的神经网络.
+    - 根据稀疏的结构不同, 可分为三类 (见 @fig-sparsity). 其中 Semi-structured Sparsity 的意思是比如权重矩阵每 $4$ 个权重就有 $2$ 个权重为零 (记做 $2:4$ sparsity) @sabih2025hardwaresoftwarecodesignriscvextensions.
+
+        ![用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity @sabih2025hardwaresoftwarecodesignriscvextensions, 蓝色的格子代表权重为 $0$](sparsity.png){#fig-sparsity}
+
+    - **Pruning**: 剪枝, 将神经网络中不重要的权重 (如接近零的权重) 设置为零.
+        - **Unstructured Pruning**: 非结构化剪枝, 移除个别权重, 硬件控制复杂度大.
+        - **Structured Pruning**: 结构化剪枝, 移除整个通道/滤波器/神经元等 @sabih2025hardwaresoftwarecodesignriscvextensions, 更适合硬件加速.
+        - **Semi-structured Pruning**: 半结构化剪枝, 介于上述两者之间.
+
 ## CPU Terms
 
 - **PSR (Program Status Register)**: 程序状态寄存器. 有 NZVC (Negative, Zero, Overflow, Carry) 四个标志位. 
