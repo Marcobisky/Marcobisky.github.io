@@ -477,7 +477,7 @@
     "href": "hdl/hdl.html#chisel",
     "title": "HDL 硬件描述语言",
     "section": "Chisel",
-    "text": "Chisel\n\n+&: 如果 io.in_a 和 io.in_b 为 4.W 时, 则 sum 为 5.W (带溢出).\nval sum = io.in_a +& io.in_b\n允许多个 := 赋值到同一个输出:\nio.out := 0.U\nio.out := 1.U // 覆盖上一个\nif 和 when 的区别:\n\nif 用来在编译阶段决定电路是哪一种\nwhen 用来生成固定的 verilog 电路, 相当于 verilog 的 if.\n\norR: reduction OR, 对所有位进行 OR 操作.",
+    "text": "Chisel\n\n+&: 如果 io.in_a 和 io.in_b 为 4.W 时, 则 sum 为 5.W (带溢出).\nval sum = io.in_a +& io.in_b\n允许多个 := 赋值到同一个输出:\nio.out := 0.U\nio.out := 1.U // 覆盖上一个\nif 和 when 的区别:\n\nif 用来在编译阶段决定电路是哪一种\nwhen 用来生成固定的 verilog 电路, 相当于 verilog 的 if.\n\norR: reduction OR, 对所有位进行 OR 操作. 比如 GPR 读寄存器时, 只要地址不是全 0，就读出寄存器的值:\nio.rdata1 := Mux(io.raddr1.orR, regs(io.raddr1), 0.U)\nio.rdata2 := Mux(io.raddr2.orR, regs(io.raddr2), 0.U)",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
@@ -543,7 +543,7 @@
     "href": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
     "title": "CPU 原理速成",
     "section": "CPU 是如何成为现在这个样子的?",
-    "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n流水线\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n在每两个 phase 之间插入一些受始终控制的寄存器:\n\nIF-ID 之间: 当前指令, PC 值 (jal 要用)\nID-EX 之间: 指令类型, rs1, rs2, rd, imm.\n\n\n\n\n第三阶段\n\n总线\n\nAXI4, AHB, APB\n\n\nCache\n\n\nMemory\n\n内存: working memory, main memory\nDRAM & SSD 内存与硬盘\n\n读写速度 (3000 倍): 17 ns vs 50 ms, 超音速飞机和龟速\n容量: 16GB vs 4TB\n\nSIMM & DIMM\n\nDIMM (Dual In-line Memory Module)\n\n\n\n\n\n\n1. Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill\n\n\n2. Slchoi (2025) Multi-cycle implementation & pipelining",
+    "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n流水线\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n在每两个 phase 之间插入一些受始终控制的寄存器:\n\nIF-ID 之间: 当前指令, PC 值 (jal 要用)\nID-EX 之间: 指令类型, rs1, rs2, rd, imm.\n\n\n\n\n第三阶段\n\n总线\n\nAXI4, AHB, APB\n\n\nCache\n\n\nMemory\n\n内存: working memory, main memory\nDRAM & SSD 内存与硬盘\n\n读写速度 (3000 倍): 17 ns vs 50 ms, 超音速飞机和龟速\n容量: 16GB vs 4TB\n\nSIMM & DIMM\n\nDIMM (Dual In-line Memory Module)",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>CPU 原理速成</span>"
@@ -767,6 +767,17 @@
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cpu/cc-cpu.html#macros-宏",
+    "href": "cc-cpu/cc-cpu.html#macros-宏",
+    "title": "CPU 原理速成",
+    "section": "Macros 宏",
+    "text": "Macros 宏\n\nxlen = 32: Word length 字长, 即 GPR 寄存器宽度 (由于通用寄存器被命名为 x0~x31)\n\n\n\n\n\n1. Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill\n\n\n2. Slchoi (2025) Multi-cycle implementation & pipelining",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>CPU 原理速成</span>"
     ]
   }
 ]
