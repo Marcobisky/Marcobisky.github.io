@@ -757,5 +757,16 @@
       "CFU Playground",
       "<span class='chapter-number'>16</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
     ]
+  },
+  {
+    "objectID": "hdl/hdl.html#area-optimization-面积优化方法",
+    "href": "hdl/hdl.html#area-optimization-面积优化方法",
+    "title": "HDL 硬件描述语言",
+    "section": "Area Optimization 面积优化方法",
+    "text": "Area Optimization 面积优化方法\n\n有时可读性强的代码会导致使用的逻辑门更多, 占用更多面积. 所以一个模块有时会写两种版本, 一种是可读性强的, 另一种是面积优化的版本.\n\n\nCSE 公共子表达式消除\nCommon Subexpression Elimination 也是编译器优化的一种. 举个简单的例子:\nint x = a + b;\nint y = a + b;\n可以优化为:\nint temp = a + b;\nint x = temp;\nint y = temp;\n这样就避免了重复计算 a + b 两次.\n在 RTL 设计中, 比如 Listing lst-AddSubSimple 这个简单的加减法模块, 注意到 “减法” 其实等价于 “加上 B 的补码”, 可以得到更优化的版本 Listing lst-AddSubArea:\n\n\n\n\n\nAddSubSimple.scala\n\nclass AddSubSimple extends Module {\n  val io = IO(new Bundle {\n    val a = Input(UInt(8.W))\n    val b = Input(UInt(8.W))\n    val sub = Input(Bool())   // true 表示减法\n    val out = Output(UInt(8.W))\n  })\n\n  // 两个独立运算单元\n  val addRes = io.a + io.b\n  val subRes = io.a - io.b\n\n  io.out := Mux(io.sub, subRes, addRes)\n}\n\n\n\n\n\nAddSubArea.scala\n\nclass AddSubOptimized extends Module {\n  val io = IO(new Bundle {\n    val a = Input(UInt(8.W))\n    val b = Input(UInt(8.W))\n    val sub = Input(Bool())\n    val out = Output(UInt(8.W))\n  })\n\n  // 如果是减法，就取 -B；否则取 B\n  val b_eff = Mux(io.sub, -io.b, io.b)\n  io.out := io.a + b_eff\n}\n\n\n\n\n对比他们两个 sbt 出来的 verilog 代码:\n\n\n\n\n\nAddSubSimple.v\n\nmodule AddSubSimple(\n  input        clock,\n  input        reset,\n  input  [7:0] io_a,\n  input  [7:0] io_b,\n  input        io_sub,\n  output [7:0] io_out\n);\n  wire [7:0] addRes = io_a + io_b;\n  wire [7:0] subRes = io_a - io_b;\n  assign io_out = io_sub ? subRes : addRes;\nendmodule\n\n\n\n\n\nAddSubArea.v\n\nmodule AddSubArea(\n  input        clock,\n  input        reset,\n  input  [7:0] io_a,\n  input  [7:0] io_b,\n  input        io_sub,\n  output [7:0] io_out\n);\n  wire [7:0] _b_eff_T_1 = 8'h0 - io_b;\n  wire [7:0] b_eff = io_sub ? _b_eff_T_1 : io_b;\n  assign io_out = io_a + b_eff;\nendmodule",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+    ]
   }
 ]

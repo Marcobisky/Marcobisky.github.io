@@ -498,6 +498,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#verilog-testbench" id="toc-verilog-testbench" class="nav-link" data-scroll-target="#verilog-testbench">Verilog Testbench</a></li>
   </ul></li>
   <li><a href="#chisel" id="toc-chisel" class="nav-link" data-scroll-target="#chisel">Chisel</a></li>
+  <li><a href="#area-optimization-面积优化方法" id="toc-area-optimization-面积优化方法" class="nav-link" data-scroll-target="#area-optimization-面积优化方法">Area Optimization 面积优化方法</a>
+  <ul class="collapse">
+  <li><a href="#cse-公共子表达式消除" id="toc-cse-公共子表达式消除" class="nav-link" data-scroll-target="#cse-公共子表达式消除">CSE 公共子表达式消除</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -638,8 +642,113 @@ io.out := 1.U // 覆盖上一个</code></pre></li>
 </ul></li>
 <li><p><code>orR</code>: reduction OR, 对所有位进行 OR 操作.</p></li>
 </ul>
+</section>
+<section id="area-optimization-面积优化方法" class="level2">
+<h2 class="anchored" data-anchor-id="area-optimization-面积优化方法">Area Optimization 面积优化方法</h2>
+<blockquote class="blockquote">
+<p>有时可读性强的代码会导致使用的逻辑门更多, 占用更多面积. 所以一个模块有时会写两种版本, 一种是可读性强的, 另一种是面积优化的版本.</p>
+</blockquote>
+<section id="cse-公共子表达式消除" class="level3">
+<h3 class="anchored" data-anchor-id="cse-公共子表达式消除">CSE 公共子表达式消除</h3>
+<p><strong>Common Subexpression Elimination</strong> 也是编译器优化的一种. 举个简单的例子:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> x <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> y <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>可以优化为:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> temp <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> x <span class="op">=</span> temp<span class="op">;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> y <span class="op">=</span> temp<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>这样就避免了重复计算 <code>a + b</code> 两次.</p>
+<p>在 RTL 设计中, 比如 <a href="#lst-AddSubSimple" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-AddSubSimple</span></a> 这个简单的加减法模块, <strong>注意到 “减法” 其实等价于 “加上 B 的补码”</strong>, 可以得到更优化的版本 <a href="#lst-AddSubArea" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-AddSubArea</span></a>:</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>AddSubSimple.scala</strong></pre>
+</div>
+<div class="sourceCode" id="lst-AddSubSimple" data-filename="AddSubSimple.scala"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="lst-AddSubSimple-1"><a href="#lst-AddSubSimple-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AddSubSimple <span class="kw">extends</span> Module <span class="op">{</span></span>
+<span id="lst-AddSubSimple-2"><a href="#lst-AddSubSimple-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> io <span class="op">=</span> <span class="fu">IO</span><span class="op">(</span><span class="kw">new</span> Bundle <span class="op">{</span></span>
+<span id="lst-AddSubSimple-3"><a href="#lst-AddSubSimple-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> a <span class="op">=</span> <span class="fu">Input</span><span class="op">(</span><span class="fu">UInt</span><span class="op">(</span><span class="fl">8.</span>W<span class="op">))</span></span>
+<span id="lst-AddSubSimple-4"><a href="#lst-AddSubSimple-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> b <span class="op">=</span> <span class="fu">Input</span><span class="op">(</span><span class="fu">UInt</span><span class="op">(</span><span class="fl">8.</span>W<span class="op">))</span></span>
+<span id="lst-AddSubSimple-5"><a href="#lst-AddSubSimple-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> sub <span class="op">=</span> <span class="fu">Input</span><span class="op">(</span><span class="fu">Bool</span><span class="op">())</span>   <span class="co">// true 表示减法</span></span>
+<span id="lst-AddSubSimple-6"><a href="#lst-AddSubSimple-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> out <span class="op">=</span> <span class="fu">Output</span><span class="op">(</span><span class="fu">UInt</span><span class="op">(</span><span class="fl">8.</span>W<span class="op">))</span></span>
+<span id="lst-AddSubSimple-7"><a href="#lst-AddSubSimple-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">})</span></span>
+<span id="lst-AddSubSimple-8"><a href="#lst-AddSubSimple-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-AddSubSimple-9"><a href="#lst-AddSubSimple-9" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 两个独立运算单元</span></span>
+<span id="lst-AddSubSimple-10"><a href="#lst-AddSubSimple-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> addRes <span class="op">=</span> io<span class="op">.</span>a <span class="op">+</span> io<span class="op">.</span>b</span>
+<span id="lst-AddSubSimple-11"><a href="#lst-AddSubSimple-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> subRes <span class="op">=</span> io<span class="op">.</span>a <span class="op">-</span> io<span class="op">.</span>b</span>
+<span id="lst-AddSubSimple-12"><a href="#lst-AddSubSimple-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-AddSubSimple-13"><a href="#lst-AddSubSimple-13" aria-hidden="true" tabindex="-1"></a>  io<span class="op">.</span>out <span class="op">:=</span> <span class="fu">Mux</span><span class="op">(</span>io<span class="op">.</span>sub<span class="op">,</span> subRes<span class="op">,</span> addRes<span class="op">)</span></span>
+<span id="lst-AddSubSimple-14"><a href="#lst-AddSubSimple-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>AddSubArea.scala</strong></pre>
+</div>
+<div class="sourceCode" id="lst-AddSubArea" data-filename="AddSubArea.scala"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="lst-AddSubArea-1"><a href="#lst-AddSubArea-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> AddSubOptimized <span class="kw">extends</span> Module <span class="op">{</span></span>
+<span id="lst-AddSubArea-2"><a href="#lst-AddSubArea-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> io <span class="op">=</span> <span class="fu">IO</span><span class="op">(</span><span class="kw">new</span> Bundle <span class="op">{</span></span>
+<span id="lst-AddSubArea-3"><a href="#lst-AddSubArea-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> a <span class="op">=</span> <span class="fu">Input</span><span class="op">(</span><span class="fu">UInt</span><span class="op">(</span><span class="fl">8.</span>W<span class="op">))</span></span>
+<span id="lst-AddSubArea-4"><a href="#lst-AddSubArea-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> b <span class="op">=</span> <span class="fu">Input</span><span class="op">(</span><span class="fu">UInt</span><span class="op">(</span><span class="fl">8.</span>W<span class="op">))</span></span>
+<span id="lst-AddSubArea-5"><a href="#lst-AddSubArea-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> sub <span class="op">=</span> <span class="fu">Input</span><span class="op">(</span><span class="fu">Bool</span><span class="op">())</span></span>
+<span id="lst-AddSubArea-6"><a href="#lst-AddSubArea-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> out <span class="op">=</span> <span class="fu">Output</span><span class="op">(</span><span class="fu">UInt</span><span class="op">(</span><span class="fl">8.</span>W<span class="op">))</span></span>
+<span id="lst-AddSubArea-7"><a href="#lst-AddSubArea-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">})</span></span>
+<span id="lst-AddSubArea-8"><a href="#lst-AddSubArea-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-AddSubArea-9"><a href="#lst-AddSubArea-9" aria-hidden="true" tabindex="-1"></a>  <span class="co">// 如果是减法，就取 -B；否则取 B</span></span>
+<span id="lst-AddSubArea-10"><a href="#lst-AddSubArea-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> b_eff <span class="op">=</span> <span class="fu">Mux</span><span class="op">(</span>io<span class="op">.</span>sub<span class="op">,</span> <span class="op">-</span>io<span class="op">.</span>b<span class="op">,</span> io<span class="op">.</span>b<span class="op">)</span></span>
+<span id="lst-AddSubArea-11"><a href="#lst-AddSubArea-11" aria-hidden="true" tabindex="-1"></a>  io<span class="op">.</span>out <span class="op">:=</span> io<span class="op">.</span>a <span class="op">+</span> b_eff</span>
+<span id="lst-AddSubArea-12"><a href="#lst-AddSubArea-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<p>对比他们两个 <code>sbt</code> 出来的 <code>verilog</code> 代码:</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>AddSubSimple.v</strong></pre>
+</div>
+<div class="sourceCode" id="cb16" data-filename="AddSubSimple.v"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> AddSubSimple<span class="op">(</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        clock<span class="op">,</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        reset<span class="op">,</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_a<span class="op">,</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_b<span class="op">,</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        io_sub<span class="op">,</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">output</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_out</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> addRes <span class="op">=</span> io_a <span class="op">+</span> io_b<span class="op">;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> subRes <span class="op">=</span> io_a <span class="op">-</span> io_b<span class="op">;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">assign</span> io_out <span class="op">=</span> io_sub <span class="op">?</span> subRes <span class="op">:</span> addRes<span class="op">;</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>AddSubArea.v</strong></pre>
+</div>
+<div class="sourceCode" id="cb17" data-filename="AddSubArea.v"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> AddSubArea<span class="op">(</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        clock<span class="op">,</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        reset<span class="op">,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_a<span class="op">,</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_b<span class="op">,</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        io_sub<span class="op">,</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">output</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_out</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> _b_eff_T_1 <span class="op">=</span> <span class="bn">8'h0</span> <span class="op">-</span> io_b<span class="op">;</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> b_eff <span class="op">=</span> io_sub <span class="op">?</span> _b_eff_T_1 <span class="op">:</span> io_b<span class="op">;</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">assign</span> io_out <span class="op">=</span> io_a <span class="op">+</span> b_eff<span class="op">;</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
