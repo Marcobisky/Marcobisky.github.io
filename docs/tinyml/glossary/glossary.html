@@ -549,6 +549,7 @@ window.Quarto = {
   <li><a href="#hdl" id="toc-hdl" class="nav-link" data-scroll-target="#hdl">HDL</a></li>
   <li><a href="#fpga-principles" id="toc-fpga-principles" class="nav-link" data-scroll-target="#fpga-principles">FPGA Principles</a></li>
   <li><a href="#fpga-structure-结构" id="toc-fpga-structure-结构" class="nav-link" data-scroll-target="#fpga-structure-结构">FPGA Structure 结构</a></li>
+  <li><a href="#verification-验证" id="toc-verification-验证" class="nav-link" data-scroll-target="#verification-验证">Verification 验证</a></li>
   </ul></li>
   <li><a href="#submodules-项目中用到的核心子模块" id="toc-submodules-项目中用到的核心子模块" class="nav-link" data-scroll-target="#submodules-项目中用到的核心子模块">Submodules 项目中用到的核心子模块</a></li>
   <li><a href="#ml-terms" id="toc-ml-terms" class="nav-link" data-scroll-target="#ml-terms">ML Terms</a>
@@ -701,6 +702,21 @@ window.Quarto = {
 </ul></li>
 </ul>
 </section>
+<section id="verification-验证" class="level3">
+<h3 class="anchored" data-anchor-id="verification-验证">Verification 验证</h3>
+<blockquote class="blockquote">
+<p>验证是芯片设计很重要的一环, 下面将简要介绍 Verification 的一些概念, 遵循认识论原则.</p>
+</blockquote>
+<ul>
+<li><p><strong>DUT</strong>: Device Under Test. 被测试的模块.</p></li>
+<li><p><strong>TB (Testbench)</strong>: 狭义来说就是用 <code>verilog</code> 写的测试代码 (<code>initial begin</code> 之类的). 但写过都知道有以下缺点:</p>
+<ul>
+<li>基本上只能验证模块的功能正确性.</li>
+<li>输入什么信号都要自己写, 很费时, 而且缺乏随机性.</li>
+</ul></li>
+<li><p><strong>UVM (Universal Verification Methodology)</strong>: 验证方法学.</p></li>
+</ul>
+</section>
 </section>
 <section id="submodules-项目中用到的核心子模块" class="level2">
 <h2 class="anchored" data-anchor-id="submodules-项目中用到的核心子模块">Submodules 项目中用到的核心子模块</h2>
@@ -777,7 +793,13 @@ window.Quarto = {
 <li><p><strong>FP32</strong>: 32 位浮点数, 1 位符号位, 8 位指数位, 23 位尾数位, 精度高, 计算速度慢.</p></li>
 <li><p><strong>BF16</strong>: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位, 精度低, 计算速度快.</p></li>
 <li><p><strong>DAG (Directed Acyclic Graph)</strong>: 有向无环图, 用来可视化一次计算过程 (哪些数据先算, 后面的数据依赖哪些数据).</p></li>
-<li><p><strong>tiled 分块</strong>:</p></li>
+<li><p><strong>tiled 分块</strong></p></li>
+<li><p><strong>NAS (Neural Architecture Search)</strong>: 神经网络架构搜索, 自动化地搜索神经网络的最佳架构 (而不是人工设计) <span class="citation" data-cites="mellor2021neuralarchitecturesearchtraining">[<a href="#ref-mellor2021neuralarchitecturesearchtraining" role="doc-biblioref">3</a>]</span>.</p></li>
+<li><p><strong>Neuromorphic Computing</strong>: 比如 SNN (Spiking Neural Network).</p></li>
+<li><p><strong>FM (Foundation Model)</strong>: 基础模型. 一般为了解决一个问题往往会训练一个专门的模型 (task-specific model). 但 FM 是一种通用的模型, 在大规模、广泛、多样的数据 (多模态的, 文字/图像/音频) 上进行训练 (训练成本很高), 然后可以通过微调 (fine-tuning) 来适应各种下游任务 (如文本生成、图像识别、语音识别等).</p>
+<ul>
+<li><strong>Edge-native foundation models</strong>: 边缘化的 FM, 涉及到对大模型的 knowledge distillation, pruning, quantization 等技术, 以适应边缘设备的计算和存储限制 <span class="citation" data-cites="somvanshi2025tinymachinelearningtiny">[<a href="#ref-somvanshi2025tinymachinelearningtiny" role="doc-biblioref">4</a>]</span>.</li>
+</ul></li>
 </ul>
 <section id="computing-in-ml" class="level3">
 <h3 class="anchored" data-anchor-id="computing-in-ml">Computing in ML</h3>
@@ -793,21 +815,21 @@ window.Quarto = {
 </ul></li>
 <li><strong>Spase DNN</strong>: 稀疏神经网络, 指网络中有大量的权重为零 (即不参与计算) 的神经网络.
 <ul>
-<li><p>根据稀疏的结构不同, 可分为三类 (见 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a>). 其中 Semi-structured Sparsity 的意思是比如权重矩阵每 <span class="math inline">\(4\)</span> 个权重就有 <span class="math inline">\(2\)</span> 个权重为零 (记做 <span class="math inline">\(2:4\)</span> sparsity) <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">3</a>]</span>.</p>
+<li><p>根据稀疏的结构不同, 可分为三类 (见 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a>). 其中 Semi-structured Sparsity 的意思是比如权重矩阵每 <span class="math inline">\(4\)</span> 个权重就有 <span class="math inline">\(2\)</span> 个权重为零 (记做 <span class="math inline">\(2:4\)</span> sparsity) <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">5</a>]</span>.</p>
 <div id="fig-sparsity" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparsity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="sparsity.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sparsity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">3</a>]</span>, 蓝色的格子代表权重为 <span class="math inline">\(0\)</span>
+Figure&nbsp;1: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">5</a>]</span>, 蓝色的格子代表权重为 <span class="math inline">\(0\)</span>
 </figcaption>
 </figure>
 </div></li>
 <li><p><strong>Pruning</strong>: 剪枝, 将神经网络中不重要的权重 (如接近零的权重) 设置为零.</p>
 <ul>
 <li><strong>Unstructured Pruning</strong>: 非结构化剪枝, 移除个别权重, 硬件控制复杂度大.</li>
-<li><strong>Structured Pruning</strong>: 结构化剪枝, 移除整个通道/滤波器/神经元等 <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">3</a>]</span>, 更适合硬件加速. (比如 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a> (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).</li>
+<li><strong>Structured Pruning</strong>: 结构化剪枝, 移除整个通道/滤波器/神经元等 <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">5</a>]</span>, 更适合硬件加速. (比如 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a> (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).</li>
 <li><strong>Semi-structured Pruning</strong>: 半结构化剪枝, 介于上述两者之间.</li>
 </ul></li>
 </ul></li>
@@ -827,7 +849,7 @@ Figure&nbsp;1: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-st
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="endianness.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">4</a>]</span></figcaption>
+<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">6</a>]</span></figcaption>
 </figure>
 </div></li>
 </ul>
@@ -884,7 +906,7 @@ Figure&nbsp;1: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-st
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="elf-format.png" class="img-fluid figure-img"></p>
-<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">4</a>]</span></figcaption>
+<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">6</a>]</span></figcaption>
 </figure>
 </div>
 </div></div><ul>
@@ -909,7 +931,7 @@ Figure&nbsp;1: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-st
 <ul>
 <li><strong>RTOS (Real-Time Operating System)</strong>: 实时操作系统, 用于嵌入式系统.
 <ul>
-<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">4</a>]</span>.</li>
+<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili">[<a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">6</a>]</span>.</li>
 <li><strong>RT-Thread</strong>: 也是一个 RTOS</li>
 </ul></li>
 </ul>
@@ -941,7 +963,7 @@ Figure&nbsp;1: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-st
 <li><p><strong>MTRL (Multi-task Reinforcement Learning)</strong>: 多任务强化学习.</p></li>
 <li><p><strong>PDK (Process Development Kit)</strong>: 工艺开发套件.</p>
 <ul>
-<li><strong>NDA (Non-Disclosure Agreement)</strong>: 商业 PDK 必须对模型文件、器件参数、仿真结果保密 (这是将 ML 应用于电路设计的最大瓶颈之一 <span class="citation" data-cites="li_2023_design">[<a href="#ref-li_2023_design" role="doc-biblioref">5</a>]</span>).</li>
+<li><strong>NDA (Non-Disclosure Agreement)</strong>: 商业 PDK 必须对模型文件、器件参数、仿真结果保密 (这是将 ML 应用于电路设计的最大瓶颈之一 <span class="citation" data-cites="li_2023_design">[<a href="#ref-li_2023_design" role="doc-biblioref">7</a>]</span>).</li>
 <li><strong>SKY130</strong>: 开源 PDK, 由 Google 和 SkyWater Technology 在 2020 年共同开发的 130nm 开源工艺平台.</li>
 </ul></li>
 </ul>
@@ -981,14 +1003,20 @@ Figure&nbsp;1: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-st
 <div id="ref-Simulation_Time._Putting_2025_oscc" class="csl-entry" role="listitem">
 <div class="csl-left-margin">2. </div><div class="csl-right-inline">YSYX (2025) <a href="https://ysyx.oscc.cc/docs/2407/e/5.html#%E6%89%93%E5%8D%B0%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%B3%A2%E5%BD%A2">E5 从 RTL 代码到可流片版图 | 官方文档</a></div>
 </div>
+<div id="ref-mellor2021neuralarchitecturesearchtraining" class="csl-entry" role="listitem">
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">Mellor J, Turner J, Storkey A, Crowley EJ (2021) <a href="https://arxiv.org/abs/2006.04647">Neural architecture search without training</a></div>
+</div>
+<div id="ref-somvanshi2025tinymachinelearningtiny" class="csl-entry" role="listitem">
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">Somvanshi S, Islam MM, Chhetri G, et al (2025) <a href="https://arxiv.org/abs/2506.18927">From tiny machine learning to tiny deep learning: A survey</a></div>
+</div>
 <div id="ref-sabih2025hardwaresoftwarecodesignriscvextensions" class="csl-entry" role="listitem">
-<div class="csl-left-margin">3. </div><div class="csl-right-inline">Sabih M, Karim A, Wittmann J, Hannig F, Teich J (2025) <a href="https://arxiv.org/abs/2504.19659">Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs</a></div>
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">Sabih M, Karim A, Wittmann J, Hannig F, Teich J (2025) <a href="https://arxiv.org/abs/2504.19659">Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs</a></div>
 </div>
 <div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
-<div class="csl-left-margin">4. </div><div class="csl-right-inline">Lazyparser (2025) <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">Compilation and linker</a></div>
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">Lazyparser (2025) <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">Compilation and linker</a></div>
 </div>
 <div id="ref-li_2023_design" class="csl-entry" role="listitem">
-<div class="csl-left-margin">5. </div><div class="csl-right-inline">Li Z, Carusone AC (2023) Design and optimization of low-dropout voltage regulator using relational graph neural network and reinforcement learning in open-source SKY130 process. 2015 IEEE/ACM International Conference on Computer-Aided Design (ICCAD) 01–09. <a href="https://doi.org/10.1109/iccad57390.2023.10323720">https://doi.org/10.1109/iccad57390.2023.10323720</a></div>
+<div class="csl-left-margin">7. </div><div class="csl-right-inline">Li Z, Carusone AC (2023) Design and optimization of low-dropout voltage regulator using relational graph neural network and reinforcement learning in open-source SKY130 process. 2015 IEEE/ACM International Conference on Computer-Aided Design (ICCAD) 01–09. <a href="https://doi.org/10.1109/iccad57390.2023.10323720">https://doi.org/10.1109/iccad57390.2023.10323720</a></div>
 </div>
 </div>
 </section>
