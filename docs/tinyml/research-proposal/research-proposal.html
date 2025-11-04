@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Jinming Ren">
+<meta name="keywords" content="Edge AI, RISC-V, FPGA, CFU, Quantization, Spiking Neural Networks, Neuromorphic Computing, ANN-to-SNN, Compute-in-Memory, Real-time Detection, Event Cameras, Co-design.">
+
+<title>Research Proposal: New Inference Paradigms for ML at the Edge – TinyML</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../env-setup/env-setup.html" rel="next">
+<link href="../glossary/glossary.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-6353c5142b84b22f6683470407aecb9b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-5549b3ede58740172b4e45471f64731a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-6353c5142b84b22f6683470407aecb9b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../index.html">Prologue</a></li><li class="breadcrumb-item"><a href="../research-proposal/research-proposal.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Research Proposal: New Inference Paradigms for ML at the Edge</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">TinyML</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Prologue</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction 引入</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Resources 学习资料汇总</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary/glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Glossary 名词解释</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../research-proposal/research-proposal.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Research Proposal: New Inference Paradigms for ML at the Edge</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Environment Setup</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../env-setup/env-setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">FPGA 开发环境配置</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Crash Courses</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../c-riscv-asm/c-riscv-asm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">C 和 RISCV 汇编</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../riscv/riscv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">RISCV ISA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-os/cc-os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">OS 操作系统原理</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../hdl/hdl.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">HDL 硬件描述语言</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-fpga/cc-fpga.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">FPGA 原理速成</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-cpu/cc-cpu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">CPU 原理速成</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-gpu/cc-gpu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">GPU 原理速成</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../open-src-tools/open-src-tools.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Open Source 开源工具</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Neural Network</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../yolo/yolo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">YOLO Object Detection 目标检测</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">ML Accelerators</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../hls-design/HLS-design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">HLS Design FPGA 并行编程</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">CFU Playground</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation">Motivation</a></li>
+  <li><a href="#problem-statement-research-questions" id="toc-problem-statement-research-questions" class="nav-link" data-scroll-target="#problem-statement-research-questions">Problem Statement &amp; Research Questions</a></li>
+  <li><a href="#project-objectives-expected-contributions" id="toc-project-objectives-expected-contributions" class="nav-link" data-scroll-target="#project-objectives-expected-contributions">Project Objectives &amp; Expected Contributions</a></li>
+  <li><a href="#methodology" id="toc-methodology" class="nav-link" data-scroll-target="#methodology">Methodology</a>
+  <ul class="collapse">
+  <li><a href="#warm-up-von-neumann-path-risc-v-fpga-ann-first" id="toc-warm-up-von-neumann-path-risc-v-fpga-ann-first" class="nav-link" data-scroll-target="#warm-up-von-neumann-path-risc-v-fpga-ann-first">Warm-up: Von Neumann path (RISC-V + FPGA, ANN first)</a></li>
+  <li><a href="#sec-mid-term" id="toc-sec-mid-term" class="nav-link" data-scroll-target="#sec-mid-term">Mid-term: Brain-Inspired path (SNN on FPGA, portable toolchain)</a></li>
+  <li><a href="#long-term-emergent-intelligence" id="toc-long-term-emergent-intelligence" class="nav-link" data-scroll-target="#long-term-emergent-intelligence">Long-term: Emergent Intelligence</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+<div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="research-proposal.pdf"><i class="bi bi-link-45deg"></i>PDF</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../index.html">Prologue</a></li><li class="breadcrumb-item"><a href="../research-proposal/research-proposal.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Research Proposal: New Inference Paradigms for ML at the Edge</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Research Proposal: New Inference Paradigms for ML at the Edge</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Jinming Ren <a href="https://orcid.org/0009-0004-1800-2829" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    This project targets real-time, on-device ML through RISC-V + FPGA co-design and neuromorphic inference. We first optimize an ANN detector (e.g., RT-DETR) via sub-<span class="math inline">\(8\)</span>-bit quantization and CFU-based acceleration to achieve deterministic low latency. We then develop an SNN path with few time-steps, plus a portable SNN IR and quantization API for cross-backend deployment. We study internal complexity (richer neuron dynamics) to replace external depth/width and explore compute-in/near-memory for memory-bound kernels. Using NeuroBench-style evaluation on video and event-camera tasks, we aim for <span class="math inline">\(&lt;10\)</span> ms latency and <span class="math inline">\(\ge 30\sim 50\%\)</span> energy savings at <span class="math inline">\(\le 1\sim 2\%\)</span> accuracy drop versus a GPU-edge baseline, releasing all artifacts for reproducibility.
+  </div>
+</div>
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>Edge AI, RISC-V, FPGA, CFU, Quantization, Spiking Neural Networks, Neuromorphic Computing, ANN-to-SNN, Compute-in-Memory, Real-time Detection, Event Cameras, Co-design.</p>
+  </div>
+</div>
+
+</header>
+
+
+<section id="motivation" class="level2">
+<h2 class="anchored" data-anchor-id="motivation">Motivation</h2>
+<p>Over the past decade, cloud-based training and inference pipelines face growing issues of <strong>high latency, bandwidth bottlenecks, data privacy issues</strong> <span class="citation" data-cites="deng2025edgeintelligencespikingneural">[<a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">1</a>]</span> and escalating <strong>training energy cost</strong> <span class="citation" data-cites="a2025_chapter">[<a href="#ref-a2025_chapter" role="doc-biblioref">2</a>]</span>, etc. Edge GPUs partially alleviate these issues but, on the one hand, remain too general-purpose, lacking flexibility for custom numeric precisions, memory hierarchy and data movement <span class="citation" data-cites="Asking_Questions_2025_youtube">[<a href="#ref-Asking_Questions_2025_youtube" role="doc-biblioref">3</a>]</span>. On the other hand, different applications stress different aspects:</p>
+<ul>
+<li><strong>Autonomous systems, UAVs, Controlled nuclear fusion</strong>: Demand sub-millisecond latency for control stability and decision safety <span class="citation" data-cites="sali2025realtimefpgabased Duarte:2018ite Fusion_Energy_Sciences_2025_energy">[<a href="#ref-sali2025realtimefpgabased" role="doc-biblioref">4</a>–<a href="#ref-Fusion_Energy_Sciences_2025_energy" role="doc-biblioref">6</a>]</span>.</li>
+<li><strong>Medical and IoT devices</strong>: Prioritize data privacy and local analytics to meet regulatory and ethical standards <span class="citation" data-cites="deng2025edgeintelligencespikingneural">[<a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">1</a>]</span>.</li>
+</ul>
+<p>Recent evidence <span class="citation" data-cites="yan2024surveyfpgabasedacceleratorml">[<a href="#ref-yan2024surveyfpgabasedacceleratorml" role="doc-biblioref">7</a>]</span> shows <strong>FPGA-based accelerators</strong> can outperform GPUs in both <strong>energy efficiency</strong> and <strong>deterministic latency</strong> when tuned for application-specific workloads. Therefore, FPGA-based hardware–software co-design emerges as a promising solution for low-power, low-latency edge computing tailored to specific application needs.</p>
+</section>
+<section id="problem-statement-research-questions" class="level2">
+<h2 class="anchored" data-anchor-id="problem-statement-research-questions">Problem Statement &amp; Research Questions</h2>
+<p><strong>Problem.</strong> Edge AI is constrained by end-to-end latency, energy per inference, and privacy. General-purpose accelerators lack support for application-specific numerics and event-driven workloads. SNNs promise ultra-low-power inference but lack portable toolchains (IR/quantization) and competitive accuracy at low time-steps.</p>
+<ol type="1">
+<li><p>How far can RISC-V + FPGA co-design push latency/energy for real-time perception while preserving accuracy?</p></li>
+<li><p>Can SNNs with internal complexity (multi-timescale, adaptive thresholds) match ANN accuracy at few-time-step inference on FPGA?</p></li>
+<li><p>What portable SNN IR + quantization API enables “write once, target multiple back-ends” without accuracy regressions?</p></li>
+<li><p>Which dataflows (streaming vs memory-centric) minimize data motion for attention/convolution bottlenecks at the edge?</p></li>
+</ol>
+</section>
+<section id="project-objectives-expected-contributions" class="level2">
+<h2 class="anchored" data-anchor-id="project-objectives-expected-contributions">Project Objectives &amp; Expected Contributions</h2>
+<ol type="1">
+<li><p>An open source, reproducible full-stack edge ML system (models <span class="math inline">\(\to\)</span> compiler <span class="math inline">\(\to\)</span> RTL <span class="math inline">\(\to\)</span> bitstream) that surpasses the ANN GPU-edge baseline on <span class="math inline">\(\ge 2\)</span> of {latency, energy per inference, accuracy} for a selected application scenario.</p></li>
+<li><p>A portable SNN IR + quantization API for spike dynamics, demonstrated on FPGA.</p></li>
+<li><p>Evidence that internal complexity can reduce depth/width and time-steps while maintaining accuracy on edge tasks.</p></li>
+<li><p>An open benchmark harness with NeuroBench-style reporting for fair cross-hardware comparison.</p></li>
+</ol>
+<p>There are two variables to choose though:</p>
+<ul>
+<li><strong>Application scenario</strong>: Suits edge computing and extremely low latency (possibly video stream processing / controlled nuclear fusion).</li>
+<li><strong>Target network structure</strong>: Possibly accelerating RT-DETR <span class="citation" data-cites="lv2023detrs">[<a href="#ref-lv2023detrs" role="doc-biblioref">8</a>]</span> or YOLO, or directly optimize existing Spiking Neural Networks (SNNs).</li>
+</ul>
+</section>
+<section id="methodology" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="methodology">Methodology</h2>
+<p>To achieve the project objectives, the proposed research will follow a three-stage methodology: The warm-up phase establishes an ANN baseline and a RISC-V-coupled FPGA accelerator with deterministic low-latency dataflows. The mid-term phase investigates brain-inspired computing, especially SNNs, focusing on improving accuracy, enhancing LIF model (increasing “internal complexity” <span class="citation" data-cites="He2024 10636118">[<a href="#ref-He2024" role="doc-biblioref">9</a>, <a href="#ref-10636118" role="doc-biblioref">10</a>]</span>), sparse computation, quantization / pruning models and establishing SNN standard APIs. The long-term phase explores emergent intelligence by investigating hypercomputation beyond Turing limits. The details are as shown in the following sections.</p>
+<section id="warm-up-von-neumann-path-risc-v-fpga-ann-first" class="level3">
+<h3 class="anchored" data-anchor-id="warm-up-von-neumann-path-risc-v-fpga-ann-first">Warm-up: Von Neumann path (RISC-V + FPGA, ANN first)</h3>
+<p>This phase has been planned as my graduation project, with the aim to pushing the limits of von Neumann architecture (RISC-V) in edge computing by accelerating and optimizing existing ANNs. Take target network RT-DETR <span class="citation" data-cites="lv2023detrs">[<a href="#ref-lv2023detrs" role="doc-biblioref">8</a>]</span> as an example, the steps are as follows:</p>
+<ul>
+<li><p><strong>Quantization &amp; pruning for edge</strong>: We adopt sub-8-bit quantization (INT8 <span class="math inline">\(\to\)</span> INT4/INT2 if accuracy allows) and structured sparsity to minimize off-chip transfers. We will report accuracy-latency-energy trade-offs under identical datasets and input resolutions.</p></li>
+<li><p><strong>RISC-V-based accelerator with CFU Playground</strong>: As a undergraduate warm-up project, we will imitate the design flow in <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">11</a>]</span> as shown in <a href="#fig-warm-up" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-warm-up</span></a>. We will implement a VexRiscv + Custom function unit (CFU) design within the open-source CFU Playground framework <span class="citation" data-cites="Prakash_2023">[<a href="#ref-Prakash_2023" role="doc-biblioref">12</a>]</span> shown in <a href="#fig-cfu-playground" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cfu-playground</span></a>. The difficulties are to design customized extended instructions in RISC-V for computational-intensive operators (e.g., depthwise/pointwise convolution, <span class="math inline">\(QK^T\)</span>, low-bit GEMM), write the corresponding RTL for the hardware.</p>
+<div id="fig-warm-up" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-warm-up-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="warm-up.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-warm-up-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Warm-up phase design flow (adapted from <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">11</a>]</span>)
+</figcaption>
+</figure>
+</div>
+<div id="fig-cfu-playground" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cfu-playground-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="cfu-playground.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cfu-playground-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: CFU-playground: ML Accelerators in RISC-V ISA <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions Prakash_2023">[<a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">11</a>, <a href="#ref-Prakash_2023" role="doc-biblioref">12</a>]</span>
+</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Full-stack design and DSE</strong>: As a learning experience, we will reinvent the wheel by designing the entire accelerator in <code>Chisel</code> from scratch and open-sourcing it on Github. Then, we also explore a large multi-dimensional design space exploration (DSE) using automated methods (such as heuristic or evolutionary algorithms) to identify optimal configurations balancing accuracy, energy, and latency. Finally, we will use Arty A7-100T FPGA as the hardware platform for real measurements.</p></li>
+</ul>
+</section>
+<section id="sec-mid-term" class="level3">
+<h3 class="anchored" data-anchor-id="sec-mid-term">Mid-term: Brain-Inspired path (SNN on FPGA, portable toolchain)</h3>
+<p>This phase is planned to be my potential PhD research topic. We will explore Brain-Inspired Computing (BIC) in computer vision tasks with a particular focus on EdgeSNNs (parameters <span class="math inline">\(&lt; 100\text{ M}\)</span> <span class="citation" data-cites="deng2025edgeintelligencespikingneural">[<a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">1</a>]</span>) and In-Memory Computing (CIM).</p>
+<div id="fig-lif-model" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lif-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lif-model.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lif-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Leaky integrate-and-fire (LIF) neuron dynamics in SNN <span class="citation" data-cites="10636118">[<a href="#ref-10636118" role="doc-biblioref">10</a>]</span>
+</figcaption>
+</figure>
+</div>
+<p>SNNs have shown promise for ultra-low-power, event-driven inference at the edge. SNNs model neurons with explicit membrane dynamics (LIF model as shown in <a href="#fig-lif-model" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-lif-model</span></a>). Unlike conventional ANNs, SNNs process information in the temporal domain using binary spikes (event-driven coding), this is particularly suitable for SpikeCV cameras <span class="citation" data-cites="ashraf2025spact18spikinghumanaction">[<a href="#ref-ashraf2025spact18spikinghumanaction" role="doc-biblioref">13</a>]</span>, which in my view are the next-generation vision sensors for edge applications such as autonomous driving.</p>
+<p>Previous work on SNNs in autonomous driving includes Spiking-YOLO <span class="citation" data-cites="kim2019spikingyolospikingneuralnetwork">[<a href="#ref-kim2019spikingyolospikingneuralnetwork" role="doc-biblioref">14</a>]</span>, EMS-YOLO <span class="citation" data-cites="su2023deepdirectlytrainedspikingneural">[<a href="#ref-su2023deepdirectlytrainedspikingneural" role="doc-biblioref">15</a>]</span>, etc. However, the performance is still not good in general compared to ANN <span class="citation" data-cites="Jin2025">[<a href="#ref-Jin2025" role="doc-biblioref">16</a>]</span>. ECS-LIF in <span class="citation" data-cites="Jin2025">[<a href="#ref-Jin2025" role="doc-biblioref">16</a>]</span> suggests high-performance spiking detectors are possible with ANN-level matched accuracy and ultra-low energy costs. However, one still need to carefully select hardware architectures. For video classification, research is even more nascent <span class="citation" data-cites="ashraf2025spact18spikinghumanaction">[<a href="#ref-ashraf2025spact18spikinghumanaction" role="doc-biblioref">13</a>]</span>. Early attempts include spiking recurrent networks (processing up to 300 time steps of video frames), or hybrid ANN-SNN approaches for action recognition <span class="citation" data-cites="ashraf2025spact18spikinghumanaction">[<a href="#ref-ashraf2025spact18spikinghumanaction" role="doc-biblioref">13</a>]</span>, SpikeVideoTransformer <span class="citation" data-cites="zou2025spikevideoformerefficientspikedrivenvideo">[<a href="#ref-zou2025spikevideoformerefficientspikedrivenvideo" role="doc-biblioref">17</a>]</span>, SpikeYOLO <span class="citation" data-cites="luo2025integervaluedtrainingspikedriveninference">[<a href="#ref-luo2025integervaluedtrainingspikedriveninference" role="doc-biblioref">18</a>]</span>. However, there is no SNN equivalent yet for many popular video models (e.g.&nbsp;no published spiking variant of SlowFast or DETR detection-transformer as of 2025).</p>
+<p>Since the research steps are not as clear as the warm-up phase, I list some potential research directions in parallel below:</p>
+<ul>
+<li><p><strong>Explore SNN design / training method</strong>: There are two routes to get optimized SNNs: ANN2SNN conversion <span class="citation" data-cites="lv2023detrs deng2025edgeintelligencespikingneural">[<a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">1</a>, <a href="#ref-lv2023detrs" role="doc-biblioref">8</a>]</span>, or direct-training SNNs. We will explore both routes to find the best-performing SNNs for our target application. We will also investigate advanced training techniques such as surrogate gradients, temporal backpropagation, and biologically inspired learning rules to improve SNN performance.</p></li>
+<li><p><strong>Develop unified SNN toolchain</strong>: SNNs lack standard APIs and SNN-specific IRs (analogous to ONNX <span class="citation" data-cites="deng2025edgeintelligencespikingneural Carpegna_2025">[<a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">1</a>, <a href="#ref-Carpegna_2025" role="doc-biblioref">19</a>]</span>) for quantization strategies tailored to spike dynamics <span class="citation" data-cites="Carpegna_2025">[<a href="#ref-Carpegna_2025" role="doc-biblioref">19</a>]</span>. We prototype a minimal graph-level SNN IR (ops, neuron nodes, timing semantics) plus a quantization API (e.g., <span class="math inline">\(\text{INT8} \times \text{INT2}\)</span> spike ops, ternary spikes, per-layer time-step budgets) to decouple front-end training from back-end compilers, following the direction of NIR and recent co-design work that targets FPGA-friendly spike arithmetic. This addresses today’s fragmentation across neuromorphic stacks and enables “write once, target FPGA/Loihi/MCU.” <span class="citation" data-cites="Pedersen2024">[<a href="#ref-Pedersen2024" role="doc-biblioref">20</a>]</span></p></li>
+<li><p><strong>Further explore SNN internal complexity</strong>: A recent study <span class="citation" data-cites="He2024 10636118">[<a href="#ref-He2024" role="doc-biblioref">9</a>, <a href="#ref-10636118" role="doc-biblioref">10</a>]</span> by Network model with internal complexity bridges artificial intelligence and neuroscience shows a pivotal shift in thinking: Instead of simply growing neural networks by adding more layers or parameters (“external complexity”), we can embed richer dynamics <em>inside</em> each neuron or module — a paradigm the authors term “small model with internal complexity.”</p></li>
+</ul>
+</section>
+<section id="long-term-emergent-intelligence" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="long-term-emergent-intelligence">Long-term: Emergent Intelligence</h3>
+<p>This phase is my long-term aspiration toward artificial general intelligence (AGI). This stage will explore the theoretical and practical computational boundary and brand-new distributed computing paradigms inspired by the human brain under the guidance of recent theoretical investigations into <em>emergence</em> in artificial systems, such as Berti et al.&nbsp;(2025) <span class="citation" data-cites="berti2025emergentabilitieslargelanguage">[<a href="#ref-berti2025emergentabilitieslargelanguage" role="doc-biblioref">21</a>]</span> who survey emergent abilities in LLMs and identify conditions like scaling, criticality and compression that contribute to spontaneous capability gains. Continuing the exploration of internal complexity in #sec-mid-term, there are two major directions: Turing-complete machine and hypercomputation beyond Turing limits.</p>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-cgol" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cgol-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="cgol.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cgol-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Conway’s Game of Life (CGOL): local update rules <span class="citation" data-cites="Hirose_2020">[<a href="#ref-Hirose_2020" role="doc-biblioref">22</a>]</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-gosper-glider-gun" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gosper-glider-gun-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gosper-glider-gun.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gosper-glider-gun-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Gosper’s glider gun: a self-replicating pattern proving Turing-completeness <span class="citation" data-cites="Datawrapper_2025_datawrapper wikipediacontributors_2023_gun">[<a href="#ref-Datawrapper_2025_datawrapper" role="doc-biblioref">23</a>, <a href="#ref-wikipediacontributors_2023_gun" role="doc-biblioref">24</a>]</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Decentralized, event-driven architectures</strong>: We will first explore turing-complete hardware and software systems that mimic the <em>highly-distributed, asynchronous nature and learning-while-inferencing feature</em> of the brain. <em>Turing-equivalent</em> cellular automata such as CGOL <span class="citation" data-cites="mccrum2024conwaysgamelifeanalogue">[<a href="#ref-mccrum2024conwaysgamelifeanalogue" role="doc-biblioref">25</a>]</span> (<a href="#fig-cgol" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cgol</span></a>), Langton’s ant, Particle Life already demonstrate how simple local rules can give rise to complex, emergent patterns (<a href="#fig-gosper-glider-gun" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-gosper-glider-gun</span></a>, <a href="#fig-pl1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-pl1</span></a>, <a href="#fig-pl2" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-pl2</span></a>). While using the CGOL itself as a practical “computer” is inefficient, it serves as a proof-of-concept that emergence can arise from simple components. The challenge is discovering the <em>right set of rules (i.e., internal complexity) or learning algorithms</em> that yield robust emergent intelligence, not just (external) complexity for its own sake <span class="citation" data-cites="krakauer2025largelanguagemodelsemergence">[<a href="#ref-krakauer2025largelanguagemodelsemergence" role="doc-biblioref">26</a>]</span>. Then turn out to nature (the hardware) to find out if there is a machine under our control that performs this set of rules intrinsically.</li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-pl1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pl1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="particle-life1.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pl1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Emergent chasing behavior (Particle Life).
+</figcaption>
+</figure>
+</div>
+<div id="fig-pl2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pl2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="particle-life2.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pl2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Stable pattern formation (Particle Life).
+</figcaption>
+</figure>
+</div>
+</div></div><ul>
+<li><strong>Hypercomputation beyond Turing limits</strong>: Human brain might be exploiting computational principles beyond the scope of traditional Turing machines. Penrose and others (like Stuart Hameroff) have hypothesized that quantum effects in neural microstructures (e.g.&nbsp;microtubules) could enable the brain to do things standard computers cannot <span class="citation" data-cites="Continuing_To_Use_2025_popularmechanics">[<a href="#ref-Continuing_To_Use_2025_popularmechanics" role="doc-biblioref">27</a>]</span>. Achieving AI with brain-like cognition might then require tapping into quantum computing <span class="citation" data-cites="silva2025leveragingquantumsuperpositioninfer">[<a href="#ref-silva2025leveragingquantumsuperpositioninfer" role="doc-biblioref">28</a>]</span>, ONNs <span class="citation" data-cites="Fu2024">[<a href="#ref-Fu2024" role="doc-biblioref">29</a>]</span>, Organoid Intelligence (OI) <span class="citation" data-cites="OI2023 Timothy_Oh_2025_medium">[<a href="#ref-OI2023" role="doc-biblioref">30</a>, <a href="#ref-Timothy_Oh_2025_medium" role="doc-biblioref">31</a>]</span> and beyond.</li>
+</ul>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<!-- 
+Meanwhile, spiking neural networks (SNNs) have emerged as promising candidates for ultra-low-power, event-driven inference at the edge. Yet, as noted by Deng et al. (2025), the current SNN ecosystem suffers from the lack of unified intermediate representations (IRs) and quantization APIs tailored to spike dynamics—gaps analogous to the pre-ONNX era of deep learning frameworks. Ongoing research, such as Carpegna et al. (2025), highlights that SNN toolchains remain highly fragmented and hardware-specific, limiting portability across platforms (FPGA, Loihi, MCU). Establishing standardized SNN IRs and quantization interfaces is thus a critical enabler for large-scale deployment and hardware co-design.
+
+In summary, cloud-based AI systems are constrained by cost, latency, energy, and privacy. FPGA-based hardware–software co-design provides an effective solution for application-specific, low-power, low-latency computation. At the same time, the neuromorphic computing paradigm—especially SNNs—offers a biologically inspired path toward event-driven and energy-efficient intelligence. The absence of unified toolchains and co-design standards forms the primary motivation and opportunity for this research. -->
+
+
+<div id="refs" class="references csl-bib-body" role="list">
+<div id="ref-deng2025edgeintelligencespikingneural" class="csl-entry" role="listitem">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Deng S, Yu D, Lv C, et al (2025) <a href="https://arxiv.org/abs/2507.14069">Edge intelligence with spiking neural networks</a></div>
+</div>
+<div id="ref-a2025_chapter" class="csl-entry" role="listitem">
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">(2025) <a href="https://hai.stanford.edu/assets/files/hai_ai-index-report-2025_chapter1_final.pdf?utm_source=chatgpt.com">CHAPTER 1: Research and development</a></div>
+</div>
+<div id="ref-Asking_Questions_2025_youtube" class="csl-entry" role="listitem">
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">Questions A (2025) <a href="https://www.youtube.com/watch?v=2y3GNY4tf7A">Introduction to FPGAs and ML inference with hls4ml (benjamin ramhorst, 8 november 2024) - YouTube</a></div>
+</div>
+<div id="ref-sali2025realtimefpgabased" class="csl-entry" role="listitem">
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">Sali SM, Meribout M, Majeed AA (2025) <a href="https://arxiv.org/abs/2509.04153">Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations</a></div>
+</div>
+<div id="ref-Duarte:2018ite" class="csl-entry" role="listitem">
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">Duarte J et al (2018) <span class="nocase">Fast inference of deep neural networks in FPGAs for particle physics</span>. JINST 13(07):P07027. <a href="https://doi.org/10.1088/1748-0221/13/07/P07027">https://doi.org/10.1088/1748-0221/13/07/P07027</a></div>
+</div>
+<div id="ref-Fusion_Energy_Sciences_2025_energy" class="csl-entry" role="listitem">
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">Sciences FE (2025) <a href="https://www.energy.gov/science/fes/articles/ai-tackles-disruptive-tearing-instability-fusion-plasma?utm_source=chatgpt.com">AI tackles disruptive tearing instability in fusion plasma | department of</a></div>
+</div>
+<div id="ref-yan2024surveyfpgabasedacceleratorml" class="csl-entry" role="listitem">
+<div class="csl-left-margin">7. </div><div class="csl-right-inline">Yan F, Koch A, Sinnen O (2024) <a href="https://arxiv.org/abs/2412.15666">A survey on FPGA-based accelerator for ML models</a></div>
+</div>
+<div id="ref-lv2023detrs" class="csl-entry" role="listitem">
+<div class="csl-left-margin">8. </div><div class="csl-right-inline">Zhao Y, Lv W, Xu S, et al (2023) <a href="https://arxiv.org/abs/2304.08069">DETRs beat YOLOs on real-time object detection</a></div>
+</div>
+<div id="ref-He2024" class="csl-entry" role="listitem">
+<div class="csl-left-margin">9. </div><div class="csl-right-inline">He L, Xu Y, He W, et al (2024) Network model with internal complexity bridges artificial intelligence and neuroscience. Nature Computational Science 4(8):584–599. <a href="https://doi.org/10.1038/s43588-024-00674-9">https://doi.org/10.1038/s43588-024-00674-9</a></div>
+</div>
+<div id="ref-10636118" class="csl-entry" role="listitem">
+<div class="csl-left-margin">10. </div><div class="csl-right-inline">Li G, Deng L, Tang H, et al (2024) Brain-inspired computing: A systematic survey and future trends. Proceedings of the IEEE 112(6):544–584. <a href="https://doi.org/10.1109/JPROC.2024.3429360">https://doi.org/10.1109/JPROC.2024.3429360</a></div>
+</div>
+<div id="ref-sabih2025hardwaresoftwarecodesignriscvextensions" class="csl-entry" role="listitem">
+<div class="csl-left-margin">11. </div><div class="csl-right-inline">Sabih M, Karim A, Wittmann J, Hannig F, Teich J (2025) <a href="https://arxiv.org/abs/2504.19659">Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs</a></div>
+</div>
+<div id="ref-Prakash_2023" class="csl-entry" role="listitem">
+<div class="csl-left-margin">12. </div><div class="csl-right-inline">Prakash S, Callahan T, Bushagour J, et al (2023) <a href="https://doi.org/10.1109/ispass57527.2023.00024">CFU playground: Full-stack open-source framework for tiny machine learning (TinyML) acceleration on FPGAs</a>. In: 2023 IEEE international symposium on performance analysis of systems and software (ISPASS). IEEE, pp 157–167</div>
+</div>
+<div id="ref-ashraf2025spact18spikinghumanaction" class="csl-entry" role="listitem">
+<div class="csl-left-margin">13. </div><div class="csl-right-inline">Ashraf Y, Sharshar A, Bojkovic V, Gu B (2025) <a href="https://arxiv.org/abs/2507.16151">SPACT18: Spiking human action recognition benchmark dataset with complementary RGB and thermal modalities</a></div>
+</div>
+<div id="ref-kim2019spikingyolospikingneuralnetwork" class="csl-entry" role="listitem">
+<div class="csl-left-margin">14. </div><div class="csl-right-inline">Kim S, Park S, Na B, Yoon S (2019) <a href="https://arxiv.org/abs/1903.06530">Spiking-YOLO: Spiking neural network for energy-efficient object detection</a></div>
+</div>
+<div id="ref-su2023deepdirectlytrainedspikingneural" class="csl-entry" role="listitem">
+<div class="csl-left-margin">15. </div><div class="csl-right-inline">Su Q, Chou Y, Hu Y, et al (2023) <a href="https://arxiv.org/abs/2307.11411">Deep directly-trained spiking neural networks for object detection</a></div>
+</div>
+<div id="ref-Jin2025" class="csl-entry" role="listitem">
+<div class="csl-left-margin">16. </div><div class="csl-right-inline">Jin M, Wang X, Guo C, Yang S (2025) Research on target detection for autonomous driving based on ECS-spiking neural networks. Scientific Reports 15(1):13725. <a href="https://doi.org/10.1038/s41598-025-97913-4">https://doi.org/10.1038/s41598-025-97913-4</a></div>
+</div>
+<div id="ref-zou2025spikevideoformerefficientspikedrivenvideo" class="csl-entry" role="listitem">
+<div class="csl-left-margin">17. </div><div class="csl-right-inline">Zou S, Li Q, Ji W, et al (2025) <a href="https://arxiv.org/abs/2505.10352">SpikeVideoFormer: An efficient spike-driven video transformer with hamming attention and <span class="math inline">\(\mathcal{O}(T)\)</span> complexity</a></div>
+</div>
+<div id="ref-luo2025integervaluedtrainingspikedriveninference" class="csl-entry" role="listitem">
+<div class="csl-left-margin">18. </div><div class="csl-right-inline">Luo X, Yao M, Chou Y, Xu B, Li G (2025) <a href="https://arxiv.org/abs/2407.20708">Integer-valued training and spike-driven inference spiking neural network for high-performance and energy-efficient object detection</a></div>
+</div>
+<div id="ref-Carpegna_2025" class="csl-entry" role="listitem">
+<div class="csl-left-margin">19. </div><div class="csl-right-inline">Carpegna A, Savino A, Carlo SD (2025) Spiker+: A framework for the generation of efficient spiking neural networks FPGA accelerators for inference at the edge. IEEE Transactions on Emerging Topics in Computing 13(3):784–798. <a href="https://doi.org/10.1109/tetc.2024.3511676">https://doi.org/10.1109/tetc.2024.3511676</a></div>
+</div>
+<div id="ref-Pedersen2024" class="csl-entry" role="listitem">
+<div class="csl-left-margin">20. </div><div class="csl-right-inline">Pedersen JE, Abreu S, Jobst M, et al (2024) Neuromorphic intermediate representation: A unified instruction set for interoperable brain-inspired computing. Nature Communications 15(1):8122. <a href="https://doi.org/10.1038/s41467-024-52259-9">https://doi.org/10.1038/s41467-024-52259-9</a></div>
+</div>
+<div id="ref-berti2025emergentabilitieslargelanguage" class="csl-entry" role="listitem">
+<div class="csl-left-margin">21. </div><div class="csl-right-inline">Berti L, Giorgi F, Kasneci G (2025) <a href="https://arxiv.org/abs/2503.05788">Emergent abilities in large language models: A survey</a></div>
+</div>
+<div id="ref-Hirose_2020" class="csl-entry" role="listitem">
+<div class="csl-left-margin">22. </div><div class="csl-right-inline">Hirose T, Sawaragi T (2020) Extended FRAM model based on cellular automaton to clarify complexity of socio-technical systems and improve their safety. Safety Science 123:104556. <a href="https://doi.org/10.1016/j.ssci.2019.104556">https://doi.org/10.1016/j.ssci.2019.104556</a></div>
+</div>
+<div id="ref-Datawrapper_2025_datawrapper" class="csl-entry" role="listitem">
+<div class="csl-left-margin">23. </div><div class="csl-right-inline">Lokhov I (2025) <a href="https://www.datawrapper.de/blog/game-of-life">Game of life</a></div>
+</div>
+<div id="ref-wikipediacontributors_2023_gun" class="csl-entry" role="listitem">
+<div class="csl-left-margin">24. </div><div class="csl-right-inline">Contributors W (2023) <a href="https://en.wikipedia.org/wiki/Gun_(cellular_automaton)">Gun (cellular automaton)</a></div>
+</div>
+<div id="ref-mccrum2024conwaysgamelifeanalogue" class="csl-entry" role="listitem">
+<div class="csl-left-margin">25. </div><div class="csl-right-inline">McCrum J, Kee TP (2024) <a href="https://arxiv.org/abs/2410.22389">Conways game of life as an analogue to a habitable world livingness beyond the biological</a></div>
+</div>
+<div id="ref-krakauer2025largelanguagemodelsemergence" class="csl-entry" role="listitem">
+<div class="csl-left-margin">26. </div><div class="csl-right-inline">Krakauer DC, Krakauer JW, Mitchell M (2025) <a href="https://arxiv.org/abs/2506.11135">Large language models and emergence: A complex systems perspective</a></div>
+</div>
+<div id="ref-Continuing_To_Use_2025_popularmechanics" class="csl-entry" role="listitem">
+<div class="csl-left-margin">27. </div><div class="csl-right-inline">Orf D (2025) <a href="https://www.popularmechanics.com/science/a65368553/quantum-entanglement-in-brain-consciousness/">Does quantum entanglement in your brain generate consciousness?</a></div>
+</div>
+<div id="ref-silva2025leveragingquantumsuperpositioninfer" class="csl-entry" role="listitem">
+<div class="csl-left-margin">28. </div><div class="csl-right-inline">Silva GA (2025) <a href="https://arxiv.org/abs/2403.18963">Leveraging quantum superposition to infer the dynamic behavior of a spatial-temporal neural network signaling model</a></div>
+</div>
+<div id="ref-Fu2024" class="csl-entry" role="listitem">
+<div class="csl-left-margin">29. </div><div class="csl-right-inline">Fu T, Zhang J, Sun R, et al (2024) Optical neural networks: Progress and challenges. Light: Science &amp; Applications 13(1):263. <a href="https://doi.org/10.1038/s41377-024-01590-3">https://doi.org/10.1038/s41377-024-01590-3</a></div>
+</div>
+<div id="ref-OI2023" class="csl-entry" role="listitem">
+<div class="csl-left-margin">30. </div><div class="csl-right-inline">Smirnova L, Caffo B, Gracias D, et al (2023) Organoid intelligence (OI): The new frontier in biocomputing and intelligence-in-a-dish. Frontiers in Science 1:1017235. <a href="https://doi.org/10.3389/fsci.2023.1017235">https://doi.org/10.3389/fsci.2023.1017235</a></div>
+</div>
+<div id="ref-Timothy_Oh_2025_medium" class="csl-entry" role="listitem">
+<div class="csl-left-margin">31. </div><div class="csl-right-inline">Oh T (2025) <a href="https://medium.com/@timothyohoc/the-future-of-artificial-intelligence-wetware-da2e396b3c55">The future of artificial intelligence — wetware</a></div>
+</div>
+</div>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../glossary/glossary.html" class="pagination-link" aria-label="Glossary 名词解释">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Glossary 名词解释</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../env-setup/env-setup.html" class="pagination-link" aria-label="FPGA 开发环境配置">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">FPGA 开发环境配置</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

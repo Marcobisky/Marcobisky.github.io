@@ -1,0 +1,127 @@
+---
+title: "Research Proposal: New Inference Paradigms for ML at the Edge"
+author:
+    - name: Jinming Ren
+      orcid: 0009-0004-1800-2829
+other-links:
+    - text: PDF
+      href: research-proposal.pdf
+abstract:
+    This project targets real-time, on-device ML through RISC-V + FPGA co-design and neuromorphic inference. We first optimize an ANN detector (e.g., RT-DETR) via sub-$8$-bit quantization and CFU-based acceleration to achieve deterministic low latency. We then develop an SNN path with few time-steps, plus a portable SNN IR and quantization API for cross-backend deployment. We study internal complexity (richer neuron dynamics) to replace external depth/width and explore compute-in/near-memory for memory-bound kernels. Using NeuroBench-style evaluation on video and event-camera tasks, we aim for $<10$ ms latency and $\ge 30\sim 50\%$ energy savings at $\le 1\sim 2\%$ accuracy drop versus a GPU-edge baseline, releasing all artifacts for reproducibility.
+
+keywords:
+    - Edge AI, RISC-V, FPGA, CFU, Quantization, Spiking Neural Networks, Neuromorphic Computing, ANN-to-SNN, Compute-in-Memory, Real-time Detection, Event Cameras, Co-design.
+---
+
+
+## Motivation
+
+
+Over the past decade, cloud-based training and inference pipelines face growing issues of **high latency, bandwidth bottlenecks, data privacy issues** @deng2025edgeintelligencespikingneural and escalating **training energy cost** @a2025_chapter, etc. Edge GPUs partially alleviate these issues but, on the one hand, remain too general-purpose, lacking flexibility for custom numeric precisions, memory hierarchy and data movement @Asking_Questions_2025_youtube. On the other hand, different applications stress different aspects:
+
+- **Autonomous systems, UAVs, Controlled nuclear fusion**: Demand sub-millisecond latency for control stability and decision safety [@sali2025realtimefpgabased; @Duarte:2018ite; @Fusion_Energy_Sciences_2025_energy].
+- **Medical and IoT devices**: Prioritize data privacy and local analytics to meet regulatory and ethical standards @deng2025edgeintelligencespikingneural.
+
+Recent evidence @yan2024surveyfpgabasedacceleratorml shows **FPGA-based accelerators** can outperform GPUs in both **energy efficiency** and **deterministic latency** when tuned for application-specific workloads. Therefore, FPGA-based hardware–software co-design emerges as a promising solution for low-power, low-latency edge computing tailored to specific application needs.
+
+## Problem Statement & Research Questions
+
+**Problem.** Edge AI is constrained by end-to-end latency, energy per inference, and privacy. General-purpose accelerators lack support for application-specific numerics and event-driven workloads. SNNs promise ultra-low-power inference but lack portable toolchains (IR/quantization) and competitive accuracy at low time-steps.
+
+
+1. How far can RISC-V + FPGA co-design push latency/energy for real-time perception while preserving accuracy?
+
+2. Can SNNs with internal complexity (multi-timescale, adaptive thresholds) match ANN accuracy at few-time-step inference on FPGA?
+
+3. What portable SNN IR + quantization API enables “write once, target multiple back-ends” without accuracy regressions?
+
+4. Which dataflows (streaming vs memory-centric) minimize data motion for attention/convolution bottlenecks at the edge?
+
+## Project Objectives & Expected Contributions
+
+1. An open source, reproducible full-stack edge ML system (models $\to$ compiler $\to$ RTL $\to$ bitstream) that surpasses the ANN GPU-edge baseline on $\ge 2$ of {latency, energy per inference, accuracy} for a selected application scenario.
+
+2. A portable SNN IR + quantization API for spike dynamics, demonstrated on FPGA.
+
+3. Evidence that internal complexity can reduce depth/width and time-steps while maintaining accuracy on edge tasks.
+
+4. An open benchmark harness with NeuroBench-style reporting for fair cross-hardware comparison.
+
+There are two variables to choose though:
+
+- **Application scenario**: Suits edge computing and extremely low latency (possibly video stream processing / controlled nuclear fusion).
+- **Target network structure**: Possibly accelerating RT-DETR @lv2023detrs or YOLO, or directly optimize existing Spiking Neural Networks (SNNs).
+
+
+## Methodology
+
+To achieve the project objectives, the proposed research will follow a three-stage methodology: The warm-up phase establishes an ANN baseline and a RISC-V-coupled FPGA accelerator with deterministic low-latency dataflows. The mid-term phase investigates brain-inspired computing, especially SNNs, focusing on improving accuracy, enhancing LIF model (increasing "internal complexity" [@He2024; @10636118]), sparse computation, quantization / pruning models and establishing SNN standard APIs. The long-term phase explores emergent intelligence by investigating hypercomputation beyond Turing limits. The details are as shown in the following sections.
+
+### Warm-up: Von Neumann path (RISC-V + FPGA, ANN first)
+
+This phase has been planned as my graduation project, with the aim to pushing the limits of von Neumann architecture (RISC-V) in edge computing by accelerating and optimizing existing ANNs. Take target network RT-DETR @lv2023detrs as an example, the steps are as follows:
+
+- **Quantization & pruning for edge**: We adopt sub-8-bit quantization (INT8 $\to$ INT4/INT2 if accuracy allows) and structured sparsity to minimize off-chip transfers. We will report accuracy-latency-energy trade-offs under identical datasets and input resolutions. 
+
+- **RISC-V-based accelerator with CFU Playground**: As a undergraduate warm-up project, we will imitate the design flow in @sabih2025hardwaresoftwarecodesignriscvextensions as shown in @fig-warm-up. We will implement a VexRiscv + Custom function unit (CFU) design within the open-source CFU Playground framework @Prakash_2023 shown in @fig-cfu-playground. The difficulties are to design customized extended instructions in RISC-V for computational-intensive operators (e.g., depthwise/pointwise convolution, $QK^T$, low-bit GEMM), write the corresponding RTL for the hardware.
+
+    ![Warm-up phase design flow (adapted from @sabih2025hardwaresoftwarecodesignriscvextensions)](warm-up.png){#fig-warm-up}
+
+    ![CFU-playground: ML Accelerators in RISC-V ISA [@sabih2025hardwaresoftwarecodesignriscvextensions; @Prakash_2023]](cfu-playground.png){#fig-cfu-playground width=80%}
+
+- **Full-stack design and DSE**: As a learning experience, we will reinvent the wheel by designing the entire accelerator in `Chisel` from scratch and open-sourcing it on Github. Then, we also explore a large multi-dimensional design space exploration (DSE) using automated methods (such as heuristic or evolutionary algorithms) to identify optimal configurations balancing accuracy, energy, and latency. Finally, we will use Arty A7-100T FPGA as the hardware platform for real measurements.
+
+### Mid-term: Brain-Inspired path (SNN on FPGA, portable toolchain) {#sec-mid-term}
+
+This phase is planned to be my potential PhD research topic. We will explore Brain-Inspired Computing (BIC) in computer vision tasks with a particular focus on EdgeSNNs (parameters $< 100\text{ M}$ @deng2025edgeintelligencespikingneural) and In-Memory Computing (CIM).
+
+![Leaky integrate-and-fire (LIF) neuron dynamics in SNN @10636118](lif-model.png){#fig-lif-model}
+
+SNNs have shown promise for ultra-low-power, event-driven inference at the edge. SNNs model neurons with explicit membrane dynamics (LIF model as shown in @fig-lif-model). Unlike conventional ANNs, SNNs process information in the temporal domain using binary spikes (event-driven coding), this is particularly suitable for SpikeCV cameras @ashraf2025spact18spikinghumanaction, which in my view are the next-generation vision sensors for edge applications such as autonomous driving. 
+
+
+Previous work on SNNs in autonomous driving includes Spiking-YOLO @kim2019spikingyolospikingneuralnetwork, EMS-YOLO @su2023deepdirectlytrainedspikingneural, etc. However, the performance is still not good in general compared to ANN @Jin2025. ECS-LIF in @Jin2025 suggests high-performance spiking detectors are possible with ANN-level matched accuracy and ultra-low energy costs. However, one still need to carefully select hardware architectures. For video classification, research is even more nascent @ashraf2025spact18spikinghumanaction. Early attempts include spiking recurrent networks (processing up to 300 time steps of video frames), or hybrid ANN-SNN approaches for action recognition @ashraf2025spact18spikinghumanaction, SpikeVideoTransformer @zou2025spikevideoformerefficientspikedrivenvideo, SpikeYOLO @luo2025integervaluedtrainingspikedriveninference. However, there is no SNN equivalent yet for many popular video models (e.g. no published spiking variant of SlowFast or DETR detection-transformer as of 2025).
+
+Since the research steps are not as clear as the warm-up phase, I list some potential research directions in parallel below:
+
+- **Explore SNN design / training method**: There are two routes to get optimized SNNs: ANN2SNN conversion [@lv2023detrs; @deng2025edgeintelligencespikingneural], or direct-training SNNs. We will explore both routes to find the best-performing SNNs for our target application. We will also investigate advanced training techniques such as surrogate gradients, temporal backpropagation, and biologically inspired learning rules to improve SNN performance.
+
+- **Develop unified SNN toolchain**: SNNs lack standard APIs and SNN-specific IRs (analogous to ONNX [@deng2025edgeintelligencespikingneural; @Carpegna_2025]) for quantization strategies tailored to spike dynamics @Carpegna_2025. We prototype a minimal graph-level SNN IR (ops, neuron nodes, timing semantics) plus a quantization API (e.g.,  $\text{INT8} \times \text{INT2}$ spike ops, ternary spikes, per-layer time-step budgets) to decouple front-end training from back-end compilers, following the direction of NIR and recent co-design work that targets FPGA-friendly spike arithmetic. This addresses today's fragmentation across neuromorphic stacks and enables "write once, target FPGA/Loihi/MCU." @Pedersen2024
+
+- **Further explore SNN internal complexity**: A recent study [@He2024; @10636118] by Network model with internal complexity bridges artificial intelligence and neuroscience shows a pivotal shift in thinking: Instead of simply growing neural networks by adding more layers or parameters ("external complexity"), we can embed richer dynamics *inside* each neuron or module --- a paradigm the authors term "small model with internal complexity."
+
+
+### Long-term: Emergent Intelligence
+
+This phase is my long-term aspiration toward artificial general intelligence (AGI). This stage will explore the theoretical and practical computational boundary and brand-new distributed computing paradigms inspired by the human brain under the guidance of recent theoretical investigations into *emergence* in artificial systems, such as Berti et al. (2025) @berti2025emergentabilitieslargelanguage who survey emergent abilities in LLMs and identify conditions like scaling, criticality and compression that contribute to spontaneous capability gains. Continuing the exploration of internal complexity in #sec-mid-term, there are two major directions: Turing-complete machine and hypercomputation beyond Turing limits.
+
+
+::: {layout-ncol=2}
+
+![Conway’s Game of Life (CGOL): local update rules @Hirose_2020.](cgol.png){#fig-cgol}
+
+![Gosper’s glider gun: a self-replicating pattern proving Turing-completeness [@Datawrapper_2025_datawrapper; @wikipediacontributors_2023_gun].](gosper-glider-gun.gif){#fig-gosper-glider-gun}
+
+:::
+
+- **Decentralized, event-driven architectures**: We will first explore turing-complete hardware and software systems that mimic the *highly-distributed, asynchronous nature and learning-while-inferencing feature* of the brain. *Turing-equivalent* cellular automata such as CGOL @mccrum2024conwaysgamelifeanalogue (@fig-cgol), Langton's ant, Particle Life already demonstrate how simple local rules can give rise to complex, emergent patterns (@fig-gosper-glider-gun, @fig-pl1, @fig-pl2). While using the CGOL itself as a practical "computer" is inefficient, it serves as a proof-of-concept that emergence can arise from simple components. The challenge is discovering the *right set of rules (i.e., internal complexity) or learning algorithms* that yield robust emergent intelligence, not just (external) complexity for its own sake @krakauer2025largelanguagemodelsemergence. Then turn out to nature (the hardware) to find out if there is a machine under our control that performs this set of rules intrinsically.
+
+::: {.column-margin}
+
+![Emergent chasing behavior (Particle Life).](particle-life1.gif){#fig-pl1}
+
+![Stable pattern formation (Particle Life).](particle-life2.gif){#fig-pl2}
+
+:::
+
+- **Hypercomputation beyond Turing limits**: Human brain might be exploiting computational principles beyond the scope of traditional Turing machines. Penrose and others (like Stuart Hameroff) have hypothesized that quantum effects in neural microstructures (e.g. microtubules) could enable the brain to do things standard computers cannot @Continuing_To_Use_2025_popularmechanics. Achieving AI with brain-like cognition might then require tapping into quantum computing @silva2025leveragingquantumsuperpositioninfer, ONNs @Fu2024, Organoid Intelligence (OI) [@OI2023; @Timothy_Oh_2025_medium] and beyond.
+
+
+## References
+
+
+
+<!-- 
+Meanwhile, spiking neural networks (SNNs) have emerged as promising candidates for ultra-low-power, event-driven inference at the edge. Yet, as noted by Deng et al. (2025), the current SNN ecosystem suffers from the lack of unified intermediate representations (IRs) and quantization APIs tailored to spike dynamics—gaps analogous to the pre-ONNX era of deep learning frameworks. Ongoing research, such as Carpegna et al. (2025), highlights that SNN toolchains remain highly fragmented and hardware-specific, limiting portability across platforms (FPGA, Loihi, MCU). Establishing standardized SNN IRs and quantization interfaces is thus a critical enabler for large-scale deployment and hardware co-design.
+
+In summary, cloud-based AI systems are constrained by cost, latency, energy, and privacy. FPGA-based hardware–software co-design provides an effective solution for application-specific, low-power, low-latency computation. At the same time, the neuromorphic computing paradigm—especially SNNs—offers a biologically inspired path toward event-driven and energy-efficient intelligence. The absence of unified toolchains and co-design standards forms the primary motivation and opportunity for this research. -->
