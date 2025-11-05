@@ -552,6 +552,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#general" id="toc-general" class="nav-link" data-scroll-target="#general">General</a></li>
   <li><a href="#interface" id="toc-interface" class="nav-link" data-scroll-target="#interface">Interface</a></li>
+  <li><a href="#zynq" id="toc-zynq" class="nav-link" data-scroll-target="#zynq">ZYNQ</a></li>
   <li><a href="#file-formats" id="toc-file-formats" class="nav-link" data-scroll-target="#file-formats">File formats</a></li>
   <li><a href="#hdl" id="toc-hdl" class="nav-link" data-scroll-target="#hdl">HDL</a></li>
   <li><a href="#fpga-principles" id="toc-fpga-principles" class="nav-link" data-scroll-target="#fpga-principles">FPGA Principles</a></li>
@@ -638,7 +639,7 @@ window.Quarto = {
 <ul>
 <li><code>PLATFORMS=common_soc sim hps</code>, 三个平台. <code>common_soc</code> 指标准的 FPGA 开发平台; <code>sim</code> 指用 Verilator 进行软件仿真.</li>
 </ul></li>
-<li><p><strong>SoC (System on Chip) FPGA 片上系统</strong>: 比如 ZYNQ, <strong>一块硅芯片</strong> 就可以实现整个系统的功能 (而不是要组合多个芯片).</p></li>
+<li><p><strong>SoC (System on Chip) FPGA 片上系统</strong>: 比如 ZYNQ 有 PL 和 PS, <strong>一块硅芯片</strong> 就可以实现整个系统的功能 (而不是要组合多个芯片).</p></li>
 <li><p><strong>ACAP (Adaptive Compute Acceleration Platform)</strong>: 集成了专用 AI 引擎／DSP阵列、Network-on-chip (NoC)、高带宽存储接口 (如 HBM) 等异构硬件资源 <span class="citation" data-cites="sali2025realtimefpgabased"><a href="#ref-sali2025realtimefpgabased" role="doc-biblioref">[1]</a></span>, 如 Xilinx Versal 系列.</p></li>
 <li><p><strong>IP Core</strong>: Intellectual Property Core. 由一方 (开发者或公司) 设计，并通过许可授权给其他设计者使用。常见的 IP 核包括 CPU 内核、以太网控制器、内存控制器等.</p>
 <ul>
@@ -659,11 +660,17 @@ window.Quarto = {
 </ul></li>
 </ul>
 </section>
+<section id="zynq" class="level3">
+<h3 class="anchored" data-anchor-id="zynq">ZYNQ</h3>
+<ul>
+<li><strong>APU (Application Processing Unit)</strong>: ZYNQ PS 内部的一个双核 ARM Cortex-A9 CPU. (就是 CPU, 见 <a href="../cc-fpga/cc-fpga.html#sec-ps-structure">FPGA 原理速成</a>)</li>
+</ul>
+</section>
 <section id="file-formats" class="level3">
 <h3 class="anchored" data-anchor-id="file-formats">File formats</h3>
 <ul>
 <li><p><strong><code>.pcf</code> 文件</strong>: Physical Constraints File. <code>.pcf</code> 文件告诉工具：Verilog 中的某个逻辑信号，物理上应该接到 FPGA 的哪个 pin. 比如:</p>
-<pre class="pcf"><code>set_io D1 B5</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>set_io D1 B5</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>表示把 <code>D1</code> (在 <code>.v</code> 文件中定义的) 信号连接到 FPGA 的 B5 引脚.</p>
 <ul>
 <li><strong><code>.xdc</code> 文件</strong>: Xilinx Design Constraints File (Vivado 工具使用的约束文件, a.k.a., Master Constraints File 主约束文件). <a href="https://raw.githubusercontent.com/Digilent/digilent-xdc/master/Arty-A7-35-Master.xdc">Arty 35T xdc 文件</a></li>
@@ -910,6 +917,7 @@ Figure&nbsp;2: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-st
 </ul></li>
 <li><p><strong>PPA (Power, Performance, Area)</strong>: 三个重要的设计指标.</p></li>
 <li><p><strong>DSA (Domain Specific Architecture)</strong></p></li>
+<li><p><strong>DDR (Double Data Rate)</strong>: 一种 (双倍数据率) RAM, 在上升沿和下降沿各传输一次数据. <strong>SDR</strong> 是早期内存技术, 只在时钟上升沿传输数据.</p></li>
 </ul>
 </section>
 <section id="gpu-terms" class="level2">
@@ -1046,28 +1054,28 @@ Figure&nbsp;2: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-st
 
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
 <div id="ref-sali2025realtimefpgabased" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[1] </div><div class="csl-right-inline">S. M. Sali, M. Meribout, and A. A. Majeed, <span>“<a href="https://arxiv.org/abs/2509.04153">Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations</a>.”</span> 2025.</div>
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">S. M. Sali, M. Meribout, and A. A. Majeed, <span>“Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations.”</span> 2025. Available: <a href="https://arxiv.org/abs/2509.04153">https://arxiv.org/abs/2509.04153</a></div>
 </div>
 <div id="ref-Simulation_Time._Putting_2025_oscc" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[2] </div><div class="csl-right-inline">YSYX, <span>“<a href="https://ysyx.oscc.cc/docs/2407/e/5.html#%E6%89%93%E5%8D%B0%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%B3%A2%E5%BD%A2">E5 从 RTL 代码到可流片版图 | 官方文档</a>,”</span> 2025.</div>
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">YSYX, <span>“E5 从 RTL 代码到可流片版图 | 官方文档,”</span> 2025, Available: <a href="https://ysyx.oscc.cc/docs/2407/e/5.html#%E6%89%93%E5%8D%B0%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%B3%A2%E5%BD%A2">https://ysyx.oscc.cc/docs/2407/e/5.html#%E6%89%93%E5%8D%B0%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%B3%A2%E5%BD%A2</a></div>
 </div>
 <div id="ref-mellor2021neuralarchitecturesearchtraining" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[3] </div><div class="csl-right-inline">J. Mellor, J. Turner, A. Storkey, and E. J. Crowley, <span>“<a href="https://arxiv.org/abs/2006.04647">Neural architecture search without training</a>.”</span> 2021.</div>
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">J. Mellor, J. Turner, A. Storkey, and E. J. Crowley, <span>“Neural architecture search without training.”</span> 2021. Available: <a href="https://arxiv.org/abs/2006.04647">https://arxiv.org/abs/2006.04647</a></div>
 </div>
 <div id="ref-deng2025edgeintelligencespikingneural" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[4] </div><div class="csl-right-inline">S. Deng, D. Yu, C. Lv, X. Du, L. Jiang, X. Zhao, W. Tong, X. Zheng, W. Fang, P. Zhao, G. Pan, S. Dustdar, and A. Y. Zomaya, <span>“<a href="https://arxiv.org/abs/2507.14069">Edge intelligence with spiking neural networks</a>.”</span> 2025.</div>
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">S. Deng <em>et al.</em>, <span>“Edge intelligence with spiking neural networks.”</span> 2025. Available: <a href="https://arxiv.org/abs/2507.14069">https://arxiv.org/abs/2507.14069</a></div>
 </div>
 <div id="ref-somvanshi2025tinymachinelearningtiny" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[5] </div><div class="csl-right-inline">S. Somvanshi, M. M. Islam, G. Chhetri, R. Chakraborty, M. S. Mimi, S. A. Shuvo, K. S. Islam, S. A. Javed, S. A. Rafat, A. Dutta, and S. Das, <span>“<a href="https://arxiv.org/abs/2506.18927">From tiny machine learning to tiny deep learning: A survey</a>.”</span> 2025.</div>
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">S. Somvanshi <em>et al.</em>, <span>“From tiny machine learning to tiny deep learning: A survey.”</span> 2025. Available: <a href="https://arxiv.org/abs/2506.18927">https://arxiv.org/abs/2506.18927</a></div>
 </div>
 <div id="ref-sabih2025hardwaresoftwarecodesignriscvextensions" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[6] </div><div class="csl-right-inline">M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, <span>“<a href="https://arxiv.org/abs/2504.19659">Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs</a>.”</span> 2025.</div>
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, <span>“Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.”</span> 2025. Available: <a href="https://arxiv.org/abs/2504.19659">https://arxiv.org/abs/2504.19659</a></div>
 </div>
 <div id="ref-The_Human_Developers_2025_cnblogs" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[7] </div><div class="csl-right-inline">S. Dai, <span>“<a href="https://www.cnblogs.com/sddai/p/18670953">Symbol grounding problem in artificial intelligence</a>,”</span> 2025.</div>
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">S. Dai, <span>“Symbol grounding problem in artificial intelligence,”</span> 2025, Available: <a href="https://www.cnblogs.com/sddai/p/18670953">https://www.cnblogs.com/sddai/p/18670953</a></div>
 </div>
 <div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[8] </div><div class="csl-right-inline">Lazyparser, <span>“<a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">Compilation and linker</a>,”</span> 2025.</div>
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">Lazyparser, <span>“Compilation and linker,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5</a></div>
 </div>
 </div>
 </section>
