@@ -625,7 +625,7 @@ window.Quarto = {
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">file</span> test.zip <span class="co"># 返回 </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
-<section id="fpga-terms" class="level2">
+<section id="fpga-terms" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="fpga-terms">FPGA Terms</h2>
 <section id="general" class="level3">
 <h3 class="anchored" data-anchor-id="general">General</h3>
@@ -660,10 +660,36 @@ window.Quarto = {
 </ul></li>
 </ul>
 </section>
-<section id="zynq" class="level3">
+<section id="zynq" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="zynq">ZYNQ</h3>
 <ul>
-<li><strong>APU (Application Processing Unit)</strong>: ZYNQ PS 内部的一个双核 ARM Cortex-A9 CPU. (就是 CPU, 见 <a href="../cc-fpga/cc-fpga.html#sec-ps-structure">FPGA 原理速成</a>)</li>
+<li><strong>核心商业模式</strong>:
+<ul>
+<li><strong>IP 提供商</strong>: 设计 IP 核并授权给芯片设计制造商使用. E.g., ARM (CPU 内核设计)</li>
+<li><strong>芯片设计制造商</strong>: 购买 IP 核并设计和生产关键芯片. E.g., Xilinx (被 AMD 收购), ST (STM32 核心芯片的制造商).</li>
+<li><strong>开发板制造商</strong>: 从芯片设计制造商处采购芯片, 并设计供电电路、时钟电路、将方形黑色的芯片底部的引脚引出接入各种物理接口、设计 PCB 等, 最终生产出开发板. E.g., Alinx, 正点原子, Digilent.</li>
+</ul></li>
+<li><strong>命名规则</strong>
+<ul>
+<li>E.g., ZYNQ XC7Z010 CLG400ABX2021 D6168711A, XC7: 7 系列 (Xilinx Corporation), Z: ZYNQ, 010: 逻辑资源规模 (越小越少), CLG: 封装类型 (Chip-Scale Lead-Free BGA (Ball Grid Array)), 400: 引脚数, ABX: 温度、性能等级, 2021: 生产年份, D6168711A: 可理解为序列号.</li>
+<li>ZYNQ 7010 SoCs 包括 XC7Z010 等很多型号.</li>
+</ul></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="zynq-7010-board.png" class="img-fluid figure-img"></p>
+<figcaption>ZYNQ 7010 实物图: Xilinx 与 Alinx 公司分别负责的部分.</figcaption>
+</figure>
+</div>
+</div></div><ul>
+<li><p><strong>APU (Application Processing Unit)</strong>: ZYNQ PS 内部的一个双核 ARM Cortex-A9 CPU. (就是 CPU, 见 <a href="../cc-fpga/cc-fpga.html#sec-ps-structure">FPGA 原理速成</a>)</p></li>
+<li><p><strong>MIO (Multiplexed I/O)</strong>: ZYNQ PS 黑色芯片里面有多种外设: SPI, IIC, CAN, UART, etc. 比如 UART 主要涉及 TX 和 RX 两类信号, 这两类信号需要通过 MIO 与用户交互. 但是 BGA 封装出来的引脚很少 (XC7 只有 54 根), 需要进行复用.</p>
+<ul>
+<li><strong>EMIO (Extended MIO)</strong>: 先要通过 PL 再与用户交互.</li>
+</ul></li>
+<li><p><strong>GIC (Generic Interrupt Controller)</strong>: 通用中断控制器, 收集外设、PL 发来的中断请求, 按优先级分配给 APU 中的两个核. 相当于 STM32 里面的 NVIC (Nested Vectored Interrupt Controller), 只不过 NVIC 只需要给到一个核.</p></li>
 </ul>
 </section>
 <section id="file-formats" class="level3">
