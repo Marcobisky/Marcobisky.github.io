@@ -35,11 +35,25 @@ title: "FPGA 原理速成"
 
 不要认为一个开发板只有 “软” 部分, 有些 (ZYNQ) 经常用的模块会用硬件 “焊死” 在板子上 (**Heterogenous 异构**、**SoC**). 这些硬件通过 I/O 口与 PL 部分通信, 比如:
 
-![ZYNQ PS 和 PL 通过 AXI 通信](zynq.png){width=60%}
+![ZYNQ PS 和 PL 通过 AXI 通信](zynq.png){width=50%}
 
 以 ZYNQ XC7Z010 为例, 在 Vivado 中创建工程 `Create Block Design` 后, 添加 `ZYNQ7 Processing System` IP 核 (@fig-zynq-xz7z-ps-pl), 可以看到 PS (白色) 和 PL (灰色) 以及他们之间的连接:
 
 ![ZYNQ XC7Z010 的 PS 和 PL](zynq-xz7z-ps-pl.png){#fig-zynq-xz7z-ps-pl}
+
+## AXI4 总线协议
+
+### Port 接口
+
+- **GP (General Purpose)**: 通用接口, 位宽 32 bits, 使用 AXI4_LITE 协议, 传输小数据量 (比如命令和地址).
+
+- **HP (High Performance)**: 高性能接口, 位宽 32 或 64 bits, 使用 AXI4_FULL 协议, 传输大数据量.
+
+- **ACP (Accelerator Coherency Port)**: 加速器一致性端口, 位宽 64 bits, 使用 AXI_FULL 协议, 适合高速通信 (用的比较少).
+
+    ![两种 AXI 和在 ZYNQ 7010 上面使用的接口](axi-zynq.png){#fig-axi-zynq width=50%}
+
+
 
 ## 编译过程
 
