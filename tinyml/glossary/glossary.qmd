@@ -39,7 +39,7 @@ title: "Glossary 名词解释"
 - **HPS**: High Performance System. 
     - `PLATFORMS=common_soc sim hps`, 三个平台. `common_soc` 指标准的 FPGA 开发平台; `sim` 指用 Verilator 进行软件仿真.
 
-- **SoC (System on Chip) FPGA 片上系统**: 比如 ZYNQ 有 PL 和 PS, **一块硅芯片** 就可以实现整个系统的功能 (而不是要组合多个芯片). 
+- **SoC (System on Chip) FPGA 片上系统**: 比如 ZYNQ 有 PL 和 PS, **一块硅芯片** 就可以实现整个系统的功能 (而不是要组合多个芯片 (Chiplet)). 有时 Chiplets 组成的系统也叫 SoC, 但严格来说 SoC 是指单芯片系统. 
 
 - **ACAP (Adaptive Compute Acceleration Platform)**: 集成了专用 AI 引擎／DSP阵列、Network-on-chip (NoC)、高带宽存储接口 (如 HBM) 等异构硬件资源 @sali2025realtimefpgabased, 如 Xilinx Versal 系列.
 
@@ -142,7 +142,7 @@ title: "Glossary 名词解释"
 
 - **UVM (Universal Verification Methodology)**: 验证方法学.
 
-## Submodules 项目中用到的核心子模块
+## Open Source Tools
 
 > 该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!
 
@@ -196,7 +196,24 @@ title: "Glossary 名词解释"
 
 - [**Litex**](https://github.com/enjoy-digital/litex): 支持用 Python 脚本拼装出完整的 SoC.
 
+## EDA Terms
 
+- **Netlist 网表**: 一个 Graph, 描述了电路用了哪些元件和它们之间的连接. 
+    - Gate-level 门级网表: 比如用 `yosys` 生成的 `.json` 文件.
+    - Transistor-level 晶体管级网表: `.spice`, `.cir`.
+
+### Packaging 封装
+
+- **Wafer 晶圆, Die, Chiplet Arch**
+    - Die 和 Tile: 一样的概念, 前者强调物理实体, 后者强调逻辑功能单元.
+
+    ![Die & Wafer 关系, Chiplet 思想 (Use smaller dies) 与其如何提高良率、降低成本 @filho_2024_what](chiplet.png){#fig-chiplet}
+
+:::{.column-margin}
+![多个 Die 通过 D2D connection (die-to-die) 形成 SoC @filho_2024_what](die2soc.png){#fig-die2soc}
+:::
+
+- **TSV (Through-Silicon Via) 硅通孔**: 就是在硅片上打孔, 然后在孔内镀铜, 形成垂直的电连接通道.
 
 ## ML Terms
 
@@ -319,6 +336,14 @@ title: "Glossary 名词解释"
 - **DDR (Double Data Rate)**: 一种 (双倍数据率) RAM, 在上升沿和下降沿各传输一次数据. **SDR** 是早期内存技术, 只在时钟上升沿传输数据.
 
 ## GPU Terms
+
+- **GDDR (Graphics DDR)**: 显存 (每颗 GDDR6X 带宽 $80$ GB/s.)
+
+- **HBM (High Bandwidth Memory)**: 高带宽内存 (每颗 HBM2E 带宽 $460$ GB/s.)
+
+:::{.column-margin}
+![AMD GPU 2015 采用 2.5D 封装](amd-gpu-2015.png){#fig-amd-gpu-2015}
+:::
 
 - **Kernel**: 在 GPU 上运行的函数. 
 
