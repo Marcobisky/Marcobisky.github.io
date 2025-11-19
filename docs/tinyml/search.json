@@ -55,6 +55,17 @@
     ]
   },
   {
+    "objectID": "index.html#references",
+    "href": "index.html#references",
+    "title": "TinyML",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] 电子H., “哈工大深度学习体系结构课程 | 实验2：YOLO算法量化加速-CSDN博客,” 2025, Available: https://blog.csdn.net/HackEle/article/details/135944887\n\n\n[2] “Deep learning architecture.” Gitee.com, 2021. Available: https://gitee.com/hitsz-cslab/dla#https://gitee.com/hitsz-cslab/dla/tree/master/stupkt. [Accessed: Jul. 15, 2025]\n\n\n[3] Intel, “What is edge computing? – intel.” Intel, 2025. Available: https://www.intel.com/content/www/us/en/learn/what-is-edge-computing.html\n\n\n[4] S. M. Sali, M. Meribout, and A. A. Majeed, “Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations.” 2025. Available: https://arxiv.org/abs/2509.04153\n\n\n[5] S. G. at ETH Zürich, “Introduction to FPGAs and ML inference with hls4ml (benjamin ramhorst, 8 november 2024).” YouTube, Nov. 2024. Available: https://www.youtube.com/watch?v=2y3GNY4tf7A. [Accessed: Nov. 04, 2025]\n\n\n[6] J. Duarte et al., “Fast inference of deep neural networks in FPGAs for particle physics,” JINST, vol. 13, no. 7, p. P07027, 2018, doi: 10.1088/1748-0221/13/07/P07027. Available: https://arxiv.org/abs/1804.06913\n\n\n[7] U. D. of Energy, “AI tackles disruptive tearing instability in fusion plasma.” Energy.gov, 2025. Available: https://www.energy.gov/science/fes/articles/ai-tackles-disruptive-tearing-instability-fusion-plasma\n\n\n[8] S. Deng et al., “Edge intelligence with spiking neural networks.” 2025. Available: https://arxiv.org/abs/2507.14069\n\n\n[9] S. Somvanshi et al., “From tiny machine learning to tiny deep learning: A survey.” 2025. Available: https://arxiv.org/abs/2506.18927\n\n\n[10] M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, “Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.” 2025. Available: https://arxiv.org/abs/2504.19659",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction 引入</span>"
+    ]
+  },
+  {
     "objectID": "resources/resources.html",
     "href": "resources/resources.html",
     "title": "Resources 学习资料汇总",
@@ -165,11 +176,22 @@
     ]
   },
   {
-    "objectID": "glossary/glossary.html#submodules-项目中用到的核心子模块",
-    "href": "glossary/glossary.html#submodules-项目中用到的核心子模块",
+    "objectID": "glossary/glossary.html#open-source-tools",
+    "href": "glossary/glossary.html#open-source-tools",
     "title": "Glossary 名词解释",
-    "section": "Submodules 项目中用到的核心子模块",
-    "text": "Submodules 项目中用到的核心子模块\n\n该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!\n\n\nverilator: 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行仿真, 模拟出时钟、寄存器逻辑、外设交互等行为.\nverilator -cc blink.v # 生成 obj_dir/ 其中含有转换好的 C++ 代码\niverilog (Icarus Verilog): 也是仿真 (但不输出 C 代码):\niverilog -o blink.vvp blink.v blink_tb.v\n# 生成 vcd 文件可配合 GTKWave 查看波形\nvvp blink.vvp\nopenFPGALoader: 用于将比特流烧录到 FPGA (但不能调试).\n# 示例：\nopenFPGALoader -b arty arty_bitstream.bit      # SRAM 加载\nopenFPGALoader -b arty -f arty_bitstream.bit   # 写入 flash\nopenocd: Open On-Chip Debugger. 用于调试 FPGA 的工具. 支持 JTAG 接口.\n三个端到端的工具链:\n\nVivado: IDE, 闭源.\nyosysHQ (Yosys Open SYnthesis Suite Headquarters): yyds!! 一个开源的 EDA 工具链. 子项目包括:\n\nicestorm: 用于针对 Lattice iCE40 FPGA 实现完全的端到端开源流程, 从 Verilog 到 bitstream, 再烧写到 FPGA 板卡上. 以下每一个命令都是一个单独的 repo!!\n# yosys 综合 (将 verilog 转换为网表 .json)\nyosys -p 'synth_ice40 -top blink -json blink.json' blink.v\n# nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)\nnextpnr-ice40 --up5k --json blink.json --pcf blink.pcf --asc blink.asc\n# icepack 打包 (生成 bitstream .bin)\nicepack blink.asc blink.bin\n# icesprog 烧写 (将 bitstream 写入 FPGA)\nsudo icesprog blink.bin\n\nF4PGA: 以前叫 Symbiflow, 旨在为多家 FPGA 供应商 (Xilinx 7 系列、Lattice iCE40/ECP5、QuickLogic EOS S3 等) 提供统一、功能完备、可扩展且无需专有软件的端到端开发流程.\n\n里面大量使用了 YosysHQ 的工具.\n\n\nSpinalHDL: 一个基于 Scala 的硬件描述语言 (HDL), 用于生成 Verilog 代码. SpinalHDL 提供了更高级的抽象和更强大的功能, 使得硬件设计更加灵活和可扩展.\n\nVexRiscv:\n\nLitex: 支持用 Python 脚本拼装出完整的 SoC.",
+    "section": "Open Source Tools",
+    "text": "Open Source Tools\n\n该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!\n\n\nverilator: 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行仿真, 模拟出时钟、寄存器逻辑、外设交互等行为.\nverilator -cc blink.v # 生成 obj_dir/ 其中含有转换好的 C++ 代码\niverilog (Icarus Verilog): 也是仿真 (但不输出 C 代码):\niverilog -o blink.vvp blink.v blink_tb.v\n# 生成 vcd 文件可配合 GTKWave 查看波形\nvvp blink.vvp\nopenFPGALoader: 用于将比特流烧录到 FPGA (但不能调试).\n# 示例：\nopenFPGALoader -b arty arty_bitstream.bit      # SRAM 加载\nopenFPGALoader -b arty -f arty_bitstream.bit   # 写入 flash\nopenocd: Open On-Chip Debugger. 用于调试 FPGA 的工具. 支持 JTAG 接口.\n三个端到端的工具链:\n\nVivado: IDE, 闭源.\nyosysHQ (Yosys Open SYnthesis Suite Headquarters): yyds!! 一个开源的 EDA 工具链. 子项目包括:\n\nicestorm: 用于针对 Lattice iCE40 FPGA 实现完全的端到端开源流程, 从 Verilog 到 bitstream, 再烧写到 FPGA 板卡上. 以下每一个命令都是一个单独的 repo!!\n# yosys 综合 (将 verilog 转换为网表 .json)\nyosys -p 'synth_ice40 -top blink -json blink.json' blink.v\n# nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)\nnextpnr-ice40 --up5k --json blink.json --pcf blink.pcf --asc blink.asc\n# icepack 打包 (生成 bitstream .bin)\nicepack blink.asc blink.bin\n# icesprog 烧写 (将 bitstream 写入 FPGA)\nsudo icesprog blink.bin\n\nF4PGA: 以前叫 Symbiflow, 旨在为多家 FPGA 供应商 (Xilinx 7 系列、Lattice iCE40/ECP5、QuickLogic EOS S3 等) 提供统一、功能完备、可扩展且无需专有软件的端到端开发流程.\n\n里面大量使用了 YosysHQ 的工具.\n\n\nSpinalHDL: 一个基于 Scala 的硬件描述语言 (HDL), 用于生成 Verilog 代码. SpinalHDL 提供了更高级的抽象和更强大的功能, 使得硬件设计更加灵活和可扩展.\n\nVexRiscv:\n\nLitex: 支持用 Python 脚本拼装出完整的 SoC.",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+    ]
+  },
+  {
+    "objectID": "glossary/glossary.html#eda-terms",
+    "href": "glossary/glossary.html#eda-terms",
+    "title": "Glossary 名词解释",
+    "section": "EDA Terms",
+    "text": "EDA Terms\n\nNetlist 网表: 一个 Graph, 描述了电路用了哪些元件和它们之间的连接.\n\nGate-level 门级网表: 比如用 yosys 生成的 .json 文件.\nTransistor-level 晶体管级网表: .spice, .cir.\n\n\n\nPackaging 封装\n\nWafer 晶圆, Die, Chiplet Arch\n\nDie 和 Tile: 一样的概念, 前者强调物理实体, 后者强调逻辑功能单元.\n\n\n\n\n\n\n\nFigure 1: Die & Wafer 关系, Chiplet 思想 (Use smaller dies) 与其如何提高良率、降低成本 [3]\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 2: 多个 Die 通过 D2D connection (die-to-die) 形成 SoC [3]\n\n\n\n\nTSV (Through-Silicon Via) 硅通孔: 就是在硅片上打孔, 然后在孔内镀铜, 形成垂直的电连接通道.\nHBT (Hybrid bonding terminal): 一种连接上下层 Die 的端子 (通过直接原子键合).",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
@@ -253,17 +275,6 @@
     ]
   },
   {
-    "objectID": "glossary/glossary.html#analoggym-terms",
-    "href": "glossary/glossary.html#analoggym-terms",
-    "title": "Glossary 名词解释",
-    "section": "AnalogGYM Terms",
-    "text": "AnalogGYM Terms\n\nFOM (Figure of Merit): 性能指标.\nPVT (Process, Voltage, Temperature): 影响电路性能的三个主要因素.\n\nProcess: 工艺, e.g.,\n\nTT (Typical-Typical): 典型工艺角, NMOS 和 PMOS 都是典型速度设计的目标工艺角\nFF (Fast-Fast): 快-快工艺角, NMOS 和 PMOS 都比典型值快, 功耗通常较高，速度快\nSS (Slow-Slow): 慢-慢工艺角, NMOS 和 PMOS 都比典型值慢, 功耗较低，但速度慢\nFS (Fast-Slow): 快-慢工艺角, NMOS 快，PMOS 慢, 不对称的工艺条件\nSF (Slow-Fast): 慢-快工艺角, NMOS 慢，PMOS 快, 另一种不对称条件NMOS慢，PMOS快\n\nPVT corner: PVT 角, 某种特定的工艺、电压和温度组合 (一般是比较极端的组合, 所以称为 “corner”).\n\nGAT (Graph Attention Network): 图注意力网络.\nMTRL (Multi-task Reinforcement Learning): 多任务强化学习.\nPDK (Process Development Kit): 工艺开发套件.\n\nNDA (Non-Disclosure Agreement): 商业 PDK 必须对模型文件、器件参数、仿真结果保密 (这是将 ML 应用于电路设计的最大瓶颈之一 [8]).\nSKY130: 开源 PDK, 由 Google 和 SkyWater Technology 在 2020 年共同开发的 130nm 开源工艺平台.",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
-    ]
-  },
-  {
     "objectID": "glossary/glossary.html#integrated-circuit-terms",
     "href": "glossary/glossary.html#integrated-circuit-terms",
     "title": "Glossary 名词解释",
@@ -294,6 +305,83 @@
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+    ]
+  },
+  {
+    "objectID": "glossary/glossary.html#references",
+    "href": "glossary/glossary.html#references",
+    "title": "Glossary 名词解释",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] S. M. Sali, M. Meribout, and A. A. Majeed, “Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations.” 2025. Available: https://arxiv.org/abs/2509.04153\n\n\n[2] YSYX, “E5 从 RTL 代码到可流片版图 | 官方文档,” 2025, Available: https://ysyx.oscc.cc/docs/2407/e/5.html#%E6%89%93%E5%8D%B0%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%B3%A2%E5%BD%A2\n\n\n[3] R. P. Filho, “What is a chiplet, and why should you care?” Keysight.com, Aug. 2024. Available: https://www.keysight.com/blogs/en/tech/sim-des/what-is-a-chiplet-and-why-should-you-care. [Accessed: Nov. 16, 2025]\n\n\n[4] J. Mellor, J. Turner, A. Storkey, and E. J. Crowley, “Neural architecture search without training.” 2021. Available: https://arxiv.org/abs/2006.04647\n\n\n[5] S. Deng et al., “Edge intelligence with spiking neural networks.” 2025. Available: https://arxiv.org/abs/2507.14069\n\n\n[6] S. Somvanshi et al., “From tiny machine learning to tiny deep learning: A survey.” 2025. Available: https://arxiv.org/abs/2506.18927\n\n\n[7] M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, “Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.” 2025. Available: https://arxiv.org/abs/2504.19659\n\n\n[8] S. Dai, “Symbol grounding problem in artificial intelligence,” 2025, Available: https://www.cnblogs.com/sddai/p/18670953\n\n\n[9] Lazyparser, “Compilation and linker,” 2025, Available: https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&vd_source=42579e22289b6144ba0b2bdcf99834e3&p=5",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+    ]
+  },
+  {
+    "objectID": "research-proposal/research-proposal.html",
+    "href": "research-proposal/research-proposal.html",
+    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
+    "section": "",
+    "text": "Motivation\nOver the past decade, cloud-based training and inference pipelines face growing issues of high latency, bandwidth bottlenecks, data privacy issues [1] and escalating training energy cost [2], etc. Edge GPUs partially alleviate these issues but, on the one hand, remain too general-purpose, lacking flexibility for custom numeric precisions, memory hierarchy and data movement [3]. On the other hand, different applications stress different aspects:\nRecent evidence [7] shows FPGA-based accelerators can outperform GPUs in both energy efficiency and deterministic latency when tuned for application-specific workloads. Therefore, FPGA-based hardware–software co-design emerges as a promising solution for low-power, low-latency edge computing tailored to specific application needs.",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
+    ]
+  },
+  {
+    "objectID": "research-proposal/research-proposal.html#motivation",
+    "href": "research-proposal/research-proposal.html#motivation",
+    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
+    "section": "",
+    "text": "Autonomous systems, UAVs, Controlled nuclear fusion: Demand sub-millisecond latency for control stability and decision safety [4], [5], [6].\nMedical and IoT devices: Prioritize data privacy and local analytics to meet regulatory and ethical standards [1].",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
+    ]
+  },
+  {
+    "objectID": "research-proposal/research-proposal.html#problem-statement-research-questions",
+    "href": "research-proposal/research-proposal.html#problem-statement-research-questions",
+    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
+    "section": "Problem Statement & Research Questions",
+    "text": "Problem Statement & Research Questions\nProblem. Edge AI is constrained by end-to-end latency, energy per inference, and privacy. General-purpose accelerators lack support for application-specific numerics and event-driven workloads. SNNs promise ultra-low-power inference but lack portable toolchains (IR/quantization) and competitive accuracy at low time-steps.\n\nHow far can RISC-V + FPGA co-design push latency/energy for real-time perception while preserving accuracy?\nCan SNNs with internal complexity (multi-timescale, adaptive thresholds) match ANN accuracy at few-time-step inference on FPGA?\nWhat portable SNN IR + quantization API enables “write once, target multiple back-ends” without accuracy regressions?\nWhich dataflows (streaming vs memory-centric) minimize data motion for attention/convolution bottlenecks at the edge?",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
+    ]
+  },
+  {
+    "objectID": "research-proposal/research-proposal.html#project-objectives-expected-contributions",
+    "href": "research-proposal/research-proposal.html#project-objectives-expected-contributions",
+    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
+    "section": "Project Objectives & Expected Contributions",
+    "text": "Project Objectives & Expected Contributions\n\nAn open source, reproducible full-stack edge ML system (models \\(\\to\\) compiler \\(\\to\\) RTL \\(\\to\\) bitstream) that surpasses the ANN GPU-edge baseline on \\(\\ge 2\\) of {latency, energy per inference, accuracy} for a selected application scenario.\nA portable SNN IR + quantization API for spike dynamics, demonstrated on FPGA.\nEvidence that internal complexity can reduce depth/width and time-steps while maintaining accuracy on edge tasks.\nAn open benchmark harness with NeuroBench-style reporting for fair cross-hardware comparison.\n\nThere are two variables to choose though:\n\nApplication scenario: Suits edge computing and extremely low latency (possibly video stream processing / controlled nuclear fusion).\nTarget network structure: Possibly accelerating RT-DETR [8] or YOLO, or directly optimize existing Spiking Neural Networks (SNNs).",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
+    ]
+  },
+  {
+    "objectID": "research-proposal/research-proposal.html#methodology",
+    "href": "research-proposal/research-proposal.html#methodology",
+    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
+    "section": "Methodology",
+    "text": "Methodology\nTo achieve the project objectives, the proposed research will follow a three-stage methodology: The warm-up phase establishes an ANN baseline and a RISC-V-coupled FPGA accelerator with deterministic low-latency dataflows. The mid-term phase investigates brain-inspired computing, especially SNNs, focusing on improving accuracy, enhancing LIF model (increasing “internal complexity” [9], [10]), sparse computation, quantization / pruning models and establishing SNN standard APIs. The long-term phase explores emergent intelligence by investigating hypercomputation beyond Turing limits. The details are as shown in the following sections.\n\nWarm-up: Von Neumann path (RISC-V + FPGA, ANN first)\nThis phase has been planned as my graduation project, with the aim to pushing the limits of von Neumann architecture (RISC-V) in edge computing by accelerating and optimizing existing ANNs. Take target network RT-DETR [8] as an example, the steps are as follows:\n\nQuantization & pruning for edge: We adopt sub-8-bit quantization (INT8 \\(\\to\\) INT4/INT2 if accuracy allows) and structured sparsity to minimize off-chip transfers. We will report accuracy-latency-energy trade-offs under identical datasets and input resolutions.\nRISC-V-based accelerator with CFU Playground: As a undergraduate warm-up project, we will imitate the design flow in [11] as shown in Figure fig-warm-up. We will implement a VexRiscv + Custom function unit (CFU) design within the open-source CFU Playground framework [12] shown in Figure fig-cfu-playground. The difficulties are to design customized extended instructions in RISC-V for computational-intensive operators (e.g., depthwise/pointwise convolution, \\(QK^T\\), low-bit GEMM), write the corresponding RTL for the hardware.\n\n\n\n\n\n\nFigure 1: Warm-up phase design flow (adapted from [11])\n\n\n\n\n\n\n\n\n\nFigure 2: CFU-playground: ML Accelerators in RISC-V ISA [11], [12]\n\n\n\nFull-stack design and DSE: As a learning experience, we will reinvent the wheel by designing the entire accelerator in Chisel from scratch and open-sourcing it on Github. Then, we also explore a large multi-dimensional design space exploration (DSE) using automated methods (such as heuristic or evolutionary algorithms) to identify optimal configurations balancing accuracy, energy, and latency. Finally, we will use Arty A7-100T FPGA as the hardware platform for real measurements.\n\n\n\nMid-term: Brain-Inspired path (SNN on FPGA, portable toolchain)\nThis phase is planned to be my potential PhD research topic. We will explore Brain-Inspired Computing (BIC) in computer vision tasks with a particular focus on EdgeSNNs (parameters \\(&lt; 100\\text{ M}\\) [1]) and In-Memory Computing (CIM).\n\n\n\n\n\n\nFigure 3: Leaky integrate-and-fire (LIF) neuron dynamics in SNN [10]\n\n\n\nSNNs have shown promise for ultra-low-power, event-driven inference at the edge. SNNs model neurons with explicit membrane dynamics (LIF model as shown in Figure fig-lif-model). Unlike conventional ANNs, SNNs process information in the temporal domain using binary spikes (event-driven coding), this is particularly suitable for SpikeCV cameras [13], which in my view are the next-generation vision sensors for edge applications such as autonomous driving.\nPrevious work on SNNs in autonomous driving includes Spiking-YOLO [14], EMS-YOLO [15], etc. However, the performance is still not good in general compared to ANN [16]. ECS-LIF in [16] suggests high-performance spiking detectors are possible with ANN-level matched accuracy and ultra-low energy costs. However, one still need to carefully select hardware architectures. For video classification, research is even more nascent [13]. Early attempts include spiking recurrent networks (processing up to 300 time steps of video frames), or hybrid ANN-SNN approaches for action recognition [13], SpikeVideoTransformer [17], SpikeYOLO [18]. However, there is no SNN equivalent yet for many popular video models (e.g. no published spiking variant of SlowFast or DETR detection-transformer as of 2025).\nSince the research steps are not as clear as the warm-up phase, I list some potential research directions in parallel below:\n\nExplore SNN design / training method: There are two routes to get optimized SNNs: ANN2SNN conversion [1], [8], or direct-training SNNs. We will explore both routes to find the best-performing SNNs for our target application. We will also investigate advanced training techniques such as surrogate gradients, temporal backpropagation, and biologically inspired learning rules to improve SNN performance.\nDevelop unified SNN toolchain: SNNs lack standard APIs and SNN-specific IRs (analogous to ONNX [1], [19]) for quantization strategies tailored to spike dynamics [19]. We prototype a minimal graph-level SNN IR (ops, neuron nodes, timing semantics) plus a quantization API (e.g., \\(\\text{INT8} \\times \\text{INT2}\\) spike ops, ternary spikes, per-layer time-step budgets) to decouple front-end training from back-end compilers, following the direction of NIR and recent co-design work that targets FPGA-friendly spike arithmetic. This addresses today’s fragmentation across neuromorphic stacks and enables “write once, target FPGA/Loihi/MCU.” [20]\nFurther explore SNN internal complexity: A recent study [9], [10] by Network model with internal complexity bridges artificial intelligence and neuroscience shows a pivotal shift in thinking: Instead of simply growing neural networks by adding more layers or parameters (“external complexity”), we can embed richer dynamics inside each neuron or module — a paradigm the authors term “small model with internal complexity.”\n\n\n\nLong-term: Emergent Intelligence\nThis phase is my long-term aspiration toward artificial general intelligence (AGI). This stage will explore the theoretical and practical computational boundary and brand-new distributed computing paradigms inspired by the human brain under the guidance of recent theoretical investigations into emergence in artificial systems, such as Berti et al. (2025) [21] who survey emergent abilities in LLMs and identify conditions like scaling, criticality and compression that contribute to spontaneous capability gains. Continuing the exploration of internal complexity in #sec-mid-term, there are two major directions: Turing-complete machine and hypercomputation beyond Turing limits.\n\n\n\n\n\n\n\n\n\nFigure 4: Conway’s Game of Life (CGOL): local update rules [22].\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: Gosper’s glider gun: a self-replicating pattern proving Turing-completeness [23], [24].\n\n\n\n\n\n\n\nDecentralized, event-driven architectures: We will first explore turing-complete hardware and software systems that mimic the highly-distributed, asynchronous nature and learning-while-inferencing feature of the brain. Turing-equivalent cellular automata such as CGOL [25] (Figure fig-cgol), Langton’s ant, Particle Life already demonstrate how simple local rules can give rise to complex, emergent patterns (Figure fig-gosper-glider-gun, Figure fig-pl1, Figure fig-pl2). While using the CGOL itself as a practical “computer” is inefficient, it serves as a proof-of-concept that emergence can arise from simple components. The challenge is discovering the right set of rules (i.e., internal complexity) or learning algorithms that yield robust emergent intelligence, not just (external) complexity for its own sake [26]. Then turn out to nature (the hardware) to find out if there is a machine under our control that performs this set of rules intrinsically.\n\n\n\n\n\n\n\n\n\nFigure 6: Emergent chasing behavior (Particle Life).\n\n\n\n\n\n\n\n\n\nFigure 7: Stable pattern formation (Particle Life).\n\n\n\n\nHypercomputation beyond Turing limits: Human brain might be exploiting computational principles beyond the scope of traditional Turing machines. Penrose and others (like Stuart Hameroff) have hypothesized that quantum effects in neural microstructures (e.g. microtubules) could enable the brain to do things standard computers cannot [27]. Achieving AI with brain-like cognition might then require tapping into quantum computing [28], ONNs [29], Organoid Intelligence (OI) [30], [31] and beyond.",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
+    ]
+  },
+  {
+    "objectID": "research-proposal/research-proposal.html#references",
+    "href": "research-proposal/research-proposal.html#references",
+    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
+    "section": "References",
+    "text": "References\n\n\n\n\n\n[1] S. Deng et al., “Edge intelligence with spiking neural networks.” 2025. Available: https://arxiv.org/abs/2507.14069\n\n\n[2] “CHAPTER 1: Research and development.” Artificial Intelligence Index Report 2025, 2025. Available: https://hai.stanford.edu/assets/files/hai_ai-index-report-2025_chapter1_final.pdf. [Accessed: Nov. 03, 2025]\n\n\n[3] S. G. at ETH Zürich, “Introduction to FPGAs and ML inference with hls4ml (benjamin ramhorst, 8 november 2024).” YouTube, Nov. 2024. Available: https://www.youtube.com/watch?v=2y3GNY4tf7A. [Accessed: Nov. 04, 2025]\n\n\n[4] S. M. Sali, M. Meribout, and A. A. Majeed, “Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations.” 2025. Available: https://arxiv.org/abs/2509.04153\n\n\n[5] J. Duarte et al., “Fast inference of deep neural networks in FPGAs for particle physics,” JINST, vol. 13, no. 7, p. P07027, 2018, doi: 10.1088/1748-0221/13/07/P07027. Available: https://arxiv.org/abs/1804.06913\n\n\n[6] U. D. of Energy, “AI tackles disruptive tearing instability in fusion plasma.” Energy.gov, 2025. Available: https://www.energy.gov/science/fes/articles/ai-tackles-disruptive-tearing-instability-fusion-plasma\n\n\n[7] F. Yan, A. Koch, and O. Sinnen, “A survey on FPGA-based accelerator for ML models.” 2024. Available: https://arxiv.org/abs/2412.15666\n\n\n[8] Y. Zhao et al., “DETRs beat YOLOs on real-time object detection.” 2023. Available: https://arxiv.org/abs/2304.08069\n\n\n[9] L. He et al., “Network model with internal complexity bridges artificial intelligence and neuroscience,” Nature Computational Science, vol. 4, no. 8, pp. 584–599, 2024, doi: 10.1038/s43588-024-00674-9. Available: https://doi.org/10.1038/s43588-024-00674-9\n\n\n[10] G. Li et al., “Brain-inspired computing: A systematic survey and future trends,” Proceedings of the IEEE, vol. 112, no. 6, pp. 544–584, 2024, doi: 10.1109/JPROC.2024.3429360\n\n\n[11] M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, “Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.” 2025. Available: https://arxiv.org/abs/2504.19659\n\n\n[12] S. Prakash et al., “CFU playground: Full-stack open-source framework for tiny machine learning (TinyML) acceleration on FPGAs,” in 2023 IEEE international symposium on performance analysis of systems and software (ISPASS), IEEE, Apr. 2023, pp. 157–167. doi: 10.1109/ispass57527.2023.00024. Available: http://dx.doi.org/10.1109/ISPASS57527.2023.00024\n\n\n[13] Y. Ashraf, A. Sharshar, V. Bojkovic, and B. Gu, “SPACT18: Spiking human action recognition benchmark dataset with complementary RGB and thermal modalities.” 2025. Available: https://arxiv.org/abs/2507.16151\n\n\n[14] S. Kim, S. Park, B. Na, and S. Yoon, “Spiking-YOLO: Spiking neural network for energy-efficient object detection.” 2019. Available: https://arxiv.org/abs/1903.06530\n\n\n[15] Q. Su et al., “Deep directly-trained spiking neural networks for object detection.” 2023. Available: https://arxiv.org/abs/2307.11411\n\n\n[16] M. Jin, X. Wang, C. Guo, and S. Yang, “Research on target detection for autonomous driving based on ECS-spiking neural networks,” Scientific Reports, vol. 15, no. 1, p. 13725, 2025, doi: 10.1038/s41598-025-97913-4. Available: https://doi.org/10.1038/s41598-025-97913-4\n\n\n[17] S. Zou et al., “SpikeVideoFormer: An efficient spike-driven video transformer with hamming attention and \\(\\mathcal{O}(T)\\) complexity.” 2025. Available: https://arxiv.org/abs/2505.10352\n\n\n[18] X. Luo, M. Yao, Y. Chou, B. Xu, and G. Li, “Integer-valued training and spike-driven inference spiking neural network for high-performance and energy-efficient object detection.” 2025. Available: https://arxiv.org/abs/2407.20708\n\n\n[19] A. Carpegna, A. Savino, and S. D. Carlo, “Spiker+: A framework for the generation of efficient spiking neural networks FPGA accelerators for inference at the edge,” IEEE Transactions on Emerging Topics in Computing, vol. 13, no. 3, pp. 784–798, Jul. 2025, doi: 10.1109/tetc.2024.3511676. Available: http://dx.doi.org/10.1109/TETC.2024.3511676\n\n\n[20] J. E. Pedersen et al., “Neuromorphic intermediate representation: A unified instruction set for interoperable brain-inspired computing,” Nature Communications, vol. 15, no. 1, p. 8122, 2024, doi: 10.1038/s41467-024-52259-9. Available: https://doi.org/10.1038/s41467-024-52259-9\n\n\n[21] L. Berti, F. Giorgi, and G. Kasneci, “Emergent abilities in large language models: A survey.” 2025. Available: https://arxiv.org/abs/2503.05788\n\n\n[22] T. Hirose and T. Sawaragi, “Extended FRAM model based on cellular automaton to clarify complexity of socio-technical systems and improve their safety,” Safety Science, vol. 123, p. 104556, Mar. 2020, doi: 10.1016/j.ssci.2019.104556\n\n\n[23] I. Lokhov, “Game of life | datawrapper blog.” Datawrapper, Jun. 2021. Available: https://www.datawrapper.de/blog/game-of-life\n\n\n[24] W. Contributors, “Gun (cellular automaton).” Wikipedia; Wikimedia Foundation, Aug. 2023. Available: https://en.wikipedia.org/wiki/Gun_(cellular_automaton)\n\n\n[25] J. McCrum and T. P. Kee, “Conways game of life as an analogue to a habitable world livingness beyond the biological.” 2024. Available: https://arxiv.org/abs/2410.22389\n\n\n[26] D. C. Krakauer, J. W. Krakauer, and M. Mitchell, “Large language models and emergence: A complex systems perspective.” 2025. Available: https://arxiv.org/abs/2506.11135\n\n\n[27] D. Orf, “Quantum entanglement in your brain is what generates consciousness, radical study suggests.” Popular Mechanics, Jul. 2025. Available: https://www.popularmechanics.com/science/a65368553/quantum-entanglement-in-brain-consciousness/\n\n\n[28] G. A. Silva, “Leveraging quantum superposition to infer the dynamic behavior of a spatial-temporal neural network signaling model.” 2025. Available: https://arxiv.org/abs/2403.18963\n\n\n[29] T. Fu et al., “Optical neural networks: Progress and challenges,” Light: Science & Applications, vol. 13, no. 1, p. 263, 2024, doi: 10.1038/s41377-024-01590-3. Available: https://doi.org/10.1038/s41377-024-01590-3\n\n\n[30] L. Smirnova et al., “Organoid intelligence (OI): The new frontier in biocomputing and intelligence-in-a-dish,” Frontiers in Science, vol. 1, p. 1017235, Feb. 2023, doi: 10.3389/fsci.2023.1017235\n\n\n[31] T. Oh, “The future of artificial intelligence — wetware.” Medium, Jul. 2023. Available: https://medium.com/@timothyohoc/the-future-of-artificial-intelligence-wetware-da2e396b3c55. [Accessed: Nov. 04, 2025]",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
     ]
   },
   {
@@ -363,6 +451,17 @@
     ]
   },
   {
+    "objectID": "eda-3d-placement/eda-3d-placement.html",
+    "href": "eda-3d-placement/eda-3d-placement.html",
+    "title": "EDA: 3D IC Placement",
+    "section": "",
+    "text": "Glossary",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
+    ]
+  },
+  {
     "objectID": "c-riscv-asm/c-riscv-asm.html",
     "href": "c-riscv-asm/c-riscv-asm.html",
     "title": "C 和 RISCV 汇编",
@@ -370,7 +469,7 @@
     "text": "C 编译过程\n装好 RISCV 编译工具链, 创建一个简单的 C 语言程序 hello.c:\n运行:\n用 riscv32-unknown-elf-readelf 查看生成的 .o 文件:\n得到:\n再查看 Section 信息:\n得到:\n对 .o 文件进行反汇编:\n得到:",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
     ]
   },
   {
@@ -381,7 +480,7 @@
     "text": "Compiler, Assembler, Linker:\n\nWatch this video\n\n\ngcc 编译选项:\n\n-E: 只预处理, 不编译.\n-S: 生成汇编代码 (.s 文件)\n-c: 只编译, 不链接. (生成 .o 文件)\n-o &lt;file&gt;: 指定输出文件名.\n-g: 在输出的文件中加入支持调试的信息.\n-v (verbose): 显示编译过程中的详细信息.\n\n\n\n\n\n\n\n编译过程\n\n\n\n\n\nhello.c\n\n#include &lt;stdio.h&gt;\n\nint global_init = 0x11111111;\nconst int global_const = 0x22222222;\n\nvoid main()\n{\n    static int static_var = 0x33333333;\n    static int static_var_uninit;\n    int auto_var = 0x44444444;\n    printf(\"hello world!\\n\");\n    return;\n}\n\n\nriscv32-unknown-elf-gcc -c hello.c -o hello.o # 只编译, 不链接\n\nriscv32-unknown-elf-readelf -h hello.o &gt; header_info.log # 查看 Header 信息, 并输出到文件\n\n\n\nheader_info.log\n\nELF Header:\n  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 \n  Class:                             ELF32\n  Data:                              2's complement, little endian\n  Version:                           1 (current)\n  OS/ABI:                            UNIX - System V\n  ABI Version:                       0\n  Type:                              REL (Relocatable file)\n  Machine:                           RISC-V\n  Version:                           0x1\n  Entry point address:               0x0\n  Start of program headers:          0 (bytes into file)\n  Start of section headers:          916 (bytes into file)\n  Flags:                             0x5, RVC, double-float ABI\n  Size of this header:               52 (bytes)\n  Size of program headers:           0 (bytes)\n  Number of program headers:         0\n  Size of section headers:           40 (bytes)\n  Number of section headers:         14\n  Section header string table index: 13\n\n\n\nriscv32-unknown-elf-readelf -S hello.o &gt; section_info.log # 查看 Section 信息, 并输出到文件\n\n\n\nsection_info.log\n\nThere are 14 section headers, starting at offset 0x394:\n\nSection Headers:\n  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            00000000 000000 000000 00      0   0  0\n  [ 1] .text             PROGBITS        00000000 000034 00002e 00  AX  0   0  2\n  [ 2] .rela.text        RELA            00000000 0002d8 000048 0c   I 11   1  4\n  [ 3] .data             PROGBITS        00000000 000062 000000 00  WA  0   0  1\n  [ 4] .bss              NOBITS          00000000 000064 000004 00  WA  0   0  4\n  [ 5] .sdata            PROGBITS        00000000 000064 000008 00  WA  0   0  4\n  [ 6] .srodata          PROGBITS        00000000 00006c 000004 00   A  0   0  4\n  [ 7] .rodata           PROGBITS        00000000 000070 00000d 00   A  0   0  4\n  [ 8] .comment          PROGBITS        00000000 00007d 00001a 01  MS  0   0  1\n  [ 9] .note.GNU-stack   PROGBITS        00000000 000097 000000 00      0   0  1\n  [10] .riscv.attributes RISCV_ATTRIBUTE 00000000 000097 000066 00      0   0  1\n  [11] .symtab           SYMTAB          00000000 000100 000130 10     12  15  4\n  [12] .strtab           STRTAB          00000000 000230 0000a7 00      0   0  1\n  [13] .shstrtab         STRTAB          00000000 000320 000074 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), p (processor specific)\n\n\n\nriscv32-unknown-elf-objdump -S hello.o &gt; disassembly.s # 反汇编, 并输出到文件\n\n\n\ndisassembly.s\n\n\nhello.o:     file format elf32-littleriscv\n\n\nDisassembly of section .text:\n\n00000000 &lt;main&gt;:\n   0:   1101                    addi    sp,sp,-32\n   2:   ce06                    sw  ra,28(sp)\n   4:   cc22                    sw  s0,24(sp)\n   6:   1000                    addi    s0,sp,32\n   8:   444447b7            lui a5,0x44444\n   c:   44478793            addi    a5,a5,1092 # 44444444 &lt;static_var.0+0x44444440&gt;\n  10:   fef42623            sw  a5,-20(s0)\n  14:   000007b7            lui a5,0x0\n  18:   00078513            mv  a0,a5\n  1c:   00000097            auipc   ra,0x0\n  20:   000080e7            jalr    ra # 1c &lt;main+0x1c&gt;\n  24:   0001                    nop\n  26:   40f2                    lw  ra,28(sp)\n  28:   4462                    lw  s0,24(sp)\n  2a:   6105                    addi    sp,sp,32\n  2c:   8082                    ret",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
     ]
   },
   {
@@ -389,10 +488,10 @@
     "href": "c-riscv-asm/c-riscv-asm.html#riscv-汇编语言",
     "title": "C 和 RISCV 汇编",
     "section": "RISCV 汇编语言",
-    "text": "RISCV 汇编语言\n\n基本格式:\n&lt;label&gt;: &lt;operation&gt; # &lt;comment&gt;\n\n&lt;operation&gt; 的类型 [1]:\n\ninstruction (指令)\npseudo-instruction (伪指令): li x6, 5, nop, RISCV 中有定义\ndirective (伪操作): .macro ... .endm, .end, .text, .global _start 告知汇编器的指示, 与 RISCV 规范无关.\nmacro (宏):\n.macro do_nothing\n    nop\n.endm\n\n_start: do_nothing # 调用宏, 汇编器会将它展开\n\n\n标签其实表示地址:\n_start: li x6, 5 # _start 标签其实就是这条指令的地址\n\n\n\n\n\n1. Lazyparser (2025) Compilation and linker",
+    "text": "RISCV 汇编语言\n\n基本格式:\n&lt;label&gt;: &lt;operation&gt; # &lt;comment&gt;\n\n&lt;operation&gt; 的类型 [1]:\n\ninstruction (指令)\npseudo-instruction (伪指令): li x6, 5, nop, RISCV 中有定义\ndirective (伪操作): .macro ... .endm, .end, .text, .global _start 告知汇编器的指示, 与 RISCV 规范无关.\nmacro (宏):\n.macro do_nothing\n    nop\n.endm\n\n_start: do_nothing # 调用宏, 汇编器会将它展开\n\n\n标签其实表示地址:\n_start: li x6, 5 # _start 标签其实就是这条指令的地址\n\n\n\n\n\n[1] Lazyparser, “Compilation and linker,” 2025, Available: https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&vd_source=42579e22289b6144ba0b2bdcf99834e3&p=5",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>5</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
     ]
   },
   {
@@ -403,7 +502,7 @@
     "text": "RISCV Extensions\nIn RISC-V, extensions are optional instruction sets that extend the base ISA (RV32I, 32-bit integer instructions) to add extra functionality.\nSome extensions are listed here:\nFor example, RV32IMAC → A 32-bit RISC-V CPU with Integer (I), Multiply (M), Atomic (A), and Compressed (C) extensions. RV32IMAFD can be reduced to written as RV32G.",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>RISCV ISA</span>"
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>RISCV ISA</span>"
     ]
   },
   {
@@ -414,7 +513,7 @@
     "text": "Extension\nMeaning\nPurpose\n\n\n\n\nM\nInteger Multiplication & Division\nAdds mul, div, rem instructions\n\n\nA\nAtomic Instructions\nAdds atomic memory operations (e.g., amoadd.w)\n\n\nF\nSingle-Precision Floating Point\nSupports float (32-bit) operations\n\n\nD\nDouble-Precision Floating Point\nSupports double (64-bit) operations\n\n\nC\nCompressed Instructions\nReduces code size (e.g., c.add, c.sw)\n\n\n\n\n\nZicsr: Z (Standard), I (Integer), CSR (Support read and write to CSRs)",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>RISCV ISA</span>"
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>RISCV ISA</span>"
     ]
   },
   {
@@ -425,7 +524,7 @@
     "text": "指令类型\n\nALU 运算\n\nOne category of instructions is arithmetic operations (abbr. aluop), which is just doing things between GPRs.\nCommonly Used aluop instructions:\nlui t0, 0x40000     ;t0 = 0x40000 &lt;&lt; 12 (load upper 20 bits of the imm)\n\nadd t0, t1, t2      ;t0 = t1 + t2\nsub t0, t1, t2      ;t0 = t1 - t2 (no imm version)\nor t0, t1, t2       ;t0 = t1 | t2\nand t0, t1, t2      ;t0 = t1 & t2\nxor t0, t1, t2      ;t0 = t1 ^ t2\n\naddi t0, t1, 10     ;t0 = t1 + 10 (decimal)\nori t0, t1, 0xF     ;t0 = t1 | 0xF\nandi t0, t1, 0xF    ;t0 = t1 & 0xF\nxori t0, t1, 0xF    ;t0 = t1 ^ 0xF\n\nsll t0, t1, t2      ;t0 = t1 &lt;&lt; t2 (shift left logical)\nsrl t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right logical)\nsra t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right arithmetic, preserve sign)\n\nslli t0, t1, 2      ;t0 = t1 &lt;&lt; 2\nsrli t0, t1, 2      ;t0 = t1 &gt;&gt; 2\nsrai t0, t1, 2      ;t0 = t1 &gt;&gt; 2 (preserve sign)\n\nslt t0, t1, t2      ;t0 = (t1 &lt; t2) (set if less than signed)\nsltu t0, t1, t2     ;t0 = (t1 &lt; t2) (set if less than unsigned)\n\nslti t0, t1, -5     ;t0 = (t1 &lt; -5) (imm signed)\nsltiu t0, t1, 10    ;t0 = (t1 &lt; 10) (imm unsigned)\n\n\n\nCSR 寄存器及其操作\n\nIntroduction\n\nCSR (Control and Status Registers)\nAre accessed using CSR instructions, not via memory-mapped I/O like GPIO registers.\nGPRs can be accessed at any privilege level, while CSRs are defined at a specific privilege level and can only be accessed by that level and any levels of higher privilege.\nEvery CSR has a unique address, each 32 bits share one address (instead of 8 bits).\nCSR addresses are 12-bits, meaning that up to 4,096 CSRs can be implemented (\\(2^12 = 4096\\)). The bits in a CSR address define its accessibility, use, and CSR number. \nWhile GPRs are used for storing data used to perform operations, CSRs typically modify the behavior of a hart (i.e. “Control”) or inform of its state and attributes (i.e. “Status”), or both.\nWARL (Write any, read legal): Some field in a CPU register that allows any value to be written, but when read back, it returns only a valid (legal) value. For example, in MPP[12:11] field in mstatus register, we have:\n\n\n\n\nWrite Attempt (MPP)\nStored Value (MPP field)\n\n\n\n\n00 (User)\n✅ 00 (User mode)\n\n\n11 (Machine)\n✅ 11 (Machine mode)\n\n\n01 (Illegal)\n🔄 Returns 00 or 11 (Legal)\n\n\n10 (Illegal)\n🔄 Returns 00 or 11 (Legal)\n\n\n\n\nCSRs related intimitely to interrupts and exceptions (interrupts are external (“asynchronise”), exceptions are internal (“synchronise”, usually through software or timer), some place confuse them though, but it’s okay).\n\n\n\nCommonly Used CSRs and their sub-fields\nThe registers are labelled in this format: reg (addr, reset_val).\n\n\n\nPart of the registers\n\n\n\nmstatus (0x300, 0x00001800): Machine Status (lower 32 bits), controls global interrupt enable and privilege modes.\n\n\nmstatus.MPP[12:11]: Machine Previous Priviledge mode. When an mret is executed, the privilege mode is change to this value.\nmstatus.MIE[3]: Machine (global) Interrupt Enable.\nmstatus.MPIE[7]: Machine previous Interrupt Enable. When an interrupt occurs, the content in mstatus.MIE is loaded into this bit (and for simplicity, mstatus.MIE is changed to 0, so no other interrupts is allowed to come in), and after the interrupt is processed (after mret), this bit is restored into mstatus.MIE again.\n\n\nmisa (0x301, depends on RV32 and M_EXT):\nmie (0x304, 0x00000000): Machine Interrupt Enable, enables specific interrupts (not global). Also you should have a look at mip (0x344).\nmip (0x344): Machine Interrupt Pending Register, indicates which specific interrupts are pending. \n\nMSIP/MSIE[3]: Machine Software Interrupt Pending/Enable\nMTIP/MTIE[7]: Machine Timer Interrupt Pending/Enable\nMEIP/MEIE[11]: Machine External Interrupt Pending/Enable\n\nmtvec (0x305, ): Machine Trap-Handler Base Address, specifies where the CPU jumps on an interrupt/exception. \n\nMODE[1:0]:\n\n00: Direct. All traps (either interrupts or exceptions) set PC directly to BASE.\n01: Vectored. Exceptions will set PC directly to BASE, while (asynchronous) interrupts will set PC to BASE+4*mcause.Exception Code (See mcause register.)\nothers: invalid.\n\n\nmepc (0x341, 0x00000000): Machine Exception Program Counter, saves the address of the interrupted instruction.\n\nWhen an interrupt occurs, the current PC + 1 is saved in mepc.\nWhen an exception is encountered, the current PC is saved in mepc. (Why? The exception may triggered by the instruction at the current PC, maybe we solve the exception in the interrupt handler, so give it another chance to execute that instruction again.)\n\nand the core jumps to the exception address. When a mret instruction is executed, the value from mepc replaces the current program counter.\nmcause (0x342): Machine Trap Cause, identifies the cause of the interrupt/exception. \n\nInterrupt[31]:\n\n1: Exceptions\n0: Interrupts\n\nException Code[30:0]: (pay special attention to the number 3/7/11)\n\n\n\n\n\n\n\n\nInterrupt[31]\nException Code[30:0]\nDescription\n\n\n\n\n1\n0, 2, 4, 6, 8, 10, 12, 14-15\nReserved\n\n\n1\n1 / 3\nSupervisor/Machine software interrupt\n\n\n1\n5 / 7\nSupervisor/Machine timer interrupt\n\n\n1\n9 / 11\nSupervisor/Machine external interrupt\n\n\n1\n13\nCounter-overflow interrupt\n\n\n1\n≥16\nDesignated for platform use\n\n\n0\n0\nInstruction address misaligned\n\n\n0\n1\nInstruction access fault\n\n\n0\n2\nIllegal instruction\n\n\n0\n3\nBreakpoint\n\n\n0\n4\nLoad address misaligned\n\n\n0\n5\nLoad access fault\n\n\n0\n6 / 7\nStore/AMO address/access fault\n\n\n0\n8 / 9 / 11\nEnvironment call from U/S/M-mode\n\n\n0\n10, 14, 17, 20-23, 32-47, ≥64\nReserved\n\n\n0\n12\nInstruction page fault\n\n\n0\n13\nLoad page fault\n\n\n0\n15\nStore/AMO page fault\n\n\n0\n16\nDouble trap\n\n\n0\n18\nSoftware check\n\n\n0\n19\nHardware error\n\n\n0\n24-31, 48-63\nDesignated for custom use\n\n\n\n\nmtval (0x343): Machine Trap Value, provides extra information about exceptions (their addresses and so on)\n\n\n\nCommonly Used CSR instructions\n;register version:\ncsrrw x5, mstatus, x10  ;x5 = mstatus (read), mstatus = x10 (write)\ncsrw mtvec, t0          ;mtvec = t0 (write only)\ncsrrs x5, mie, x10      ;x5 = mie (read), mie |= x10 (set)\ncsrrc x5, mie, x10      ;x5 = mie (read), mie &= x10 (clear)\n\n;imm version:\ncsrrwi x5, mstatus, 0x1 ;x5 = mstatus (read), mstatus = 0x1 (write imm)\ncsrrsi x5, mie, 0x1     ;x5 = mie (read), mie |= 0x1 (set imm)\ncsrrc x5, mie, 0x1      ;x5 = mie (read), mie &= 0x1 (clear imm)\nConvenient pseudo-instructions:\ncsrr rd, csr    ;csrrs rd, csr, x0\ncsrw csr, rs    ;csrrw x0, csr, rs\ncsrs csr, rs    ;csrrs x0, csr, rs\ncsrc csr, rs    ;csrrc x0, csr, rs\ncsrwi csr, imm  ;csrrwi x0, csr, imm\ncsrsi csr, imm  ;csrrsi x0, csr, imm\ncsrci csr, imm  ;csrrci x0, csr, imm\n\n\n\nGPRs 通用寄存器\n\nIntroduction\nThe 32 registers in RISC-V are called general-purpose registers (GPRs, or “integer registers”). They are used for various purposes, such as holding data, addresses, or temporary values during program execution. These registers are 32 bits wide in the RV32I ISA and are identified as x0 to x31.\nEach register has a conventional name that indicates its intended usage, although these names are just conventions, and you can use them for other purposes if needed.\n\n\n\n通用寄存器的 ABI 规范\n\n\n\n\nPartial Explanations\n\nra\nPurpose: Stores the return address for function calls.\njal ra, function_label  # Jump to function_label and store return address in ra\nret                     # Return to the address in ra\nsp\nPurpose: Points to the top of the stack (used for dynamic memory allocation during function calls).\naddi sp, sp, -16      # Allocate 16 bytes on the stack\nsw t0, 0(sp)          # Store t0 at the top of the stack\nlw t0, 0(sp)          # Retrieve t0 from the stack\naddi sp, sp, 16       # Deallocate 16 bytes\ngp\nPurpose: Points to global and static data in memory.\nlw t0, 0(gp)         # Load a value from the global data section\ntp\nPurpose: Points to thread-local storage (used in multi-threaded programs).\nlw t0, 0(tp)         # Load a thread-specific value\nt0-t6\nPurpose: Temporary values, not preserved across function calls.\n\n\n\n\n跳转指令\n\nIntroduction\nOne category of instructions is jump operations (abbr. jmpop), which is just changing the value of PC (or some GPRs by the way)\n\n\nCommonly Used aluop instructions\n; unconditional:\njal ra, 0x10        ;ra = PC + 4, PC += 0x10 (link and jump, should be laj)\njalr ra, 8(t0)      ;ra = PC + 4, PC += t0+8 (wrt a register)\n\n; conditional:\nbeq t0, t1, 0x8     ;PC += 0x8 if t0 == t1 (branch if equal)\nbne t0, t1, 0x8     ;PC += 0x8 if t0 != t1 (branch if not equal)\nblt t0, t1, 0x8     ;PC += 0x8 if t0 &lt; t1 (signed less than)\nbge t0, t1, 0x8     ;PC += 0x8 if t0 &gt;= t1 (signed greater or equal)\nbltu t0, t1, 0x8    ;PC += 0x8 if t0 &lt; t1 (unsigned less than)\nbgeu t0, t1, 0x8    ;PC += 0x8 if t0 &gt;= t1 (unsigned greater or equal)\n\nauipc t0, 0x1000    ;t0 = PC + (0x1000 &lt;&lt; 12) (add upper imm and PC to a reg)\n\n\nNotes\nload:\n    lbu a1, 0(t1)\n    sb a1, 0(t2)\n    addi t1, t1, 1\n    addi t2, t2, 1\n    bltu t2, t3, load\nIf lbu a1, 0(t1) is at location 0x8000001a, then this line: bltu t2, t3, load does NOT mean\nPC += 0x8000001a if t2 &lt; t3\nbut\nPC = 0x8000001a if t2 &lt; t3\n(done by the smart compiler!)\n\n\n\nMachine Mode\n\nIntroduction\nOne category of instructions is machine operations (abbr. machineop), which is a set of privileged instructions in the RISC-V privileged architecture. These instructions are all related to the CSRs, so make sure you are familiar with those registers first.\n\n\nRISCV Privilege Levels from High to Low\n\nDebug (D)\nMachine (M): “must-have”\nSupervisor (S)\n\nHypervisor-extended Supervisor (HS)\nVirtual Supervisor (VS)\nVirtual User (VU)\n\nUser (U)\n\n\n\nCommonly Used machineop instructions\n\nmret: Return from Machine-mode to Supervisor-mode (or User-mode). Steps:\n\nRestore the privilege mode:\n\nThe processor sets the current privilege mode based on MPP from mstatus.\nMPP is cleared to user mode (00) or supervisor mode (01) if applicable.\n\nRestore the interrupt enable status:\n\nThe MIE bit in mstatus is set to MPIE.\nThe MPIE bit is cleared (0).\n\nRestore the program counter (PC):\n\nThe PC is set to the value stored in mepc, resuming execution where it was interrupted.\n\n\n\n\n\n\n内存操作\n\nIntroduction\nOne category of instructions is memory operations (abbr. memop), which is just exchanging data between GPRs to memory locations.\nSo naturally, these signals are crucial for storing a data into memory:\n\nWE: Write enable. Whenever a memop intruction is detected, the memory block needs to be enabled.\n[31:0] data_mem: the 32-bit data to be stored.\n[31:0] mem_addr: where to be stored.\n[3:0] storebytes_size: Store a byte (0001), half word (0011), or a word (1111)?\n\n\n\nCommonly Used memop instructions\nlui t0, 0x40000 ;t0 = 0x40000 &lt;&lt; 12b (load unsigned imm)\nlb t0, 1(a0)    ;t0 = mem[a0 + 1] (load byte)\nlh t0, 2(a0)    ;t0 = mem[a0 + 2] (load half word)\nlw t0, 4(a0)    ;t0 = mem[a0 + 4] (load word)\nlbu t0, 1(a0)   ;unsigned (zero extending)\nlhu t0, 2(a0)   ;unsigned (zero extending)\n\nsb t0, 1(a0)    ;mem[a0 + 1] = t0 (store byte)\nsh t0, 2(a0)    ;mem[a0 + 2] = t0 (store half word)\nsw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>RISCV ISA</span>"
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>RISCV ISA</span>"
     ]
   },
   {
@@ -436,7 +535,7 @@
     "text": "操作系统:\n\n狭义: 内核\n广义: 发行版\n\n快捷参考表:\n\n\n\nUnit\n# Bytes\nHex\n\n\n\n\n1 KB\n\\(2^{10}\\) B\n0x00000400\n\n\n4 KB\n\\(2^{12}\\) B\n0x00001000\n\n\n1 MB\n\\(2^{20}\\) B\n0x00100000\n\n\n128 MB\n\\(2^{27}\\) B\n0x08000000\n\n\n1 GB\n\\(2^{30}\\) B\n0x40000000\n\n\n\n\n\nA process is an abstract data structure that represents all of the necessary information to run a program.\n\n\n\n\n一个 Process 初始化后在内存中的结构 和给 OS 的 Process Control Block\n\n\n\n\n\nProcess Scheduling 进程调度",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>OS 操作系统原理</span>"
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>OS 操作系统原理</span>"
     ]
   },
   {
@@ -447,7 +546,7 @@
     "text": "Change of Mind",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
     ]
   },
   {
@@ -458,7 +557,7 @@
     "text": "Hardware does not “execute” the lines of code in sequence.",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
     ]
   },
   {
@@ -469,7 +568,7 @@
     "text": "Verilog\n\nassign\n\n多个 assign 执行没有顺序, 同时进行.\nassign 是 “continuous assignment”, 右值变化时, 左值跟着变化.\n\nOperation 运算符: ~, ! (logical), &, && (logical), |, || (logical), ^ (XOR).\nif, else if 是有顺序的!!!\n(procedure 一定要放在 always 块中吗?)\n(为什么 wire 类型不能在 always 里面被赋值?)\nalways 块中的代码是顺序执行的 (但在 always 块外的代码是并行执行的).\nmodule top (input my_in, output reg my_out);\n    always @(*) begin\n        my_out = 0;\n        my_out = 1; // This is valid! (Always block 按顺序执行)\n    end\nendmodule\n\nLatch 推断: 下面如果 cpu_overheated = 0 则默认会让 shut_off_computer 保持上一个值, 这就是 latch 推断.\nalways @(*) begin\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n有时我们就是需要这种推断, 但为了避免, 可以利用always 的顺序性先提前赋值:\nalways @(*) begin\n    shut_off_computer = 0; // 先提前赋值\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n\nConcatenation:\nassign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100\nindex 可以是负数:\nreg [5:-1] my_reg; // index 可以是负数.\nwire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!\ninput a 默认为 wire.\nbegin end 在只有一行代码时可以省略 (相当于 C 中的 {}).\nwire 不能在 always 块中被赋值. reg 才能在 always 中被赋值.\nwire a;\nalways @(*) begin\n    assign a = 1; // Error!\nend\nwire a;\nalways @(*) begin\n    a &lt;= 1; // Not an error, `a` is viewed as a reg.\nend\nSynchronous and Asynchronous Reset:\n\nsynchronous reset:\nalways @(posedge clk) begin\n    if (reset)\n        ...\nend\nasynchronous reset:\nalways @(posedge clk or posedge reset) begin\n    if (reset)\n        ...\nend\n\nor 只能在 always 块中使用, if () 中要用 ||.\nInference 和 Instantiation:\n\nInference: 通过 always 块的内容推断出一个模块的功能.\nInstantiation: 显式地实例化一个模块, 通过 module_name instance_name (port_map) 的方式.\n\n循环群结构 (Torus, etc) 如果用 % 运算符来处理会消耗大量资源, 尽量用 if 语句:\nif (mm == 8'd59) begin\n    mm &lt;= 8'd0;\nend\n\n如果用 % 运算符来处理:\n\n-1 % 16 的结果是 -1, 而不是 15 (所以 (a-1)%16 应该写成 (a+15)%16).\n1~12 的循环先转换为 0~11 的循环, 再换元.\n\n\nBCD (Binary-Coded Decimal): 一种从 0 到 9 的计数器, 输出是四位二进制编码的十进制数.\nBlocking 和 Non-blocking assignments:\n\n=: Blocking assignment, 若在 always 块中使用, 则必须按照顺序执行!\n&lt;=: Non-blocking assignment, 在 always 块中使用时, 会同时执行所有赋值. (一般 always 里面都用这个!)\n\n\n\nVerilog Testbench\n`timescale 1ns / 1ps // #1 代表 1ns, 最精确可以到 #1.001\n`timescale 1ns / 1ns // #1 代表 1ns, #1.01 等是不合法的\n\n$stop //停下来",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
     ]
   },
   {
@@ -480,282 +579,7 @@
     "text": "Chisel\n\n+&: 如果 io.in_a 和 io.in_b 为 4.W 时, 则 sum 为 5.W (带溢出).\nval sum = io.in_a +& io.in_b\n允许多个 := 赋值到同一个输出:\nio.out := 0.U\nio.out := 1.U // 覆盖上一个\nif 和 when 的区别:\n\nif 用来在编译阶段决定电路是哪一种\nwhen 用来生成固定的 verilog 电路, 相当于 verilog 的 if.\n\norR: reduction OR, 对所有位进行 OR 操作. 比如 GPR 读寄存器时, 只要地址不是全 0，就读出寄存器的值 (即创建了一个虚拟的 x0 寄存器，值恒为 0):\nio.rdata1 := Mux(io.raddr1.orR, regs(io.raddr1), 0.U)\nio.rdata2 := Mux(io.raddr2.orR, regs(io.raddr2), 0.U)",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
-    ]
-  },
-  {
-    "objectID": "cc-fpga/cc-fpga.html",
-    "href": "cc-fpga/cc-fpga.html",
-    "title": "FPGA 原理速成",
-    "section": "",
-    "text": "FPGA Structure 结构",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>FPGA 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-fpga/cc-fpga.html#fpga-structure-结构",
-    "href": "cc-fpga/cc-fpga.html#fpga-structure-结构",
-    "title": "FPGA 原理速成",
-    "section": "",
-    "text": "PL (Programmable Logic) 可编程部分\n这个部分是一个 FPGA 开发板 “软” 的部分, 即可以通过 verilog 来控制硬件电路的部分. 要理清一下几个概念:\n\nBLE (Basic Logic Element): 基本逻辑单元. LUT 和 FF 的「经典」的组合.\n\n见 Figure fig-ble, 方框代表 LUT (Look up Table), 本质上就是一个 Mux (Multiplexer, 多路选择器).\n红色的位置将来的 bitstream 会写入 (用来配置这个 BLE 的功能), i0-i3 是这个 BLE 的输入, 右边是输出.\n\n\n\n\n\n\nFigure 1: 这个 BLE 由 LUT-4 和 D-FF 组成\n\n\n\n\nCLB (Configurable Logic Block, Xilinx) 可配置逻辑块: 一个或者多个 BLE 的组合.\n\n也叫 Slice (Vivado HLS) 或 LAB (Logic Array Block) 或 ALM (Adaptive Logic Module, Intel).\n\n\n\n\n\n\n\n\n由 1 个 BLE 构成的 CLB (e.g. Xilinx Spartan 6)\n\n\n\n\n\n\n\n由 4 个 BLE 构成的 CLB\n\n\n\n\n\n\nSB (SwitchBox): 连接不同 CLB 的开关盒.\n\n\n\n\n\n\nFigure 2: Slice (蓝色) 和其周围的 SB (SwitchBox) [1]\n\n\n\n\n\n\n\n\n\nFigure fig-slice-sb 的放大结构\n\n\n\n\nPS (Processing System) 处理器部分\n不要认为一个开发板只有 “软” 部分, 有些 (ZYNQ) 经常用的模块会用硬件 “焊死” 在板子上 (Heterogenous 异构、SoC). 这些硬件通过 I/O 口与 PL 部分通信, 比如:\n\n\n\nZYNQ PS 和 PL 通过 AXI 通信\n\n\n以 ZYNQ XC7Z010 为例, 在 Vivado 中创建工程 Create Block Design 后, 添加 ZYNQ7 Processing System IP 核 (Figure fig-zynq-xz7z-ps-pl), 可以看到 PS (白色) 和 PL (灰色) 以及他们之间的连接:\n\n\n\n\n\n\nFigure 3: ZYNQ XC7Z010 的 PS 和 PL",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>FPGA 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-fpga/cc-fpga.html#编译过程",
-    "href": "cc-fpga/cc-fpga.html#编译过程",
-    "title": "FPGA 原理速成",
-    "section": "编译过程",
-    "text": "编译过程\n\nSynthesis 综合\n\n动机: FPGA 不懂 “行为”, 它需要的是 “你想用哪些门, 怎么连线”. 所以 Synthesis 是将你写的 .v 逻辑翻译成各种 Logic gates 应该如何连接 (门级网表) 的过程 (以 .json 格式输出).",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>FPGA 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-cpu/cc-cpu.html",
-    "href": "cc-cpu/cc-cpu.html",
-    "title": "CPU 原理速成",
-    "section": "",
-    "text": "Change of Mind",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>CPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-cpu/cc-cpu.html#change-of-mind",
-    "href": "cc-cpu/cc-cpu.html#change-of-mind",
-    "title": "CPU 原理速成",
-    "section": "",
-    "text": "对于有时钟的电路, 我们应该想象成: 电路的状态只在时钟的上升沿「瞬间」变化. 时钟的上升沿发生时电路做了两件事情:\n\n前一个时钟周期的计算结果该锁存的 锁存到寄存器 中.\n下一个时钟周期的结果瞬间计算出来并 放在线上 (他们目前还不能被 CPU “看到”).",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>CPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
-    "href": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
-    "title": "CPU 原理速成",
-    "section": "CPU 是如何成为现在这个样子的?",
-    "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n流水线\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n在每两个 phase 之间插入一些受始终控制的寄存器:\n\nIF-ID 之间: 当前指令, PC 值 (jal 要用)\nID-EX 之间: 指令类型, rs1, rs2, rd, imm.\n\n\n\n\n第三阶段\n\n总线: ARM 公司研发了很多总线, 他们的集合称为 AMBA (Advanced Microcontroller Bus Architecture). 包括: APB, AHB, AXI. Xilinx 公司很多异构的 FPGA都需要引入 AXI 总线.\nAXI 特点:\n\n面向存储: 指主、从机在读到数据之后一般都会将这些数据先放在某种储存里面.\n突发总线:\n\n\n\n\nCache\n\n\nMemory\n\n内存: working memory, main memory\nDRAM & SSD 内存与硬盘\n\n读写速度 (3000 倍): 17 ns vs 50 ms, 超音速飞机和龟速\n容量: 16GB vs 4TB\n\nSIMM & DIMM\n\nDIMM (Dual In-line Memory Module)",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>CPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-gpu/cc-gpu.html",
-    "href": "cc-gpu/cc-gpu.html",
-    "title": "GPU 原理速成",
-    "section": "",
-    "text": "CUDA",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>GPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-gpu/cc-gpu.html#cuda",
-    "href": "cc-gpu/cc-gpu.html#cuda",
-    "title": "GPU 原理速成",
-    "section": "",
-    "text": "2026 年之前 GPU 只能做特定的函数运算, 2026 年之后引入了 GPGPU (General Purpose GPU), 有一整套库函数来对 GPU 进行编程.\n\nCUDA: Compute Unified Device Architecture (NVIDIA, 闭源)\nOpenCL: Open Computing Language (开源)\n\nGPU device memory 可以被所有 CUDA 核心共享:\n\n\n\nNVidia GPU 架构 [1]\n\n\n连接有 GPU 的 CPU 二者的 memory 是不共享的 [1], 二者之间的数据由 DMA 搬运.\n\n\n\nSeperate memory systems [1]\n\n\nKernel functions [1]:\n\n__host__: 默认在 CPU (host) 上运行的函数.\n__global__: 在 GPU 上运行, 可被 CPU 调用的函数.\n__device__: 在 GPU 上运行, 只能被 GPU 调用的函数.\n\n全局变量: 可以被 CPU 和 GPU 访问的变量, 不能用 local variable 的方式声明!\n__managed__ int x;\n\n\n\n\n\n1. Cheung SY (2025) Lecture notes on computer science courses: Computer architecture (CS355)",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>GPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "open-src-tools/open-src-tools.html",
-    "href": "open-src-tools/open-src-tools.html",
-    "title": "Open Source 开源工具",
-    "section": "",
-    "text": "Behavioral Simulation 行为仿真",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Open Source 开源工具</span>"
-    ]
-  },
-  {
-    "objectID": "open-src-tools/open-src-tools.html#behavioral-simulation-行为仿真",
-    "href": "open-src-tools/open-src-tools.html#behavioral-simulation-行为仿真",
-    "title": "Open Source 开源工具",
-    "section": "",
-    "text": "即: NOT board-specific 的仿真.\n\n\n用到的工具:\n\n\nVerilator\n先创建一个 Verilog 文件:",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Open Source 开源工具</span>"
-    ]
-  },
-  {
-    "objectID": "open-src-tools/open-src-tools.html#makefile",
-    "href": "open-src-tools/open-src-tools.html#makefile",
-    "title": "Open Source 开源工具",
-    "section": "Makefile",
-    "text": "Makefile\n\n格式:\ntarget: prerequisites\n    recipe\n缺省规则\n.DEFAULT_GOAL := all\nall: ...\n伪规则\n.PHONY: all clean\nAppend:\nCFLAGS += -Wall -O2\n改后缀名:\nSRCS_ASM = start.S\nOBJS = $(SRCS_ASM:.S=.o)\n冒号前面和后面:\n%.o : %.c\n    $(CC) $(CFLAGS) -c $&lt; -o $@\n\n% 为通配符, 意思是每当你需要一个 .o 文件, 并且当前目录下有对应的 .c 文件时, 就用下面的命令来生成它\n$&lt;: 第一个依赖文件\n$@: 目标文件\n$^: 所有依赖文件\n$?: 所有比目标文件新的依赖文件",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Open Source 开源工具</span>"
-    ]
-  },
-  {
-    "objectID": "open-src-tools/open-src-tools.html#qemu-模拟器",
-    "href": "open-src-tools/open-src-tools.html#qemu-模拟器",
-    "title": "Open Source 开源工具",
-    "section": "QEMU 模拟器",
-    "text": "QEMU 模拟器",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>12</span>  <span class='chapter-title'>Open Source 开源工具</span>"
-    ]
-  },
-  {
-    "objectID": "nn-essence/nn-essence.html",
-    "href": "nn-essence/nn-essence.html",
-    "title": "The Essence of NN 神经网络的本质",
-    "section": "",
-    "text": "Change of Mind",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
-    ]
-  },
-  {
-    "objectID": "nn-essence/nn-essence.html#change-of-mind",
-    "href": "nn-essence/nn-essence.html#change-of-mind",
-    "title": "The Essence of NN 神经网络的本质",
-    "section": "",
-    "text": "I don’t think view neural networks as black boxes does any help towards understanding and inventing new networks.\n对一个神经网络来说, 我们要站在它的角度考虑 up to what extend it could tell the difference of data? 比如图像处理的神经网络, 它肯定不知道输入的是一张图, 如果是一段文字呢? 如果对于很多类型的数据它都不能区分, 说明这个网络非常 general 但性能肯定很差.",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
-    ]
-  },
-  {
-    "objectID": "nn-essence/nn-essence.html#questions",
-    "href": "nn-essence/nn-essence.html#questions",
-    "title": "The Essence of NN 神经网络的本质",
-    "section": "Questions",
-    "text": "Questions\n\n梯度下降和反向传播的关系是什么?\n我们算梯度是在什么空间里面?\n梯度下降在 Transformer 里面是如何工作的?",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
-    ]
-  },
-  {
-    "objectID": "nn-essence/nn-essence.html#neural-network-is-not-so-different",
-    "href": "nn-essence/nn-essence.html#neural-network-is-not-so-different",
-    "title": "The Essence of NN 神经网络的本质",
-    "section": "Neural Network is Not So Different",
-    "text": "Neural Network is Not So Different\n\n目标: 找一个映射.\n\n世界上很多问题其实就是一个复杂的映射, 比如图像识别就是输入是图片, 输出是图片中的各种内容. 只不过这个函数存在于人类的大脑中, 无法写出显式的表达式. 人类想要强行把这个函数的表达式找到! 怎么找呢? 我们看到一棵树, 它为什么是一棵树呢? 每个像素都对它是一棵树做出了贡献, 但好像整体是一棵树又与单个像素毫无关系. 如果这个表达式存在, 那么它肯定非常复杂 (这里不能追求所谓的 “简洁与优美”). 但我们可以缩小一点范围, 用某种特定形式的函数来逼近所求. 也就是:\n\n在一堆某种形式的映射里面 (参数化的函数空间 \\(\\mathcal{\\hat{F}}\\)) 找到一个映射 \\(\\hat{f}\\) 来拟合一个复杂的映射 \\(f: \\mathcal{X}\\to \\mathcal{Y}\\)\n\n人们首先发现长成 Equation eq-fcnn 这种样子的映射仿佛有很强的拟合能力, 也就是不管你人脑中的模型有多复杂, 总是可以在下面形式的映射中找到合适的拟合.\n\\[\n\\hat{f}(x) = \\sigma (W^{[L]} \\cdots \\sigma (W^{[2]} \\sigma (W^{[1]} x + b^{[1]}) + b^{[2]}) + \\cdots + b^{[L]})\n\\tag{1}\\]\nEquation eq-fcnn 很复杂对吧. 但是它可以用下面的图可视化出来:\n\n\n\n\n\n\nFigure 1: 仅仅是 Equation eq-fcnn 的可视化\n\n\n\n这张图放在这里太 cliché 了, 但是我想说的是: 我们对它太过熟悉了, 以至于认为选择这种参数化方法是理所应当、独一无二的.\n(FCNN, CNN, Transformer是同一层面上的概念? FCNN 能做到的事情很多, 但是太general 了, 所以先猜测什么样的结构能更好地揭示规律 (比如卷积 (尊重了 \\(\\mathcal{X}\\) 结构从而很可能能加速神经网络发现规律的过程?), 再比如 GNN), 然后加入它们来 帮助神经网络发现规律? “Differential Model” 我感觉 FCNN 和 CNN 的本质是一样的? CNN 的本质是 pre-trained FCNN (或者说?))\n\n事实证明形如神经网络的那些参数化函数空间能够拟合绝大多数的复杂映射, 所以无脑选择这样的 \\(\\mathcal{\\hat{F}}\\) 就行了.\n\n\n如果一个问题可以用以下的框架里面描述, 那么这个问题就可以用神经网络来解决!\n\n\n「复杂的映射」\n「复杂的映射」这个思想可以刻画和描述所有以下问题:\n\nClassification 分类问题: \\(\\mathcal{Y}\\) 仅仅是没有任何结构的集合.\n\n请说出下面例子的 \\(\\mathcal{X}\\) 和 \\(\\mathcal{Y}\\):\n\nImage Classification: 输入一张图片, 判断是猫还是狗还是其它的.\nFace Detection: 输入一张图片, 判断有没有人脸.\nHandwriting Recognition: 输入一张手写的数字, 判断是几. (虽然 \\(\\mathcal{Y}\\) 有序结构, 但不关心)\n\n\\(\\mathcal{X}\\) 是所有图片的集合, \\(\\mathcal{Y}\\) 是所有类别的集合.\n\nRegression 回归问题: \\(\\mathcal{Y}\\) 有序结构. (Generally speaking, 有拓扑结构1)\n\n请说出下面例子 [1] 的 \\(\\mathcal{X}\\) 和 \\(\\mathcal{Y}\\):\n\nLinear Regression: 给定一个标量场, 用线性标量场来拟合. (相当于指定了 \\(\\mathcal{\\hat{F}}\\))\nQuantization: 根据市场情况、历史数据等, 预测明天的股票价格.\n预测某个视频观看者年龄.\n根据发送的控制信号, 预测机械臂在三维空间的坐标.\n根据历史湿度、温度等天气信息, 预测某地明天的温度.\n\n\n\n1 序结构诱导的拓扑称为 Alexandrov 拓扑.\n\n参数化\n\n如果一个函数空间的所有元素都能用形式上相同的式子表达 (这个式子里面有一些可变的参数), 那么这个函数空间就是参数化的.\n\n\nLinear Regression 的参数化函数空间同构2于 \\(\\mathbb{R}^2\\):\n\n\n\n同构的 Mental picture\n\n\n\n2 在拓扑向量空间的意义上: \\[\\{f: \\mathbb{R}\\to \\mathbb{R} \\mid f(x) = wx + b, w, b \\in \\mathbb{R}\\} \\simeq \\{(w, b) \\mid w, b \\in \\mathbb{R}\\}\\]\n某个 CNN 的参数化函数空间同构于 \\(\\mathbb{R}^{200}\\):",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
-    ]
-  },
-  {
-    "objectID": "nn-essence/nn-essence.html#如何设计-mathcalhatf",
-    "href": "nn-essence/nn-essence.html#如何设计-mathcalhatf",
-    "title": "The Essence of NN 神经网络的本质",
-    "section": "如何设计 \\(\\mathcal{\\hat{F}}\\) ?",
-    "text": "如何设计 \\(\\mathcal{\\hat{F}}\\) ?\n\n即如何「设计」神经网络.\n\n\n尊重 \\(\\mathcal{X}, \\mathcal{Y}\\) 中元素的结构\n(升维、ask a lot of binary questions、编解码器、激活函数用什么类型 这些的联系是什么?)\n(\\(\\mathcal{X}\\) 为图片集合、文字、电路板、声音时分别有什么结构?)\n(curse of dimension怎么解决?)\n如果 \\(\\mathcal{X}\\) 是一张图片的话, 我们有 “相邻” 点这种概念, 也就是说输入进 \\(\\hat{f}\\) 的对象内部是有某些结构的, 但是 FCNN (a.k.a., MLP) 并不知道这些结构.\n(引出 CNN 和 GNN)",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
-    ]
-  },
-  {
-    "objectID": "nn-essence/nn-essence.html#如何找到-hatf",
-    "href": "nn-essence/nn-essence.html#如何找到-hatf",
-    "title": "The Essence of NN 神经网络的本质",
-    "section": "如何找到 \\(\\hat{f}\\) ?",
-    "text": "如何找到 \\(\\hat{f}\\) ?\n\n即如何「训练」神经网络.\n\n(梯度下降, 各种优化器)\n(梯度消失问题怎么解决、正则化、ResNet, 为什么ResNet有效等等话题)\n\nGradient Descent 梯度下降\n\nLoss function 损失函数: 函数空间 \\(\\mathcal{\\hat{F}}\\) 映到 \\(\\mathbb{R}\\) 的标量场 \\(L: \\mathcal{\\hat{F}} \\to \\mathbb{R}\\), 由于 \\(\\mathcal{\\hat{F}}\\) 参数化, 所以 \\(L\\) 也可以看作是 \\(\\mathbb{R}^n \\to \\mathbb{R}\\) 的函数.\n\n\\(L\\) 标量场如何确定呢?\n\n用训练集中的所有样本点取平均来确定标量场 (“GD”, 计算量太大).\n通过 (不放回地) 抽取训练集中的一个 Mini batch 来估计标量场 (“SGD / Minibatch SGD”)\n\n\ntorch.optim 其它优化器:\n\nMomentum: 通过加入历史速度来模拟惯性 (Moving Average), 受噪声影响更小.\nAdaGrad(Adaptive Gradient Descent)\n\n一些参数\n\nLearning Rate 学习率",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
-    ]
-  },
-  {
-    "objectID": "nn-essence/nn-essence.html#杂项",
-    "href": "nn-essence/nn-essence.html#杂项",
-    "title": "The Essence of NN 神经网络的本质",
-    "section": "杂项",
-    "text": "杂项\n\n我发现要以线性的顺序来写这篇 blog 的话会增加很多不必要的复杂性, 所以接下来我直接按照本人的学习顺序进行整理.\n\n\nCNN Padding:\n为了解决输入输出大小不一致的问题, 可以引入 Padding.\n\n\n\n不同的 Padding, Pytorch 的默认为 zero padding (最常用 [2])\n\n\n要将各种问题设计成用机器学习的方法的 idea 非常重要. 它往往是一篇论文的核心 idea. 比如 word2vec 中提到的方法.\n\n\n\n\n\n1. Murphy KP (2012) Machine learning : A probabilistic perspective. Mit Press\n\n\n2. Lab MH (2025) Lecture 2 - basics of neural networks (MIT 6.5940, fall 2023)",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
-    ]
-  },
-  {
-    "objectID": "yolo/yolo.html",
-    "href": "yolo/yolo.html",
-    "title": "YOLO Object Detection 目标检测",
-    "section": "",
-    "text": "Task Objective 任务目标",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
-    ]
-  },
-  {
-    "objectID": "yolo/yolo.html#task-objective-任务目标",
-    "href": "yolo/yolo.html#task-objective-任务目标",
-    "title": "YOLO Object Detection 目标检测",
-    "section": "",
-    "text": "识别东西是什么\n将东西的位置框起来\n\n\n两类方法\n解决这个问题的方法有两类:\n\nOne-stage: 推理速度快, 可实时\n\nE.g., YOLO, SSD, RetinaNet\n\nTwo-stage: 准确率高\n\nRegion Proposal 候选区: 先从图片中提取出可能包含目标的 1000-2000 个区域, 然后对每个候选区进行目标对象识别操作.\nE.g., Faster R-CNN, Mask R-CNN, Cascade R-CNN\n\n\n\n\n\nOne stage 和 Two stage 流程框图对比\n\n\n\n\n\n\n\nMSCOCO 数据集有物体名字和位置标注\n\n\n\n\n损失函数\n\n\n\n交并比用来衡量预测地好不好",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
-    ]
-  },
-  {
-    "objectID": "yolo/yolo.html#yolo-v1",
-    "href": "yolo/yolo.html#yolo-v1",
-    "title": "YOLO Object Detection 目标检测",
-    "section": "YOLO V1",
-    "text": "YOLO V1\n\nNetwork Structure 网络结构\n\n\n\n\n\n\nFigure 1: YOLO V1 的网络结构 [1]\n\n\n\n\n\n\n\n\n\nFigure 2: Figure fig-yolo-v1 的 Back-Bone 网络其实是若干的卷积网络 [2]\n\n\n\n说明:\n\nFigure fig-back-bone: -s-2 表示 stride 步长为 2.\n输入输出:\n\n输入是一张正方形的图片 (长宽像素各为 \\(448\\), 有 3 个通道: RGB).\n输出的 tensor 大小为 \\(7 \\times 7 \\times 30\\)\n\n\n\n\nLabel Tensor 标签张量\n\nMSCOCO 数据集需要先转换成另外一种形式 (Figure fig-yolo-v1-data-labeling) 再喂给 TOLO V1 神经网络 (即换一种形式打标签而已).\n\n\n\n\n\n\nFigure 3: YOLO V1: \\(S = 7\\), 总共\n\n\n\n每张图片都有 \\(S \\times S = 49\\) 个 grid cell, 每一个 grid cell 都被一个 \\(30 \\times 1\\) 的向量描述, 相当于一张图片都对应了一个 \\(7 \\times 7 \\times 30\\) 的 label tensor.\n\nFigure fig-back-bone 中网络的输出也是一个 \\(7 \\times 7 \\times 30\\) 的 tensor, 但这是 Prediction Tensor 预测张量 (sec-prediction-tensor), 不能混为一谈.\n\n如果有两个物体的中心点都落在同一个 grid cell 中, YOLO V1 只会保留其中一个.\n\n\n\nPrediction Tensor 预测张量",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
-    ]
-  },
-  {
-    "objectID": "hls-design/HLS-design.html",
-    "href": "hls-design/HLS-design.html",
-    "title": "HLS Design FPGA 并行编程",
-    "section": "",
-    "text": "Test\nOngoing",
-    "crumbs": [
-      "ML Accelerators",
-      "<span class='chapter-number'>15</span>  <span class='chapter-title'>HLS Design FPGA 并行编程</span>"
-    ]
-  },
-  {
-    "objectID": "cfu-proj-struct/cfu-proj-struct.html",
-    "href": "cfu-proj-struct/cfu-proj-struct.html",
-    "title": "CFU-Playground 工程结构",
-    "section": "",
-    "text": "Folder 文件夹描述",
-    "crumbs": [
-      "CFU Playground",
-      "<span class='chapter-number'>16</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
-    ]
-  },
-  {
-    "objectID": "cfu-proj-struct/cfu-proj-struct.html#folder-文件夹描述",
-    "href": "cfu-proj-struct/cfu-proj-struct.html#folder-文件夹描述",
-    "title": "CFU-Playground 工程结构",
-    "section": "",
-    "text": "soc: 存放一个完整的 CPU 的 verilog 设计.\n\n有很多种 CPU, 比如带或不带 CFU 接口的.",
-    "crumbs": [
-      "CFU Playground",
-      "<span class='chapter-number'>16</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
     ]
   },
   {
@@ -766,150 +590,29 @@
     "text": "Area Optimization 面积优化方法\n\n有时可读性强的代码会导致使用的逻辑门更多, 占用更多面积. 所以一个模块有时会写两种版本, 一种是可读性强的, 另一种是面积优化的版本.\n\n\nCSE 公共子表达式消除\nCommon Subexpression Elimination 也是编译器优化的一种. 举个简单的例子:\nint x = a + b;\nint y = a + b;\n可以优化为:\nint temp = a + b;\nint x = temp;\nint y = temp;\n这样就避免了重复计算 a + b 两次.\n在 RTL 设计中, 比如 Listing lst-AddSubSimple 这个简单的加减法模块, 注意到 “减法” 其实等价于 “加上 B 的补码”, 可以得到更优化的版本 Listing lst-AddSubArea:\n\n\n\n\n\nAddSubSimple.scala\n\nclass AddSubSimple extends Module {\n  val io = IO(new Bundle {\n    val a = Input(UInt(8.W))\n    val b = Input(UInt(8.W))\n    val sub = Input(Bool())   // true 表示减法\n    val out = Output(UInt(8.W))\n  })\n\n  // 两个独立运算单元\n  val addRes = io.a + io.b\n  val subRes = io.a - io.b\n\n  io.out := Mux(io.sub, subRes, addRes)\n}\n\n\n\n\n\nAddSubArea.scala\n\nclass AddSubOptimized extends Module {\n  val io = IO(new Bundle {\n    val a = Input(UInt(8.W))\n    val b = Input(UInt(8.W))\n    val sub = Input(Bool())\n    val out = Output(UInt(8.W))\n  })\n\n  // 如果是减法，就取 -B；否则取 B\n  val b_eff = Mux(io.sub, -io.b, io.b)\n  io.out := io.a + b_eff\n}\n\n\n\n\n对比他们两个 sbt 出来的 verilog 代码:\n\n\n\n\n\nAddSubSimple.v\n\nmodule AddSubSimple(\n  input        clock,\n  input        reset,\n  input  [7:0] io_a,\n  input  [7:0] io_b,\n  input        io_sub,\n  output [7:0] io_out\n);\n  wire [7:0] addRes = io_a + io_b;\n  wire [7:0] subRes = io_a - io_b;\n  assign io_out = io_sub ? subRes : addRes;\nendmodule\n\n\n\n\n\nAddSubArea.v\n\nmodule AddSubArea(\n  input        clock,\n  input        reset,\n  input  [7:0] io_a,\n  input  [7:0] io_b,\n  input        io_sub,\n  output [7:0] io_out\n);\n  wire [7:0] _b_eff_T_1 = 8'h0 - io_b;\n  wire [7:0] b_eff = io_sub ? _b_eff_T_1 : io_b;\n  assign io_out = io_a + b_eff;\nendmodule",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>HDL 硬件描述语言</span>"
     ]
   },
   {
-    "objectID": "cc-cpu/cc-cpu.html#macros-宏",
-    "href": "cc-cpu/cc-cpu.html#macros-宏",
-    "title": "CPU 原理速成",
-    "section": "Macros 宏",
-    "text": "Macros 宏\n\nxlen = 32: Word length 字长, 即 GPR 寄存器宽度 (由于通用寄存器被命名为 x0~x31)\n\n\n\n\n\n1. Patt YN, Patel SJ (2020) Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill\n\n\n2. Slchoi (2025) Multi-cycle implementation & pipelining",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>CPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "glossary/glossary.html#references",
-    "href": "glossary/glossary.html#references",
-    "title": "Glossary 名词解释",
-    "section": "References",
-    "text": "References\n\n\n\n\n[1] S. M. Sali, M. Meribout, and A. A. Majeed, “Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations.” 2025. Available: https://arxiv.org/abs/2509.04153\n\n\n[2] YSYX, “E5 从 RTL 代码到可流片版图 | 官方文档,” 2025, Available: https://ysyx.oscc.cc/docs/2407/e/5.html#%E6%89%93%E5%8D%B0%E5%B9%B6%E6%9F%A5%E7%9C%8B%E6%B3%A2%E5%BD%A2\n\n\n[3] R. P. Filho, “What is a chiplet, and why should you care?” Keysight.com, Aug. 2024. Available: https://www.keysight.com/blogs/en/tech/sim-des/what-is-a-chiplet-and-why-should-you-care. [Accessed: Nov. 16, 2025]\n\n\n[4] J. Mellor, J. Turner, A. Storkey, and E. J. Crowley, “Neural architecture search without training.” 2021. Available: https://arxiv.org/abs/2006.04647\n\n\n[5] S. Deng et al., “Edge intelligence with spiking neural networks.” 2025. Available: https://arxiv.org/abs/2507.14069\n\n\n[6] S. Somvanshi et al., “From tiny machine learning to tiny deep learning: A survey.” 2025. Available: https://arxiv.org/abs/2506.18927\n\n\n[7] M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, “Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.” 2025. Available: https://arxiv.org/abs/2504.19659\n\n\n[8] S. Dai, “Symbol grounding problem in artificial intelligence,” 2025, Available: https://www.cnblogs.com/sddai/p/18670953\n\n\n[9] Lazyparser, “Compilation and linker,” 2025, Available: https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&vd_source=42579e22289b6144ba0b2bdcf99834e3&p=5",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
-    ]
-  },
-  {
-    "objectID": "index.html#references",
-    "href": "index.html#references",
-    "title": "TinyML",
-    "section": "References",
-    "text": "References\n\n\n\n\n[1] 电子H., “哈工大深度学习体系结构课程 | 实验2：YOLO算法量化加速-CSDN博客,” 2025, Available: https://blog.csdn.net/HackEle/article/details/135944887\n\n\n[2] “Deep learning architecture.” Gitee.com, 2021. Available: https://gitee.com/hitsz-cslab/dla#https://gitee.com/hitsz-cslab/dla/tree/master/stupkt. [Accessed: Jul. 15, 2025]\n\n\n[3] Intel, “What is edge computing? – intel.” Intel, 2025. Available: https://www.intel.com/content/www/us/en/learn/what-is-edge-computing.html\n\n\n[4] S. M. Sali, M. Meribout, and A. A. Majeed, “Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations.” 2025. Available: https://arxiv.org/abs/2509.04153\n\n\n[5] S. G. at ETH Zürich, “Introduction to FPGAs and ML inference with hls4ml (benjamin ramhorst, 8 november 2024).” YouTube, Nov. 2024. Available: https://www.youtube.com/watch?v=2y3GNY4tf7A. [Accessed: Nov. 04, 2025]\n\n\n[6] J. Duarte et al., “Fast inference of deep neural networks in FPGAs for particle physics,” JINST, vol. 13, no. 7, p. P07027, 2018, doi: 10.1088/1748-0221/13/07/P07027. Available: https://arxiv.org/abs/1804.06913\n\n\n[7] U. D. of Energy, “AI tackles disruptive tearing instability in fusion plasma.” Energy.gov, 2025. Available: https://www.energy.gov/science/fes/articles/ai-tackles-disruptive-tearing-instability-fusion-plasma\n\n\n[8] S. Deng et al., “Edge intelligence with spiking neural networks.” 2025. Available: https://arxiv.org/abs/2507.14069\n\n\n[9] S. Somvanshi et al., “From tiny machine learning to tiny deep learning: A survey.” 2025. Available: https://arxiv.org/abs/2506.18927\n\n\n[10] M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, “Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.” 2025. Available: https://arxiv.org/abs/2504.19659",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction 引入</span>"
-    ]
-  },
-  {
-    "objectID": "yolo/yolo.html#references",
-    "href": "yolo/yolo.html#references",
-    "title": "YOLO Object Detection 目标检测",
-    "section": "References",
-    "text": "References\n\n\n\n\n1. 上下求索电子Er (2025) [YOLO V1] 数据标注和输出张量_哔哩哔哩_bilibili\n\n\n2. Redmon J, Divvala S, Girshick R, Farhadi A (2016) You only look once: Unified, real-time object detection",
-    "crumbs": [
-      "Neural Network",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
-    ]
-  },
-  {
-    "objectID": "research-proposal/research-proposal.html",
-    "href": "research-proposal/research-proposal.html",
-    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
-    "section": "",
-    "text": "Motivation\nOver the past decade, cloud-based training and inference pipelines face growing issues of high latency, bandwidth bottlenecks, data privacy issues [1] and escalating training energy cost [2], etc. Edge GPUs partially alleviate these issues but, on the one hand, remain too general-purpose, lacking flexibility for custom numeric precisions, memory hierarchy and data movement [3]. On the other hand, different applications stress different aspects:\nRecent evidence [7] shows FPGA-based accelerators can outperform GPUs in both energy efficiency and deterministic latency when tuned for application-specific workloads. Therefore, FPGA-based hardware–software co-design emerges as a promising solution for low-power, low-latency edge computing tailored to specific application needs.",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
-    ]
-  },
-  {
-    "objectID": "research-proposal/research-proposal.html#motivation",
-    "href": "research-proposal/research-proposal.html#motivation",
-    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
-    "section": "",
-    "text": "Autonomous systems, UAVs, Controlled nuclear fusion: Demand sub-millisecond latency for control stability and decision safety [4], [5], [6].\nMedical and IoT devices: Prioritize data privacy and local analytics to meet regulatory and ethical standards [1].",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
-    ]
-  },
-  {
-    "objectID": "research-proposal/research-proposal.html#project-objectives",
-    "href": "research-proposal/research-proposal.html#project-objectives",
-    "title": "Research Proposal 研究计划",
-    "section": "Project Objectives",
-    "text": "Project Objectives\nThe goal is to develop an open source, reproducible full-stack edge ML system (models, compiler flow, RTL, FPGA bitstream, measurement harness) that beats the ANN GPU-edge baseline on energy consumption, latency and relatively high accuracy for a selected application scenario.\nThere are two variables to choose:\n\nApplication scenario: Suits edge computing and extremely low latency (possibly video stream processing / controlled nuclear fusion).\nTarget network structure: Possibly accelerating RT-DETR [8] or YOLO, or directly optimize existing Spiking Neural Networks (SNNs).",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal 研究计划</span>"
-    ]
-  },
-  {
-    "objectID": "research-proposal/research-proposal.html#methodology",
-    "href": "research-proposal/research-proposal.html#methodology",
-    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
-    "section": "Methodology",
-    "text": "Methodology\nTo achieve the project objectives, the proposed research will follow a three-stage methodology: The warm-up phase establishes an ANN baseline and a RISC-V-coupled FPGA accelerator with deterministic low-latency dataflows. The mid-term phase investigates brain-inspired computing, especially SNNs, focusing on improving accuracy, enhancing LIF model (increasing “internal complexity” [9], [10]), sparse computation, quantization / pruning models and establishing SNN standard APIs. The long-term phase explores emergent intelligence by investigating hypercomputation beyond Turing limits. The details are as shown in the following sections.\n\nWarm-up: Von Neumann path (RISC-V + FPGA, ANN first)\nThis phase has been planned as my graduation project, with the aim to pushing the limits of von Neumann architecture (RISC-V) in edge computing by accelerating and optimizing existing ANNs. Take target network RT-DETR [8] as an example, the steps are as follows:\n\nQuantization & pruning for edge: We adopt sub-8-bit quantization (INT8 \\(\\to\\) INT4/INT2 if accuracy allows) and structured sparsity to minimize off-chip transfers. We will report accuracy-latency-energy trade-offs under identical datasets and input resolutions.\nRISC-V-based accelerator with CFU Playground: As a undergraduate warm-up project, we will imitate the design flow in [11] as shown in Figure fig-warm-up. We will implement a VexRiscv + Custom function unit (CFU) design within the open-source CFU Playground framework [12] shown in Figure fig-cfu-playground. The difficulties are to design customized extended instructions in RISC-V for computational-intensive operators (e.g., depthwise/pointwise convolution, \\(QK^T\\), low-bit GEMM), write the corresponding RTL for the hardware.\n\n\n\n\n\n\nFigure 1: Warm-up phase design flow (adapted from [11])\n\n\n\n\n\n\n\n\n\nFigure 2: CFU-playground: ML Accelerators in RISC-V ISA [11], [12]\n\n\n\nFull-stack design and DSE: As a learning experience, we will reinvent the wheel by designing the entire accelerator in Chisel from scratch and open-sourcing it on Github. Then, we also explore a large multi-dimensional design space exploration (DSE) using automated methods (such as heuristic or evolutionary algorithms) to identify optimal configurations balancing accuracy, energy, and latency. Finally, we will use Arty A7-100T FPGA as the hardware platform for real measurements.\n\n\n\nMid-term: Brain-Inspired path (SNN on FPGA, portable toolchain)\nThis phase is planned to be my potential PhD research topic. We will explore Brain-Inspired Computing (BIC) in computer vision tasks with a particular focus on EdgeSNNs (parameters \\(&lt; 100\\text{ M}\\) [1]) and In-Memory Computing (CIM).\n\n\n\n\n\n\nFigure 3: Leaky integrate-and-fire (LIF) neuron dynamics in SNN [10]\n\n\n\nSNNs have shown promise for ultra-low-power, event-driven inference at the edge. SNNs model neurons with explicit membrane dynamics (LIF model as shown in Figure fig-lif-model). Unlike conventional ANNs, SNNs process information in the temporal domain using binary spikes (event-driven coding), this is particularly suitable for SpikeCV cameras [13], which in my view are the next-generation vision sensors for edge applications such as autonomous driving.\nPrevious work on SNNs in autonomous driving includes Spiking-YOLO [14], EMS-YOLO [15], etc. However, the performance is still not good in general compared to ANN [16]. ECS-LIF in [16] suggests high-performance spiking detectors are possible with ANN-level matched accuracy and ultra-low energy costs. However, one still need to carefully select hardware architectures. For video classification, research is even more nascent [13]. Early attempts include spiking recurrent networks (processing up to 300 time steps of video frames), or hybrid ANN-SNN approaches for action recognition [13], SpikeVideoTransformer [17], SpikeYOLO [18]. However, there is no SNN equivalent yet for many popular video models (e.g. no published spiking variant of SlowFast or DETR detection-transformer as of 2025).\nSince the research steps are not as clear as the warm-up phase, I list some potential research directions in parallel below:\n\nExplore SNN design / training method: There are two routes to get optimized SNNs: ANN2SNN conversion [1], [8], or direct-training SNNs. We will explore both routes to find the best-performing SNNs for our target application. We will also investigate advanced training techniques such as surrogate gradients, temporal backpropagation, and biologically inspired learning rules to improve SNN performance.\nDevelop unified SNN toolchain: SNNs lack standard APIs and SNN-specific IRs (analogous to ONNX [1], [19]) for quantization strategies tailored to spike dynamics [19]. We prototype a minimal graph-level SNN IR (ops, neuron nodes, timing semantics) plus a quantization API (e.g., \\(\\text{INT8} \\times \\text{INT2}\\) spike ops, ternary spikes, per-layer time-step budgets) to decouple front-end training from back-end compilers, following the direction of NIR and recent co-design work that targets FPGA-friendly spike arithmetic. This addresses today’s fragmentation across neuromorphic stacks and enables “write once, target FPGA/Loihi/MCU.” [20]\nFurther explore SNN internal complexity: A recent study [9], [10] by Network model with internal complexity bridges artificial intelligence and neuroscience shows a pivotal shift in thinking: Instead of simply growing neural networks by adding more layers or parameters (“external complexity”), we can embed richer dynamics inside each neuron or module — a paradigm the authors term “small model with internal complexity.”\n\n\n\nLong-term: Emergent Intelligence\nThis phase is my long-term aspiration toward artificial general intelligence (AGI). This stage will explore the theoretical and practical computational boundary and brand-new distributed computing paradigms inspired by the human brain under the guidance of recent theoretical investigations into emergence in artificial systems, such as Berti et al. (2025) [21] who survey emergent abilities in LLMs and identify conditions like scaling, criticality and compression that contribute to spontaneous capability gains. Continuing the exploration of internal complexity in #sec-mid-term, there are two major directions: Turing-complete machine and hypercomputation beyond Turing limits.\n\n\n\n\n\n\n\n\n\nFigure 4: Conway’s Game of Life (CGOL): local update rules [22].\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: Gosper’s glider gun: a self-replicating pattern proving Turing-completeness [23], [24].\n\n\n\n\n\n\n\nDecentralized, event-driven architectures: We will first explore turing-complete hardware and software systems that mimic the highly-distributed, asynchronous nature and learning-while-inferencing feature of the brain. Turing-equivalent cellular automata such as CGOL [25] (Figure fig-cgol), Langton’s ant, Particle Life already demonstrate how simple local rules can give rise to complex, emergent patterns (Figure fig-gosper-glider-gun, Figure fig-pl1, Figure fig-pl2). While using the CGOL itself as a practical “computer” is inefficient, it serves as a proof-of-concept that emergence can arise from simple components. The challenge is discovering the right set of rules (i.e., internal complexity) or learning algorithms that yield robust emergent intelligence, not just (external) complexity for its own sake [26]. Then turn out to nature (the hardware) to find out if there is a machine under our control that performs this set of rules intrinsically.\n\n\n\n\n\n\n\n\n\nFigure 6: Emergent chasing behavior (Particle Life).\n\n\n\n\n\n\n\n\n\nFigure 7: Stable pattern formation (Particle Life).\n\n\n\n\nHypercomputation beyond Turing limits: Human brain might be exploiting computational principles beyond the scope of traditional Turing machines. Penrose and others (like Stuart Hameroff) have hypothesized that quantum effects in neural microstructures (e.g. microtubules) could enable the brain to do things standard computers cannot [27]. Achieving AI with brain-like cognition might then require tapping into quantum computing [28], ONNs [29], Organoid Intelligence (OI) [30], [31] and beyond.",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
-    ]
-  },
-  {
-    "objectID": "research-proposal/research-proposal.html#anticipated-impact",
-    "href": "research-proposal/research-proposal.html#anticipated-impact",
-    "title": "Research Proposal 研究计划",
-    "section": "Anticipated Impact",
-    "text": "Anticipated Impact\n\nFull-stack: Since software-hardware co-design is adopted, the project outcome will be a solid entity rather than a theoretical idea.",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal 研究计划</span>"
-    ]
-  },
-  {
-    "objectID": "research-proposal/research-proposal.html#references",
-    "href": "research-proposal/research-proposal.html#references",
-    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
-    "section": "References",
-    "text": "References\n\n\n\n\n\n[1] S. Deng et al., “Edge intelligence with spiking neural networks.” 2025. Available: https://arxiv.org/abs/2507.14069\n\n\n[2] “CHAPTER 1: Research and development.” Artificial Intelligence Index Report 2025, 2025. Available: https://hai.stanford.edu/assets/files/hai_ai-index-report-2025_chapter1_final.pdf. [Accessed: Nov. 03, 2025]\n\n\n[3] S. G. at ETH Zürich, “Introduction to FPGAs and ML inference with hls4ml (benjamin ramhorst, 8 november 2024).” YouTube, Nov. 2024. Available: https://www.youtube.com/watch?v=2y3GNY4tf7A. [Accessed: Nov. 04, 2025]\n\n\n[4] S. M. Sali, M. Meribout, and A. A. Majeed, “Real time FPGA based CNNs for detection, classification, and tracking in autonomous systems: State of the art designs and optimizations.” 2025. Available: https://arxiv.org/abs/2509.04153\n\n\n[5] J. Duarte et al., “Fast inference of deep neural networks in FPGAs for particle physics,” JINST, vol. 13, no. 7, p. P07027, 2018, doi: 10.1088/1748-0221/13/07/P07027. Available: https://arxiv.org/abs/1804.06913\n\n\n[6] U. D. of Energy, “AI tackles disruptive tearing instability in fusion plasma.” Energy.gov, 2025. Available: https://www.energy.gov/science/fes/articles/ai-tackles-disruptive-tearing-instability-fusion-plasma\n\n\n[7] F. Yan, A. Koch, and O. Sinnen, “A survey on FPGA-based accelerator for ML models.” 2024. Available: https://arxiv.org/abs/2412.15666\n\n\n[8] Y. Zhao et al., “DETRs beat YOLOs on real-time object detection.” 2023. Available: https://arxiv.org/abs/2304.08069\n\n\n[9] L. He et al., “Network model with internal complexity bridges artificial intelligence and neuroscience,” Nature Computational Science, vol. 4, no. 8, pp. 584–599, 2024, doi: 10.1038/s43588-024-00674-9. Available: https://doi.org/10.1038/s43588-024-00674-9\n\n\n[10] G. Li et al., “Brain-inspired computing: A systematic survey and future trends,” Proceedings of the IEEE, vol. 112, no. 6, pp. 544–584, 2024, doi: 10.1109/JPROC.2024.3429360\n\n\n[11] M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, “Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.” 2025. Available: https://arxiv.org/abs/2504.19659\n\n\n[12] S. Prakash et al., “CFU playground: Full-stack open-source framework for tiny machine learning (TinyML) acceleration on FPGAs,” in 2023 IEEE international symposium on performance analysis of systems and software (ISPASS), IEEE, Apr. 2023, pp. 157–167. doi: 10.1109/ispass57527.2023.00024. Available: http://dx.doi.org/10.1109/ISPASS57527.2023.00024\n\n\n[13] Y. Ashraf, A. Sharshar, V. Bojkovic, and B. Gu, “SPACT18: Spiking human action recognition benchmark dataset with complementary RGB and thermal modalities.” 2025. Available: https://arxiv.org/abs/2507.16151\n\n\n[14] S. Kim, S. Park, B. Na, and S. Yoon, “Spiking-YOLO: Spiking neural network for energy-efficient object detection.” 2019. Available: https://arxiv.org/abs/1903.06530\n\n\n[15] Q. Su et al., “Deep directly-trained spiking neural networks for object detection.” 2023. Available: https://arxiv.org/abs/2307.11411\n\n\n[16] M. Jin, X. Wang, C. Guo, and S. Yang, “Research on target detection for autonomous driving based on ECS-spiking neural networks,” Scientific Reports, vol. 15, no. 1, p. 13725, 2025, doi: 10.1038/s41598-025-97913-4. Available: https://doi.org/10.1038/s41598-025-97913-4\n\n\n[17] S. Zou et al., “SpikeVideoFormer: An efficient spike-driven video transformer with hamming attention and \\(\\mathcal{O}(T)\\) complexity.” 2025. Available: https://arxiv.org/abs/2505.10352\n\n\n[18] X. Luo, M. Yao, Y. Chou, B. Xu, and G. Li, “Integer-valued training and spike-driven inference spiking neural network for high-performance and energy-efficient object detection.” 2025. Available: https://arxiv.org/abs/2407.20708\n\n\n[19] A. Carpegna, A. Savino, and S. D. Carlo, “Spiker+: A framework for the generation of efficient spiking neural networks FPGA accelerators for inference at the edge,” IEEE Transactions on Emerging Topics in Computing, vol. 13, no. 3, pp. 784–798, Jul. 2025, doi: 10.1109/tetc.2024.3511676. Available: http://dx.doi.org/10.1109/TETC.2024.3511676\n\n\n[20] J. E. Pedersen et al., “Neuromorphic intermediate representation: A unified instruction set for interoperable brain-inspired computing,” Nature Communications, vol. 15, no. 1, p. 8122, 2024, doi: 10.1038/s41467-024-52259-9. Available: https://doi.org/10.1038/s41467-024-52259-9\n\n\n[21] L. Berti, F. Giorgi, and G. Kasneci, “Emergent abilities in large language models: A survey.” 2025. Available: https://arxiv.org/abs/2503.05788\n\n\n[22] T. Hirose and T. Sawaragi, “Extended FRAM model based on cellular automaton to clarify complexity of socio-technical systems and improve their safety,” Safety Science, vol. 123, p. 104556, Mar. 2020, doi: 10.1016/j.ssci.2019.104556\n\n\n[23] I. Lokhov, “Game of life | datawrapper blog.” Datawrapper, Jun. 2021. Available: https://www.datawrapper.de/blog/game-of-life\n\n\n[24] W. Contributors, “Gun (cellular automaton).” Wikipedia; Wikimedia Foundation, Aug. 2023. Available: https://en.wikipedia.org/wiki/Gun_(cellular_automaton)\n\n\n[25] J. McCrum and T. P. Kee, “Conways game of life as an analogue to a habitable world livingness beyond the biological.” 2024. Available: https://arxiv.org/abs/2410.22389\n\n\n[26] D. C. Krakauer, J. W. Krakauer, and M. Mitchell, “Large language models and emergence: A complex systems perspective.” 2025. Available: https://arxiv.org/abs/2506.11135\n\n\n[27] D. Orf, “Quantum entanglement in your brain is what generates consciousness, radical study suggests.” Popular Mechanics, Jul. 2025. Available: https://www.popularmechanics.com/science/a65368553/quantum-entanglement-in-brain-consciousness/\n\n\n[28] G. A. Silva, “Leveraging quantum superposition to infer the dynamic behavior of a spatial-temporal neural network signaling model.” 2025. Available: https://arxiv.org/abs/2403.18963\n\n\n[29] T. Fu et al., “Optical neural networks: Progress and challenges,” Light: Science & Applications, vol. 13, no. 1, p. 263, 2024, doi: 10.1038/s41377-024-01590-3. Available: https://doi.org/10.1038/s41377-024-01590-3\n\n\n[30] L. Smirnova et al., “Organoid intelligence (OI): The new frontier in biocomputing and intelligence-in-a-dish,” Frontiers in Science, vol. 1, p. 1017235, Feb. 2023, doi: 10.3389/fsci.2023.1017235\n\n\n[31] T. Oh, “The future of artificial intelligence — wetware.” Medium, Jul. 2023. Available: https://medium.com/@timothyohoc/the-future-of-artificial-intelligence-wetware-da2e396b3c55. [Accessed: Nov. 04, 2025]",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
-    ]
-  },
-  {
-    "objectID": "research-proposal/research-proposal.html#problem-statement-research-questions",
-    "href": "research-proposal/research-proposal.html#problem-statement-research-questions",
-    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
-    "section": "Problem Statement & Research Questions",
-    "text": "Problem Statement & Research Questions\nProblem. Edge AI is constrained by end-to-end latency, energy per inference, and privacy. General-purpose accelerators lack support for application-specific numerics and event-driven workloads. SNNs promise ultra-low-power inference but lack portable toolchains (IR/quantization) and competitive accuracy at low time-steps.\n\nHow far can RISC-V + FPGA co-design push latency/energy for real-time perception while preserving accuracy?\nCan SNNs with internal complexity (multi-timescale, adaptive thresholds) match ANN accuracy at few-time-step inference on FPGA?\nWhat portable SNN IR + quantization API enables “write once, target multiple back-ends” without accuracy regressions?\nWhich dataflows (streaming vs memory-centric) minimize data motion for attention/convolution bottlenecks at the edge?",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
-    ]
-  },
-  {
-    "objectID": "research-proposal/research-proposal.html#project-objectives-expected-contributions",
-    "href": "research-proposal/research-proposal.html#project-objectives-expected-contributions",
-    "title": "Research Proposal: New Inference Paradigms for ML at the Edge",
-    "section": "Project Objectives & Expected Contributions",
-    "text": "Project Objectives & Expected Contributions\n\nAn open source, reproducible full-stack edge ML system (models \\(\\to\\) compiler \\(\\to\\) RTL \\(\\to\\) bitstream) that surpasses the ANN GPU-edge baseline on \\(\\ge 2\\) of {latency, energy per inference, accuracy} for a selected application scenario.\nA portable SNN IR + quantization API for spike dynamics, demonstrated on FPGA.\nEvidence that internal complexity can reduce depth/width and time-steps while maintaining accuracy on edge tasks.\nAn open benchmark harness with NeuroBench-style reporting for fair cross-hardware comparison.\n\nThere are two variables to choose though:\n\nApplication scenario: Suits edge computing and extremely low latency (possibly video stream processing / controlled nuclear fusion).\nTarget network structure: Possibly accelerating RT-DETR [8] or YOLO, or directly optimize existing Spiking Neural Networks (SNNs).",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>4</span>  <span class='chapter-title'>Research Proposal: New Inference Paradigms for ML at the Edge</span>"
-    ]
-  },
-  {
-    "objectID": "cc-fpga/cc-fpga.html#references",
-    "href": "cc-fpga/cc-fpga.html#references",
+    "objectID": "cc-fpga/cc-fpga.html",
+    "href": "cc-fpga/cc-fpga.html",
     "title": "FPGA 原理速成",
-    "section": "References",
-    "text": "References\n\n\n\n\n[1] R. Kastner, J. Matai, and S. Neuendorffer, “Parallel Programming for FPGAs,” ArXiv e-prints, May 2018, Available: https://arxiv.org/abs/1805.03648",
+    "section": "",
+    "text": "FPGA Structure 结构",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-fpga/cc-fpga.html#fpga-structure-结构",
+    "href": "cc-fpga/cc-fpga.html#fpga-structure-结构",
+    "title": "FPGA 原理速成",
+    "section": "",
+    "text": "PL (Programmable Logic) 可编程部分\n这个部分是一个 FPGA 开发板 “软” 的部分, 即可以通过 verilog 来控制硬件电路的部分. 要理清一下几个概念:\n\nBLE (Basic Logic Element): 基本逻辑单元. LUT 和 FF 的「经典」的组合.\n\n见 Figure fig-ble, 方框代表 LUT (Look up Table), 本质上就是一个 Mux (Multiplexer, 多路选择器).\n红色的位置将来的 bitstream 会写入 (用来配置这个 BLE 的功能), i0-i3 是这个 BLE 的输入, 右边是输出.\n\n\n\n\n\n\nFigure 1: 这个 BLE 由 LUT-4 和 D-FF 组成\n\n\n\n\nCLB (Configurable Logic Block, Xilinx) 可配置逻辑块: 一个或者多个 BLE 的组合.\n\n也叫 Slice (Vivado HLS) 或 LAB (Logic Array Block) 或 ALM (Adaptive Logic Module, Intel).\n\n\n\n\n\n\n\n\n由 1 个 BLE 构成的 CLB (e.g. Xilinx Spartan 6)\n\n\n\n\n\n\n\n由 4 个 BLE 构成的 CLB\n\n\n\n\n\n\nSB (SwitchBox): 连接不同 CLB 的开关盒.\n\n\n\n\n\n\nFigure 2: Slice (蓝色) 和其周围的 SB (SwitchBox) [1]\n\n\n\n\n\n\n\n\n\nFigure fig-slice-sb 的放大结构\n\n\n\n\nPS (Processing System) 处理器部分\n不要认为一个开发板只有 “软” 部分, 有些 (ZYNQ) 经常用的模块会用硬件 “焊死” 在板子上 (Heterogenous 异构、SoC). 这些硬件通过 I/O 口与 PL 部分通信, 比如:\n\n\n\nZYNQ PS 和 PL 通过 AXI 通信\n\n\n以 ZYNQ XC7Z010 为例, 在 Vivado 中创建工程 Create Block Design 后, 添加 ZYNQ7 Processing System IP 核 (Figure fig-zynq-xz7z-ps-pl), 可以看到 PS (白色) 和 PL (灰色) 以及他们之间的连接:\n\n\n\n\n\n\nFigure 3: ZYNQ XC7Z010 的 PS 和 PL",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   },
   {
@@ -920,40 +623,293 @@
     "text": "AXI4 总线协议\n\nPort 接口\n\nGP (General Purpose): 通用接口, 位宽 32 bits, 使用 AXI4_LITE 协议, 传输小数据量 (比如命令和地址).\nHP (High Performance): 高性能接口, 位宽 32 或 64 bits, 使用 AXI4_FULL 协议, 传输大数据量.\nACP (Accelerator Coherency Port): 加速器一致性端口, 位宽 64 bits, 使用 AXI_FULL 协议, 适合高速通信 (用的比较少).\n\n\n\n\n\n\nFigure 4: 两种 AXI 和在 ZYNQ 7010 上面使用的接口",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   },
   {
-    "objectID": "glossary/glossary.html#open-source-tools",
-    "href": "glossary/glossary.html#open-source-tools",
-    "title": "Glossary 名词解释",
-    "section": "Open Source Tools",
-    "text": "Open Source Tools\n\n该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!\n\n\nverilator: 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行仿真, 模拟出时钟、寄存器逻辑、外设交互等行为.\nverilator -cc blink.v # 生成 obj_dir/ 其中含有转换好的 C++ 代码\niverilog (Icarus Verilog): 也是仿真 (但不输出 C 代码):\niverilog -o blink.vvp blink.v blink_tb.v\n# 生成 vcd 文件可配合 GTKWave 查看波形\nvvp blink.vvp\nopenFPGALoader: 用于将比特流烧录到 FPGA (但不能调试).\n# 示例：\nopenFPGALoader -b arty arty_bitstream.bit      # SRAM 加载\nopenFPGALoader -b arty -f arty_bitstream.bit   # 写入 flash\nopenocd: Open On-Chip Debugger. 用于调试 FPGA 的工具. 支持 JTAG 接口.\n三个端到端的工具链:\n\nVivado: IDE, 闭源.\nyosysHQ (Yosys Open SYnthesis Suite Headquarters): yyds!! 一个开源的 EDA 工具链. 子项目包括:\n\nicestorm: 用于针对 Lattice iCE40 FPGA 实现完全的端到端开源流程, 从 Verilog 到 bitstream, 再烧写到 FPGA 板卡上. 以下每一个命令都是一个单独的 repo!!\n# yosys 综合 (将 verilog 转换为网表 .json)\nyosys -p 'synth_ice40 -top blink -json blink.json' blink.v\n# nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)\nnextpnr-ice40 --up5k --json blink.json --pcf blink.pcf --asc blink.asc\n# icepack 打包 (生成 bitstream .bin)\nicepack blink.asc blink.bin\n# icesprog 烧写 (将 bitstream 写入 FPGA)\nsudo icesprog blink.bin\n\nF4PGA: 以前叫 Symbiflow, 旨在为多家 FPGA 供应商 (Xilinx 7 系列、Lattice iCE40/ECP5、QuickLogic EOS S3 等) 提供统一、功能完备、可扩展且无需专有软件的端到端开发流程.\n\n里面大量使用了 YosysHQ 的工具.\n\n\nSpinalHDL: 一个基于 Scala 的硬件描述语言 (HDL), 用于生成 Verilog 代码. SpinalHDL 提供了更高级的抽象和更强大的功能, 使得硬件设计更加灵活和可扩展.\n\nVexRiscv:\n\nLitex: 支持用 Python 脚本拼装出完整的 SoC.",
+    "objectID": "cc-fpga/cc-fpga.html#编译过程",
+    "href": "cc-fpga/cc-fpga.html#编译过程",
+    "title": "FPGA 原理速成",
+    "section": "编译过程",
+    "text": "编译过程\n\nSynthesis 综合\n\n动机: FPGA 不懂 “行为”, 它需要的是 “你想用哪些门, 怎么连线”. 所以 Synthesis 是将你写的 .v 逻辑翻译成各种 Logic gates 应该如何连接 (门级网表) 的过程 (以 .json 格式输出).",
     "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   },
   {
-    "objectID": "glossary/glossary.html#eda-terms",
-    "href": "glossary/glossary.html#eda-terms",
-    "title": "Glossary 名词解释",
-    "section": "EDA Terms",
-    "text": "EDA Terms\n\nNetlist 网表: 一个 Graph, 描述了电路用了哪些元件和它们之间的连接.\n\nGate-level 门级网表: 比如用 yosys 生成的 .json 文件.\nTransistor-level 晶体管级网表: .spice, .cir.\n\n\n\nPackaging 封装\n\nWafer 晶圆, Die, Chiplet Arch\n\nDie 和 Tile: 一样的概念, 前者强调物理实体, 后者强调逻辑功能单元.\n\n\n\n\n\n\n\nFigure 1: Die & Wafer 关系, Chiplet 思想 (Use smaller dies) 与其如何提高良率、降低成本 [3]\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 2: 多个 Die 通过 D2D connection (die-to-die) 形成 SoC [3]\n\n\n\n\nTSV (Through-Silicon Via) 硅通孔: 就是在硅片上打孔, 然后在孔内镀铜, 形成垂直的电连接通道.\nHBT (Hybrid bonding terminal): 一种连接上下层 Die 的端子 (通过直接原子键合).",
+    "objectID": "cc-fpga/cc-fpga.html#references",
+    "href": "cc-fpga/cc-fpga.html#references",
+    "title": "FPGA 原理速成",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] R. Kastner, J. Matai, and S. Neuendorffer, “Parallel Programming for FPGAs,” ArXiv e-prints, May 2018, Available: https://arxiv.org/abs/1805.03648",
     "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   },
   {
-    "objectID": "eda-3d-placement/eda-3d-placement.html",
-    "href": "eda-3d-placement/eda-3d-placement.html",
-    "title": "EDA: 3D IC Placement",
+    "objectID": "cc-cpu/cc-cpu.html",
+    "href": "cc-cpu/cc-cpu.html",
+    "title": "CPU 原理速成",
     "section": "",
-    "text": "Glossary",
+    "text": "Change of Mind",
     "crumbs": [
-      "EDA",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
+      "Crash Courses",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>CPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cpu/cc-cpu.html#change-of-mind",
+    "href": "cc-cpu/cc-cpu.html#change-of-mind",
+    "title": "CPU 原理速成",
+    "section": "",
+    "text": "对于有时钟的电路, 我们应该想象成: 电路的状态只在时钟的上升沿「瞬间」变化. 时钟的上升沿发生时电路做了两件事情:\n\n前一个时钟周期的计算结果该锁存的 锁存到寄存器 中.\n下一个时钟周期的结果瞬间计算出来并 放在线上 (他们目前还不能被 CPU “看到”).",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>CPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
+    "href": "cc-cpu/cc-cpu.html#cpu-是如何成为现在这个样子的",
+    "title": "CPU 原理速成",
+    "section": "CPU 是如何成为现在这个样子的?",
+    "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n流水线\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n在每两个 phase 之间插入一些受始终控制的寄存器:\n\nIF-ID 之间: 当前指令, PC 值 (jal 要用)\nID-EX 之间: 指令类型, rs1, rs2, rd, imm.\n\n\n\n\n第三阶段\n\n总线: ARM 公司研发了很多总线, 他们的集合称为 AMBA (Advanced Microcontroller Bus Architecture). 包括: APB, AHB, AXI. Xilinx 公司很多异构的 FPGA都需要引入 AXI 总线.\nAXI 特点:\n\n面向存储: 指主、从机在读到数据之后一般都会将这些数据先放在某种储存里面.\n突发总线:\n\n\n\n\nCache\n\n\nMemory\n\n内存: working memory, main memory\nDRAM & SSD 内存与硬盘\n\n读写速度 (3000 倍): 17 ns vs 50 ms, 超音速飞机和龟速\n容量: 16GB vs 4TB\n\nSIMM & DIMM\n\nDIMM (Dual In-line Memory Module)",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>CPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cpu/cc-cpu.html#macros-宏",
+    "href": "cc-cpu/cc-cpu.html#macros-宏",
+    "title": "CPU 原理速成",
+    "section": "Macros 宏",
+    "text": "Macros 宏\n\nxlen = 32: Word length 字长, 即 GPR 寄存器宽度 (由于通用寄存器被命名为 x0~x31)\n\n\n\n\n\n[1] Y. N. Patt and S. J. Patel, Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill, 2020.\n\n\n[2] Slchoi, “Multi-cycle implementation & pipelining,” 2025, Available: https://velog.io/@taegon1998/4.2-4.3-Multi-Cycle-Implementation-Pipelining",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>CPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-gpu/cc-gpu.html",
+    "href": "cc-gpu/cc-gpu.html",
+    "title": "GPU 原理速成",
+    "section": "",
+    "text": "CUDA",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>GPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-gpu/cc-gpu.html#cuda",
+    "href": "cc-gpu/cc-gpu.html#cuda",
+    "title": "GPU 原理速成",
+    "section": "",
+    "text": "2026 年之前 GPU 只能做特定的函数运算, 2026 年之后引入了 GPGPU (General Purpose GPU), 有一整套库函数来对 GPU 进行编程.\n\nCUDA: Compute Unified Device Architecture (NVIDIA, 闭源)\nOpenCL: Open Computing Language (开源)\n\nGPU device memory 可以被所有 CUDA 核心共享:\n\n\n\nNVidia GPU 架构 [1]\n\n\n连接有 GPU 的 CPU 二者的 memory 是不共享的 [1], 二者之间的数据由 DMA 搬运.\n\n\n\nSeperate memory systems [1]\n\n\nKernel functions [1]:\n\n__host__: 默认在 CPU (host) 上运行的函数.\n__global__: 在 GPU 上运行, 可被 CPU 调用的函数.\n__device__: 在 GPU 上运行, 只能被 GPU 调用的函数.\n\n全局变量: 可以被 CPU 和 GPU 访问的变量, 不能用 local variable 的方式声明!\n__managed__ int x;\n\n\n\n\n\n[1] S. Y. Cheung, “Lecture notes on computer science courses: Computer architecture (CS355),” 2025, Available: https://www.cs.emory.edu/~cheung/Courses/355/Syllabus/syl.html#CURRENT",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>GPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "open-src-tools/open-src-tools.html",
+    "href": "open-src-tools/open-src-tools.html",
+    "title": "Open Source 开源工具",
+    "section": "",
+    "text": "Behavioral Simulation 行为仿真",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Open Source 开源工具</span>"
+    ]
+  },
+  {
+    "objectID": "open-src-tools/open-src-tools.html#behavioral-simulation-行为仿真",
+    "href": "open-src-tools/open-src-tools.html#behavioral-simulation-行为仿真",
+    "title": "Open Source 开源工具",
+    "section": "",
+    "text": "即: NOT board-specific 的仿真.\n\n\n用到的工具:\n\n\nVerilator\n先创建一个 Verilog 文件:",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Open Source 开源工具</span>"
+    ]
+  },
+  {
+    "objectID": "open-src-tools/open-src-tools.html#makefile",
+    "href": "open-src-tools/open-src-tools.html#makefile",
+    "title": "Open Source 开源工具",
+    "section": "Makefile",
+    "text": "Makefile\n\n格式:\ntarget: prerequisites\n    recipe\n缺省规则\n.DEFAULT_GOAL := all\nall: ...\n伪规则\n.PHONY: all clean\nAppend:\nCFLAGS += -Wall -O2\n改后缀名:\nSRCS_ASM = start.S\nOBJS = $(SRCS_ASM:.S=.o)\n冒号前面和后面:\n%.o : %.c\n    $(CC) $(CFLAGS) -c $&lt; -o $@\n\n% 为通配符, 意思是每当你需要一个 .o 文件, 并且当前目录下有对应的 .c 文件时, 就用下面的命令来生成它\n$&lt;: 第一个依赖文件\n$@: 目标文件\n$^: 所有依赖文件\n$?: 所有比目标文件新的依赖文件",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Open Source 开源工具</span>"
+    ]
+  },
+  {
+    "objectID": "open-src-tools/open-src-tools.html#qemu-模拟器",
+    "href": "open-src-tools/open-src-tools.html#qemu-模拟器",
+    "title": "Open Source 开源工具",
+    "section": "QEMU 模拟器",
+    "text": "QEMU 模拟器",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>Open Source 开源工具</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html",
+    "href": "nn-essence/nn-essence.html",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "",
+    "text": "Change of Mind",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>15</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#change-of-mind",
+    "href": "nn-essence/nn-essence.html#change-of-mind",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "",
+    "text": "I don’t think view neural networks as black boxes does any help towards understanding and inventing new networks.\n对一个神经网络来说, 我们要站在它的角度考虑 up to what extend it could tell the difference of data? 比如图像处理的神经网络, 它肯定不知道输入的是一张图, 如果是一段文字呢? 如果对于很多类型的数据它都不能区分, 说明这个网络非常 general 但性能肯定很差.",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>15</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#questions",
+    "href": "nn-essence/nn-essence.html#questions",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "Questions",
+    "text": "Questions\n\n梯度下降和反向传播的关系是什么?\n我们算梯度是在什么空间里面?\n梯度下降在 Transformer 里面是如何工作的?",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>15</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#neural-network-is-not-so-different",
+    "href": "nn-essence/nn-essence.html#neural-network-is-not-so-different",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "Neural Network is Not So Different",
+    "text": "Neural Network is Not So Different\n\n目标: 找一个映射.\n\n世界上很多问题其实就是一个复杂的映射, 比如图像识别就是输入是图片, 输出是图片中的各种内容. 只不过这个函数存在于人类的大脑中, 无法写出显式的表达式. 人类想要强行把这个函数的表达式找到! 怎么找呢? 我们看到一棵树, 它为什么是一棵树呢? 每个像素都对它是一棵树做出了贡献, 但好像整体是一棵树又与单个像素毫无关系. 如果这个表达式存在, 那么它肯定非常复杂 (这里不能追求所谓的 “简洁与优美”). 但我们可以缩小一点范围, 用某种特定形式的函数来逼近所求. 也就是:\n\n在一堆某种形式的映射里面 (参数化的函数空间 \\(\\mathcal{\\hat{F}}\\)) 找到一个映射 \\(\\hat{f}\\) 来拟合一个复杂的映射 \\(f: \\mathcal{X}\\to \\mathcal{Y}\\)\n\n人们首先发现长成 Equation eq-fcnn 这种样子的映射仿佛有很强的拟合能力, 也就是不管你人脑中的模型有多复杂, 总是可以在下面形式的映射中找到合适的拟合.\n\\[\n\\hat{f}(x) = \\sigma (W^{[L]} \\cdots \\sigma (W^{[2]} \\sigma (W^{[1]} x + b^{[1]}) + b^{[2]}) + \\cdots + b^{[L]})\n\\tag{1}\\]\nEquation eq-fcnn 很复杂对吧. 但是它可以用下面的图可视化出来:\n\n\n\n\n\n\nFigure 1: 仅仅是 Equation eq-fcnn 的可视化\n\n\n\n这张图放在这里太 cliché 了, 但是我想说的是: 我们对它太过熟悉了, 以至于认为选择这种参数化方法是理所应当、独一无二的.\n(FCNN, CNN, Transformer是同一层面上的概念? FCNN 能做到的事情很多, 但是太general 了, 所以先猜测什么样的结构能更好地揭示规律 (比如卷积 (尊重了 \\(\\mathcal{X}\\) 结构从而很可能能加速神经网络发现规律的过程?), 再比如 GNN), 然后加入它们来 帮助神经网络发现规律? “Differential Model” 我感觉 FCNN 和 CNN 的本质是一样的? CNN 的本质是 pre-trained FCNN (或者说?))\n\n事实证明形如神经网络的那些参数化函数空间能够拟合绝大多数的复杂映射, 所以无脑选择这样的 \\(\\mathcal{\\hat{F}}\\) 就行了.\n\n\n如果一个问题可以用以下的框架里面描述, 那么这个问题就可以用神经网络来解决!\n\n\n「复杂的映射」\n「复杂的映射」这个思想可以刻画和描述所有以下问题:\n\nClassification 分类问题: \\(\\mathcal{Y}\\) 仅仅是没有任何结构的集合.\n\n请说出下面例子的 \\(\\mathcal{X}\\) 和 \\(\\mathcal{Y}\\):\n\nImage Classification: 输入一张图片, 判断是猫还是狗还是其它的.\nFace Detection: 输入一张图片, 判断有没有人脸.\nHandwriting Recognition: 输入一张手写的数字, 判断是几. (虽然 \\(\\mathcal{Y}\\) 有序结构, 但不关心)\n\n\\(\\mathcal{X}\\) 是所有图片的集合, \\(\\mathcal{Y}\\) 是所有类别的集合.\n\nRegression 回归问题: \\(\\mathcal{Y}\\) 有序结构. (Generally speaking, 有拓扑结构1)\n\n请说出下面例子 [1] 的 \\(\\mathcal{X}\\) 和 \\(\\mathcal{Y}\\):\n\nLinear Regression: 给定一个标量场, 用线性标量场来拟合. (相当于指定了 \\(\\mathcal{\\hat{F}}\\))\nQuantization: 根据市场情况、历史数据等, 预测明天的股票价格.\n预测某个视频观看者年龄.\n根据发送的控制信号, 预测机械臂在三维空间的坐标.\n根据历史湿度、温度等天气信息, 预测某地明天的温度.\n\n\n\n1 序结构诱导的拓扑称为 Alexandrov 拓扑.\n\n参数化\n\n如果一个函数空间的所有元素都能用形式上相同的式子表达 (这个式子里面有一些可变的参数), 那么这个函数空间就是参数化的.\n\n\nLinear Regression 的参数化函数空间同构2于 \\(\\mathbb{R}^2\\):\n\n\n\n同构的 Mental picture\n\n\n\n2 在拓扑向量空间的意义上: \\[\\{f: \\mathbb{R}\\to \\mathbb{R} \\mid f(x) = wx + b, w, b \\in \\mathbb{R}\\} \\simeq \\{(w, b) \\mid w, b \\in \\mathbb{R}\\}\\]\n某个 CNN 的参数化函数空间同构于 \\(\\mathbb{R}^{200}\\):",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>15</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#如何设计-mathcalhatf",
+    "href": "nn-essence/nn-essence.html#如何设计-mathcalhatf",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "如何设计 \\(\\mathcal{\\hat{F}}\\) ?",
+    "text": "如何设计 \\(\\mathcal{\\hat{F}}\\) ?\n\n即如何「设计」神经网络.\n\n\n尊重 \\(\\mathcal{X}, \\mathcal{Y}\\) 中元素的结构\n(升维、ask a lot of binary questions、编解码器、激活函数用什么类型 这些的联系是什么?)\n(\\(\\mathcal{X}\\) 为图片集合、文字、电路板、声音时分别有什么结构?)\n(curse of dimension怎么解决?)\n如果 \\(\\mathcal{X}\\) 是一张图片的话, 我们有 “相邻” 点这种概念, 也就是说输入进 \\(\\hat{f}\\) 的对象内部是有某些结构的, 但是 FCNN (a.k.a., MLP) 并不知道这些结构.\n(引出 CNN 和 GNN)",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>15</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#如何找到-hatf",
+    "href": "nn-essence/nn-essence.html#如何找到-hatf",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "如何找到 \\(\\hat{f}\\) ?",
+    "text": "如何找到 \\(\\hat{f}\\) ?\n\n即如何「训练」神经网络.\n\n(梯度下降, 各种优化器)\n(梯度消失问题怎么解决、正则化、ResNet, 为什么ResNet有效等等话题)\n\nGradient Descent 梯度下降\n\nLoss function 损失函数: 函数空间 \\(\\mathcal{\\hat{F}}\\) 映到 \\(\\mathbb{R}\\) 的标量场 \\(L: \\mathcal{\\hat{F}} \\to \\mathbb{R}\\), 由于 \\(\\mathcal{\\hat{F}}\\) 参数化, 所以 \\(L\\) 也可以看作是 \\(\\mathbb{R}^n \\to \\mathbb{R}\\) 的函数.\n\n\\(L\\) 标量场如何确定呢?\n\n用训练集中的所有样本点取平均来确定标量场 (“GD”, 计算量太大).\n通过 (不放回地) 抽取训练集中的一个 Mini batch 来估计标量场 (“SGD / Minibatch SGD”)\n\n\ntorch.optim 其它优化器:\n\nMomentum: 通过加入历史速度来模拟惯性 (Moving Average), 受噪声影响更小.\nAdaGrad(Adaptive Gradient Descent)\n\n一些参数\n\nLearning Rate 学习率",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>15</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "nn-essence/nn-essence.html#杂项",
+    "href": "nn-essence/nn-essence.html#杂项",
+    "title": "The Essence of NN 神经网络的本质",
+    "section": "杂项",
+    "text": "杂项\n\n我发现要以线性的顺序来写这篇 blog 的话会增加很多不必要的复杂性, 所以接下来我直接按照本人的学习顺序进行整理.\n\n\nCNN Padding:\n为了解决输入输出大小不一致的问题, 可以引入 Padding.\n\n\n\n不同的 Padding, Pytorch 的默认为 zero padding (最常用 [2])\n\n\n要将各种问题设计成用机器学习的方法的 idea 非常重要. 它往往是一篇论文的核心 idea. 比如 word2vec 中提到的方法.\n\n\n\n\n\n[1] K. P. Murphy, Machine learning : A probabilistic perspective. Mit Press, 2012.\n\n\n[2] M. H. Lab, “Lecture 2 - basics of neural networks (MIT 6.5940, fall 2023),” 2025, Available: https://www.youtube.com/watch?v=ieg0RJb7TeI&list=PL80kAHvQbh-pT4lCkDT53zT8DKmhE0idB&index=4",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>15</span>  <span class='chapter-title'>The Essence of NN 神经网络的本质</span>"
+    ]
+  },
+  {
+    "objectID": "yolo/yolo.html",
+    "href": "yolo/yolo.html",
+    "title": "YOLO Object Detection 目标检测",
+    "section": "",
+    "text": "Task Objective 任务目标",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>16</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
+    ]
+  },
+  {
+    "objectID": "yolo/yolo.html#task-objective-任务目标",
+    "href": "yolo/yolo.html#task-objective-任务目标",
+    "title": "YOLO Object Detection 目标检测",
+    "section": "",
+    "text": "识别东西是什么\n将东西的位置框起来\n\n\n两类方法\n解决这个问题的方法有两类:\n\nOne-stage: 推理速度快, 可实时\n\nE.g., YOLO, SSD, RetinaNet\n\nTwo-stage: 准确率高\n\nRegion Proposal 候选区: 先从图片中提取出可能包含目标的 1000-2000 个区域, 然后对每个候选区进行目标对象识别操作.\nE.g., Faster R-CNN, Mask R-CNN, Cascade R-CNN\n\n\n\n\n\nOne stage 和 Two stage 流程框图对比\n\n\n\n\n\n\n\nMSCOCO 数据集有物体名字和位置标注\n\n\n\n\n损失函数\n\n\n\n交并比用来衡量预测地好不好",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>16</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
+    ]
+  },
+  {
+    "objectID": "yolo/yolo.html#yolo-v1",
+    "href": "yolo/yolo.html#yolo-v1",
+    "title": "YOLO Object Detection 目标检测",
+    "section": "YOLO V1",
+    "text": "YOLO V1\n\nNetwork Structure 网络结构\n\n\n\n\n\n\nFigure 1: YOLO V1 的网络结构 [1]\n\n\n\n\n\n\n\n\n\nFigure 2: Figure fig-yolo-v1 的 Back-Bone 网络其实是若干的卷积网络 [2]\n\n\n\n说明:\n\nFigure fig-back-bone: -s-2 表示 stride 步长为 2.\n输入输出:\n\n输入是一张正方形的图片 (长宽像素各为 \\(448\\), 有 3 个通道: RGB).\n输出的 tensor 大小为 \\(7 \\times 7 \\times 30\\)\n\n\n\n\nLabel Tensor 标签张量\n\nMSCOCO 数据集需要先转换成另外一种形式 (Figure fig-yolo-v1-data-labeling) 再喂给 TOLO V1 神经网络 (即换一种形式打标签而已).\n\n\n\n\n\n\nFigure 3: YOLO V1: \\(S = 7\\), 总共\n\n\n\n每张图片都有 \\(S \\times S = 49\\) 个 grid cell, 每一个 grid cell 都被一个 \\(30 \\times 1\\) 的向量描述, 相当于一张图片都对应了一个 \\(7 \\times 7 \\times 30\\) 的 label tensor.\n\nFigure fig-back-bone 中网络的输出也是一个 \\(7 \\times 7 \\times 30\\) 的 tensor, 但这是 Prediction Tensor 预测张量 (sec-prediction-tensor), 不能混为一谈.\n\n如果有两个物体的中心点都落在同一个 grid cell 中, YOLO V1 只会保留其中一个.\n\n\n\nPrediction Tensor 预测张量",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>16</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
+    ]
+  },
+  {
+    "objectID": "yolo/yolo.html#references",
+    "href": "yolo/yolo.html#references",
+    "title": "YOLO Object Detection 目标检测",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] 上下求索电子Er, “[YOLO V1] 数据标注和输出张量_哔哩哔哩_bilibili,” 2025, Available: https://www.bilibili.com/video/BV1gKwAeWEo4/?spm_id_from=333.788.player.switch&vd_source=42579e22289b6144ba0b2bdcf99834e3&p=3\n\n\n[2] J. Redmon, S. Divvala, R. Girshick, and A. Farhadi, “You only look once: Unified, real-time object detection.” 2016. Available: https://arxiv.org/abs/1506.02640",
+    "crumbs": [
+      "Neural Network",
+      "<span class='chapter-number'>16</span>  <span class='chapter-title'>YOLO Object Detection 目标检测</span>"
+    ]
+  },
+  {
+    "objectID": "hls-design/HLS-design.html",
+    "href": "hls-design/HLS-design.html",
+    "title": "HLS Design FPGA 并行编程",
+    "section": "",
+    "text": "Test\nOngoing",
+    "crumbs": [
+      "ML Accelerators",
+      "<span class='chapter-number'>17</span>  <span class='chapter-title'>HLS Design FPGA 并行编程</span>"
+    ]
+  },
+  {
+    "objectID": "cfu-proj-struct/cfu-proj-struct.html",
+    "href": "cfu-proj-struct/cfu-proj-struct.html",
+    "title": "CFU-Playground 工程结构",
+    "section": "",
+    "text": "Folder 文件夹描述",
+    "crumbs": [
+      "CFU Playground",
+      "<span class='chapter-number'>18</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
+    ]
+  },
+  {
+    "objectID": "cfu-proj-struct/cfu-proj-struct.html#folder-文件夹描述",
+    "href": "cfu-proj-struct/cfu-proj-struct.html#folder-文件夹描述",
+    "title": "CFU-Playground 工程结构",
+    "section": "",
+    "text": "soc: 存放一个完整的 CPU 的 verilog 设计.\n\n有很多种 CPU, 比如带或不带 CFU 接口的.",
+    "crumbs": [
+      "CFU Playground",
+      "<span class='chapter-number'>18</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
     ]
   }
 ]
