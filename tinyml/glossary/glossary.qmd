@@ -202,6 +202,8 @@ title: "Glossary 名词解释"
     - Gate-level 门级网表: 比如用 `yosys` 生成的 `.json` 文件.
     - Transistor-level 晶体管级网表: `.spice`, `.cir`.
 
+- **STA (Static Timing Analysis)**: 静态时序分析. 静态指通过线长等物理结构直接分析电路的 delay (而不需要通过仿真).
+
 ### Packaging 封装
 
 - **Wafer 晶圆, Die, Chiplet Arch**
@@ -214,13 +216,19 @@ title: "Glossary 名词解释"
 :::
 
 - **3D IC** 常见类型:
-    - **TSV-based**: 用 **TSV (Through-Silicon Via) 硅通孔**, 就是在硅片上打孔, 然后在孔内镀铜, 形成垂直的电连接通道. 但由于 large pitches and parasitics, 性能提升有限 @zhao2024analyticalheterogeneousdietodie3d.
+    - **TSV-based**: 用 **TSV (Through-Silicon Via) 硅通孔**, 就是在硅片上打孔, 然后在孔内镀铜, 形成垂直的电连接通道. 但由于 large pitches and parasitics, 性能提升有限 @zhao2024analyticalheterogeneousdietodie3d. **BPV (Bond pad via)** 可能类似 TSV @10454441?
     - **Monolithic**: 一整块硅片上制造多个层次的电路, 成本高.
-    - **F2F (Face-to-Face)**: 用 **HBT (Hybrid bonding terminal)** 端子连接上下层 Die (通过直接原子键合) @zhao2024analyticalheterogeneousdietodie3d.
+    - **F2F (Face-to-Face)**: 用 **HBT (Hybrid bonding terminal)** (或 **BPM (Bond pad metal)** @10454441) 端子连接上下层 Die (通过直接原子键合) @zhao2024analyticalheterogeneousdietodie3d.
 
-- **BPM (Bond pad metal)**
+- **pitch 间距**: 两个相邻的重复元件中心之间的距离. HBT 的优点就是 pitch 比较小 (fine), 集成度高.
 
-- **BPV (Bond pad via)**
+- **RSMTs (Rectilinear Steiner Minimal Trees)**: 简单理解为 Manhattan 走线的最小生成树 (可以引入额外的 point 作为中间点, 称为 **Steiner points** @fig-steiner-pt, 原始给定的点一般是 pins). 
+
+:::{layout = "[60, -4, 36]"}
+![通过引入 Steiner point $S$ 可以减少线长](steiner-pt.png){width=90% #fig-steiner-pt}
+
+![$\# \text{Steiner points} \le \# \text{pins} - 2$](num-steiner.png){width=85% #fig-num-steiner}
+:::
 
 ## ML Terms
 
