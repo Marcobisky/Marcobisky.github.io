@@ -580,6 +580,7 @@ window.Quarto = {
   <li><a href="#eda-terms" id="toc-eda-terms" class="nav-link" data-scroll-target="#eda-terms">EDA Terms</a>
   <ul class="collapse">
   <li><a href="#packaging-封装" id="toc-packaging-封装" class="nav-link" data-scroll-target="#packaging-封装">Packaging 封装</a></li>
+  <li><a href="#timing-analysis" id="toc-timing-analysis" class="nav-link" data-scroll-target="#timing-analysis">Timing Analysis</a></li>
   </ul></li>
   <li><a href="#ml-terms" id="toc-ml-terms" class="nav-link" data-scroll-target="#ml-terms">ML Terms</a>
   <ul class="collapse">
@@ -834,7 +835,6 @@ window.Quarto = {
 <li>Gate-level 门级网表: 比如用 <code>yosys</code> 生成的 <code>.json</code> 文件.</li>
 <li>Transistor-level 晶体管级网表: <code>.spice</code>, <code>.cir</code>.</li>
 </ul></li>
-<li><strong>STA (Static Timing Analysis)</strong>: 静态时序分析. 静态指通过线长等物理结构直接分析电路的 delay (而不需要通过仿真).</li>
 </ul>
 <section id="packaging-封装" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="packaging-封装">Packaging 封装</h3>
@@ -908,6 +908,21 @@ Figure&nbsp;4: <span class="math inline">\(\# \text{Steiner points} \le \# \text
 </div>
 </div>
 </section>
+<section id="timing-analysis" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="timing-analysis">Timing Analysis</h3>
+<ul>
+<li><strong>STA (Static Timing Analysis)</strong>: 静态时序分析 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[6]</a></span>. 静态指通过线长等物理结构直接分析电路的 delay (而不需要通过仿真).
+<ul>
+<li><strong>Slack (时序)裕量</strong>: 信号在导线上的传输是需要时间的, slack = 信号要求到达时间 - 信号实际到达时间. <span class="math inline">\(\text{slack} &gt; 0\)</span> 安全, <span class="math inline">\(\text{slack} &lt; 0\)</span> 违规 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[6]</a></span>.</li>
+<li><strong>WNS (Worst Negative Slack) <span class="math inline">\(s_{\text{wns}}\)</span></strong>: 违规里面的最坏 slack <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[6]</a></span> (如果没有违规, 则 <span class="math inline">\(s_{\text{wns}}\)</span> 不存在).</li>
+<li><strong>TNS (Total Negative Slack) <span class="math inline">\(s_{\text{tns}}\)</span></strong>: 所有违规 slack 相加 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[6]</a></span> (如果没有违规, 则 <span class="math inline">\(s_{\text{tns}}\)</span> 不存在).
+<ul>
+<li>一般 WNS 和 TNS 都只关心 Endpoint pins (如 flip-flop inputs, outputs ports <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[6]</a></span>) 中的违规情况.</li>
+</ul></li>
+<li><strong>Critical path (CP)</strong>: 造成 WNS 的那条路径 <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;这个词在多个领域内都有使用 (比如项目管理中的 CPM), 总体来说想表达的就是「搅屎棍」的意思.</p></div></div></section>
 </section>
 <section id="ml-terms" class="level2">
 <h2 class="anchored" data-anchor-id="ml-terms">ML Terms</h2>
@@ -920,13 +935,13 @@ Figure&nbsp;4: <span class="math inline">\(\# \text{Steiner points} \le \# \text
 <li><p><strong>BF16</strong>: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位, 精度低, 计算速度快.</p></li>
 <li><p><strong>DAG (Directed Acyclic Graph)</strong>: 有向无环图, 用来可视化一次计算过程 (哪些数据先算, 后面的数据依赖哪些数据).</p></li>
 <li><p><strong>tiled 分块</strong></p></li>
-<li><p><strong>NAS (Neural Architecture Search)</strong>: 神经网络架构搜索, 自动化地搜索神经网络的最佳架构 (而不是人工设计) <span class="citation" data-cites="mellor2021neuralarchitecturesearchtraining"><a href="#ref-mellor2021neuralarchitecturesearchtraining" role="doc-biblioref">[6]</a></span>.</p></li>
+<li><p><strong>NAS (Neural Architecture Search)</strong>: 神经网络架构搜索, 自动化地搜索神经网络的最佳架构 (而不是人工设计) <span class="citation" data-cites="mellor2021neuralarchitecturesearchtraining"><a href="#ref-mellor2021neuralarchitecturesearchtraining" role="doc-biblioref">[7]</a></span>.</p></li>
 <li><p><strong>BIC (Brain-inspired Computing) / NM (Neuromorphic) Computing</strong>: 比如 SNN (Spiking Neural Network, 与 ANN 是同层概念).</p>
 <ul>
-<li><strong>ANN2SNN methods</strong>: 将 ANN 转换为 SNN 的方法 <span class="citation" data-cites="deng2025edgeintelligencespikingneural"><a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">[7]</a></span>.</li>
-<li><strong>EdgeSNN</strong>: “Edge Intelligence based on SNNs” <span class="citation" data-cites="deng2025edgeintelligencespikingneural"><a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">[7]</a></span>.</li>
+<li><strong>ANN2SNN methods</strong>: 将 ANN 转换为 SNN 的方法 <span class="citation" data-cites="deng2025edgeintelligencespikingneural"><a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">[8]</a></span>.</li>
+<li><strong>EdgeSNN</strong>: “Edge Intelligence based on SNNs” <span class="citation" data-cites="deng2025edgeintelligencespikingneural"><a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">[8]</a></span>.</li>
 </ul></li>
-<li><p><strong>Federated Learning</strong>: 为了避免公司不愿分享数据、用户隐私泄漏等问题, 将训练数据交付 cloud 不再可能, 所以我们先在边缘设备上训练模型, 然后用某种方法将各个边缘设备上学到的 “知识” 汇总到 cloud 上, 这就叫 <strong>FL</strong>. <span class="citation" data-cites="deng2025edgeintelligencespikingneural somvanshi2025tinymachinelearningtiny"><a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">[7]</a>, <a href="#ref-somvanshi2025tinymachinelearningtiny" role="doc-biblioref">[8]</a></span></p></li>
+<li><p><strong>Federated Learning</strong>: 为了避免公司不愿分享数据、用户隐私泄漏等问题, 将训练数据交付 cloud 不再可能, 所以我们先在边缘设备上训练模型, 然后用某种方法将各个边缘设备上学到的 “知识” 汇总到 cloud 上, 这就叫 <strong>FL</strong>. <span class="citation" data-cites="deng2025edgeintelligencespikingneural somvanshi2025tinymachinelearningtiny"><a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">[8]</a>, <a href="#ref-somvanshi2025tinymachinelearningtiny" role="doc-biblioref">[9]</a></span></p></li>
 </ul>
 <div id="fig-ann-vs-snn" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -934,14 +949,14 @@ Figure&nbsp;4: <span class="math inline">\(\# \text{Steiner points} \le \# \text
 <img src="ann-vs-snn.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ann-vs-snn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: ANN vs SNN <span class="citation" data-cites="deng2025edgeintelligencespikingneural"><a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">[7]</a></span>
+Figure&nbsp;5: ANN vs SNN <span class="citation" data-cites="deng2025edgeintelligencespikingneural"><a href="#ref-deng2025edgeintelligencespikingneural" role="doc-biblioref">[8]</a></span>
 </figcaption>
 </figure>
 </div>
 <ul>
 <li><strong>FM (Foundation Model)</strong>: 基础模型. 一般为了解决一个问题往往会训练一个专门的模型 (task-specific model). 但 FM 是一种通用的模型, 在大规模、广泛、多样的数据 (多模态的, 文字/图像/音频) 上进行训练 (训练成本很高), 然后可以通过微调 (fine-tuning) 来适应各种下游任务 (如文本生成、图像识别、语音识别等).
 <ul>
-<li><strong>Edge-native foundation models</strong>: 边缘化的 FM, 涉及到对大模型的 knowledge distillation, pruning, quantization 等技术, 以适应边缘设备的计算和存储限制 <span class="citation" data-cites="somvanshi2025tinymachinelearningtiny"><a href="#ref-somvanshi2025tinymachinelearningtiny" role="doc-biblioref">[8]</a></span>.</li>
+<li><strong>Edge-native foundation models</strong>: 边缘化的 FM, 涉及到对大模型的 knowledge distillation, pruning, quantization 等技术, 以适应边缘设备的计算和存储限制 <span class="citation" data-cites="somvanshi2025tinymachinelearningtiny"><a href="#ref-somvanshi2025tinymachinelearningtiny" role="doc-biblioref">[9]</a></span>.</li>
 </ul></li>
 <li><strong>VLA (Vision Language Action)</strong>: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.</li>
 </ul>
@@ -959,21 +974,21 @@ Figure&nbsp;5: ANN vs SNN <span class="citation" data-cites="deng2025edgeintelli
 </ul></li>
 <li><p><strong>Spase DNN</strong>: 稀疏神经网络, 指网络中有大量的权重为零 (即不参与计算) 的神经网络.</p>
 <ul>
-<li><p>根据稀疏的结构不同, 可分为三类 (见 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a>). 其中 Semi-structured Sparsity 的意思是比如权重矩阵每 <span class="math inline">\(4\)</span> 个权重就有 <span class="math inline">\(2\)</span> 个权重为零 (记做 <span class="math inline">\(2:4\)</span> sparsity) <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[9]</a></span>.</p>
+<li><p>根据稀疏的结构不同, 可分为三类 (见 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a>). 其中 Semi-structured Sparsity 的意思是比如权重矩阵每 <span class="math inline">\(4\)</span> 个权重就有 <span class="math inline">\(2\)</span> 个权重为零 (记做 <span class="math inline">\(2:4\)</span> sparsity) <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[10]</a></span>.</p>
 <div id="fig-sparsity" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparsity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="sparsity.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sparsity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[9]</a></span>, 蓝色的格子代表权重为 <span class="math inline">\(0\)</span>
+Figure&nbsp;6: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[10]</a></span>, 蓝色的格子代表权重为 <span class="math inline">\(0\)</span>
 </figcaption>
 </figure>
 </div></li>
 <li><p><strong>Pruning</strong>: 剪枝, 将神经网络中不重要的权重 (如接近零的权重) 设置为零.</p>
 <ul>
 <li><strong>Unstructured Pruning</strong>: 非结构化剪枝, 移除个别权重, 硬件控制复杂度大.</li>
-<li><strong>Structured Pruning</strong>: 结构化剪枝, 移除整个通道/滤波器/神经元等 <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[9]</a></span>, 更适合硬件加速. (比如 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a> (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).</li>
+<li><strong>Structured Pruning</strong>: 结构化剪枝, 移除整个通道/滤波器/神经元等 <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[10]</a></span>, 更适合硬件加速. (比如 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a> (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).</li>
 <li><strong>Semi-structured Pruning</strong>: 半结构化剪枝, 介于上述两者之间.</li>
 </ul></li>
 </ul></li>
@@ -1018,8 +1033,8 @@ Figure&nbsp;6: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-st
 <ul>
 <li><strong>Symbol Grounded Problem</strong>: 符号嵌入 (接地) 问题. 探讨的是符号 (或词语) 是如何在一个系统中获得意义的. 比如 “猫” 是一个符号, 但它不仅仅是一个符号, 它还与其它符号有所关联 (Grounded “嵌入”), 这种关联是 “猫” 的意义. 关于符号是如何嵌入的, 有以下几种观点:
 <ul>
-<li><strong>具身认知</strong>: 意义必须通过一种感官、具身的方式与世界互动, 才能真正理解并嵌入符号. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[10]</a></span></li>
-<li><strong>联结主义</strong>: 符号的意义只取决于它与其它符号的关系 (有点范畴论的感觉哈哈). 符号可以通过网络中激活模式来进行嵌入. 这些模型并不明确地定义符号的意义, 而是通过训练大量数据, 学习感官输入与概念之间的关联. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[10]</a></span></li>
+<li><strong>具身认知</strong>: 意义必须通过一种感官、具身的方式与世界互动, 才能真正理解并嵌入符号. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[11]</a></span></li>
+<li><strong>联结主义</strong>: 符号的意义只取决于它与其它符号的关系 (有点范畴论的感觉哈哈). 符号可以通过网络中激活模式来进行嵌入. 这些模型并不明确地定义符号的意义, 而是通过训练大量数据, 学习感官输入与概念之间的关联. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[11]</a></span></li>
 </ul></li>
 </ul>
 </section>
@@ -1032,15 +1047,15 @@ Figure&nbsp;6: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-st
 <li><p><strong>Benchmark</strong>: 基准测试. 用于测试系统或工具的功能/性能.</p></li>
 <li><p><strong>QEMU (Quick Emulator)</strong>: 开源的模拟器, 可模拟多种 CPU 架构 (如 ARM, x86, RISCV 等).</p></li>
 <li><p><strong>Renode</strong>: 开源的模拟器, 主要面向嵌入式系统.</p></li>
-<li><p><strong>Endianness</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>:</p>
+<li><p><strong>Endianness</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="endianness.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[11]</a></span></figcaption>
+<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[12]</a></span></figcaption>
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
 <li><p><strong>MMU (Memory Management Unit)</strong>: 内存管理单元, 负责虚拟内存和物理内存之间的映射.</p>
 <ul>
 <li><strong>TLB (Translation Lookaside Buffer)</strong>: 很像 CPU 的 Cache, 用于加速虚拟地址到物理地址的转换. 也有 TLB miss, TLB hit, spacial locality, temporal locality, etc. 这些概念.</li>
@@ -1110,7 +1125,7 @@ Figure&nbsp;7: AMD GPU 2015 采用 2.5D 封装
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="elf-format.png" class="img-fluid figure-img"></p>
-<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[11]</a></span></figcaption>
+<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[12]</a></span></figcaption>
 </figure>
 </div>
 </div></div><ul>
@@ -1135,7 +1150,7 @@ Figure&nbsp;7: AMD GPU 2015 采用 2.5D 封装
 <ul>
 <li><strong>RTOS (Real-Time Operating System)</strong>: 实时操作系统, 用于嵌入式系统.
 <ul>
-<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[11]</a></span>.</li>
+<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[12]</a></span>.</li>
 <li><strong>RT-Thread</strong>: 也是一个 RTOS</li>
 </ul></li>
 </ul>
@@ -1214,23 +1229,26 @@ Figure&nbsp;7: AMD GPU 2015 采用 2.5D 封装
 <div id="ref-10454441" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[5] </div><div class="csl-right-inline">A. Smith <em>et al.</em>, <span>“11.1 AMD InstinctTM MI300 series modular chiplet package – HPC and AI accelerator for exa-class systems,”</span> in <em>2024 IEEE international solid-state circuits conference (ISSCC)</em>, 2024, pp. 490–492. doi: <a href="https://doi.org/10.1109/ISSCC49657.2024.10454441">10.1109/ISSCC49657.2024.10454441</a></div>
 </div>
+<div id="ref-liao_2023_dreamplace" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">P. Liao, D. Guo, Z. Guo, S. Liu, Y. Lin, and B. Yu, <span>“DREAMPlace 4.0: Timing-driven placement with momentum-based net weighting and lagrangian-based refinement,”</span> <em>IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems</em>, vol. 42, pp. 3374–3387, Jan. 2023, doi: <a href="https://doi.org/10.1109/tcad.2023.3240132">10.1109/tcad.2023.3240132</a></div>
+</div>
 <div id="ref-mellor2021neuralarchitecturesearchtraining" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[6] </div><div class="csl-right-inline">J. Mellor, J. Turner, A. Storkey, and E. J. Crowley, <span>“Neural architecture search without training.”</span> 2021. Available: <a href="https://arxiv.org/abs/2006.04647">https://arxiv.org/abs/2006.04647</a></div>
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">J. Mellor, J. Turner, A. Storkey, and E. J. Crowley, <span>“Neural architecture search without training.”</span> 2021. Available: <a href="https://arxiv.org/abs/2006.04647">https://arxiv.org/abs/2006.04647</a></div>
 </div>
 <div id="ref-deng2025edgeintelligencespikingneural" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[7] </div><div class="csl-right-inline">S. Deng <em>et al.</em>, <span>“Edge intelligence with spiking neural networks.”</span> 2025. Available: <a href="https://arxiv.org/abs/2507.14069">https://arxiv.org/abs/2507.14069</a></div>
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">S. Deng <em>et al.</em>, <span>“Edge intelligence with spiking neural networks.”</span> 2025. Available: <a href="https://arxiv.org/abs/2507.14069">https://arxiv.org/abs/2507.14069</a></div>
 </div>
 <div id="ref-somvanshi2025tinymachinelearningtiny" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[8] </div><div class="csl-right-inline">S. Somvanshi <em>et al.</em>, <span>“From tiny machine learning to tiny deep learning: A survey.”</span> 2025. Available: <a href="https://arxiv.org/abs/2506.18927">https://arxiv.org/abs/2506.18927</a></div>
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">S. Somvanshi <em>et al.</em>, <span>“From tiny machine learning to tiny deep learning: A survey.”</span> 2025. Available: <a href="https://arxiv.org/abs/2506.18927">https://arxiv.org/abs/2506.18927</a></div>
 </div>
 <div id="ref-sabih2025hardwaresoftwarecodesignriscvextensions" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[9] </div><div class="csl-right-inline">M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, <span>“Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.”</span> 2025. Available: <a href="https://arxiv.org/abs/2504.19659">https://arxiv.org/abs/2504.19659</a></div>
+<div class="csl-left-margin">[10] </div><div class="csl-right-inline">M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, <span>“Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.”</span> 2025. Available: <a href="https://arxiv.org/abs/2504.19659">https://arxiv.org/abs/2504.19659</a></div>
 </div>
 <div id="ref-The_Human_Developers_2025_cnblogs" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[10] </div><div class="csl-right-inline">S. Dai, <span>“Symbol grounding problem in artificial intelligence,”</span> 2025, Available: <a href="https://www.cnblogs.com/sddai/p/18670953">https://www.cnblogs.com/sddai/p/18670953</a></div>
+<div class="csl-left-margin">[11] </div><div class="csl-right-inline">S. Dai, <span>“Symbol grounding problem in artificial intelligence,”</span> 2025, Available: <a href="https://www.cnblogs.com/sddai/p/18670953">https://www.cnblogs.com/sddai/p/18670953</a></div>
 </div>
 <div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[11] </div><div class="csl-right-inline">Lazyparser, <span>“Compilation and linker,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5</a></div>
+<div class="csl-left-margin">[12] </div><div class="csl-right-inline">Lazyparser, <span>“Compilation and linker,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5</a></div>
 </div>
 </div>
 </section>

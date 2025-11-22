@@ -202,8 +202,6 @@ title: "Glossary 名词解释"
     - Gate-level 门级网表: 比如用 `yosys` 生成的 `.json` 文件.
     - Transistor-level 晶体管级网表: `.spice`, `.cir`.
 
-- **STA (Static Timing Analysis)**: 静态时序分析. 静态指通过线长等物理结构直接分析电路的 delay (而不需要通过仿真).
-
 ### Packaging 封装
 
 - **Wafer 晶圆, Die, Chiplet Arch**
@@ -229,6 +227,19 @@ title: "Glossary 名词解释"
 
 ![$\# \text{Steiner points} \le \# \text{pins} - 2$](num-steiner.png){width=85% #fig-num-steiner}
 :::
+
+
+### Timing Analysis
+
+- **STA (Static Timing Analysis)**: 静态时序分析 @liao_2023_dreamplace. 静态指通过线长等物理结构直接分析电路的 delay (而不需要通过仿真).
+    - **Slack (时序)裕量**: 信号在导线上的传输是需要时间的, slack = 信号要求到达时间 - 信号实际到达时间. $\text{slack} > 0$ 安全, $\text{slack} < 0$ 违规 @liao_2023_dreamplace.
+    - **WNS (Worst Negative Slack) $s_{\text{wns}}$**: 违规里面的最坏 slack @liao_2023_dreamplace (如果没有违规, 则 $s_{\text{wns}}$ 不存在).
+    - **TNS (Total Negative Slack) $s_{\text{tns}}$**: 所有违规 slack 相加 @liao_2023_dreamplace (如果没有违规, 则 $s_{\text{tns}}$ 不存在).
+        - 一般 WNS 和 TNS 都只关心 Endpoint pins (如 flip-flop inputs, outputs ports @liao_2023_dreamplace) 中的违规情况.
+    - **Critical path (CP)**: 造成 WNS 的那条路径 [^cp].
+
+
+[^cp]: 这个词在多个领域内都有使用 (比如项目管理中的 CPM), 总体来说想表达的就是「搅屎棍」的意思.
 
 ## ML Terms
 
