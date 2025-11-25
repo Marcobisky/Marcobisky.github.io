@@ -2,7 +2,43 @@
 title: "EDA: 3D IC Placement"
 ---
 
-## Environment Setup (MacOS)
+## DREAMPlace 仓库
+
+### pin-list 表示法 (CSR) {#sec-pl}
+
+我们的目标是设计一种储存 net-pin 对应关系的数据结构. 首先将所有 net 的所有 pin 安排上**全局索引**. E.g., 假设我们有 $3$ 个 net, 分别包含以下 pin (用全局索引表示):
+
+```plain
+net0 = [p1, p7, p3]
+net1 = [p8, p2]
+net2 = [p6, p5, p9, p4]
+```
+
+将上述 pin 展平来定义 `flat_netpin` 数组:
+
+```plain
+flat_netpin = [p1, p7, p3, p8, p2, p6, p5, p9, p4]
+``` 
+
+当然实际上我们会用 pin 的全局索引值来表示 pin:
+
+```cpp
+int flat_netpin[] = {1, 7, 3, 8, 2, 6, 5, 9, 4};
+```
+
+再定义 `netpin_start` 数组来记录每个 net 的起始位置:
+
+```cpp
+int netpin_start[] = {0, 3, 5, 9};
+```
+
+这样, net-pin 对应关系就编码在了两个数组 `flat_netpin` 和 `netpin_start` 中. 这种方法 **节省内存空间、方便 GPU 并行处理**.
+
+## Environment Setup
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## MacOS (未成功)
 
 Clone 仓库:
 
@@ -40,35 +76,7 @@ export OpenMP_omp_LIBRARY=/opt/homebrew/opt/libomp/lib/libomp.dylib
 ```bash
 brew install bison
 ```
-
-## Introduction
-
-### Model
+:::
+<!-- ----------------------------------------- -->
 
 
-## Question 11.23
-
-- Placement 的原问题是给定 Netlist $(V, E)$, 输出所有 pin 的位置坐标. 那实际走线的话在水平方向只能横竖着走, 不能斜着走. Bistratal wirelength 模型中好像只考虑了上下 die 的线长, $z$ 轴方向的线长没有考虑吗?:
-
-    ![alt text](image.png)
-
-    ![alt text](image-2.png)
-
-    (Eq (25) 后面那一项看上去考虑了 $z$ 轴方向的线长, 实际上是为了减少 HBT 的数量.)
-
-- 如果一个 net 是 split net, 那需要增加一个 HBT 来连接上下 die, 这个 HBT 的位置是随机在 optimal region $B^*_{e, \text{HBT}}$ 里面选的吗? 
-
-- 在优化过程中 HBT 的数量应该是会变的吧 (因为有些 net 可能会从 split net 变成 non-split net), 那相当于这个优化问题的自变量的数量都会随着优化过程变化?
-
-- $z$ 轴方向的垂直联通实际上是怎样的? 是有很多层可以来连线吗? 就像下图的红色圈起来的灰色方块?
-
-    ![alt text](image-1.png)
-
-- 根据上图, 每个 cell (或 pin) 只能在上 die 或者下 die, 但是论文里面 (Eq (25)) 都是建模成 pin 的 $z$ 也是连续变化的, 最后优化出来的 pin 应该是连续分布在上下 die 之间的, 最后是直接按照 tentative partition 的方法直接把浮在中间的 pin 分成两类, 然后分别垂直投影到上下 die 上吗?
-
-## Question 11.24
-
-- PlaceDB.py: xl, xh, yl, yh meaning?
-- movable nodes, terminals, terminal_NIs, and fillers? (Filler cells meaning?)
-- PlaceDB.py: regions? FENCE, GUIDE?
-- cell 和 pin 的关系是一个 cell 可以有多个 pin, 而且这些 pin 的 location 由 pin offset 决定?
