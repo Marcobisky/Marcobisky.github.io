@@ -202,6 +202,23 @@ title: "Glossary 名词解释"
     - Gate-level 门级网表: 比如用 `yosys` 生成的 `.json` 文件.
     - Transistor-level 晶体管级网表: `.spice`, `.cir`.
 
+- **Fan-in 扇入**: 连接到 pin $v_i \in V$ 的 pin 集合称为 $v_i$ 的 fan-in, 记为 $\mathcal{F}(v_i)$ @liao_2023_dreamplace.
+    - **Fan-out 扇出** @fig-fan-in-out.
+
+:::{.column-margin}
+![$v_i$ 节点有 $3$ 个 Fan-in 节点 和 $2$ 个 Fan-out 节点](fan-in-out.png){#fig-fan-in-out}
+:::
+
+- **LEF (Library Exchange Format)**: 描述 cell 的物理信息 (尺寸、形状、pin 位置、所在金属层, etc.)
+
+- **DEF (Design Exchange Format)**: 描述整个芯片的 placement 和 routing.
+
+- **Bookshelf**: 一套用于 VLSI 设计的开源文件格式, 包括:
+    - **`.nodes`**: 描述 cell 的尺寸和类型.
+    - **`.pl`**: 描述 cell 的 placement.
+    - **`.nets`**: 描述 cell 之间的连接关系.
+    - **`.scl`**: 描述 row.
+
 ### Packaging 封装
 
 - **Wafer 晶圆, Die, Chiplet Arch**
@@ -219,6 +236,10 @@ title: "Glossary 名词解释"
     - **F2F (Face-to-Face)**: 用 **HBT (Hybrid bonding terminal)** (或 **BPM (Bond pad metal)** @10454441) 端子连接上下层 Die (通过直接原子键合) @zhao2024analyticalheterogeneousdietodie3d.
 
 - **pitch 间距**: 两个相邻的重复元件中心之间的距离. HBT 的优点就是 pitch 比较小 (fine), 集成度高.
+
+:::{.column-margin}
+![FinFET (鳍式场效应管) 的 transistor-to-transistor pitch 仅有 $57$ nm @brancheducation_2024_how.](finfet.png){#fig-finfet}
+:::
 
 - **RSMTs (Rectilinear Steiner Minimal Trees)**: 简单理解为 Manhattan 走线的最小生成树 (可以引入额外的 point 作为中间点, 称为 **Steiner points** @fig-steiner-pt, 原始给定的点一般是 pins). 
 
@@ -255,8 +276,6 @@ title: "Glossary 名词解释"
 - **BF16**: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位, 精度低, 计算速度快.
 
 - **DAG (Directed Acyclic Graph) 计算图**: 有向无环图, 用来可视化一次计算过程 (哪些数据先算, 后面的数据依赖哪些数据), 由张量和算子组成.
-
-- **tiled 分块**
 
 - **NAS (Neural Architecture Search)**: 神经网络架构搜索, 自动化地搜索神经网络的最佳架构 (而不是人工设计) @mellor2021neuralarchitecturesearchtraining.
 
@@ -297,9 +316,11 @@ title: "Glossary 名词解释"
 
 - **CIM (Compute In Memory)**: 存内计算.
 
+- **tiling 分块/瓦片**: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.
+
 ### ML Frameworks
 
-- **Tensorflow, JAX, PyTorch**: 机器学习框架. 其实就是一些 Python 库.
+- **Tensorflow, JAX, PyTorch**: 机器学习框架 @fig-mlsys. 其实就是一些 Python 库.
 
     ```python
     import tensorflow as tf
@@ -310,7 +331,7 @@ title: "Glossary 名词解释"
     - RISCV 上有 TfLM (TensorFlow Lite for Microcontrollers), 
     - **ONNX (Open Neural Network Exchange)**: 一种统一的描述神经网络结构的格式, 以上三种框架都支持导出为 ONNX 格式.
 
-- **TVM, XLA (Accelerated Linear Algebra)**: 机器学习编译器, 在以上三个框架内都有 python 的接口函数.
+- **TVM, XLA (Accelerated Linear Algebra)**: 机器学习编译器 @fig-mlsys, 在以上三个框架内都有 python 的接口函数.
 
 ![AI 编译栈和编程体系](mlsys.png){#fig-mlsys width=80%}
 
