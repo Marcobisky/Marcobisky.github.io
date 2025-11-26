@@ -31,8 +31,44 @@ title: "GPU 原理速成"
     - `__global__`: 在 GPU 上运行, 可被 CPU 调用的函数.
     - `__device__`: 在 GPU 上运行, 只能被 GPU 调用的函数.
 
+### Unified Memory 统一内存
+
 - 全局变量: 可以被 CPU 和 GPU 访问的变量, **不能用 local variable 的方式声明**!
 
     ```c
     __managed__ int x;
     ```
+
+- 统一内存允许 CPU 和 GPU 共享同一块内存区域, 比如 @lst-managed 中的 CPU 和 GPU 都能访问和改变 `x` 变量:
+
+    ```{.cuda filename="managed.cu" #lst-managed}
+    {{< include src/managed.cu >}}
+    ```
+
+输出:
+
+    ```bash
+    CPU sees x = 0
+    GPU sees x = 1
+    ```
+
+注意是 CPU 先打印 (因为没有用 `cudaDeviceSynchronize()`)!
+
+### Synchronization 同步
+
+CPU 将指令发到 GPU 之后**不会等 GPU 执行完再继续往下执行** (默认 async), 如果需要等 GPU 执行完再继续, 将 `my_kernel<<<1,1>>>(x_ptr);` 改为:
+
+    ```cuda
+    my_kernel<<<1,1>>>(x_ptr);
+    cudaDeviceSynchronize(); // Wait for GPU to finish
+    ```
+
+输出:
+
+    ```bash
+    GPU sees x = 1
+    CPU sees x = 1
+    ```
+
+### Stream 流
+

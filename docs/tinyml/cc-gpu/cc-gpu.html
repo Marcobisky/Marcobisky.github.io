@@ -85,7 +85,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../open-src-tools/open-src-tools.html" rel="next">
+<link href="../cc-eda/cc-eda.html" rel="next">
 <link href="../cc-cpu/cc-cpu.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -421,7 +421,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../c-riscv-asm/c-riscv-asm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">C 和 RISCV 汇编</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">C/C++ 和 RISCV 汇编</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -462,8 +462,14 @@ div.csl-indent {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../cc-eda/cc-eda.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">EDA Basics 基础</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../open-src-tools/open-src-tools.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Open Source 开源工具</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Open Source 开源工具</span></span></a>
   </div>
 </li>
       </ul>
@@ -480,13 +486,13 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../yolo/yolo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">YOLO Object Detection 目标检测</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">YOLO Object Detection 目标检测</span></span></a>
   </div>
 </li>
       </ul>
@@ -503,7 +509,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../hls-design/HLS-design.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">HLS Design FPGA 并行编程</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">HLS Design FPGA 并行编程</span></span></a>
   </div>
 </li>
       </ul>
@@ -520,7 +526,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
   </div>
 </li>
       </ul>
@@ -535,7 +541,12 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#cuda" id="toc-cuda" class="nav-link active" data-scroll-target="#cuda">CUDA</a></li>
+  <li><a href="#cuda" id="toc-cuda" class="nav-link active" data-scroll-target="#cuda">CUDA</a>
+  <ul class="collapse">
+  <li><a href="#unified-memory-统一内存" id="toc-unified-memory-统一内存" class="nav-link" data-scroll-target="#unified-memory-统一内存">Unified Memory 统一内存</a></li>
+  <li><a href="#synchronization-同步" id="toc-synchronization-同步" class="nav-link" data-scroll-target="#synchronization-同步">Synchronization 同步</a></li>
+  <li><a href="#stream-流" id="toc-stream-流" class="nav-link" data-scroll-target="#stream-流">Stream 流</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -603,9 +614,47 @@ div.csl-indent {
 <li><code>__global__</code>: 在 GPU 上运行, 可被 CPU 调用的函数.</li>
 <li><code>__device__</code>: 在 GPU 上运行, 只能被 GPU 调用的函数.</li>
 </ul></li>
+</ul>
+<section id="unified-memory-统一内存" class="level3">
+<h3 class="anchored" data-anchor-id="unified-memory-统一内存">Unified Memory 统一内存</h3>
+<ul>
 <li><p>全局变量: 可以被 CPU 和 GPU 访问的变量, <strong>不能用 local variable 的方式声明</strong>!</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>__managed__ <span class="dt">int</span> x<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>统一内存允许 CPU 和 GPU 共享同一块内存区域, 比如 <a href="#lst-managed" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-managed</span></a> 中的 CPU 和 GPU 都能访问和改变 <code>x</code> 变量:</p>
+<p>```{.cuda filename=“managed.cu” #lst-managed} #include &lt;stdio.h&gt; #include &lt;cuda_runtime.h&gt;</p></li>
 </ul>
+<p><strong>global</strong> void my_kernel(int* x_ptr) { <em>x_ptr = 1; printf(“GPU sees x = %d”, </em>x_ptr); }</p>
+<p>int main() { int x = 0; int* x_ptr = &amp;x; cudaMallocManaged(&amp;x_ptr, sizeof(int));</p>
+<pre><code>my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);
+
+printf("CPU sees x = %d\n", x);
+
+cudaFree(x_ptr);
+return 0;</code></pre>
+<p>}</p>
+<pre><code>```</code></pre>
+<p>输出:</p>
+<pre><code>```bash
+CPU sees x = 0
+GPU sees x = 1
+```</code></pre>
+<p>注意是 CPU 先打印 (因为没有用 <code>cudaDeviceSynchronize()</code>)!</p>
+</section>
+<section id="synchronization-同步" class="level3">
+<h3 class="anchored" data-anchor-id="synchronization-同步">Synchronization 同步</h3>
+<p>CPU 将指令发到 GPU 之后<strong>不会等 GPU 执行完再继续往下执行</strong> (默认 async), 如果需要等 GPU 执行完再继续, 将 <code>my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);</code> 改为:</p>
+<pre><code>```cuda
+my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);
+cudaDeviceSynchronize(); // Wait for GPU to finish
+```</code></pre>
+<p>输出:</p>
+<pre><code>```bash
+GPU sees x = 1
+CPU sees x = 1
+```</code></pre>
+</section>
+<section id="stream-流" class="level3">
+<h3 class="anchored" data-anchor-id="stream-流">Stream 流</h3>
 
 
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
@@ -613,6 +662,7 @@ div.csl-indent {
 <div class="csl-left-margin">[1] </div><div class="csl-right-inline">S. Y. Cheung, <span>“Lecture notes on computer science courses: Computer architecture (CS355),”</span> 2025, Available: <a href="https://www.cs.emory.edu/~cheung/Courses/355/Syllabus/syl.html#CURRENT">https://www.cs.emory.edu/~cheung/Courses/355/Syllabus/syl.html#CURRENT</a></div>
 </div>
 </div>
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -1035,8 +1085,8 @@ div.csl-indent {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../open-src-tools/open-src-tools.html" class="pagination-link" aria-label="Open Source 开源工具">
-        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Open Source 开源工具</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../cc-eda/cc-eda.html" class="pagination-link" aria-label="EDA Basics 基础">
+        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">EDA Basics 基础</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
