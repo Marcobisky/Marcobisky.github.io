@@ -576,7 +576,7 @@
     "href": "cc-coding/cc-coding.html",
     "title": "Random Notes on Coding",
     "section": "",
-    "text": "Some C++ Basics",
+    "text": "Some C++",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
@@ -620,7 +620,7 @@
     "href": "cc-coding/cc-coding.html#coding-habits",
     "title": "Random Notes on Coding",
     "section": "Coding Habits",
-    "text": "Coding Habits\n\ngetters 和 Setters\n\n为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 public, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 private + getter/setter 的方式来控制对成员变量的访问和修改.\n写 const 是个好习惯!\n\n\n\n\n\n\naccount_public.cpp\n\nclass Account {\npublic:\n    double balance;\n};\n\nint main() {\n    Account acc;\n    acc.balance = -999999; // Not recommended\n}\n\n\n\n\n\n\naccount_private.cpp\n\nclass Account {\nprivate:\n    double balance;\n\npublic:\n    // const: no modification to member variables\n    double getBalance() const { return balance; }\n\n    void deposit(double amount) {\n        if (amount &gt; 0)\n            balance += amount;\n    }\n};",
+    "text": "Coding Habits\n\ngetters 和 Setters\n为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 public, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 private + getter/setter 的方式来控制对成员变量的访问和修改.\n\n\n\n\n\naccount_public.cpp\n\nclass Account {\npublic:\n    double balance;\n};\n\nint main() {\n    Account acc;\n    acc.balance = -999999; // Not recommended\n}\n\n\n\n\n\n\naccount_private.cpp\n\nclass Account {\nprivate:\n    double balance;\n\npublic:\n    // const: no modification to member variables\n    double getBalance() const { return balance; }\n\n    void deposit(double amount) {\n        if (amount &gt; 0)\n            balance += amount;\n    }\n};\n\n\n\n\n\n\n\n常写 const\n\n能加上 const 尽量加上 (比如 Listing lst-account_private).\nconst 用法:\nconst int *p1; // p1 本身可以修改, 但指向的内容不可以修改\nint * const p2; // p2 本身不可以修改, 但指向的内容可以修改\nconst int * const p3; // 都不能修改\nPytorch C++ API 中提供 TORCH_ARG 宏, 用于自动生成类成员变量的 getter 和 setter 方法:\n#include &lt;torch/torch.h&gt;\nTORCH_ARG(double, balance) = 0;\n自动展开为:\nprivate:\n    double balance_ = 0;\n\npublic:\n    // getter\n    const double& balance() const { return balance_; }\n\n    // setter\n    double& balance() { return balance_; }\n这种写法类似 Listing lst-account_private, const double& 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 const 表示 getter 方法本身不会修改 balance_ 成员变量.",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
@@ -965,6 +965,17 @@
     "crumbs": [
       "CFU Playground",
       "<span class='chapter-number'>19</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
+    ]
+  },
+  {
+    "objectID": "cc-coding/cc-coding.html#some-c",
+    "href": "cc-coding/cc-coding.html#some-c",
+    "title": "Random Notes on Coding",
+    "section": "",
+    "text": "C++ Basics\n\ninline 关键字\n\n允许重复定义 (如果你要在头文件里定义 (而不是声明) 函数最好加上 inline):\n\n\nadd.cpp\n\ninline int add(int a, int b) {return a + b;}\n\n避免函数调用开销, 如果 add() 用 Listing lst-addcpp 来定义, 则:\nint x = add(3, 5);\n会被编译器展开成:\nint x = 3 + 5;\n(当然这个函数由于过于简单, 如果不用 inline, 编译器也会自动优化掉函数调用开销).\n\n\n\n\nClass 类\n\nfriend 关键字\n在一个类里面声明另一个类 (或函数) 为 friend, 表示同意它访问自己的 private 和 protected 成员:\n\n\nfriend.cpp\n\n#include &lt;iostream&gt;\n\nclass B;  // Tell compiler that B exists\n\nclass A {\nprivate:\n    int secret = 7;\n\n    friend class B; // B is an intimate friend of A\n    // friend B;    // Alternative\n};\n\nclass B {\npublic:\n    void reveal(A& a) {\n        std::cout &lt;&lt; a.secret &lt;&lt; std::endl;\n    }\n};\n\nint main() {\n    A a;\n    B b;\n    b.reveal(a); // Outputs: 7\n    return 0;\n}\n\n\n\n\n\nAlias 别名\n\nReference 引用\n\nReference 仅仅是 Syntax sugar!\n必须初始化. int& ref; 是错误的.\nint& ref = a; 在编译时不会出现 ref 这个变量, 它只是 a 的别名 (alias).\n\n\n\nchange_val_ref.cpp\n\n#include &lt;iostream&gt;\nint main()\n{\n    int a = 5;\n    int& ref = a; // ref is an alias to a\n    ref = 10;     // Actually modifies a\n    std::cout &lt;&lt; \"a = \" &lt;&lt; a &lt;&lt; std::endl; // Outputs: a = 10\n    return 0;\n}\n\n\n\n\nincrement_val_ref.cpp\n\n#include &lt;iostream&gt;\nvoid increment(int& num) {num++;}\nint main()\n{\n    int value = 5;\n    increment(value); // Pass by reference\n    std::cout &lt;&lt; \"value = \" &lt;&lt; value &lt;&lt; std::endl; // Outputs: value = 6\n    return 0;\n}\n\n\n\n\ntypedef 和 using 关键字\n下面两个都是给 std::vector&lt;int&gt; 起别名 IntList, 效果一样:\nusing IntList = std::vector&lt;int&gt;;\ntypedef std::vector&lt;int&gt; IntList;\n\n\n\nNamespace 命名空间\n\n我们希望在不同的场景中给功能类似的函数起完全相同的名字 (比如下面例子的 print() 函数), 为了避免命名冲突, 我们可以使用 namespace:\n\n\n\nnamespace.cpp\n\n#include &lt;iostream&gt;\n\nnamespace AppleSpace { namespace GoodApple {\n    void print(const char* msg)\n    {\n        std::cout &lt;&lt; \"Goodapple \" &lt;&lt; msg &lt;&lt; std::endl;\n    }\n}   namespace BadApple {\n    void print(const char* msg)\n    {\n        std::cout &lt;&lt; \"Badapple \" &lt;&lt; msg &lt;&lt; std::endl;\n    }\n} }\n\nnamespace OrangeSpace {\n    void print(const char* msg)\n    {\n        std::cout &lt;&lt; \"Orange \" &lt;&lt; msg &lt;&lt; std::endl;\n    }\n}\n\nint main() {\n    AppleSpace::GoodApple::print(\"Hello\");\n    AppleSpace::BadApple::print(\"Hello\");\n    OrangeSpace::print(\"Hello\");\n    return 0;\n}\n\n\n输出:\nGoodapple Hello\nBadapple Hello\nOrange Hello\n\n不要到处拉 using namespace xxx; 的 shit!\n全局作用域运算符:\n\n\n\nglobalnamespace.cpp\n\n#include &lt;iostream&gt;\n\nint value = 10;  // Global namespace value\n\nnamespace A {\n    int value = 20;  // A::value\n\n    void print() {\n        std::cout &lt;&lt; value &lt;&lt; std::endl;      // Output 20\n        std::cout &lt;&lt; ::value &lt;&lt; std::endl;    // Output 10\n    }\n}\n\nint main() {\n    A::print();\n}\n\n\n\n:: 可用于调用 namespace 里的函数 或 class 里的 static 变量或方法. 在外部定义类的方法实现时必须用 :: (调用时用 .).",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   }
 ]

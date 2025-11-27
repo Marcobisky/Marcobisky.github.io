@@ -1,8 +1,6 @@
 ### getters 和 Setters
 
-- 为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 `public`, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 `private` + getter/setter 的方式来控制对成员变量的访问和修改.
-
-- 写 `const` 是个好习惯!
+为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 `public`, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 `private` + getter/setter 的方式来控制对成员变量的访问和修改.
 
 ::: {layout-ncol=2}
 ```{.cpp filename="account_public.cpp" #lst-account_public}
@@ -13,3 +11,38 @@
 {{< include src/cpp/account_private.cpp >}}
 ```
 :::
+
+### 常写 `const`
+
+- 能加上 `const` 尽量加上 (比如 @lst-account_private).
+
+- `const` 用法:
+
+    ```cpp
+    const int *p1; // p1 本身可以修改, 但指向的内容不可以修改
+    int * const p2; // p2 本身不可以修改, 但指向的内容可以修改
+    const int * const p3; // 都不能修改
+    ```
+
+- `Pytorch C++ API` 中提供 `TORCH_ARG` 宏, 用于自动生成类成员变量的 getter 和 setter 方法:
+
+    ```cpp
+    #include <torch/torch.h>
+    TORCH_ARG(double, balance) = 0;
+    ```
+
+    自动展开为:
+
+    ```cpp
+    private:
+        double balance_ = 0;
+
+    public:
+        // getter
+        const double& balance() const { return balance_; }
+        
+        // setter
+        double& balance() { return balance_; }
+    ```
+
+    这种写法类似 @lst-account_private, `const double&` 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 `const` 表示 getter 方法本身不会修改 `balance_` 成员变量.
