@@ -1,0 +1,62 @@
+### Class 类
+
+#### `friend` 关键字
+
+在一个类里面声明另一个类 (或函数) 为 `friend`, 表示同意它访问自己的 `private` 和 `protected` 成员:
+
+```{.cpp filename="friend.cpp" #lst-friendcpp}
+{{< include src/cpp/friend.cpp >}}
+```
+
+### Alias 别名
+
+#### Reference 引用
+
+- Reference 仅仅是 Syntax sugar!
+- 必须初始化. `int& ref;` 是错误的.
+- `int& ref = a;` 在编译时不会出现 `ref` 这个变量, 它只是 `a` 的别名 (alias).
+
+```{.cpp filename="change_val_ref.cpp" #lst-changevalrefcpp}
+{{< include src/cpp/change_val_ref.cpp >}}
+```
+
+```{.cpp filename="increment_val_ref.cpp" #lst-incrementvalrefcpp}
+{{< include src/cpp/increment_val_ref.cpp >}}
+```
+
+#### `typedef` 和 `using`
+
+下面两个都是给 `std::vector<int>` 起别名 `IntList`, 效果一样:
+
+```cpp
+using IntList = std::vector<int>;
+typedef std::vector<int> IntList;
+```
+
+### Namespace 命名空间
+
+- 我们希望在不同的场景中给功能类似的函数起**完全相同的名字** (比如下面例子的 `print()` 函数), 为了**避免命名冲突**, 我们可以使用 `namespace`:
+
+```{.cpp filename="namespace.cpp" #lst-namespacecpp}
+{{< include src/cpp/namespace.cpp >}}
+```
+
+输出:
+
+```txt
+Goodapple Hello
+Badapple Hello
+Orange Hello
+```
+
+- 不要到处拉 `using namespace xxx;` 的 shit!
+
+- 全局作用域运算符:
+
+```{.cpp filename="globalnamespace.cpp" #lst-globalnamespacecpp}
+{{< include src/cpp/globalnamespace.cpp >}}
+```
+
+- `::` 可用于**调用** namespace 里的函数 或 class 里的 `static` 变量或方法. 在外部**定义**类的方法实现时必须用 `::` (调用时用 `.`).
+
+<!-- ### Anonymous Functions (Lambda Expressions) -->

@@ -1,0 +1,74 @@
+- `+&`: 如果 `io.in_a` 和 `io.in_b` 为 `4.W` 时, 则 `sum` 为 `5.W` (带溢出).
+
+    ```scala
+    val sum = io.in_a +& io.in_b
+    ```
+
+- 允许多个 `:=` 赋值到同一个输出:
+
+    ```scala
+    io.out := 0.U
+    io.out := 1.U // 覆盖上一个
+    ```
+
+- `if` 和 `when` 的区别:
+    - `if` 用来在编译阶段决定电路是哪一种
+    - `when` 用来生成固定的 verilog 电路, 相当于 verilog 的 `if`.
+
+- `orR`: reduction OR, 对所有位进行 OR 操作. 比如 GPR 读寄存器时, 只要地址不是全 0，就读出寄存器的值 (即创建了一个虚拟的 x0 寄存器，值恒为 0):
+
+    ```scala
+    io.rdata1 := Mux(io.raddr1.orR, regs(io.raddr1), 0.U)
+    io.rdata2 := Mux(io.raddr2.orR, regs(io.raddr2), 0.U)
+    ```
+
+### Area Optimization 面积优化方法
+
+> 有时可读性强的代码会导致使用的逻辑门更多, 占用更多面积. 所以一个模块有时会写两种版本, 一种是可读性强的, 另一种是面积优化的版本.
+
+#### CSE 公共子表达式消除
+
+**Common Subexpression Elimination** 也是编译器优化的一种. 举个简单的例子:
+
+```c
+int x = a + b;
+int y = a + b;
+```
+
+可以优化为:
+
+```c
+int temp = a + b;
+int x = temp;
+int y = temp;
+```
+
+这样就避免了重复计算 `a + b` 两次.
+
+在 RTL 设计中, 比如 @lst-AddSubSimple 这个简单的加减法模块, **注意到 "减法" 其实等价于 "加上 B 的补码"**, 可以得到更优化的版本 @lst-AddSubArea:
+
+::: {layout-ncol=2}
+
+```{.scala filename="AddSubSimple.scala" #lst-AddSubSimple}
+{{< include src/hdl/AddSubSimple.scala >}}
+```
+
+```{.scala filename="AddSubArea.scala" #lst-AddSubArea}
+{{< include src/hdl/AddSubArea.scala >}}
+```
+
+:::
+
+对比他们两个 `sbt` 出来的 `verilog` 代码:
+
+::: {layout-ncol=2}
+
+```{.verilog filename="AddSubSimple.v"}
+{{< include src/hdl/AddSubSimple.v >}}
+```
+
+```{.verilog filename="AddSubArea.v"}
+{{< include src/hdl/AddSubArea.v >}}
+```
+
+:::
