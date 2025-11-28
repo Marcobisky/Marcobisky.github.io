@@ -260,11 +260,18 @@ title: "Glossary 名词解释"
 
 ### Timing Analysis
 
-- **STA (Static Timing Analysis)**: 静态时序分析 @liao_2023_dreamplace. 静态指通过线长等物理结构直接分析电路的 delay (而不需要通过仿真).
-    - **Slack (时序)裕量**: 信号在导线上的传输是需要时间的, slack = 信号要求到达时间 - 信号实际到达时间. $\text{slack} > 0$ 安全, $\text{slack} < 0$ 违规 @liao_2023_dreamplace.
+- **STA (Static Timing Analysis)**: 静态时序分析 @liao_2023_dreamplace. 信号在导线上的传输是需要时间的, 静态指通过线长等物理结构直接分析电路的 delay (而不需要通过仿真).
+
+- **Timing arc**: 若 pin $i$ 的信号变化会影响 pin $j$ 的信号变化, 则称 pin $i$ 到 pin $j$ 之间存在一个 timing arc (注意有方向).
+    - **Cell arc**: 某个 cell (如 AND gate) 内部的 timing arc.
+    - **Net arc**: 金属层走线或 via 上的 timing arc.
+    - **Arc delay**: 若 $(p_i, p_j)$ 间存在 timing arc, 则 arc delay 表示从 pin $p_i$ 信号变化到 pin $p_j$ 信号变化所需的时间.
+
+
+- **Slack (时序)裕量**: Timing arc 不可避免, 但 arc delay 必须满足要求即可. slack = 信号要求到达时间 - 信号实际到达时间. $\text{slack} > 0$ 安全, $\text{slack} < 0$ 违规 @liao_2023_dreamplace.
     - **WNS (Worst Negative Slack) $s_{\text{wns}}$**: 违规里面的最坏 slack @liao_2023_dreamplace (如果没有违规, 则 $s_{\text{wns}}$ 不存在).
     - **TNS (Total Negative Slack) $s_{\text{tns}}$**: 所有违规 slack 相加 @liao_2023_dreamplace (如果没有违规, 则 $s_{\text{tns}}$ 不存在).
-        - 一般 WNS 和 TNS 都只关心 Endpoint pins (如 flip-flop inputs, outputs ports @liao_2023_dreamplace) 中的违规情况.
+        - 一般 WNS 和 TNS 都只关心 Primary output endpoint pins (PO, 如 flip-flop inputs, outputs ports @liao_2023_dreamplace) 中的违规情况.
     - **Critical path (CP)**: 造成 WNS 的那条路径 [^cp].
 
 

@@ -495,12 +495,6 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">EDA Basics 基础</span></span></a>
   </div>
 </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../open-src-tools/open-src-tools.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Open Source 开源工具</span></span></a>
-  </div>
-</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -515,13 +509,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../yolo/yolo.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">YOLO Object Detection 目标检测</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">YOLO Object Detection 目标检测</span></span></a>
   </div>
 </li>
       </ul>
@@ -538,7 +532,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../hls-design/HLS-design.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">HLS Design FPGA 并行编程</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">HLS Design FPGA 并行编程</span></span></a>
   </div>
 </li>
       </ul>
@@ -555,7 +549,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
   </div>
 </li>
       </ul>
@@ -987,13 +981,19 @@ Figure&nbsp;8: <span class="math inline">\(\# \text{Steiner points} \le \# \text
 <section id="timing-analysis" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="timing-analysis">Timing Analysis</h3>
 <ul>
-<li><strong>STA (Static Timing Analysis)</strong>: 静态时序分析 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[3]</a></span>. 静态指通过线长等物理结构直接分析电路的 delay (而不需要通过仿真).
+<li><p><strong>STA (Static Timing Analysis)</strong>: 静态时序分析 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[3]</a></span>. 信号在导线上的传输是需要时间的, 静态指通过线长等物理结构直接分析电路的 delay (而不需要通过仿真).</p></li>
+<li><p><strong>Timing arc</strong>: 若 pin <span class="math inline">\(i\)</span> 的信号变化会影响 pin <span class="math inline">\(j\)</span> 的信号变化, 则称 pin <span class="math inline">\(i\)</span> 到 pin <span class="math inline">\(j\)</span> 之间存在一个 timing arc (注意有方向).</p>
 <ul>
-<li><strong>Slack (时序)裕量</strong>: 信号在导线上的传输是需要时间的, slack = 信号要求到达时间 - 信号实际到达时间. <span class="math inline">\(\text{slack} &gt; 0\)</span> 安全, <span class="math inline">\(\text{slack} &lt; 0\)</span> 违规 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[3]</a></span>.</li>
+<li><strong>Cell arc</strong>: 某个 cell (如 AND gate) 内部的 timing arc.</li>
+<li><strong>Net arc</strong>: 金属层走线或 via 上的 timing arc.</li>
+<li><strong>Arc delay</strong>: 若 <span class="math inline">\((p_i, p_j)\)</span> 间存在 timing arc, 则 arc delay 表示从 pin <span class="math inline">\(p_i\)</span> 信号变化到 pin <span class="math inline">\(p_j\)</span> 信号变化所需的时间.</li>
+</ul></li>
+<li><p><strong>Slack (时序)裕量</strong>: Timing arc 不可避免, 但 arc delay 必须满足要求即可. slack = 信号要求到达时间 - 信号实际到达时间. <span class="math inline">\(\text{slack} &gt; 0\)</span> 安全, <span class="math inline">\(\text{slack} &lt; 0\)</span> 违规 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[3]</a></span>.</p>
+<ul>
 <li><strong>WNS (Worst Negative Slack) <span class="math inline">\(s_{\text{wns}}\)</span></strong>: 违规里面的最坏 slack <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[3]</a></span> (如果没有违规, 则 <span class="math inline">\(s_{\text{wns}}\)</span> 不存在).</li>
 <li><strong>TNS (Total Negative Slack) <span class="math inline">\(s_{\text{tns}}\)</span></strong>: 所有违规 slack 相加 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[3]</a></span> (如果没有违规, 则 <span class="math inline">\(s_{\text{tns}}\)</span> 不存在).
 <ul>
-<li>一般 WNS 和 TNS 都只关心 Endpoint pins (如 flip-flop inputs, outputs ports <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[3]</a></span>) 中的违规情况.</li>
+<li>一般 WNS 和 TNS 都只关心 Primary output endpoint pins (PO, 如 flip-flop inputs, outputs ports <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[3]</a></span>) 中的违规情况.</li>
 </ul></li>
 <li><strong>Critical path (CP)</strong>: 造成 WNS 的那条路径 <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</li>
 </ul></li>
