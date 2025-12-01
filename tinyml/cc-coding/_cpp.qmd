@@ -50,6 +50,58 @@ argv[2] = "999"
 argv[3] = "test"
 ```
 
+### Memory Management 内存管理
+
+#### `new` 关键字
+
+`new` 用来在堆上分配内存:
+
+```cpp
+int* p = new int[10]; // Allocate 10 integers on heap
+for (int i = 0; i < 10; i++) {
+    p[i] = i * i; // Assign values
+}
+delete[] p; // Don't forget to free the memory!
+```
+
+分配单个对象. 注意下面两行代码的唯一区别是 `malloc` **没有调用 Constructor**!
+
+```cpp
+MyClass* obj = new MyClass(); // Allocate single object
+MyClass* obj2 = (MyClass*)malloc(sizeof(MyClass)); // C-style allocation
+delete obj; // Free the memory!
+free(obj2); // Free C-style allocated memory
+```
+
+#### Smart Pointers 智能指针
+
+Smart Pointers = `new` without `delete`. 即不需要担心内存泄漏问题.
+
+- `std::unique_ptr<T>`: 不能被复制:
+
+    ```cpp
+    std::unique_ptr<int> p1 = std::make_unique<int>(42); // Create unique_ptr
+    // std::unique_ptr<int> p2 = p1; // Error: cannot copy unique_ptr
+    ```
+
+- `std::shared_ptr<T>`: 可以被复制 (用过引用计数来管理内存).
+
+- `std::weak_ptr<T>`: 不会增加引用计数, 用于解决 `shared_ptr` 循环引用问题 (@fig-cirref, `a1` 表示 `a` 的引用计数为 1 (`a.use_count() == 1`)):
+
+:::{.column-margin}
+![循环引用问题](cirref.png){#fig-cirref}
+:::
+
+::: {layout-ncol=2}
+```{.cpp filename="sharedptr.cpp" #lst-sharedptrcpp}
+{{< include src/cpp/sharedptr.cpp >}}
+```
+
+```{.cpp filename="weakptr.cpp" #lst-weakptr}
+{{< include src/cpp/weakptr.cpp >}}
+```
+:::
+
 
 ### Class 类
 

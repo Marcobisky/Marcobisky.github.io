@@ -40,8 +40,32 @@ int netpin_start[] = {0, 3, 5, 9};
 :::
 <!-- ----------------------------------------- -->
 
-- 
+### Database 数据库
 
+#### Place2D
+
+- **Index 规则**: `layer = 0` (top), `1` (bottom), `2` (HBT).
+
+- `xl(0)`, `yl(0)`, `xh(0)`, `yh(0)`: Top die 可放置 cell 的区域 (xlow, ylow, xhigh, yhigh).
+    - `xl(2)`, `yl(2)`, `xh(2)`, `yh(2)`: 中间层放置 bonding terminal 的区域 (有 padding).
+
+- `raw_xl(0)`, `raw_yl(0)`, `raw_xh(0)`, `raw_yh(0)`; `gp_xl(0)`, `gp_yl(0)`, `gp_xh(0)`, `gp_yh(0)`: 跟上面没区别 (就是复制).
+
+- `die_area`: Die 面积 (> (`xh(0)`-`xl(0)`) * (`yh(0)`-`yl(0)`) ).
+
+- `site_width`, `row_height`: Site 的宽度和高度.
+
+- `num_physical_nodes`：原始 placedb 里的所有 node 数 (movable + 固定 + IO + HBT), 还没加 filler.
+
+- `num_movable_nodes`：所有 movable nodes 数 (对 2D 情形就是 num_nodes - num_terminals).
+
+- `num_total_all_nodes`：按 pin map 数出来的 node 数, 要求和 `num_movable_nodes` 一致 (有 assert).
+
+- `num_nets` / `num_pins`：普通意义上的 nets / pins 数目.
+
+- `num_movable_pins`：可动节点 + IO 节点上的 pin 总数 (因为 IO 也要参与布线 / timing).
+
+- `num_bonding_terminals`：插入的 HBT 个数.
 
 
 ## Environment Setup
