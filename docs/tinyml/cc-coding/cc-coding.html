@@ -758,6 +758,104 @@ Figure&nbsp;1: 循环引用问题
 </section>
 <section id="class-类" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="class-类">Class 类</h3>
+<section id="constructor-init-list-构造函数与初始化列表" class="level4">
+<h4 class="anchored" data-anchor-id="constructor-init-list-构造函数与初始化列表">Constructor, Init List 构造函数与初始化列表</h4>
+<ul>
+<li><strong>Constructor</strong>: 相当于 <code>Python</code> 里的 <code>__init__</code> 方法. 每次创建对象时会被调用. 可以有多个 Constructor (根据是否带参数区分). 名字是 <code>ClassName()</code>.
+<ul>
+<li><strong>Destructor</strong>: 相当于 <code>Python</code> 里的 <code>__del__</code> 方法. 每次对象被销毁时会被调用. 名字是 <code>~ClassName()</code>.</li>
+</ul></li>
+<li><strong>Constructor member initializer list</strong>: 用于在 Constructor 体<strong>执行前</strong>初始化成员变量 (用 <code>:</code> 引出). 那跟放在 Constructor 体里初始化有什么区别呢? 见下面例子:</li>
+</ul>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>constructor.cpp</strong></pre>
+</div>
+<div class="sourceCode" id="lst-constructorcpp" data-filename="constructor.cpp"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-constructorcpp-1"><a href="#lst-constructorcpp-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="lst-constructorcpp-2"><a href="#lst-constructorcpp-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> <span class="kw">namespace</span> std<span class="op">;</span></span>
+<span id="lst-constructorcpp-3"><a href="#lst-constructorcpp-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-constructorcpp-4"><a href="#lst-constructorcpp-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Small </span>
+<span id="lst-constructorcpp-5"><a href="#lst-constructorcpp-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="lst-constructorcpp-6"><a href="#lst-constructorcpp-6" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="lst-constructorcpp-7"><a href="#lst-constructorcpp-7" aria-hidden="true" tabindex="-1"></a>    Small<span class="op">()</span></span>
+<span id="lst-constructorcpp-8"><a href="#lst-constructorcpp-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-constructorcpp-9"><a href="#lst-constructorcpp-9" aria-hidden="true" tabindex="-1"></a>        cout <span class="op">&lt;&lt;</span> <span class="dv">1</span> <span class="op">&lt;&lt;</span> endl<span class="op">;</span></span>
+<span id="lst-constructorcpp-10"><a href="#lst-constructorcpp-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-constructorcpp-11"><a href="#lst-constructorcpp-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-constructorcpp-12"><a href="#lst-constructorcpp-12" aria-hidden="true" tabindex="-1"></a>    Small<span class="op">(</span><span class="dt">int</span> in<span class="op">)</span></span>
+<span id="lst-constructorcpp-13"><a href="#lst-constructorcpp-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-constructorcpp-14"><a href="#lst-constructorcpp-14" aria-hidden="true" tabindex="-1"></a>        cout <span class="op">&lt;&lt;</span> <span class="dv">2</span> <span class="op">&lt;&lt;</span> endl<span class="op">;</span></span>
+<span id="lst-constructorcpp-15"><a href="#lst-constructorcpp-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-constructorcpp-16"><a href="#lst-constructorcpp-16" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="lst-constructorcpp-17"><a href="#lst-constructorcpp-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-constructorcpp-18"><a href="#lst-constructorcpp-18" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Big</span>
+<span id="lst-constructorcpp-19"><a href="#lst-constructorcpp-19" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="lst-constructorcpp-20"><a href="#lst-constructorcpp-20" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="lst-constructorcpp-21"><a href="#lst-constructorcpp-21" aria-hidden="true" tabindex="-1"></a>    Small small<span class="op">;</span></span>
+<span id="lst-constructorcpp-22"><a href="#lst-constructorcpp-22" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="lst-constructorcpp-23"><a href="#lst-constructorcpp-23" aria-hidden="true" tabindex="-1"></a>    Big<span class="op">(</span><span class="dt">int</span> in<span class="op">)</span></span>
+<span id="lst-constructorcpp-24"><a href="#lst-constructorcpp-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-constructorcpp-25"><a href="#lst-constructorcpp-25" aria-hidden="true" tabindex="-1"></a>        small <span class="op">=</span> Small<span class="op">(</span>in<span class="op">);</span></span>
+<span id="lst-constructorcpp-26"><a href="#lst-constructorcpp-26" aria-hidden="true" tabindex="-1"></a>        cout <span class="op">&lt;&lt;</span> <span class="dv">3</span> <span class="op">&lt;&lt;</span> endl<span class="op">;</span> </span>
+<span id="lst-constructorcpp-27"><a href="#lst-constructorcpp-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-constructorcpp-28"><a href="#lst-constructorcpp-28" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="lst-constructorcpp-29"><a href="#lst-constructorcpp-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-constructorcpp-30"><a href="#lst-constructorcpp-30" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span></span>
+<span id="lst-constructorcpp-31"><a href="#lst-constructorcpp-31" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="lst-constructorcpp-32"><a href="#lst-constructorcpp-32" aria-hidden="true" tabindex="-1"></a>    Big big<span class="op">(</span><span class="dv">7</span><span class="op">);</span> <span class="co">// Output: 1 2 3</span></span>
+<span id="lst-constructorcpp-33"><a href="#lst-constructorcpp-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="lst-constructorcpp-34"><a href="#lst-constructorcpp-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-constructorcpp-35"><a href="#lst-constructorcpp-35" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>constructor_init.cpp</strong></pre>
+</div>
+<div class="sourceCode" id="lst-constructorinitcpp" data-filename="constructor_init.cpp"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-constructorinitcpp-1"><a href="#lst-constructorinitcpp-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="lst-constructorinitcpp-2"><a href="#lst-constructorinitcpp-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> <span class="kw">namespace</span> std<span class="op">;</span></span>
+<span id="lst-constructorinitcpp-3"><a href="#lst-constructorinitcpp-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-constructorinitcpp-4"><a href="#lst-constructorinitcpp-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Small </span>
+<span id="lst-constructorinitcpp-5"><a href="#lst-constructorinitcpp-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="lst-constructorinitcpp-6"><a href="#lst-constructorinitcpp-6" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="lst-constructorinitcpp-7"><a href="#lst-constructorinitcpp-7" aria-hidden="true" tabindex="-1"></a>    Small<span class="op">()</span></span>
+<span id="lst-constructorinitcpp-8"><a href="#lst-constructorinitcpp-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-constructorinitcpp-9"><a href="#lst-constructorinitcpp-9" aria-hidden="true" tabindex="-1"></a>        cout <span class="op">&lt;&lt;</span> <span class="dv">1</span> <span class="op">&lt;&lt;</span> endl<span class="op">;</span></span>
+<span id="lst-constructorinitcpp-10"><a href="#lst-constructorinitcpp-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-constructorinitcpp-11"><a href="#lst-constructorinitcpp-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-constructorinitcpp-12"><a href="#lst-constructorinitcpp-12" aria-hidden="true" tabindex="-1"></a>    Small<span class="op">(</span><span class="dt">int</span> in<span class="op">)</span></span>
+<span id="lst-constructorinitcpp-13"><a href="#lst-constructorinitcpp-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-constructorinitcpp-14"><a href="#lst-constructorinitcpp-14" aria-hidden="true" tabindex="-1"></a>        cout <span class="op">&lt;&lt;</span> <span class="dv">2</span> <span class="op">&lt;&lt;</span> endl<span class="op">;</span></span>
+<span id="lst-constructorinitcpp-15"><a href="#lst-constructorinitcpp-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-constructorinitcpp-16"><a href="#lst-constructorinitcpp-16" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="lst-constructorinitcpp-17"><a href="#lst-constructorinitcpp-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-constructorinitcpp-18"><a href="#lst-constructorinitcpp-18" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Big</span>
+<span id="lst-constructorinitcpp-19"><a href="#lst-constructorinitcpp-19" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="lst-constructorinitcpp-20"><a href="#lst-constructorinitcpp-20" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="lst-constructorinitcpp-21"><a href="#lst-constructorinitcpp-21" aria-hidden="true" tabindex="-1"></a>    Small small<span class="op">;</span></span>
+<span id="lst-constructorinitcpp-22"><a href="#lst-constructorinitcpp-22" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="lst-constructorinitcpp-23"><a href="#lst-constructorinitcpp-23" aria-hidden="true" tabindex="-1"></a>    Big<span class="op">(</span><span class="dt">int</span> in<span class="op">)</span> </span>
+<span id="lst-constructorinitcpp-24"><a href="#lst-constructorinitcpp-24" aria-hidden="true" tabindex="-1"></a>        <span class="op">:</span> small<span class="op">(</span>in<span class="op">)</span></span>
+<span id="lst-constructorinitcpp-25"><a href="#lst-constructorinitcpp-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-constructorinitcpp-26"><a href="#lst-constructorinitcpp-26" aria-hidden="true" tabindex="-1"></a>        cout <span class="op">&lt;&lt;</span> <span class="dv">3</span> <span class="op">&lt;&lt;</span> endl<span class="op">;</span> </span>
+<span id="lst-constructorinitcpp-27"><a href="#lst-constructorinitcpp-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-constructorinitcpp-28"><a href="#lst-constructorinitcpp-28" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="lst-constructorinitcpp-29"><a href="#lst-constructorinitcpp-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-constructorinitcpp-30"><a href="#lst-constructorinitcpp-30" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span></span>
+<span id="lst-constructorinitcpp-31"><a href="#lst-constructorinitcpp-31" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="lst-constructorinitcpp-32"><a href="#lst-constructorinitcpp-32" aria-hidden="true" tabindex="-1"></a>    Big big<span class="op">(</span><span class="dv">7</span><span class="op">);</span> <span class="co">// Output: 2 3</span></span>
+<span id="lst-constructorinitcpp-33"><a href="#lst-constructorinitcpp-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="lst-constructorinitcpp-34"><a href="#lst-constructorinitcpp-34" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-constructorinitcpp-35"><a href="#lst-constructorinitcpp-35" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
 <section id="this-指针" class="level4">
 <h4 class="anchored" data-anchor-id="this-指针"><code>this</code> 指针</h4>
 <p>就是 <code>Python</code> 里的 <code>self</code> (当前对象的地址):</p>
