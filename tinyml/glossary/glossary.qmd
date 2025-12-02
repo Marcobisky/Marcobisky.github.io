@@ -308,6 +308,16 @@ title: "Glossary 名词解释"
 
 - **VLA (Vision Language Action)**: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.
 
+- **Pretraining 预训练**: 用维基百科、书籍等未标注的大规模数据集对模型进行训练 (自监督的), 方法包括:
+    - **Masked Language Modeling (MLM)**: 随机挖空, 然后预测挖空的词语.
+    - **Next Sentence Prediction (NSP)**: 以句子为单位的 MLM.
+
+- **Fine-tuning 微调**: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论->情感标签).
+    - **Full fine-tuning 全参数微调**: 会更新模型的**所有**参数. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).
+    - **Parameter-efficient fine-tuning (PEFT) 参数高效微调**: 主流, 冻结 $99\%$ 以上的模型参数, 只更新少量参数 (E.g., LoRA).
+    - **Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)**: 用指令-回答对微调, 如 "翻译成中文: How are you?" -> "你好吗?", 让模型会回答而只是文本补全.
+    - **Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习**: SFT 微调后的模型不是最有帮助的/有害的/不符合价值观的, 让模型给出多个回答, 然后让**人类**打分, 用强化学习 (如 PPO) 进行强化学习微调.
+
 ### Computing in ML
 
 - **FLOP (Floating-Point OPeration)**: 一次浮点运算包括一次加/减/乘/除.

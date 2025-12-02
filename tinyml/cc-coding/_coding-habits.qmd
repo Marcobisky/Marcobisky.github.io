@@ -22,6 +22,9 @@
     const int *p1; // p1 本身可以修改, 但指向的内容不可以修改
     int * const p2; // p2 本身不可以修改, 但指向的内容可以修改
     const int * const p3; // 都不能修改
+
+    int const& my_int; // 引用的内容不可以修改, 同 const int&
+    // int &const // 不合法
     ```
 
 - `Pytorch C++ API` 中提供 `TORCH_ARG` 宏, 用于自动生成类成员变量的 getter 和 setter 方法:
@@ -45,4 +48,4 @@
         double& balance() { return balance_; }
     ```
 
-    这种写法类似 @lst-account_private, `const double&` 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 `const` 表示 getter 方法本身不会修改 `balance_` 成员变量. 用户可以通过 `obj.balance()` 来获取余额, 也可以通过 `obj.balance() = 100.0;` 来修改余额.
+    这种写法类似 @lst-account_private, `const double&` 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 `const` 表示 getter 方法本身不会修改这个类的**所有**成员变量 (`balance_` in this case). 用户可以通过 `obj.balance()` 来获取余额, 也可以通过 `obj.balance() = 100.0;` 来修改余额.
