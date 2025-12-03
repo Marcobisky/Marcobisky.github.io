@@ -24,7 +24,7 @@ title: "EDA: 3D IC Placement"
         ![由于上下 die 工艺不同, 同一个 cell/macro 在不同 die 上占面积不同 @zhao2024analyticalheterogeneousdietodie3d](heterogeneous_tech.png){#fig-heterogeneous-tech width=70%}
     
     - 所有 std cell 必须放在 row 上 (macro 不做要求), 且任意两个元件不能重叠 @10323747.
-    - 上下 die 的 utilization ratio (所有该 die 的 cell/macro area 之和除以该 die 面积) 有上限 (不能全挤在一边).
+    - 上下 die 的 utilization ratio (所有该 die 的 cell/macro area 之和除以该 die 面积) 有上限 (分别记作 $u^+, u^-$ @10323747, cell 不能全挤在一边).
     - std cell 不能旋转 (R0). Macro只能旋转 R0/R90/R180/R270. cell 和 macro 都不能镜像.
 
 - 求解:
@@ -33,14 +33,25 @@ title: "EDA: 3D IC Placement"
 
 ### Loss Function 目标函数构成
 
-- **eDensity**
-    - **动机**: 为了使 cell 之间保持距离, 用电场的排斥力来建模这个过程.
-    - 电荷量 $q$ 用 cell 的体积表示 (), 大 cell 对其它 cell 的排斥力很大.
-    - 用总 potential energy 来作为 $L$ 的一部分 (希望 cell 之间距离更远), 跟 wirelength 是冲突的目标.
+#### ePlace
 
-- **Total half-perimeter wirelength (HPWL)**
-    - **动机**: 同一个 net 的 pin 不要太分散以至于连接的导线太长.
-    - 上下 die 都可以分别算出一个 HPWL, 然后求和. (HBT 用中心点位置来算 @10323747)
+- **动机**: 为了使 cell 之间保持距离, 用电场的排斥力来建模这个过程 @eplace2015.
+- 电荷量 $q$ 用 cell 的体积表示, 大 cell 对其它 cell 的排斥力很大.
+- 用总 potential energy 来作为 $L$ 的一部分 (希望 cell 之间距离更远), 跟 wirelength 是冲突的目标.
+- **Fillers**: 为了解决 maximum utilization constraint 而提出的假象的带电液体. 有两类 fillers:
+    - **z-fixed fillers**: 想象上/下 die 是两个**独立封闭**的长方体容器, 以 top die 为例, 如果 $u^+ = 80\%$, 则加入体积为 top die 总体积 $20\%$ 的液体 @10323747, bottom die 同理. 该液体密度均匀, 容易想象当 cell 太多时, 液体会把 cell 挤到另一层去 (而液体本身不会跨层).
+        - Initialization: **均匀**地滴灌在该层 die 上 [@eplace2015; @liao2023analyticaldietodie3dplacement].
+    - **free fillers**: 将上下 die 作为一个整体的「大容器」$\Omega$ @zhao2024analyticalheterogeneousdietodie3d, cell 和 macro 浮在其中, 它们总体积是固定的, 那么剩下的空间 $\text{vol}_{fr}$ (也是固定的) 填满了 free fillers. 具体原因不明, 可能是为了缓冲? 也可以不用 (E.g., @Chen2024 没有用 free fillers) 
+        - Initialization: @zhao2024analyticalheterogeneousdietodie3d 的方法是: 想象有体积为 $\text{vol}_{fr}$ 的液体, 用滴灌按照以 $\Omega$ 中心为均值的正态分布逐滴滴在「大容器」内 (重合的液滴不合并, 所以密度可能不均匀).
+
+- **Cell 和 macro 的 initialization**: 跟 free filler 一模一样 @liao2023analyticaldietodie3dplacement, 也是用滴灌的方法.
+
+![z-fixed fillers (gray); macros (red); std cells (top/bottom, blue); free filler (hide) @zhao2024analyticalheterogeneousdietodie3d](eplace-init.png){#fig-eplace-init width=90%}
+
+#### Total half-perimeter wirelength (HPWL)
+
+- **动机**: 同一个 net 的 pin 不要太分散以至于连接的导线太长.
+- 上下 die 都可以分别算出一个 HPWL, 然后求和. (HBT 用中心点位置来算 @10323747)
 
 ### 数据格式要求
 
