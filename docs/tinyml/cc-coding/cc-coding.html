@@ -569,6 +569,10 @@ window.Quarto = {
   <li><a href="#getters-和-setters" id="toc-getters-和-setters" class="nav-link" data-scroll-target="#getters-和-setters">getters 和 Setters</a></li>
   <li><a href="#常写-const" id="toc-常写-const" class="nav-link" data-scroll-target="#常写-const">常写 <code>const</code></a></li>
   </ul></li>
+  <li><a href="#tips-on-code-reading" id="toc-tips-on-code-reading" class="nav-link" data-scroll-target="#tips-on-code-reading">Tips on Code Reading</a>
+  <ul class="collapse">
+  <li><a href="#first-encounter" id="toc-first-encounter" class="nav-link" data-scroll-target="#first-encounter">First Encounter</a></li>
+  </ul></li>
   <li><a href="#verilog" id="toc-verilog" class="nav-link" data-scroll-target="#verilog">Verilog</a>
   <ul class="collapse">
   <li><a href="#verilog-testbench" id="toc-verilog-testbench" class="nav-link" data-scroll-target="#verilog-testbench">Verilog Testbench</a></li>
@@ -876,7 +880,7 @@ Figure&nbsp;1: 循环引用问题
 <div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;<code>protected</code> 和 <code>private</code> 区别: 前者代表本类和子类可以访问, 后者只能本类访问 (子类不行).</p></div></div></section>
 <section id="friend-关键字" class="level4">
 <h4 class="anchored" data-anchor-id="friend-关键字"><code>friend</code> 关键字</h4>
-<p>在一个类里面声明另一个类 (或函数) 为 <code>friend</code>, 表示同意它访问自己的 <code>private</code> 和 <code>protected</code> 成员:</p>
+<p>在一个类里面声明另一个类 (或函数) 为 <code>friend</code>, 表示同意它访问自己的 <code>private</code> 和 <code>protected</code> 成员 (注意是谁访问谁的私有成员!):</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>friend.cpp</strong></pre>
@@ -1224,7 +1228,10 @@ Figure&nbsp;1: 循环引用问题
 <li><p><code>const</code> 用法:</p>
 <div class="sourceCode" id="cb22"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">int</span> <span class="op">*</span>p1<span class="op">;</span> <span class="co">// p1 本身可以修改, 但指向的内容不可以修改</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span> <span class="at">const</span> p2<span class="op">;</span> <span class="co">// p2 本身不可以修改, 但指向的内容可以修改</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">int</span> <span class="op">*</span> <span class="at">const</span> p3<span class="op">;</span> <span class="co">// 都不能修改</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">int</span> <span class="op">*</span> <span class="at">const</span> p3<span class="op">;</span> <span class="co">// 都不能修改</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="at">const</span><span class="op">&amp;</span> my_int<span class="op">;</span> <span class="co">// 引用的内容不可以修改, 同 const int&amp;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="co">// int &amp;const // 不合法</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><code>Pytorch C++ API</code> 中提供 <code>TORCH_ARG</code> 宏, 用于自动生成类成员变量的 getter 和 setter 方法:</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;torch/torch.h&gt;</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>TORCH_ARG<span class="op">(</span><span class="dt">double</span><span class="op">,</span> balance<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1238,7 +1245,17 @@ Figure&nbsp;1: 循环引用问题
 <span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// setter</span></span>
 <span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span><span class="op">&amp;</span> balance<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="va">balance_</span><span class="op">;</span> <span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>这种写法类似 <a href="#lst-account_private" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-account_private</span></a>, <code>const double&amp;</code> 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 <code>const</code> 表示 getter 方法本身不会修改 <code>balance_</code> 成员变量. 用户可以通过 <code>obj.balance()</code> 来获取余额, 也可以通过 <code>obj.balance() = 100.0;</code> 来修改余额.</p></li>
+<p>这种写法类似 <a href="#lst-account_private" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-account_private</span></a>, <code>const double&amp;</code> 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 <code>const</code> 表示 getter 方法本身不会修改这个类的<strong>所有</strong>成员变量 (<code>balance_</code> in this case). 用户可以通过 <code>obj.balance()</code> 来获取余额, 也可以通过 <code>obj.balance() = 100.0;</code> 来修改余额.</p></li>
+</ul>
+</section>
+</section>
+<section id="tips-on-code-reading" class="level2">
+<h2 class="anchored" data-anchor-id="tips-on-code-reading">Tips on Code Reading</h2>
+<section id="first-encounter" class="level3">
+<h3 class="anchored" data-anchor-id="first-encounter">First Encounter</h3>
+<ul>
+<li><p><strong>Take it Easy</strong>: 一个 <code>C++</code> project 不过是一堆 class 和一个 main.</p></li>
+<li><p>如果是 OOP, 关注类会<strong>改变</strong>哪些外部变量 (通常是引用传递) 而不是某个方法的具体实现.</p></li>
 </ul>
 </section>
 </section>

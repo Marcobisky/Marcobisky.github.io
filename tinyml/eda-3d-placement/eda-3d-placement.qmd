@@ -2,6 +2,52 @@
 title: "EDA: 3D IC Placement"
 ---
 
+## 3D Global Placement
+
+> 目前为乱序. 所有 terms 见 [Glossary 名词解释](../glossary/glossary.qmd#sec-eda-terms).
+
+### Problem Formulation
+
+给定 Netlist $(V, E)$, 给出每个 cell 的每个 pin 的 3D 坐标 $(x, y, z)$, 使得某个目标函数 $L$ (如 wirelength + density + timing) 最小.
+
+- 已知:
+    - cell 和 macro 都是长方体, 所有 cell 的高度 $z$ 统一为所在 die 的厚度 (且两个 die 厚度一样) @10323747. 所有 std cell 宽度均为 row height. 而且给定 Macro & std cell library.
+    - $z$ 为二值 (top/bottom die).
+    - HBT 大小和 pitch 已知, pin spacing 上限 和 die boundary 已知.
+    - 上下 die row 信息.
+
+- 约束:
+    - HBT 在两个 die 的表面 (有大小, pitch 要求 (比 cell size 大很多) 和**数量上限** (每加一个 HBT 会有相同大小的惩罚)).
+    - 如果一个 net 跨层 ("Split net"), 则必须插入且仅插入一个 HBT.
+    - **Heterogeneous tech 不同工艺**: 上 die 和下 die 的工艺不同, 比如如果上 die 的工艺较差, 同一个 AND 门放在上 die 上的占面积会更大. 不同工艺的 cell characteristic, cell height, cell size, cell pin locations 可能不同 @10323747.
+
+        ![由于上下 die 工艺不同, 同一个 cell/macro 在不同 die 上占面积不同 @zhao2024analyticalheterogeneousdietodie3d](heterogeneous_tech.png){#fig-heterogeneous-tech width=70%}
+    
+    - 所有 std cell 必须放在 row 上 (macro 不做要求), 且任意两个元件不能重叠 @10323747.
+    - 上下 die 的 utilization ratio (所有该 die 的 cell/macro area 之和除以该 die 面积) 有上限 (不能全挤在一边).
+    - std cell 不能旋转 (R0). Macro只能旋转 R0/R90/R180/R270. cell 和 macro 都不能镜像.
+
+- 求解:
+    - 上/下 die placement 结果 (每个 cell 左下角坐标和旋转角度).
+    - HBT placement 结果 (加上 net 信息)
+
+### Loss Function 目标函数构成
+
+- **eDensity**
+    - **动机**: 为了使 cell 之间保持距离, 用电场的排斥力来建模这个过程.
+    - 电荷量 $q$ 用 cell 的体积表示 (), 大 cell 对其它 cell 的排斥力很大.
+    - 用总 potential energy 来作为 $L$ 的一部分 (希望 cell 之间距离更远), 跟 wirelength 是冲突的目标.
+
+- **Total half-perimeter wirelength (HPWL)**
+    - **动机**: 同一个 net 的 pin 不要太分散以至于连接的导线太长.
+    - 上下 die 都可以分别算出一个 HPWL, 然后求和. (HBT 用中心点位置来算 @10323747)
+
+### 数据格式要求
+
+- 上下 die 的 bottom-left corner 规定坐标为 $(0, 0)$, 且同坐标代表物理上的同一位置 (E.g., top die 的 (10, 20) 和 bottom die 的 (10, 20) 是垂直对齐的) @10323747.
+
+
+
 ## DREAMPlace Naming Manual 命名法
 
 - `flat_netpin`, `netpin_start`: 见下方 pin-list 表示法 (CSR).
