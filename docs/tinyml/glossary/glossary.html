@@ -585,6 +585,7 @@ window.Quarto = {
   <li><a href="#ml-terms" id="toc-ml-terms" class="nav-link" data-scroll-target="#ml-terms">ML Terms</a>
   <ul class="collapse">
   <li><a href="#computing-in-ml" id="toc-computing-in-ml" class="nav-link" data-scroll-target="#computing-in-ml">Computing in ML</a></li>
+  <li><a href="#optimizer-in-ml" id="toc-optimizer-in-ml" class="nav-link" data-scroll-target="#optimizer-in-ml">Optimizer in ML</a></li>
   <li><a href="#ml-frameworks" id="toc-ml-frameworks" class="nav-link" data-scroll-target="#ml-frameworks">ML Frameworks</a></li>
   <li><a href="#benchmarks-in-ml" id="toc-benchmarks-in-ml" class="nav-link" data-scroll-target="#benchmarks-in-ml">Benchmarks in ML</a></li>
   <li><a href="#related-philosophy" id="toc-related-philosophy" class="nav-link" data-scroll-target="#related-philosophy">Related Philosophy</a></li>
@@ -1000,7 +1001,7 @@ Figure&nbsp;8: <span class="math inline">\(\# \text{Steiner points} \le \# \text
 </ul>
 <div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;这个词在多个领域内都有使用 (比如项目管理中的 CPM), 总体来说想表达的就是「搅屎棍」的意思.</p></div></div></section>
 </section>
-<section id="ml-terms" class="level2">
+<section id="ml-terms" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="ml-terms">ML Terms</h2>
 <ul>
 <li><p><strong>ANN (Artificial Neural Network)</strong>: 就是传统意义上的神经网络.</p></li>
@@ -1084,13 +1085,32 @@ Figure&nbsp;10: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <li><p><strong>tiling 分块/瓦片</strong>: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.</p></li>
 </ul>
 </section>
+<section id="optimizer-in-ml" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="optimizer-in-ml">Optimizer in ML</h3>
+<ul>
+<li><p><strong>Optimizer 优化器</strong>: 更新模型参数的算法.</p></li>
+<li><p><strong>Gradient Descent (GD) 梯度下降<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></strong>: 所有优化方法都从这个基础方法改进而来.</p>
+<ul>
+<li><strong>Batch Gradient Descent (BGD) 全批量梯度下降</strong>: 用整个训练集计算梯度并更新参数.</li>
+<li><strong>Stochastic Gradient Descent (SGD) 随机梯度下降</strong>: 每次用一个样本计算梯度并更新参数.</li>
+<li><strong>Mini-batch Gradient Descent 小批量梯度下降</strong>: 每次用一个 mini-batch (如 32 个样本) 计算梯度并更新参数.</li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;<em>Abuse of Notation</em> 一般说的 GD/SGD 指 Mini-batch 版本, 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!</p></div></div><ul>
+<li><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均, 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 可加速和平滑收敛、避免陷入局部最优. 也有一些基于次改良的版本:
+<ul>
+<li><p><strong>Nesterov Accelerated Gradient (NAG)</strong>: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 <code>torch</code> 为例:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>optimizer_nag <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>, momentum<span class="op">=</span><span class="fl">0.9</span>, nesterov<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul></li>
+</ul>
+</section>
 <section id="ml-frameworks" class="level3">
 <h3 class="anchored" data-anchor-id="ml-frameworks">ML Frameworks</h3>
 <ul>
 <li><p><strong>Tensorflow, JAX, PyTorch</strong>: 机器学习框架 <a href="#fig-mlsys" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-mlsys</span></a>. 其实就是一些 Python 库.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>RISCV 上有 TfLM (TensorFlow Lite for Microcontrollers),</li>
 <li><strong>ONNX (Open Neural Network Exchange)</strong>: 一种统一的描述神经网络结构的格式, 以上三种框架都支持导出为 ONNX 格式.</li>
@@ -1145,7 +1165,7 @@ Figure&nbsp;11: AI 编译栈和编程体系
 <li><p><strong>Benchmark</strong>: 基准测试. 用于测试系统或工具的功能/性能.</p></li>
 <li><p><strong>QEMU (Quick Emulator)</strong>: 开源的模拟器, 可模拟多种 CPU 架构 (如 ARM, x86, RISCV 等).</p></li>
 <li><p><strong>Renode</strong>: 开源的模拟器, 主要面向嵌入式系统.</p></li>
-<li><p><strong>Endianness</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>:</p>
+<li><p><strong>Endianness</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="endianness.png" class="img-fluid figure-img" style="width:80.0%"></p>
@@ -1153,7 +1173,7 @@ Figure&nbsp;11: AI 编译栈和编程体系
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
 <li><p><strong>MMU (Memory Management Unit)</strong>: 内存管理单元, 负责虚拟内存和物理内存之间的映射.</p>
 <ul>
 <li><strong>TLB (Translation Lookaside Buffer)</strong>: 很像 CPU 的 Cache, 用于加速虚拟地址到物理地址的转换. 也有 TLB miss, TLB hit, spacial locality, temporal locality, etc. 这些概念.</li>
