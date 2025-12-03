@@ -4,7 +4,7 @@ title: "GPU 原理速成"
 
 > GPU 就是核心多一点的 CPU.
 
-![GPU 就是核心多一点的 CPU. @emory](gpu-cpu.png)
+![GPU 就是核心多一点的 CPU. @emory](gpu-cpu.png){#fig-gpu-cpu width=90%}
 
 
 - GPU 是典型的 SIMD Computer (a.k.a. Vector Computer).
@@ -19,12 +19,12 @@ title: "GPU 原理速成"
 
 - GPU device memory 可以被所有 CUDA 核心共享:
 
-    ![NVidia GPU 架构 @emory](nvidia-gpu.png)
+    ![NVidia GPU 架构 @emory](nvidia-gpu.png){#fig-nvidia-gpu width=80%}
 
 
 - 连接有 GPU 的 CPU 二者的 memory 是不共享的 @emory, 二者之间的数据由 DMA 搬运.
 
-    ![Seperate memory systems @emory](seperate-memory.png)
+    ![Seperate memory systems @emory](seperate-memory.png){#fig-seperate-memory width=80%}
 
 - **Kernel functions** @emory:
     - `__host__`: 默认在 CPU (host) 上运行的函数.
@@ -41,16 +41,16 @@ title: "GPU 原理速成"
 
 - 统一内存允许 CPU 和 GPU 共享同一块内存区域, 比如 @lst-managed 中的 CPU 和 GPU 都能访问和改变 `x` 变量:
 
-    ```{.cuda filename="managed.cu" #lst-managed}
-    {{< include src/managed.cu >}}
-    ```
+```{.cu filename="managed.cu" #lst-managed}
+{{< include src/managed.cu >}}
+```
 
 输出:
 
-    ```bash
-    CPU sees x = 0
-    GPU sees x = 1
-    ```
+```bash
+CPU sees x = 0
+GPU sees x = 1
+```
 
 注意是 CPU 先打印 (因为没有用 `cudaDeviceSynchronize()`)!
 
@@ -58,17 +58,17 @@ title: "GPU 原理速成"
 
 CPU 将指令发到 GPU 之后**不会等 GPU 执行完再继续往下执行** (默认 async), 如果需要等 GPU 执行完再继续, 将 `my_kernel<<<1,1>>>(x_ptr);` 改为:
 
-    ```cuda
-    my_kernel<<<1,1>>>(x_ptr);
-    cudaDeviceSynchronize(); // Wait for GPU to finish
-    ```
+```cu
+my_kernel<<<1,1>>>(x_ptr);
+cudaDeviceSynchronize(); // Wait for GPU to finish
+```
 
 输出:
 
-    ```bash
-    GPU sees x = 1
-    CPU sees x = 1
-    ```
+```bash
+GPU sees x = 1
+CPU sees x = 1
+```
 
 ### Stream 流
 

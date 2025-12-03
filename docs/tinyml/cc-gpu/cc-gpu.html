@@ -570,10 +570,14 @@ div.csl-indent {
 <blockquote class="blockquote">
 <p>GPU 就是核心多一点的 CPU.</p>
 </blockquote>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="gpu-cpu.png" class="img-fluid figure-img"></p>
-<figcaption>GPU 就是核心多一点的 CPU. <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span></figcaption>
+<div id="fig-gpu-cpu" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gpu-cpu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gpu-cpu.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gpu-cpu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: GPU 就是核心多一点的 CPU. <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
+</figcaption>
 </figure>
 </div>
 <ul>
@@ -589,17 +593,25 @@ div.csl-indent {
 <li>OpenCL: Open Computing Language (Apple Inc., 开源)</li>
 </ul></li>
 <li><p>GPU device memory 可以被所有 CUDA 核心共享:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="nvidia-gpu.png" class="img-fluid figure-img"></p>
-<figcaption>NVidia GPU 架构 <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span></figcaption>
+<div id="fig-nvidia-gpu" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-nvidia-gpu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="nvidia-gpu.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nvidia-gpu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: NVidia GPU 架构 <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
+</figcaption>
 </figure>
 </div></li>
 <li><p>连接有 GPU 的 CPU 二者的 memory 是不共享的 <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>, 二者之间的数据由 DMA 搬运.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="seperate-memory.png" class="img-fluid figure-img"></p>
-<figcaption>Seperate memory systems <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span></figcaption>
+<div id="fig-seperate-memory" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-seperate-memory-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="seperate-memory.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-seperate-memory-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Seperate memory systems <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
+</figcaption>
 </figure>
 </div></li>
 <li><p><strong>Kernel functions</strong> <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>:</p>
@@ -614,38 +626,46 @@ div.csl-indent {
 <ul>
 <li><p>全局变量: 可以被 CPU 和 GPU 访问的变量, <strong>不能用 local variable 的方式声明</strong>!</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>__managed__ <span class="dt">int</span> x<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p>统一内存允许 CPU 和 GPU 共享同一块内存区域, 比如 <a href="#lst-managed" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-managed</span></a> 中的 CPU 和 GPU 都能访问和改变 <code>x</code> 变量:</p>
-<p>```{.cuda filename=“managed.cu” #lst-managed} #include &lt;stdio.h&gt; #include &lt;cuda_runtime.h&gt;</p></li>
+<li><p>统一内存允许 CPU 和 GPU 共享同一块内存区域, 比如 <a href="#lst-managed" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-managed</span></a> 中的 CPU 和 GPU 都能访问和改变 <code>x</code> 变量:</p></li>
 </ul>
-<p><strong>global</strong> void my_kernel(int* x_ptr) { <em>x_ptr = 1; printf(“GPU sees x = %d”, </em>x_ptr); }</p>
-<p>int main() { int x = 0; int* x_ptr = &amp;x; cudaMallocManaged(&amp;x_ptr, sizeof(int));</p>
-<pre><code>my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);
-
-printf("CPU sees x = %d\n", x);
-
-cudaFree(x_ptr);
-return 0;</code></pre>
-<p>}</p>
-<pre><code>```</code></pre>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>managed.cu</strong></pre>
+</div>
+<div class="sourceCode" id="lst-managed" data-filename="managed.cu"><pre class="sourceCode cu code-with-copy"><code class="sourceCode isocpp"><span id="lst-managed-1"><a href="#lst-managed-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></span>
+<span id="lst-managed-2"><a href="#lst-managed-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;cuda_runtime.h&gt;</span></span>
+<span id="lst-managed-3"><a href="#lst-managed-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-managed-4"><a href="#lst-managed-4" aria-hidden="true" tabindex="-1"></a>__global__ <span class="dt">void</span> my_kernel<span class="op">(</span><span class="dt">int</span><span class="op">*</span> x_ptr<span class="op">)</span> <span class="op">{</span></span>
+<span id="lst-managed-5"><a href="#lst-managed-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>x_ptr <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="lst-managed-6"><a href="#lst-managed-6" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">"GPU sees x = </span><span class="sc">%d\n</span><span class="st">"</span><span class="op">,</span> <span class="op">*</span>x_ptr<span class="op">);</span></span>
+<span id="lst-managed-7"><a href="#lst-managed-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-managed-8"><a href="#lst-managed-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-managed-9"><a href="#lst-managed-9" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="lst-managed-10"><a href="#lst-managed-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> x <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="lst-managed-11"><a href="#lst-managed-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span><span class="op">*</span> x_ptr <span class="op">=</span> <span class="op">&amp;</span>x<span class="op">;</span></span>
+<span id="lst-managed-12"><a href="#lst-managed-12" aria-hidden="true" tabindex="-1"></a>    cudaMallocManaged<span class="op">(&amp;</span>x_ptr<span class="op">,</span> <span class="kw">sizeof</span><span class="op">(</span><span class="dt">int</span><span class="op">));</span></span>
+<span id="lst-managed-13"><a href="#lst-managed-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-managed-14"><a href="#lst-managed-14" aria-hidden="true" tabindex="-1"></a>    my_kernel<span class="op">&lt;&lt;&lt;</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span><span class="op">&gt;&gt;&gt;(</span>x_ptr<span class="op">);</span></span>
+<span id="lst-managed-15"><a href="#lst-managed-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-managed-16"><a href="#lst-managed-16" aria-hidden="true" tabindex="-1"></a>    printf<span class="op">(</span><span class="st">"CPU sees x = </span><span class="sc">%d\n</span><span class="st">"</span><span class="op">,</span> x<span class="op">);</span></span>
+<span id="lst-managed-17"><a href="#lst-managed-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-managed-18"><a href="#lst-managed-18" aria-hidden="true" tabindex="-1"></a>    cudaFree<span class="op">(</span>x_ptr<span class="op">);</span></span>
+<span id="lst-managed-19"><a href="#lst-managed-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="lst-managed-20"><a href="#lst-managed-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>输出:</p>
-<pre><code>```bash
-CPU sees x = 0
-GPU sees x = 1
-```</code></pre>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 0</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>注意是 CPU 先打印 (因为没有用 <code>cudaDeviceSynchronize()</code>)!</p>
 </section>
 <section id="synchronization-同步" class="level3">
 <h3 class="anchored" data-anchor-id="synchronization-同步">Synchronization 同步</h3>
 <p>CPU 将指令发到 GPU 之后<strong>不会等 GPU 执行完再继续往下执行</strong> (默认 async), 如果需要等 GPU 执行完再继续, 将 <code>my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);</code> 改为:</p>
-<pre><code>```cuda
-my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);
-cudaDeviceSynchronize(); // Wait for GPU to finish
-```</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cu code-with-copy"><code class="sourceCode isocpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>my_kernel<span class="op">&lt;&lt;&lt;</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span><span class="op">&gt;&gt;&gt;(</span>x_ptr<span class="op">);</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>cudaDeviceSynchronize<span class="op">();</span> <span class="co">// Wait for GPU to finish</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>输出:</p>
-<pre><code>```bash
-GPU sees x = 1
-CPU sees x = 1
-```</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="stream-流" class="level3">
 <h3 class="anchored" data-anchor-id="stream-流">Stream 流</h3>
