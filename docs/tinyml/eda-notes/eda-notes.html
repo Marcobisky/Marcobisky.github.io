@@ -565,10 +565,10 @@ window.Quarto = {
 </header>
 
 
-<section id="takeaways" class="level2">
+<section id="takeaways" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="takeaways">Takeaways</h2>
 <ul>
-<li>处处都是优化问题, 一般的思路就是先 brainstorm 你能想到的<strong>要减小</strong>的「因素」 (要增大的话填负号即可), 然后一股脑<strong>全加起来</strong>作为 Loss function. 然后:
+<li>处处都是优化问题, 一般的思路就是先 brainstorm 你能想到的<strong>要减小</strong>的「因素<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>」, 然后一股脑<strong>全加起来</strong>作为 Loss function. 然后:
 <ul>
 <li><span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 给我们的启发就是将这个问题等价变成一个训练神经网络的问题, 利用 <code>torch</code> 的生态来并行计算.</li>
 <li>如果 Loss function 里有不可微的部分. 两种办法:
@@ -577,6 +577,8 @@ window.Quarto = {
 <li>用某种平滑的方法来强行可微, 方法很多, 你也可以自己设计.</li>
 </ul></li>
 </ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;要增大的话填负号即可; 当然这些「因素」很多时候是相互冲突的, 而且有些「因素」比较定性, 一时间很难想出清晰的表达式, 即使有清晰的表达式计算量也极其大.</p></div></div><ul>
 <li>Net weight <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 的 idea 告诉我们有些难以单读开一个表达式的「因素」可以融入其它的「因素」里!</li>
 </ul>
 </section>
@@ -619,26 +621,23 @@ Figure&nbsp;2: Std cell height 不一定等于 row height <span class="citation"
 <section id="三个阶段" class="level3">
 <h3 class="anchored" data-anchor-id="三个阶段">三个阶段</h3>
 <ul>
-<li><p><strong>Global (coarse/initial) placement</strong>: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[3]</a></span>.</p>
+<li><strong>Global (coarse/initial) placement</strong>: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[3]</a></span>.</li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[65,35]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 65.0%;justify-content: flex-start;">
 <div id="fig-legalization" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-legalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="legalization.png" class="img-fluid figure-img" style="width:70.0%">
+<img src="legalization.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-legalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figure&nbsp;3: Legalization 把 cell/macro 吸附到最近的 row/site 上并推开重叠 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[3]</a></span>
 </figcaption>
 </figure>
-</div></li>
-<li><p><strong>Legalization 合法化</strong>: 消除重叠和在<strong>两个</strong>方向对齐的过程 (见 <a href="#fig-legalization" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-legalization</span></a>). Cell/macro 不能随便放置, 而要在两个方向对齐:</p>
-<ul>
-<li><strong>Row</strong>: 见 <a href="#fig-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-layout</span></a>, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供同意的供电. 自然的, 所有 cell/macro 不能随便放置, 而要在水平方向成一条线, 使得 die 有“一层一层”的概念, <strong>每一层称为一个 row</strong>. Row height 等于 std cell height; Row 分隔线 VDD 和 GND 交替.</li>
-<li><strong>Site</strong>: Row 引入了「层」, 而 site 给每一层也数字化引入了「门牌号」, 每个 cell/macro 必须对齐到 row 和 site 边界!</li>
-</ul></li>
-</ul>
-<div class="quarto-layout-panel" data-layout="[40,60]">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 40.0%;justify-content: flex-start;">
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 35.0%;justify-content: flex-start;">
 <div id="fig-rowdemo" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-rowdemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -650,21 +649,24 @@ Figure&nbsp;4: Cell/macro 必须放在 row 上 <span class="citation" data-cites
 </figure>
 </div>
 </div>
-<div class="quarto-layout-cell" style="flex-basis: 60.0%;justify-content: flex-start;">
-<div id="fig-sitedemo" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-sitedemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="sitedemo.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sitedemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Std cell 必须上下对齐 row, 左右对齐 site <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[3]</a></span>.
-</figcaption>
-</figure>
-</div>
-</div>
 </div>
 </div>
 <ul>
+<li><strong>Legalization 合法化</strong>: 消除重叠和在<strong>两个</strong>方向对齐的过程 (见 <a href="#fig-legalization" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-legalization</span></a>). Cell/macro 不能随便放置, 而要在两个方向对齐:
+<ul>
+<li><strong>Row</strong>: 见 <a href="#fig-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-layout</span></a>, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供统一的供电. 自然的, 所有 cell/macro 要在水平方向成一条线, 使得 die 有“一层一层”的概念, <strong>每一层称为一个 row</strong>. Row height 等于 std cell height; Row 分隔线 (见 <a href="#fig-sitedemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sitedemo</span></a> 的蓝色条) VDD 和 GND 交替.</li>
+<li><strong>Site</strong>: Row 引入了「层」, 而 site 给每一层也数字化引入了「门牌号」, 每个 cell/macro 必须对齐到 row 和 site 边界!</li>
+</ul>
+<div id="fig-sitedemo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sitedemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="sitedemo.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sitedemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Std cell 必须上下对齐 row, 左右对齐 site <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[3]</a></span>; 且下面一层的 std cell 需要 flip!
+</figcaption>
+</figure>
+</div></li>
 <li><strong>Detailed placement</strong></li>
 </ul>
 </section>
@@ -684,7 +686,7 @@ Figure&nbsp;6: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构
 <section id="density-model" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="density-model">Density Model</h3>
 <ul>
-<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[5]</a></span> (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[6]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
+<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[5]</a></span> (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[6]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
 <div id="fig-bindemo" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bindemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -696,7 +698,7 @@ Figure&nbsp;7: 此图中 bin 的高度是 row height 的 <span class="math inlin
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;注意区分 bin 和 row/site 围成的小方格! 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.</p></div></div></section>
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;注意区分 bin 和 row/site 围成的小方格! 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.</p></div></div></section>
 <section id="timing-model" class="level3">
 <h3 class="anchored" data-anchor-id="timing-model">Timing Model</h3>
 <ul>
