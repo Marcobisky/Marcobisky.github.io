@@ -1010,5 +1010,49 @@
       "Prologue",
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Resources 学习资料汇总</span>"
     ]
+  },
+  {
+    "objectID": "eda-notes/eda-notes.html",
+    "href": "eda-notes/eda-notes.html",
+    "title": "EDA Basics 基础",
+    "section": "",
+    "text": "Some Terms",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Basics 基础</span>"
+    ]
+  },
+  {
+    "objectID": "eda-notes/eda-notes.html#sec-eda-terms",
+    "href": "eda-notes/eda-notes.html#sec-eda-terms",
+    "title": "EDA Basics 基础",
+    "section": "",
+    "text": "Hypergraph 超图: 图的一种推广, Netlist 常被建模成 (Directed) hypergraph \\((V, E)\\) (edge 可以有多个 vertex).\n\n\\(V\\) 中的元素代表 pin.\n\\(E\\) 中的元素称为一个 net.\n\nLayout: 元件或电路的 electric function 的几何图形表示 [1].\nStandard Cell (std cell) 标准单元: 一组实现逻辑门的物理单元 (AND, OR, NOT, NAND, etc.) [1]. 他们过于基础以至于被称为 “standard”.\n\n\n\n\n\n\nFigure 1: NOT 和 NAND 的 layout [1]\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 2: Std cell height 不一定等于 row height [1].",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Basics 基础</span>"
+    ]
+  },
+  {
+    "objectID": "eda-notes/eda-notes.html#placement-布局",
+    "href": "eda-notes/eda-notes.html#placement-布局",
+    "title": "EDA Basics 基础",
+    "section": "Placement 布局",
+    "text": "Placement 布局\n\n三个阶段\n\nGlobal (coarse/initial) placement: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) [1].\n\n\n\n\n\n\nFigure 3: Legalization 把 cell/macro 吸附到最近的 row/site 上并推开重叠 [1]\n\n\n\nLegalization 合法化: 消除重叠和在两个方向对齐的过程 (见 Figure fig-legalization). Cell/macro 不能随便放置, 而要在两个方向对齐:\n\nRow: 见 Figure fig-layout, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供同意的供电. 自然的, 所有 cell/macro 不能随便放置, 而要在水平方向成一条线, 使得 die 有“一层一层”的概念, 每一层称为一个 row. Row height 等于 std cell height; Row 分隔线 VDD 和 GND 交替.\nSite: Row 引入了「层」, 而 site 给每一层也数字化引入了「门牌号」, 每个 cell/macro 必须对齐到 row 和 site 边界!\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Cell/macro 必须放在 row 上 [1].\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: Std cell 必须上下对齐 row, 左右对齐 site [1].\n\n\n\n\n\n\n\nDetailed placement\n\n\n\nWirelength Model\n\n\n\n\n\n\nFigure 6: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 [2].\n\n\n\n\n\nDensity Model\n\nBin: 仅仅是为了方便计算1布局的密度 [3] (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin [4] (见 Figure fig-bindemo). 所有的 bin 组成的集合记作 \\(B\\).\n\n\n\n\n\n\nFigure 7: 此图中 bin 的高度是 row height 的 \\(4\\) 倍 [1]\n\n\n\n\n1 注意区分 bin 和 row/site 围成的小方格! 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Basics 基础</span>"
+    ]
+  },
+  {
+    "objectID": "eda-notes/eda-notes.html#references",
+    "href": "eda-notes/eda-notes.html#references",
+    "title": "EDA Basics 基础",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] J. Monteiro, “Algorithms to improve area density utilization, routability and timing during detailed placement and legalization of VLSI circuits,” PhD thesis, 2019.\n\n\n[2] iEDA, “A7-VLSI auto placement for circuit cells.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/practice/algorithms/a7.html. [Accessed: Dec. 05, 2025]\n\n\n[3] iEDA, “8.3 layout problems and modeling.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html. [Accessed: Dec. 05, 2025]\n\n\n[4] Y. Zhao, P. Liao, S. Liu, J. Jiang, Y. Lin, and B. Yu, “Analytical heterogeneous die-to-die 3D placement with macros.” 2024. Available: https://arxiv.org/abs/2403.09070",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Basics 基础</span>"
+    ]
   }
 ]
