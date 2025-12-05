@@ -1,10 +1,20 @@
 ---
-title: "EDA Basics 基础"
+title: "EDA Notes 笔记"
 ---
+
+## Takeaways
+
+- 处处都是优化问题, 一般的思路就是先 brainstorm 你能想到的**要减小**的「因素」 (要增大的话填负号即可), 然后一股脑**全加起来**作为 Loss function. 然后:
+    - @liao_2023_dreamplace 给我们的启发就是将这个问题等价变成一个训练神经网络的问题, 利用 `torch` 的生态来并行计算.
+    - 如果 Loss function 里有不可微的部分. 两种办法: 
+        - 直接分段函数哈哈哈 (反正 `torch` 里面也是用查找表算的梯度, 它也不知道它优化的函数可不可微哈哈, 这个办法在 @liao2023analyticaldietodie3dplacement 叫做 **subgradient**).
+        - 用某种平滑的方法来强行可微, 方法很多, 你也可以自己设计.
+
+- Net weight @liao_2023_dreamplace 的 idea 告诉我们有些难以单读开一个表达式的「因素」可以融入其它的「因素」里!
 
 ## Some Terms {#sec-eda-terms}
 
-- **Hypergraph 超图**: 图的一种推广, Netlist 常被建模成 (Directed) hypergraph $(V, E)$ (edge 可以有多个 vertex).
+- **Hypergraph 超图**: 图的一种推广, Netlist 常被建模成 (Directed @liao_2023_dreamplace) hypergraph $(V, E)$ (edge 可以有多个 vertex).
     - $V$ 中的元素代表 **pin**.
     - $E$ 中的元素称为一个 **net**.
 
@@ -40,7 +50,7 @@ title: "EDA Basics 基础"
 
 ### Wirelength Model
 
-![两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 @_2024_a7vlsi.](wirelength-model.png){#fig-wirelength-model width=90%}
+![两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 @_2024_a7vlsi.](wirelength-model.png){#fig-wirelength-model width=80%}
 
 ### Density Model
 
@@ -49,5 +59,11 @@ title: "EDA Basics 基础"
     ![此图中 bin 的高度是 row height 的 $4$ 倍 @phdthesisAlgorithms2019](bindemo.png){#fig-bindemo width=70%}
 
 [^bin]: 注意区分 bin 和 row/site 围成的小方格! 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.
+
+### Timing Model
+
+- 单独引入衡量 Timing 的 explicit form 是困难的 (为什么?). 于是 @liao_2023_dreamplace 天才般地通过**引入 net weight 将 timing 的信息融合进 wirelength model 里** 从而使得优化过程考虑了 timing 因素!!
+
+TODO
 
 ## References

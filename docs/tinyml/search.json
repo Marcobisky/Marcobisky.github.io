@@ -154,6 +154,17 @@
     ]
   },
   {
+    "objectID": "resources/resources.html#references",
+    "href": "resources/resources.html#references",
+    "title": "Resources 学习资料汇总",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] iEDA, “8.3 layout problems and modeling.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html. [Accessed: Dec. 05, 2025]",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Resources 学习资料汇总</span>"
+    ]
+  },
+  {
     "objectID": "glossary/glossary.html",
     "href": "glossary/glossary.html",
     "title": "Glossary 名词解释",
@@ -202,7 +213,7 @@
     "href": "glossary/glossary.html#sec-eda-terms",
     "title": "Glossary 名词解释",
     "section": "EDA Terms",
-    "text": "EDA Terms\n\nAIEDA (MLDA/EDI/EDA2.0): 利用 AI 来辅助 EDA 设计流程.\nNetlist 网表: 一个 Graph, 描述了电路用了哪些元件和它们之间的连接.\n\nGate-level 门级网表: 比如用 yosys 生成的 .json 文件.\nTransistor-level 晶体管级网表: .spice, .cir.\n\nFan-in 扇入: 连接到 pin \\(v_i \\in V\\) 的 pin 集合称为 \\(v_i\\) 的 fan-in, 记为 \\(\\mathcal{F}(v_i)\\) [3].\n\nFan-out 扇出 Figure fig-fan-in-out.\n\n\n\n\n\n\n\n\n\n\nFigure 2: \\(v_i\\) 节点有 \\(3\\) 个 Fan-in 节点 和 \\(2\\) 个 Fan-out 节点\n\n\n\n\nLEF (Library Exchange Format): 描述 cell 的物理信息 (尺寸、形状、pin 位置、所在金属层, etc.)\nDEF (Design Exchange Format): 描述整个芯片的 placement 和 routing.\nBookshelf: 一套用于 VLSI 设计的开源文件格式, 包括:\n\n.nodes: 描述 cell 的尺寸和类型.\n.pl: 描述 cell 的 placement.\n.nets: 描述 cell 之间的连接关系.\n.scl: 描述 row.\n\nCSR (Compressed Sparse Row): 用 index + data 进行连续存储的格式 (E.g., sparse matrix, pin-list 表示法, etc.)\n\n\n\n\n\n\n\n\n\n\nFigure 3: Sparse matrix 原始形式\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Sparse matrix 可以用三个数组来储存\n\n\n\n\n\n\n\nPackaging 封装\n\nWafer 晶圆, Die, Chiplet Arch\n\nDie 和 Tile: 一样的概念, 前者强调物理实体, 后者强调逻辑功能单元.\n\n\n\n\n\n\n\nFigure 5: Wafer 是圆圆的一整块, 上面可以切下来 \\(A,B,C,D\\) 四种不同的 die; Chiplet 思想 (Use smaller dies) 与其如何提高良率、降低成本 [4]\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 6: 多个 Die 通过 D2D connection (die-to-die) 形成 SoC [4]\n\n\n\n\n3D IC 常见类型:\n\nTSV-based: 用 TSV (Through-Silicon Via) 硅通孔, 就是在硅片上打孔, 然后在孔内镀铜, 形成垂直的电连接通道. 但由于 large pitches and parasitics, 性能提升有限 [5]. BPV (Bond pad via) 可能类似 TSV [6]?\nMonolithic: 一整块硅片上制造多个层次的电路, 成本高.\nF2F (Face-to-Face): 用 HBT (Hybrid bonding terminal) (或 BPM (Bond pad metal) [6]) 端子连接上下层 Die (通过直接原子键合) [5].\n\npitch 间距: 两个相邻的重复元件中心之间的距离. HBT 的优点就是 pitch 比较小 (fine), 集成度高.\n\n\n\n\n\n\n\n\n\nFigure 7: FinFET (鳍式场效应管) 的 transistor-to-transistor pitch 仅有 \\(57\\) nm [7].\n\n\n\n\nRSMTs (Rectilinear Steiner Minimal Trees): 简单理解为 Manhattan 走线的最小生成树 (可以引入额外的 point 作为中间点, 称为 Steiner points Figure fig-steiner-pt, 原始给定的点一般是 pins).\n\n\n\n\n\n\n\n\n\n\nFigure 8: 通过引入 Steiner point \\(S\\) 可以减少线长\n\n\n\n\n\n \n\n\n\n\n\n\n\n\nFigure 9: \\(\\# \\text{Steiner points} \\le \\# \\text{pins} - 2\\)\n\n\n\n\n\n\n\n\nPlacement 布局\n\nHPWL (Half-Perimeter WireLength): 某种线长的计算方法.\nStd cell, row, site, global placement, legalization, bin: 见 EDA Basics 基础.\n\n\n\nTiming Analysis\n\nRC 提取: 从物理变量抽取电容、电阻.\nSTA (Static Timing Analysis): 静态时序分析 [3]. 信号在导线上的传输是需要时间的, 静态指通过电路的电容、电阻算出电路的 delay (而不需要通过实际输入信号然后仿真).\nTiming arc: 若 pin \\(i\\) 的信号变化会影响 pin \\(j\\) 的信号变化, 则称 pin \\(i\\) 到 pin \\(j\\) 之间存在一个 timing arc (注意有方向).\n\nCell arc: 某个 cell (如 AND gate) 内部的 timing arc.\nNet arc: 金属层走线或 via 上的 timing arc.\nArc delay: 若 \\((p_i, p_j)\\) 间存在 timing arc, 则 arc delay 表示从 pin \\(p_i\\) 信号变化到 pin \\(p_j\\) 信号变化所需的时间.\n\nSlack (时序)裕量: Timing arc 不可避免, 但 arc delay 必须满足要求即可. slack = 信号要求到达时间 - 信号实际到达时间. \\(\\text{slack} &gt; 0\\) 安全, \\(\\text{slack} &lt; 0\\) 违规 [3].\n\nWNS (Worst Negative Slack) \\(s_{\\text{wns}}\\): 违规里面的最坏 slack [3] (如果没有违规, 则 \\(s_{\\text{wns}}\\) 不存在).\nTNS (Total Negative Slack) \\(s_{\\text{tns}}\\): 所有违规 slack 相加 [3] (如果没有违规, 则 \\(s_{\\text{tns}}\\) 不存在).\n\n一般 WNS 和 TNS 都只关心 Primary output endpoint pins (PO, 如 flip-flop inputs, outputs ports [3]) 中的违规情况.\n\nCritical path (CP): 造成 WNS 的那条路径 1.\n\n\n1 这个词在多个领域内都有使用 (比如项目管理中的 CPM), 总体来说想表达的就是「搅屎棍」的意思.",
+    "text": "EDA Terms\n\nAIEDA (MLDA/EDI/EDA2.0): 利用 AI 来辅助 EDA 设计流程.\nNetlist 网表: 一个 Graph, 描述了电路用了哪些元件和它们之间的连接.\n\nGate-level 门级网表: 比如用 yosys 生成的 .json 文件.\nTransistor-level 晶体管级网表: .spice, .cir.\n\nFan-in 扇入: 连接到 pin \\(v_i \\in V\\) 的 pin 集合称为 \\(v_i\\) 的 fan-in, 记为 \\(\\mathcal{F}(v_i)\\) [3].\n\nFan-out 扇出 Figure fig-fan-in-out.\n\n\n\n\n\n\n\n\n\n\nFigure 2: \\(v_i\\) 节点有 \\(3\\) 个 Fan-in 节点 和 \\(2\\) 个 Fan-out 节点\n\n\n\n\nLEF (Library Exchange Format): 描述 cell 的物理信息 (尺寸、形状、pin 位置、所在金属层, etc.)\nDEF (Design Exchange Format): 描述整个芯片的 placement 和 routing.\nBookshelf: 一套用于 VLSI 设计的开源文件格式, 包括:\n\n.nodes: 描述 cell 的尺寸和类型.\n.pl: 描述 cell 的 placement.\n.nets: 描述 cell 之间的连接关系.\n.scl: 描述 row.\n\nCSR (Compressed Sparse Row): 用 index + data 进行连续存储的格式 (E.g., sparse matrix, pin-list 表示法, etc.)\n\n\n\n\n\n\n\n\n\n\nFigure 3: Sparse matrix 原始形式\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Sparse matrix 可以用三个数组来储存\n\n\n\n\n\n\n\nPackaging 封装\n\nWafer 晶圆, Die, Chiplet Arch\n\nDie 和 Tile: 一样的概念, 前者强调物理实体, 后者强调逻辑功能单元.\n\n\n\n\n\n\n\nFigure 5: Wafer 是圆圆的一整块, 上面可以切下来 \\(A,B,C,D\\) 四种不同的 die; Chiplet 思想 (Use smaller dies) 与其如何提高良率、降低成本 [4]\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 6: 多个 Die 通过 D2D connection (die-to-die) 形成 SoC [4]\n\n\n\n\n3D IC 常见类型:\n\nTSV-based: 用 TSV (Through-Silicon Via) 硅通孔, 就是在硅片上打孔, 然后在孔内镀铜, 形成垂直的电连接通道. 但由于 large pitches and parasitics, 性能提升有限 [5]. BPV (Bond pad via) 可能类似 TSV [6]?\nMonolithic: 一整块硅片上制造多个层次的电路, 成本高.\nF2F (Face-to-Face): 用 HBT (Hybrid bonding terminal) (或 BPM (Bond pad metal) [6]) 端子连接上下层 Die (通过直接原子键合) [5].\n\npitch 间距: 两个相邻的重复元件中心之间的距离. HBT 的优点就是 pitch 比较小 (fine), 集成度高.\n\n\n\n\n\n\n\n\n\nFigure 7: FinFET (鳍式场效应管) 的 transistor-to-transistor pitch 仅有 \\(57\\) nm [7].\n\n\n\n\nRSMTs (Rectilinear Steiner Minimal Trees): 简单理解为 Manhattan 走线的最小生成树 (可以引入额外的 point 作为中间点, 称为 Steiner points Figure fig-steiner-pt, 原始给定的点一般是 pins).\n\n\n\n\n\n\n\n\n\n\nFigure 8: 通过引入 Steiner point \\(S\\) 可以减少线长\n\n\n\n\n\n \n\n\n\n\n\n\n\n\nFigure 9: \\(\\# \\text{Steiner points} \\le \\# \\text{pins} - 2\\)\n\n\n\n\n\n\n\n\nPlacement 布局\n\nHPWL (Half-Perimeter WireLength): 某种线长的计算方法.\nStd cell, row, site, global placement, legalization, bin: 见 EDA Notes 笔记.\n\n\n\nTiming Analysis\n\nRC 提取: 从物理变量抽取电容、电阻.\nSTA (Static Timing Analysis): 静态时序分析 [3]. 信号在导线上的传输是需要时间的, 静态指通过电路的电容、电阻算出电路的 delay (而不需要通过实际输入信号然后仿真).\nTiming arc: 若 pin \\(i\\) 的信号变化会影响 pin \\(j\\) 的信号变化, 则称 pin \\(i\\) 到 pin \\(j\\) 之间存在一个 timing arc (注意有方向).\n\nCell arc: 某个 cell (如 AND gate) 内部的 timing arc.\nNet arc: 金属层走线或 via 上的 timing arc.\nArc delay: 若 \\((p_i, p_j)\\) 间存在 timing arc, 则 arc delay 表示从 pin \\(p_i\\) 信号变化到 pin \\(p_j\\) 信号变化所需的时间.\n\nSlack (时序)裕量: Timing arc 不可避免, 但 arc delay 必须满足要求即可. slack = 信号要求到达时间 - 信号实际到达时间. \\(\\text{slack} &gt; 0\\) 安全, \\(\\text{slack} &lt; 0\\) 违规 [3].\n\nWNS (Worst Negative Slack) \\(s_{\\text{wns}}\\): 违规里面的最坏 slack [3] (如果没有违规, 则 \\(s_{\\text{wns}}\\) 不存在).\nTNS (Total Negative Slack) \\(s_{\\text{tns}}\\): 所有违规 slack 相加 [3] (如果没有违规, 则 \\(s_{\\text{tns}}\\) 不存在).\n\n一般 WNS 和 TNS 都只关心 Primary output endpoint pins (PO, 如 flip-flop inputs, outputs ports [3]) 中的违规情况.\n\nCritical path (CP): 造成 WNS 的那条路径 1.\n\n\n1 这个词在多个领域内都有使用 (比如项目管理中的 CPM), 总体来说想表达的就是「搅屎棍」的意思.",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
@@ -462,6 +473,61 @@
     ]
   },
   {
+    "objectID": "eda-notes/eda-notes.html",
+    "href": "eda-notes/eda-notes.html",
+    "title": "EDA Notes 笔记",
+    "section": "",
+    "text": "Takeaways",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Notes 笔记</span>"
+    ]
+  },
+  {
+    "objectID": "eda-notes/eda-notes.html#takeaways",
+    "href": "eda-notes/eda-notes.html#takeaways",
+    "title": "EDA Notes 笔记",
+    "section": "",
+    "text": "处处都是优化问题, 一般的思路就是先 brainstorm 你能想到的要减小的「因素」 (要增大的话填负号即可), 然后一股脑全加起来作为 Loss function. 然后:\n\n[1] 给我们的启发就是将这个问题等价变成一个训练神经网络的问题, 利用 torch 的生态来并行计算.\n如果 Loss function 里有不可微的部分. 两种办法:\n\n直接分段函数哈哈哈 (反正 torch 里面也是用查找表算的梯度, 它也不知道它优化的函数可不可微哈哈, 这个办法在 [2] 叫做 subgradient).\n用某种平滑的方法来强行可微, 方法很多, 你也可以自己设计.\n\n\nNet weight [1] 的 idea 告诉我们有些难以单读开一个表达式的「因素」可以融入其它的「因素」里!",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Notes 笔记</span>"
+    ]
+  },
+  {
+    "objectID": "eda-notes/eda-notes.html#sec-eda-terms",
+    "href": "eda-notes/eda-notes.html#sec-eda-terms",
+    "title": "EDA Notes 笔记",
+    "section": "Some Terms",
+    "text": "Some Terms\n\nHypergraph 超图: 图的一种推广, Netlist 常被建模成 (Directed [1]) hypergraph \\((V, E)\\) (edge 可以有多个 vertex).\n\n\\(V\\) 中的元素代表 pin.\n\\(E\\) 中的元素称为一个 net.\n\nLayout: 元件或电路的 electric function 的几何图形表示 [3].\nStandard Cell (std cell) 标准单元: 一组实现逻辑门的物理单元 (AND, OR, NOT, NAND, etc.) [3]. 他们过于基础以至于被称为 “standard”.\n\n\n\n\n\n\nFigure 1: NOT 和 NAND 的 layout [3]\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 2: Std cell height 不一定等于 row height [3].",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Notes 笔记</span>"
+    ]
+  },
+  {
+    "objectID": "eda-notes/eda-notes.html#placement-布局",
+    "href": "eda-notes/eda-notes.html#placement-布局",
+    "title": "EDA Notes 笔记",
+    "section": "Placement 布局",
+    "text": "Placement 布局\n\n三个阶段\n\nGlobal (coarse/initial) placement: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) [3].\n\n\n\n\n\n\nFigure 3: Legalization 把 cell/macro 吸附到最近的 row/site 上并推开重叠 [3]\n\n\n\nLegalization 合法化: 消除重叠和在两个方向对齐的过程 (见 Figure fig-legalization). Cell/macro 不能随便放置, 而要在两个方向对齐:\n\nRow: 见 Figure fig-layout, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供同意的供电. 自然的, 所有 cell/macro 不能随便放置, 而要在水平方向成一条线, 使得 die 有“一层一层”的概念, 每一层称为一个 row. Row height 等于 std cell height; Row 分隔线 VDD 和 GND 交替.\nSite: Row 引入了「层」, 而 site 给每一层也数字化引入了「门牌号」, 每个 cell/macro 必须对齐到 row 和 site 边界!\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Cell/macro 必须放在 row 上 [3].\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: Std cell 必须上下对齐 row, 左右对齐 site [3].\n\n\n\n\n\n\n\nDetailed placement\n\n\n\nWirelength Model\n\n\n\n\n\n\nFigure 6: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 [4].\n\n\n\n\n\nDensity Model\n\nBin: 仅仅是为了方便计算1布局的密度 [5] (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin [6] (见 Figure fig-bindemo). 所有的 bin 组成的集合记作 \\(B\\).\n\n\n\n\n\n\nFigure 7: 此图中 bin 的高度是 row height 的 \\(4\\) 倍 [3]\n\n\n\n\n1 注意区分 bin 和 row/site 围成的小方格! 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.\n\nTiming Model\n\n单独引入衡量 Timing 的 explicit form 是困难的 (为什么?). 于是 [1] 天才般地通过引入 net weight 将 timing 的信息融合进 wirelength model 里 从而使得优化过程考虑了 timing 因素!!\n\nTODO",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Notes 笔记</span>"
+    ]
+  },
+  {
+    "objectID": "eda-notes/eda-notes.html#references",
+    "href": "eda-notes/eda-notes.html#references",
+    "title": "EDA Notes 笔记",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] P. Liao, D. Guo, Z. Guo, S. Liu, Y. Lin, and B. Yu, “DREAMPlace 4.0: Timing-driven placement with momentum-based net weighting and lagrangian-based refinement,” IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems, vol. 42, pp. 3374–3387, Jan. 2023, doi: 10.1109/tcad.2023.3240132\n\n\n[2] P. Liao, Y. Zhao, D. Guo, Y. Lin, and B. Yu, “Analytical die-to-die 3D placement with bistratal wirelength model and GPU acceleration.” 2023. Available: https://arxiv.org/abs/2310.07424\n\n\n[3] J. Monteiro, “Algorithms to improve area density utilization, routability and timing during detailed placement and legalization of VLSI circuits,” PhD thesis, 2019.\n\n\n[4] iEDA, “A7-VLSI auto placement for circuit cells.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/practice/algorithms/a7.html. [Accessed: Dec. 05, 2025]\n\n\n[5] iEDA, “8.3 layout problems and modeling.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html. [Accessed: Dec. 05, 2025]\n\n\n[6] Y. Zhao, P. Liao, S. Liu, J. Jiang, Y. Lin, and B. Yu, “Analytical heterogeneous die-to-die 3D placement with macros.” 2024. Available: https://arxiv.org/abs/2403.09070",
+    "crumbs": [
+      "EDA",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Notes 笔记</span>"
+    ]
+  },
+  {
     "objectID": "eda-3d-placement/eda-3d-placement.html",
     "href": "eda-3d-placement/eda-3d-placement.html",
     "title": "EDA: 3D IC Placement",
@@ -469,7 +535,7 @@
     "text": "3D Global Placement",
     "crumbs": [
       "EDA",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
     ]
   },
   {
@@ -480,7 +546,7 @@
     "text": "目前为乱序. 所有 terms 见 Glossary 名词解释.\n\n\nProblem Formulation\n给定 Netlist \\((V, E)\\), 给出每个 cell 的每个 pin 的 3D 坐标 \\((x, y, z)\\), 使得某个目标函数 \\(L\\) (如 wirelength + density + timing) 最小.\n\n已知:\n\ncell 和 macro 都是长方体, 所有 cell 的高度 \\(z\\) 统一为所在 die 的厚度 (且两个 die 厚度一样) [1]. 所有 std cell 宽度均为 row height. 而且给定 Macro & std cell library.\n\\(z\\) 为二值 (top/bottom die).\nHBT 大小和 pitch 已知, pin spacing 上限 和 die boundary 已知.\n上下 die row 信息.\n\n约束:\n\nHBT 在两个 die 的表面 (有大小, pitch 要求 (比 cell size 大很多) 和数量上限 (每加一个 HBT 会有相同大小的惩罚)).\n如果一个 net 跨层 (“Split net”), 则必须插入且仅插入一个 HBT.\nHeterogeneous tech 不同工艺: 上 die 和下 die 的工艺不同, 比如如果上 die 的工艺较差, 同一个 AND 门放在上 die 上的占面积会更大. 不同工艺的 cell characteristic, cell height, cell size, cell pin locations 可能不同 [1].\n\n\n\n\n\n\nFigure 1: 由于上下 die 工艺不同, 同一个 cell/macro 在不同 die 上占面积不同 [2]\n\n\n\n所有 std cell 必须放在 row 上 (macro 不做要求), 且任意两个元件不能重叠 [1].\n上下 die 的 utilization ratio (所有该 die 的 cell/macro area 之和除以该 die 面积) 有上限 (分别记作 \\(u^+, u^-\\) [1], cell 不能全挤在一边).\nstd cell 不能旋转 (R0). Macro只能旋转 R0/R90/R180/R270. cell 和 macro 都不能镜像.\n\n求解:\n\n上/下 die placement 结果 (每个 cell 左下角坐标和旋转角度).\nHBT placement 结果 (加上 net 信息)\n\n\n\n\nLoss Function 目标函数构成\n\nePlace\n\n动机: 为了使 cell 之间保持距离, 用电场的排斥力来建模这个过程 [3].\n电荷量 \\(q\\) 用 cell 的体积表示, 大 cell 对其它 cell 的排斥力很大.\n用总 potential energy 来作为 \\(L\\) 的一部分 (希望 cell 之间距离更远), 跟 wirelength 是冲突的目标.\nFillers: 为了解决 maximum utilization constraint 而提出的假象的带电液体. 有两类 fillers:\n\nz-fixed fillers: 想象上/下 die 是两个独立封闭的长方体容器, 以 top die 为例, 如果 \\(u^+ = 80\\%\\), 则加入体积为 top die 总体积 \\(20\\%\\) 的液体 [1], bottom die 同理. 该液体密度均匀, 容易想象当 cell 太多时, 液体会把 cell 挤到另一层去 (而液体本身不会跨层).\n\nInitialization: 均匀地滴灌在该层 die 上 [3], [4].\n\nfree fillers: 将上下 die 作为一个整体的「大容器」\\(\\Omega\\) [2], cell 和 macro 浮在其中, 它们总体积是固定的, 那么剩下的空间 \\(\\text{vol}_{fr}\\) (也是固定的) 填满了 free fillers. 具体原因不明, 可能是为了缓冲? 也可以不用 (E.g., [5] 没有用 free fillers)\n\nInitialization: [2] 的方法是: 想象有体积为 \\(\\text{vol}_{fr}\\) 的液体, 用滴灌按照以 \\(\\Omega\\) 中心为均值的正态分布逐滴滴在「大容器」内 (重合的液滴不合并, 所以密度可能不均匀).\n\n\nCell 和 macro 的 initialization: 跟 free filler 一模一样 [4], 也是用滴灌的方法.\n\n\n\n\n\n\n\nFigure 2: z-fixed fillers (gray); macros (red); std cells (top/bottom, blue); free filler (hide) [2]\n\n\n\n\n\nTotal half-perimeter wirelength (HPWL)\n\n动机: 同一个 net 的 pin 不要太分散以至于连接的导线太长.\n上下 die 都可以分别算出一个 HPWL, 然后求和. (HBT 用中心点位置来算 [1])\n\n\n\n\n数据格式要求\n\n上下 die 的 bottom-left corner 规定坐标为 \\((0, 0)\\), 且同坐标代表物理上的同一位置 (E.g., top die 的 (10, 20) 和 bottom die 的 (10, 20) 是垂直对齐的) [1].",
     "crumbs": [
       "EDA",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
     ]
   },
   {
@@ -491,7 +557,7 @@
     "text": "DREAMPlace Naming Manual 命名法\n\nflat_netpin, netpin_start: 见下方 pin-list 表示法 (CSR).\n\n\n\n\n\n\n\n\npin-list 表示法 (CSR)\n\n\n\n\n\n我们的目标是设计一种储存 net-pin 对应关系的数据结构. 首先将所有 net 的所有 pin 安排上全局索引. E.g., 假设我们有 \\(3\\) 个 net, 分别包含以下 pin (用全局索引表示):\nnet0 = [p1, p7, p3]\nnet1 = [p8, p2]\nnet2 = [p6, p5, p9, p4]\n将上述 pin 展平来定义 flat_netpin 数组:\nflat_netpin = [p1, p7, p3, p8, p2, p6, p5, p9, p4]\n当然实际上我们会用 pin 的全局索引值来表示 pin:\nint flat_netpin[] = {1, 7, 3, 8, 2, 6, 5, 9, 4};\n再定义 netpin_start 数组来记录每个 net 的起始位置:\nint netpin_start[] = {0, 3, 5, 9};\n这样, net-pin 对应关系就编码在了两个数组 flat_netpin 和 netpin_start 中. 这种方法 节省内存空间、方便 GPU 并行处理.\n\n\n\n\n\nDatabase 数据库\n\nPlace2D\n\nIndex 规则: layer = 0 (top), 1 (bottom), 2 (HBT).\nxl(0), yl(0), xh(0), yh(0): Top die 可放置 cell 的区域 (xlow, ylow, xhigh, yhigh).\n\nxl(2), yl(2), xh(2), yh(2): 中间层放置 bonding terminal 的区域 (有 padding).\n\nraw_xl(0), raw_yl(0), raw_xh(0), raw_yh(0); gp_xl(0), gp_yl(0), gp_xh(0), gp_yh(0): 跟上面没区别 (就是复制).\ndie_area: Die 面积 (&gt; (xh(0)-xl(0)) * (yh(0)-yl(0)) ).\nsite_width, row_height: Site 的宽度和高度.\nnum_physical_nodes：原始 placedb 里的所有 node 数 (movable + 固定 + IO + HBT), 还没加 filler.\nnum_movable_nodes：所有 movable nodes 数 (对 2D 情形就是 num_nodes - num_terminals).\nnum_total_all_nodes：按 pin map 数出来的 node 数, 要求和 num_movable_nodes 一致 (有 assert).\nnum_nets / num_pins：普通意义上的 nets / pins 数目.\nnum_movable_pins：可动节点 + IO 节点上的 pin 总数 (因为 IO 也要参与布线 / timing).\nnum_bonding_terminals：插入的 HBT 个数.\n\n\n\nops/partition\n\nnode_partition_mask = [1, 1, 0, 0]: 表示前两个 node 在 bottom die, 后两个在 top die.\nnet_bonding_terminal_mask = [0, 1, 0]: 表示只有第二个 net 跨层 (需要 HBT).",
     "crumbs": [
       "EDA",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
     ]
   },
   {
@@ -502,7 +568,7 @@
     "text": "Environment Setup\n\n\n\n\n\n\n\nMacOS (未成功)\n\n\n\n\n\nClone 仓库:\ngit clone &lt;repository-url&gt;\ngit submodule update --init --recursive\n创建 Python 环境:\nconda create -n cupid python=3.9\nconda activate cupid\npip install torch torchvision torchaudio\npip install pyunpack patool matplotlib cairocffi pkgconfig scipy\npip install \"numpy&gt;=1.15.4,&lt;2.0\"\npip install setuptools\nmkdir -p build\ncd build\n安装 openMP 支持:\nbrew install libomp\nbrew --prefix libomp\nexport OpenMP_ROOT=/opt/homebrew/opt/libomp\nexport OpenMP_CXX_FLAGS=\"-Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include\"\nexport OpenMP_CXX_LIB_NAMES=\"omp\"\nexport OpenMP_omp_LIBRARY=/opt/homebrew/opt/libomp/lib/libomp.dylib\n安装 bison:\nbrew install bison\n\n\n\n\n\n\n\n\n[1] K.-S. Hu, H.-Y. Chi, I.-J. Lin, Y.-H. Wu, W.-H. Chen, and Y.-T. Hsieh, “Invited paper: 2023 ICCAD CAD contest problem b: 3D placement with macros,” in 2023 IEEE/ACM international conference on computer aided design (ICCAD), 2023, pp. 1–6. doi: 10.1109/ICCAD57390.2023.10323747\n\n\n[2] Y. Zhao, P. Liao, S. Liu, J. Jiang, Y. Lin, and B. Yu, “Analytical heterogeneous die-to-die 3D placement with macros.” 2024. Available: https://arxiv.org/abs/2403.09070\n\n\n[3] J. Lu et al., “ePlace: Electrostatics-based placement using fast fourier transform and nesterov’s method,” ACM Trans. Des. Autom. Electron. Syst., vol. 20, no. 2, Mar. 2015, doi: 10.1145/2699873. Available: https://doi.org/10.1145/2699873\n\n\n[4] P. Liao, Y. Zhao, D. Guo, Y. Lin, and B. Yu, “Analytical die-to-die 3D placement with bistratal wirelength model and GPU acceleration.” 2023. Available: https://arxiv.org/abs/2310.07424\n\n\n[5] Y.-J. Chen, C.-H. Hsieh, P.-H. Su, S.-H. Chen, and Y.-W. Chang, “Mixed-size 3D analytical placement with heterogeneous technology nodes,” in Proceedings of the 61st ACM/IEEE design automation conference, in DAC ’24. New York, NY, USA: Association for Computing Machinery, 2024. doi: 10.1145/3649329.3657370. Available: https://doi.org/10.1145/3649329.3657370",
     "crumbs": [
       "EDA",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>EDA: 3D IC Placement</span>"
     ]
   },
   {
@@ -513,7 +579,7 @@
     "text": "C 编译过程\n装好 RISCV 编译工具链, 创建一个简单的 C 语言程序 hello.c:\n运行:\n用 riscv32-unknown-elf-readelf 查看生成的 .o 文件:\n得到:\n再查看 Section 信息:\n得到:\n对 .o 文件进行反汇编:\n得到:",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
     ]
   },
   {
@@ -524,7 +590,7 @@
     "text": "Compiler, Assembler, Linker:\n\nWatch this video\n\n\ngcc 编译选项:\n\n-E: 只预处理, 不编译.\n-S: 生成汇编代码 (.s 文件)\n-c: 只编译, 不链接. (生成 .o 文件)\n-o &lt;file&gt;: 指定输出文件名.\n-g: 在输出的文件中加入支持调试的信息.\n-v (verbose): 显示编译过程中的详细信息.\n\n\n\n\n\n\n\n编译过程\n\n\n\n\n\nhello.c\n\n#include &lt;stdio.h&gt;\n\nint global_init = 0x11111111;\nconst int global_const = 0x22222222;\n\nvoid main()\n{\n    static int static_var = 0x33333333;\n    static int static_var_uninit;\n    int auto_var = 0x44444444;\n    printf(\"hello world!\\n\");\n    return;\n}\n\n\nriscv32-unknown-elf-gcc -c hello.c -o hello.o # 只编译, 不链接\n\nriscv32-unknown-elf-readelf -h hello.o &gt; header_info.log # 查看 Header 信息, 并输出到文件\n\n\n\nheader_info.log\n\nELF Header:\n  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00 \n  Class:                             ELF32\n  Data:                              2's complement, little endian\n  Version:                           1 (current)\n  OS/ABI:                            UNIX - System V\n  ABI Version:                       0\n  Type:                              REL (Relocatable file)\n  Machine:                           RISC-V\n  Version:                           0x1\n  Entry point address:               0x0\n  Start of program headers:          0 (bytes into file)\n  Start of section headers:          916 (bytes into file)\n  Flags:                             0x5, RVC, double-float ABI\n  Size of this header:               52 (bytes)\n  Size of program headers:           0 (bytes)\n  Number of program headers:         0\n  Size of section headers:           40 (bytes)\n  Number of section headers:         14\n  Section header string table index: 13\n\n\n\nriscv32-unknown-elf-readelf -S hello.o &gt; section_info.log # 查看 Section 信息, 并输出到文件\n\n\n\nsection_info.log\n\nThere are 14 section headers, starting at offset 0x394:\n\nSection Headers:\n  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al\n  [ 0]                   NULL            00000000 000000 000000 00      0   0  0\n  [ 1] .text             PROGBITS        00000000 000034 00002e 00  AX  0   0  2\n  [ 2] .rela.text        RELA            00000000 0002d8 000048 0c   I 11   1  4\n  [ 3] .data             PROGBITS        00000000 000062 000000 00  WA  0   0  1\n  [ 4] .bss              NOBITS          00000000 000064 000004 00  WA  0   0  4\n  [ 5] .sdata            PROGBITS        00000000 000064 000008 00  WA  0   0  4\n  [ 6] .srodata          PROGBITS        00000000 00006c 000004 00   A  0   0  4\n  [ 7] .rodata           PROGBITS        00000000 000070 00000d 00   A  0   0  4\n  [ 8] .comment          PROGBITS        00000000 00007d 00001a 01  MS  0   0  1\n  [ 9] .note.GNU-stack   PROGBITS        00000000 000097 000000 00      0   0  1\n  [10] .riscv.attributes RISCV_ATTRIBUTE 00000000 000097 000066 00      0   0  1\n  [11] .symtab           SYMTAB          00000000 000100 000130 10     12  15  4\n  [12] .strtab           STRTAB          00000000 000230 0000a7 00      0   0  1\n  [13] .shstrtab         STRTAB          00000000 000320 000074 00      0   0  1\nKey to Flags:\n  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),\n  L (link order), O (extra OS processing required), G (group), T (TLS),\n  C (compressed), x (unknown), o (OS specific), E (exclude),\n  D (mbind), p (processor specific)\n\n\n\nriscv32-unknown-elf-objdump -S hello.o &gt; disassembly.s # 反汇编, 并输出到文件\n\n\n\ndisassembly.s\n\n\nhello.o:     file format elf32-littleriscv\n\n\nDisassembly of section .text:\n\n00000000 &lt;main&gt;:\n   0:   1101                    addi    sp,sp,-32\n   2:   ce06                    sw  ra,28(sp)\n   4:   cc22                    sw  s0,24(sp)\n   6:   1000                    addi    s0,sp,32\n   8:   444447b7            lui a5,0x44444\n   c:   44478793            addi    a5,a5,1092 # 44444444 &lt;static_var.0+0x44444440&gt;\n  10:   fef42623            sw  a5,-20(s0)\n  14:   000007b7            lui a5,0x0\n  18:   00078513            mv  a0,a5\n  1c:   00000097            auipc   ra,0x0\n  20:   000080e7            jalr    ra # 1c &lt;main+0x1c&gt;\n  24:   0001                    nop\n  26:   40f2                    lw  ra,28(sp)\n  28:   4462                    lw  s0,24(sp)\n  2a:   6105                    addi    sp,sp,32\n  2c:   8082                    ret",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
     ]
   },
   {
@@ -535,7 +601,7 @@
     "text": "RISCV 汇编语言\n\n基本格式:\n&lt;label&gt;: &lt;operation&gt; # &lt;comment&gt;\n\n&lt;operation&gt; 的类型 [1]:\n\ninstruction (指令)\npseudo-instruction (伪指令): li x6, 5, nop, RISCV 中有定义\ndirective (伪操作): .macro ... .endm, .end, .text, .global _start 告知汇编器的指示, 与 RISCV 规范无关.\nmacro (宏):\n.macro do_nothing\n    nop\n.endm\n\n_start: do_nothing # 调用宏, 汇编器会将它展开\n\n\n标签其实表示地址:\n_start: li x6, 5 # _start 标签其实就是这条指令的地址\n\n\n\n\n\n[1] Lazyparser, “Compilation and linker,” 2025, Available: https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&vd_source=42579e22289b6144ba0b2bdcf99834e3&p=5",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>7</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
     ]
   },
   {
@@ -546,7 +612,7 @@
     "text": "RISCV Extensions\nIn RISC-V, extensions are optional instruction sets that extend the base ISA (RV32I, 32-bit integer instructions) to add extra functionality.\nSome extensions are listed here:\nFor example, RV32IMAC → A 32-bit RISC-V CPU with Integer (I), Multiply (M), Atomic (A), and Compressed (C) extensions. RV32IMAFD can be reduced to written as RV32G.",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>RISCV ISA</span>"
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>RISCV ISA</span>"
     ]
   },
   {
@@ -557,7 +623,7 @@
     "text": "Extension\nMeaning\nPurpose\n\n\n\n\nM\nInteger Multiplication & Division\nAdds mul, div, rem instructions\n\n\nA\nAtomic Instructions\nAdds atomic memory operations (e.g., amoadd.w)\n\n\nF\nSingle-Precision Floating Point\nSupports float (32-bit) operations\n\n\nD\nDouble-Precision Floating Point\nSupports double (64-bit) operations\n\n\nC\nCompressed Instructions\nReduces code size (e.g., c.add, c.sw)\n\n\n\n\n\nZicsr: Z (Standard), I (Integer), CSR (Support read and write to CSRs)",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>RISCV ISA</span>"
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>RISCV ISA</span>"
     ]
   },
   {
@@ -568,7 +634,7 @@
     "text": "指令类型\n\nALU 运算\n\nOne category of instructions is arithmetic operations (abbr. aluop), which is just doing things between GPRs.\nCommonly Used aluop instructions:\nlui t0, 0x40000     ;t0 = 0x40000 &lt;&lt; 12 (load upper 20 bits of the imm)\n\nadd t0, t1, t2      ;t0 = t1 + t2\nsub t0, t1, t2      ;t0 = t1 - t2 (no imm version)\nor t0, t1, t2       ;t0 = t1 | t2\nand t0, t1, t2      ;t0 = t1 & t2\nxor t0, t1, t2      ;t0 = t1 ^ t2\n\naddi t0, t1, 10     ;t0 = t1 + 10 (decimal)\nori t0, t1, 0xF     ;t0 = t1 | 0xF\nandi t0, t1, 0xF    ;t0 = t1 & 0xF\nxori t0, t1, 0xF    ;t0 = t1 ^ 0xF\n\nsll t0, t1, t2      ;t0 = t1 &lt;&lt; t2 (shift left logical)\nsrl t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right logical)\nsra t0, t1, t2      ;t0 = t1 &gt;&gt; t2 (shift right arithmetic, preserve sign)\n\nslli t0, t1, 2      ;t0 = t1 &lt;&lt; 2\nsrli t0, t1, 2      ;t0 = t1 &gt;&gt; 2\nsrai t0, t1, 2      ;t0 = t1 &gt;&gt; 2 (preserve sign)\n\nslt t0, t1, t2      ;t0 = (t1 &lt; t2) (set if less than signed)\nsltu t0, t1, t2     ;t0 = (t1 &lt; t2) (set if less than unsigned)\n\nslti t0, t1, -5     ;t0 = (t1 &lt; -5) (imm signed)\nsltiu t0, t1, 10    ;t0 = (t1 &lt; 10) (imm unsigned)\n\n\n\nCSR 寄存器及其操作\n\nIntroduction\n\nCSR (Control and Status Registers)\nAre accessed using CSR instructions, not via memory-mapped I/O like GPIO registers.\nGPRs can be accessed at any privilege level, while CSRs are defined at a specific privilege level and can only be accessed by that level and any levels of higher privilege.\nEvery CSR has a unique address, each 32 bits share one address (instead of 8 bits).\nCSR addresses are 12-bits, meaning that up to 4,096 CSRs can be implemented (\\(2^12 = 4096\\)). The bits in a CSR address define its accessibility, use, and CSR number. \nWhile GPRs are used for storing data used to perform operations, CSRs typically modify the behavior of a hart (i.e. “Control”) or inform of its state and attributes (i.e. “Status”), or both.\nWARL (Write any, read legal): Some field in a CPU register that allows any value to be written, but when read back, it returns only a valid (legal) value. For example, in MPP[12:11] field in mstatus register, we have:\n\n\n\n\nWrite Attempt (MPP)\nStored Value (MPP field)\n\n\n\n\n00 (User)\n✅ 00 (User mode)\n\n\n11 (Machine)\n✅ 11 (Machine mode)\n\n\n01 (Illegal)\n🔄 Returns 00 or 11 (Legal)\n\n\n10 (Illegal)\n🔄 Returns 00 or 11 (Legal)\n\n\n\n\nCSRs related intimitely to interrupts and exceptions (interrupts are external (“asynchronise”), exceptions are internal (“synchronise”, usually through software or timer), some place confuse them though, but it’s okay).\n\n\n\nCommonly Used CSRs and their sub-fields\nThe registers are labelled in this format: reg (addr, reset_val).\n\n\n\nPart of the registers\n\n\n\nmstatus (0x300, 0x00001800): Machine Status (lower 32 bits), controls global interrupt enable and privilege modes.\n\n\nmstatus.MPP[12:11]: Machine Previous Priviledge mode. When an mret is executed, the privilege mode is change to this value.\nmstatus.MIE[3]: Machine (global) Interrupt Enable.\nmstatus.MPIE[7]: Machine previous Interrupt Enable. When an interrupt occurs, the content in mstatus.MIE is loaded into this bit (and for simplicity, mstatus.MIE is changed to 0, so no other interrupts is allowed to come in), and after the interrupt is processed (after mret), this bit is restored into mstatus.MIE again.\n\n\nmisa (0x301, depends on RV32 and M_EXT):\nmie (0x304, 0x00000000): Machine Interrupt Enable, enables specific interrupts (not global). Also you should have a look at mip (0x344).\nmip (0x344): Machine Interrupt Pending Register, indicates which specific interrupts are pending. \n\nMSIP/MSIE[3]: Machine Software Interrupt Pending/Enable\nMTIP/MTIE[7]: Machine Timer Interrupt Pending/Enable\nMEIP/MEIE[11]: Machine External Interrupt Pending/Enable\n\nmtvec (0x305, ): Machine Trap-Handler Base Address, specifies where the CPU jumps on an interrupt/exception. \n\nMODE[1:0]:\n\n00: Direct. All traps (either interrupts or exceptions) set PC directly to BASE.\n01: Vectored. Exceptions will set PC directly to BASE, while (asynchronous) interrupts will set PC to BASE+4*mcause.Exception Code (See mcause register.)\nothers: invalid.\n\n\nmepc (0x341, 0x00000000): Machine Exception Program Counter, saves the address of the interrupted instruction.\n\nWhen an interrupt occurs, the current PC + 1 is saved in mepc.\nWhen an exception is encountered, the current PC is saved in mepc. (Why? The exception may triggered by the instruction at the current PC, maybe we solve the exception in the interrupt handler, so give it another chance to execute that instruction again.)\n\nand the core jumps to the exception address. When a mret instruction is executed, the value from mepc replaces the current program counter.\nmcause (0x342): Machine Trap Cause, identifies the cause of the interrupt/exception. \n\nInterrupt[31]:\n\n1: Exceptions\n0: Interrupts\n\nException Code[30:0]: (pay special attention to the number 3/7/11)\n\n\n\n\n\n\n\n\nInterrupt[31]\nException Code[30:0]\nDescription\n\n\n\n\n1\n0, 2, 4, 6, 8, 10, 12, 14-15\nReserved\n\n\n1\n1 / 3\nSupervisor/Machine software interrupt\n\n\n1\n5 / 7\nSupervisor/Machine timer interrupt\n\n\n1\n9 / 11\nSupervisor/Machine external interrupt\n\n\n1\n13\nCounter-overflow interrupt\n\n\n1\n≥16\nDesignated for platform use\n\n\n0\n0\nInstruction address misaligned\n\n\n0\n1\nInstruction access fault\n\n\n0\n2\nIllegal instruction\n\n\n0\n3\nBreakpoint\n\n\n0\n4\nLoad address misaligned\n\n\n0\n5\nLoad access fault\n\n\n0\n6 / 7\nStore/AMO address/access fault\n\n\n0\n8 / 9 / 11\nEnvironment call from U/S/M-mode\n\n\n0\n10, 14, 17, 20-23, 32-47, ≥64\nReserved\n\n\n0\n12\nInstruction page fault\n\n\n0\n13\nLoad page fault\n\n\n0\n15\nStore/AMO page fault\n\n\n0\n16\nDouble trap\n\n\n0\n18\nSoftware check\n\n\n0\n19\nHardware error\n\n\n0\n24-31, 48-63\nDesignated for custom use\n\n\n\n\nmtval (0x343): Machine Trap Value, provides extra information about exceptions (their addresses and so on)\n\n\n\nCommonly Used CSR instructions\n;register version:\ncsrrw x5, mstatus, x10  ;x5 = mstatus (read), mstatus = x10 (write)\ncsrw mtvec, t0          ;mtvec = t0 (write only)\ncsrrs x5, mie, x10      ;x5 = mie (read), mie |= x10 (set)\ncsrrc x5, mie, x10      ;x5 = mie (read), mie &= x10 (clear)\n\n;imm version:\ncsrrwi x5, mstatus, 0x1 ;x5 = mstatus (read), mstatus = 0x1 (write imm)\ncsrrsi x5, mie, 0x1     ;x5 = mie (read), mie |= 0x1 (set imm)\ncsrrc x5, mie, 0x1      ;x5 = mie (read), mie &= 0x1 (clear imm)\nConvenient pseudo-instructions:\ncsrr rd, csr    ;csrrs rd, csr, x0\ncsrw csr, rs    ;csrrw x0, csr, rs\ncsrs csr, rs    ;csrrs x0, csr, rs\ncsrc csr, rs    ;csrrc x0, csr, rs\ncsrwi csr, imm  ;csrrwi x0, csr, imm\ncsrsi csr, imm  ;csrrsi x0, csr, imm\ncsrci csr, imm  ;csrrci x0, csr, imm\n\n\n\nGPRs 通用寄存器\n\nIntroduction\nThe 32 registers in RISC-V are called general-purpose registers (GPRs, or “integer registers”). They are used for various purposes, such as holding data, addresses, or temporary values during program execution. These registers are 32 bits wide in the RV32I ISA and are identified as x0 to x31.\nEach register has a conventional name that indicates its intended usage, although these names are just conventions, and you can use them for other purposes if needed.\n\n\n\n通用寄存器的 ABI 规范\n\n\n\n\nPartial Explanations\n\nra\nPurpose: Stores the return address for function calls.\njal ra, function_label  # Jump to function_label and store return address in ra\nret                     # Return to the address in ra\nsp\nPurpose: Points to the top of the stack (used for dynamic memory allocation during function calls).\naddi sp, sp, -16      # Allocate 16 bytes on the stack\nsw t0, 0(sp)          # Store t0 at the top of the stack\nlw t0, 0(sp)          # Retrieve t0 from the stack\naddi sp, sp, 16       # Deallocate 16 bytes\ngp\nPurpose: Points to global and static data in memory.\nlw t0, 0(gp)         # Load a value from the global data section\ntp\nPurpose: Points to thread-local storage (used in multi-threaded programs).\nlw t0, 0(tp)         # Load a thread-specific value\nt0-t6\nPurpose: Temporary values, not preserved across function calls.\n\n\n\n\n跳转指令\n\nIntroduction\nOne category of instructions is jump operations (abbr. jmpop), which is just changing the value of PC (or some GPRs by the way)\n\n\nCommonly Used aluop instructions\n; unconditional:\njal ra, 0x10        ;ra = PC + 4, PC += 0x10 (link and jump, should be laj)\njalr ra, 8(t0)      ;ra = PC + 4, PC += t0+8 (wrt a register)\n\n; conditional:\nbeq t0, t1, 0x8     ;PC += 0x8 if t0 == t1 (branch if equal)\nbne t0, t1, 0x8     ;PC += 0x8 if t0 != t1 (branch if not equal)\nblt t0, t1, 0x8     ;PC += 0x8 if t0 &lt; t1 (signed less than)\nbge t0, t1, 0x8     ;PC += 0x8 if t0 &gt;= t1 (signed greater or equal)\nbltu t0, t1, 0x8    ;PC += 0x8 if t0 &lt; t1 (unsigned less than)\nbgeu t0, t1, 0x8    ;PC += 0x8 if t0 &gt;= t1 (unsigned greater or equal)\n\nauipc t0, 0x1000    ;t0 = PC + (0x1000 &lt;&lt; 12) (add upper imm and PC to a reg)\n\n\nNotes\nload:\n    lbu a1, 0(t1)\n    sb a1, 0(t2)\n    addi t1, t1, 1\n    addi t2, t2, 1\n    bltu t2, t3, load\nIf lbu a1, 0(t1) is at location 0x8000001a, then this line: bltu t2, t3, load does NOT mean\nPC += 0x8000001a if t2 &lt; t3\nbut\nPC = 0x8000001a if t2 &lt; t3\n(done by the smart compiler!)\n\n\n\nMachine Mode\n\nIntroduction\nOne category of instructions is machine operations (abbr. machineop), which is a set of privileged instructions in the RISC-V privileged architecture. These instructions are all related to the CSRs, so make sure you are familiar with those registers first.\n\n\nRISCV Privilege Levels from High to Low\n\nDebug (D)\nMachine (M): “must-have”\nSupervisor (S)\n\nHypervisor-extended Supervisor (HS)\nVirtual Supervisor (VS)\nVirtual User (VU)\n\nUser (U)\n\n\n\nCommonly Used machineop instructions\n\nmret: Return from Machine-mode to Supervisor-mode (or User-mode). Steps:\n\nRestore the privilege mode:\n\nThe processor sets the current privilege mode based on MPP from mstatus.\nMPP is cleared to user mode (00) or supervisor mode (01) if applicable.\n\nRestore the interrupt enable status:\n\nThe MIE bit in mstatus is set to MPIE.\nThe MPIE bit is cleared (0).\n\nRestore the program counter (PC):\n\nThe PC is set to the value stored in mepc, resuming execution where it was interrupted.\n\n\n\n\n\n\n内存操作\n\nIntroduction\nOne category of instructions is memory operations (abbr. memop), which is just exchanging data between GPRs to memory locations.\nSo naturally, these signals are crucial for storing a data into memory:\n\nWE: Write enable. Whenever a memop intruction is detected, the memory block needs to be enabled.\n[31:0] data_mem: the 32-bit data to be stored.\n[31:0] mem_addr: where to be stored.\n[3:0] storebytes_size: Store a byte (0001), half word (0011), or a word (1111)?\n\n\n\nCommonly Used memop instructions\nlui t0, 0x40000 ;t0 = 0x40000 &lt;&lt; 12b (load unsigned imm)\nlb t0, 1(a0)    ;t0 = mem[a0 + 1] (load byte)\nlh t0, 2(a0)    ;t0 = mem[a0 + 2] (load half word)\nlw t0, 4(a0)    ;t0 = mem[a0 + 4] (load word)\nlbu t0, 1(a0)   ;unsigned (zero extending)\nlhu t0, 2(a0)   ;unsigned (zero extending)\n\nsb t0, 1(a0)    ;mem[a0 + 1] = t0 (store byte)\nsh t0, 2(a0)    ;mem[a0 + 2] = t0 (store half word)\nsw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>8</span>  <span class='chapter-title'>RISCV ISA</span>"
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>RISCV ISA</span>"
     ]
   },
   {
@@ -579,7 +645,7 @@
     "text": "操作系统:\n\n狭义: 内核\n广义: 发行版\n\n快捷参考表:\n\n\n\nUnit\n# Bytes\nHex\n\n\n\n\n1 KB\n\\(2^{10}\\) B\n0x00000400\n\n\n4 KB\n\\(2^{12}\\) B\n0x00001000\n\n\n1 MB\n\\(2^{20}\\) B\n0x00100000\n\n\n128 MB\n\\(2^{27}\\) B\n0x08000000\n\n\n1 GB\n\\(2^{30}\\) B\n0x40000000\n\n\n\n\n\nA process is an abstract data structure that represents all of the necessary information to run a program.\n\n\n\n\n一个 Process 初始化后在内存中的结构 和给 OS 的 Process Control Block\n\n\n\n\n\nProcess Scheduling 进程调度",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>9</span>  <span class='chapter-title'>OS 操作系统原理</span>"
+      "<span class='chapter-number'>10</span>  <span class='chapter-title'>OS 操作系统原理</span>"
     ]
   },
   {
@@ -590,7 +656,7 @@
     "text": "Some C++",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
@@ -601,7 +667,7 @@
     "text": "C++ Basics\n\ninline 关键字\n\n允许重复定义 (如果你要在头文件里定义 (而不是声明) 函数最好加上 inline):\n\n\nadd.cpp\n\ninline int add(int a, int b) {return a + b;}\n\n避免函数调用开销, 如果 add() 用 Listing lst-addcpp 来定义, 则:\nint x = add(3, 5);\n会被编译器展开成:\nint x = 3 + 5;\n(当然这个函数由于过于简单, 如果不用 inline, 编译器也会自动优化掉函数调用开销).\n\n\n\n命令行参数\n\nargc: Argument Count, 参数个数\nargv: Argument Vector, 参数列表 (字符串数组)\n\nint main(int argc, char* argv[]) {\n    return 0;\n}\n编译运行:\ng++ main.cpp -o main\n./main abc 999 test\n会有:\nargc = 4\nargv[0] = \"./main\"\nargv[1] = \"abc\"\nargv[2] = \"999\"\nargv[3] = \"test\"\n\n\n\nMemory Management 内存管理\n\nnew 关键字\nnew 用来在堆上分配内存:\nint* p = new int[10]; // Allocate 10 integers on heap\nfor (int i = 0; i &lt; 10; i++) {\n    p[i] = i * i; // Assign values\n}\ndelete[] p; // Don't forget to free the memory!\n分配单个对象. 注意下面两行代码的唯一区别是 malloc 没有调用 Constructor!\nMyClass* obj = new MyClass(); // Allocate single object\nMyClass* obj2 = (MyClass*)malloc(sizeof(MyClass)); // C-style allocation\ndelete obj; // Free the memory!\nfree(obj2); // Free C-style allocated memory\n\n\nSmart Pointers 智能指针\nSmart Pointers = new without delete. 即不需要担心内存泄漏问题.\n\nstd::unique_ptr&lt;T&gt;: 不能被复制:\nstd::unique_ptr&lt;int&gt; p1 = std::make_unique&lt;int&gt;(42); // Create unique_ptr\n// std::unique_ptr&lt;int&gt; p2 = p1; // Error: cannot copy unique_ptr\nstd::shared_ptr&lt;T&gt;: 可以被复制 (用过引用计数来管理内存).\nstd::weak_ptr&lt;T&gt;: 不会增加引用计数, 用于解决 shared_ptr 循环引用问题 (Figure fig-cirref, a1 表示 a 的引用计数为 1 (a.use_count() == 1)):\n\n\n\n\n\n\n\n\n\nFigure 1: 循环引用问题\n\n\n\n\n\n\n\n\nsharedptr.cpp\n\n#include &lt;memory&gt;\n#include &lt;iostream&gt;\n\nclass B; // Let A know B\n\nclass A {\npublic:\n    std::shared_ptr&lt;B&gt; bptr;\n    ~A() { std::cout &lt;&lt; \"A destroyed\\n\"; }\n};\n\nclass B {\npublic:\n    std::shared_ptr&lt;A&gt; aptr;\n    ~B() { std::cout &lt;&lt; \"B destroyed\\n\"; }\n};\n\nint main() {\n    auto a = std::make_shared&lt;A&gt;(); // a1\n    auto b = std::make_shared&lt;B&gt;(); // b1\n\n    a-&gt;bptr = b; // b2\n    b-&gt;aptr = a; // a2\n\n    // No destroy messages!!! (Memory leak)\n} // b1 a1 (not 0!)\n\n\n\n\n\n\nweakptr.cpp\n\n#include &lt;memory&gt;\n#include &lt;iostream&gt;\n\nclass B; // Let A know B\n\nclass A {\npublic:\n    std::weak_ptr&lt;B&gt; bptr;\n    ~A() { std::cout &lt;&lt; \"A destroyed\\n\"; }\n};\n\nclass B {\npublic:\n    std::weak_ptr&lt;A&gt; aptr;\n    ~B() { std::cout &lt;&lt; \"B destroyed\\n\"; }\n};\n\nint main() {\n    auto a = std::make_shared&lt;A&gt;(); // a1\n    auto b = std::make_shared&lt;B&gt;(); // b1\n\n    a-&gt;bptr = b; // b1 still\n    b-&gt;aptr = a; // a1 still\n\n    // Destroy properly\n} // a0 b0\n\n\n\n\n\n\n\n\nClass 类\n\nConstructor, Init List 构造函数与初始化列表\n\nConstructor: 相当于 Python 里的 __init__ 方法. 每次创建对象时会被调用. 可以有多个 Constructor (根据是否带参数区分). 名字是 ClassName().\n\nDestructor: 相当于 Python 里的 __del__ 方法. 每次对象被销毁时会被调用. 名字是 ~ClassName().\n\nConstructor member initializer list: 用于在 Constructor 体执行前初始化成员变量 (用 : 引出). 那跟放在 Constructor 体里初始化有什么区别呢? 见下面例子:\n\n\n\n\n\n\nconstructor.cpp\n\n#include &lt;iostream&gt;\nusing namespace std;\n\nclass Small \n{\npublic:\n    Small()\n    {\n        cout &lt;&lt; 1 &lt;&lt; endl;\n    }\n\n    Small(int in)\n    {\n        cout &lt;&lt; 2 &lt;&lt; endl;\n    }\n};\n\nclass Big\n{\nprivate:\n    Small small;\npublic:\n    Big(int in)\n    {\n        small = Small(in);\n        cout &lt;&lt; 3 &lt;&lt; endl; \n    }\n};\n\nint main()\n{\n    Big big(7); // Output: 1 2 3\n    return 0;\n}\n\n\n\n\n\n\nconstructor_init.cpp\n\n#include &lt;iostream&gt;\nusing namespace std;\n\nclass Small \n{\npublic:\n    Small()\n    {\n        cout &lt;&lt; 1 &lt;&lt; endl;\n    }\n\n    Small(int in)\n    {\n        cout &lt;&lt; 2 &lt;&lt; endl;\n    }\n};\n\nclass Big\n{\nprivate:\n    Small small;\npublic:\n    Big(int in) \n        : small(in)\n    {\n        cout &lt;&lt; 3 &lt;&lt; endl; \n    }\n};\n\nint main()\n{\n    Big big(7); // Output: 2 3\n    return 0;\n}\n\n\n\n\n\n\n\nthis 指针\n就是 Python 里的 self (当前对象的地址):\nclass A {\nprivate:\n    int x;\n\npublic:\n    void setX(int x) {\n        this-&gt;x = x;   // Left: member variable; Right: parameter\n    }\n};\n\n\n类继承\nclass A : public B\n上面代码表示让 class A 继承 class B. public 表示公开继承, 即 B 的 public 和 protected 成员在 A 里依然是 public 和 protected1.\n1 protected 和 private 区别: 前者代表本类和子类可以访问, 后者只能本类访问 (子类不行).\n\nfriend 关键字\n在一个类里面声明另一个类 (或函数) 为 friend, 表示同意它访问自己的 private 和 protected 成员 (注意是谁访问谁的私有成员!):\n\n\nfriend.cpp\n\n#include &lt;iostream&gt;\n\nclass B;  // Tell compiler that B exists\n\nclass A {\nprivate:\n    int secret = 7;\n\n    friend class B; // B is an intimate friend of A\n    // friend B;    // Alternative\n};\n\nclass B {\npublic:\n    void reveal(A& a) {\n        std::cout &lt;&lt; a.secret &lt;&lt; std::endl;\n    }\n};\n\nint main() {\n    A a;\n    B b;\n    b.reveal(a); // Outputs: 7\n    return 0;\n}\n\n\n\n\n\nAlias 别名\n\nReference 引用\n\nReference 仅仅是 Syntax sugar!\n必须初始化. int& ref; 是错误的.\nint& ref = a; 在编译时不会出现 ref 这个变量, 它只是 a 的别名 (alias).\n\n\n\nchange_val_ref.cpp\n\n#include &lt;iostream&gt;\nint main()\n{\n    int a = 5;\n    int& ref = a; // ref is an alias to a\n    ref = 10;     // Actually modifies a\n    std::cout &lt;&lt; \"a = \" &lt;&lt; a &lt;&lt; std::endl; // Outputs: a = 10\n    return 0;\n}\n\n\n\n\nincrement_val_ref.cpp\n\n#include &lt;iostream&gt;\nvoid increment(int& num) {num++;}\nint main()\n{\n    int value = 5;\n    increment(value); // Pass by reference\n    std::cout &lt;&lt; \"value = \" &lt;&lt; value &lt;&lt; std::endl; // Outputs: value = 6\n    return 0;\n}\n\n\n\n\ntypedef 和 using 关键字\n下面两个都是给 std::vector&lt;int&gt; 起别名 IntList, 效果一样:\nusing IntList = std::vector&lt;int&gt;;\ntypedef std::vector&lt;int&gt; IntList;\n\n\n\nNamespace 命名空间\n\n我们希望在不同的场景中给功能类似的函数起完全相同的名字 (比如下面例子的 print() 函数), 为了避免命名冲突, 我们可以使用 namespace:\n\n\n\nnamespace.cpp\n\n#include &lt;iostream&gt;\n\nnamespace AppleSpace { namespace GoodApple {\n    void print(const char* msg)\n    {\n        std::cout &lt;&lt; \"Goodapple \" &lt;&lt; msg &lt;&lt; std::endl;\n    }\n}   namespace BadApple {\n    void print(const char* msg)\n    {\n        std::cout &lt;&lt; \"Badapple \" &lt;&lt; msg &lt;&lt; std::endl;\n    }\n} }\n\nnamespace OrangeSpace {\n    void print(const char* msg)\n    {\n        std::cout &lt;&lt; \"Orange \" &lt;&lt; msg &lt;&lt; std::endl;\n    }\n}\n\nint main() {\n    AppleSpace::GoodApple::print(\"Hello\");\n    AppleSpace::BadApple::print(\"Hello\");\n    OrangeSpace::print(\"Hello\");\n    return 0;\n}\n\n\n输出:\nGoodapple Hello\nBadapple Hello\nOrange Hello\n\n不要到处拉 using namespace xxx; 的 shit!\n全局作用域运算符:\n\n\n\nglobalnamespace.cpp\n\n#include &lt;iostream&gt;\n\nint value = 10;  // Global namespace value\n\nnamespace A {\n    int value = 20;  // A::value\n\n    void print() {\n        std::cout &lt;&lt; value &lt;&lt; std::endl;      // Output 20\n        std::cout &lt;&lt; ::value &lt;&lt; std::endl;    // Output 10\n    }\n}\n\nint main() {\n    A::print();\n}\n\n\n\n:: 可用于调用 namespace 里的函数 或 class 里的 static 变量或方法. 在外部定义类的方法实现时必须用 :: (调用时用 .).\n\n\n\n\n常见库用法\n\nstd::copy()\n#include &lt;vector&gt;\n#include &lt;algorithm&gt;  // std::copy\n\nint main() {\n    std::vector&lt;int&gt; src = {1, 2, 3, 4, 5};\n    std::vector&lt;int&gt; dst(5);   // Must arrange space in advance\n\n    std::copy(src.begin(), src.end(), dst.begin()); // Copy src to dst\n}",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
@@ -612,7 +678,7 @@
     "text": "Pybind11\nPybind11 是一个 C++ 库, 使得我们可以在 Python 代码中调用 C++ 函数和类. 比如:\n\n\n\n\n\nadd_op.cpp\n\n#include &lt;pybind11/pybind11.h&gt;\n\nint add(int a, int b) {\n    return a + b;\n}\n\n/// @param ops library name\nPYBIND11_MODULE(ops, m) {\n    m.def(\"add\", &add);\n}\n\n\n\n\n\n\nmain.py\n\nimport ops\n\nprint(ops.add(3, 5))\n\n\n\n\n\n运行类似下面的命令:\nc++ -O3 -Wall -shared -std=c++11 -fPIC -undefined dynamic_lookup \\\n    -I/opt/homebrew/anaconda3/lib/python3.12/site-packages/pybind11/include \\\n    -I/opt/homebrew/anaconda3/include/python3.12 \\\n    add_op.cpp -o ops.cpython-312-darwin.so\n\npython main.py # output 8\n第一个命令会在当前目录下产生一个 .so (shared object) 文件. 运行 python main.py 的时候在 import ops 的时候, Python 会在 .so 文件中找到 add 函数.",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
@@ -623,7 +689,7 @@
     "text": "CMake\n\nCMakeLists\n\n\nMakefile\n\n格式:\ntarget: prerequisites\n    recipe\n缺省规则\n.DEFAULT_GOAL := all\nall: ...\n伪规则\n.PHONY: all clean\nAppend:\nCFLAGS += -Wall -O2\n改后缀名:\nSRCS_ASM = start.S\nOBJS = $(SRCS_ASM:.S=.o)\n冒号前面和后面:\n%.o : %.c\n    $(CC) $(CFLAGS) -c $&lt; -o $@\n\n% 为通配符, 意思是每当你需要一个 .o 文件, 并且当前目录下有对应的 .c 文件时, 就用下面的命令来生成它\n$&lt;: 第一个依赖文件\n$@: 目标文件\n$^: 所有依赖文件\n$?: 所有比目标文件新的依赖文件",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
@@ -634,7 +700,7 @@
     "text": "Coding Techniques\n\n正负无穷\n涉及最小/最大值初始化. 例如我们要找 arr 中的最大值:\n#include &lt;float.h&gt;   // for FLT_MAX\n\nint main() {\n    float arr[] = {3.2, -1.5, 7.8, 0.0, 4.4};\n    int n = sizeof(arr) / sizeof(arr[0]);\n    float max_val = -FLT_MAX;    // Initialize to -inf\n    for (int i = 0; i &lt; n; i++) {\n        if (arr[i] &gt; max_val)   max_val = arr[i];\n    }\n    std::cout &lt;&lt; \"Max value: \" &lt;&lt; max_val &lt;&lt; std::endl;\n    return 0;\n}\n\n\n向上取整转为向下取整\n可通过 \\[\\left\\lceil \\frac{x}{y} \\right\\rceil = \\left\\lfloor \\frac{x + y - 1}{y} \\right\\rfloor\\] 实现 (由于整数除法默认向下取整):\nint ceil_div(int x, int y) {\n    return (x + y - 1) / y; // Automatically does floor division\n}\n\n\n链式调用\n返回 *this 的引用可以实现链式调用:\n\n\nchaining.cpp\n\n#include &lt;iostream&gt;\n\nclass Point {\nprivate:\n    int x_ = 0; int y_ = 0;\n\npublic:\n    Point& setX(int x) {\n        x_ = x;\n        return *this; \n    }\n\n    Point& setY(int y) {\n        y_ = y;\n        return *this;\n    }\n};\n\nint main() {\n    Point p;\n    // Set values by chaining\n    p.setX(10).setY(20);\n}",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
@@ -642,10 +708,10 @@
     "href": "cc-coding/cc-coding.html#coding-habits",
     "title": "Random Notes on Coding",
     "section": "Coding Habits",
-    "text": "Coding Habits\n\ngetters 和 Setters\n为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 public, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 private + getter/setter 的方式来控制对成员变量的访问和修改.\n\n\n\n\n\naccount_public.cpp\n\nclass Account {\npublic:\n    double balance;\n};\n\nint main() {\n    Account acc;\n    acc.balance = -999999; // Not recommended\n}\n\n\n\n\n\n\naccount_private.cpp\n\nclass Account {\nprivate:\n    double balance;\n\npublic:\n    // const: no modification to member variables\n    double getBalance() const { return balance; }\n\n    void deposit(double amount) {\n        if (amount &gt; 0)\n            balance += amount;\n    }\n};\n\n\n\n\n\n\n\n常写 const\n\n能加上 const 尽量加上 (比如 Listing lst-account_private).\nconst 用法:\nconst int *p1; // p1 本身可以修改, 但指向的内容不可以修改\nint * const p2; // p2 本身不可以修改, 但指向的内容可以修改\nconst int * const p3; // 都不能修改\n\nint const& my_int; // 引用的内容不可以修改, 同 const int&\n// int &const // 不合法\nPytorch C++ API 中提供 TORCH_ARG 宏, 用于自动生成类成员变量的 getter 和 setter 方法:\n#include &lt;torch/torch.h&gt;\nTORCH_ARG(double, balance) = 0;\n自动展开为:\nprivate:\n    double balance_ = 0;\n\npublic:\n    // getter\n    const double& balance() const { return balance_; }\n\n    // setter\n    double& balance() { return balance_; }\n这种写法类似 Listing lst-account_private, const double& 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 const 表示 getter 方法本身不会修改这个类的所有成员变量 (balance_ in this case). 用户可以通过 obj.balance() 来获取余额, 也可以通过 obj.balance() = 100.0; 来修改余额.",
+    "text": "Coding Habits\n\n代码风格\n\n能引用尽量引用不要用指针!\n函数的参数尽量少.\n\n\n\ngetters 和 Setters\n为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 public, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 private + getter/setter 的方式来控制对成员变量的访问和修改.\n\n\n\n\n\naccount_public.cpp\n\nclass Account {\npublic:\n    double balance;\n};\n\nint main() {\n    Account acc;\n    acc.balance = -999999; // Not recommended\n}\n\n\n\n\n\n\naccount_private.cpp\n\nclass Account {\nprivate:\n    double balance;\n\npublic:\n    // const: no modification to member variables\n    double getBalance() const { return balance; }\n\n    void deposit(double amount) {\n        if (amount &gt; 0)\n            balance += amount;\n    }\n};\n\n\n\n\n\n\n\n常写 const\n\n能加上 const 尽量加上 (比如 Listing lst-account_private).\nconst 用法:\nconst int *p1; // p1 本身可以修改, 但指向的内容不可以修改\nint * const p2; // p2 本身不可以修改, 但指向的内容可以修改\nconst int * const p3; // 都不能修改\n\nint const& my_int; // 引用的内容不可以修改, 同 const int&\n// int &const // 不合法\nPytorch C++ API 中提供 TORCH_ARG 宏, 用于自动生成类成员变量的 getter 和 setter 方法:\n#include &lt;torch/torch.h&gt;\nTORCH_ARG(double, balance) = 0;\n自动展开为:\nprivate:\n    double balance_ = 0;\n\npublic:\n    // getter\n    const double& balance() const { return balance_; }\n\n    // setter\n    double& balance() { return balance_; }\n这种写法类似 Listing lst-account_private, const double& 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 const 表示 getter 方法本身不会修改这个类的所有成员变量 (balance_ in this case). 用户可以通过 obj.balance() 来获取余额, 也可以通过 obj.balance() = 100.0; 来修改余额.",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
@@ -656,7 +722,7 @@
     "text": "Tips on Code Reading\n\nFirst Encounter\n\nTake it Easy: 一个 C++ project 不过是一堆 class 和一个 main.\n如果是 OOP, 关注类会改变哪些外部变量 (通常是引用传递) 而不是某个方法的具体实现.",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
@@ -667,7 +733,7 @@
     "text": "Verilog\n\nChange of Mind: Hardware does not “execute” the lines of code in sequence.\n\n\nassign\n\n多个 assign 执行没有顺序, 同时进行.\nassign 是 “continuous assignment”, 右值变化时, 左值跟着变化.\n\nOperation 运算符: ~, ! (logical), &, && (logical), |, || (logical), ^ (XOR).\nif, else if 是有顺序的!!!\n(procedure 一定要放在 always 块中吗?)\n(为什么 wire 类型不能在 always 里面被赋值?)\nalways 块中的代码是顺序执行的 (但在 always 块外的代码是并行执行的).\nmodule top (input my_in, output reg my_out);\n    always @(*) begin\n        my_out = 0;\n        my_out = 1; // This is valid! (Always block 按顺序执行)\n    end\nendmodule\n\nLatch 推断: 下面如果 cpu_overheated = 0 则默认会让 shut_off_computer 保持上一个值, 这就是 latch 推断.\nalways @(*) begin\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n有时我们就是需要这种推断, 但为了避免, 可以利用always 的顺序性先提前赋值:\nalways @(*) begin\n    shut_off_computer = 0; // 先提前赋值\n    if (cpu_overheated)\n        shut_off_computer = 1;\nend\n\nConcatenation:\nassign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100\nindex 可以是负数:\nreg [5:-1] my_reg; // index 可以是负数.\nwire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!\ninput a 默认为 wire.\nbegin end 在只有一行代码时可以省略 (相当于 C 中的 {}).\nwire 不能在 always 块中被赋值. reg 才能在 always 中被赋值.\nwire a;\nalways @(*) begin\n    assign a = 1; // Error!\nend\nwire a;\nalways @(*) begin\n    a &lt;= 1; // Not an error, `a` is viewed as a reg.\nend\nSynchronous and Asynchronous Reset:\n\nsynchronous reset:\nalways @(posedge clk) begin\n    if (reset)\n        ...\nend\nasynchronous reset:\nalways @(posedge clk or posedge reset) begin\n    if (reset)\n        ...\nend\n\nor 只能在 always 块中使用, if () 中要用 ||.\nInference 和 Instantiation:\n\nInference: 通过 always 块的内容推断出一个模块的功能.\nInstantiation: 显式地实例化一个模块, 通过 module_name instance_name (port_map) 的方式.\n\n循环群结构 (Torus, etc) 如果用 % 运算符来处理会消耗大量资源, 尽量用 if 语句:\nif (mm == 8'd59) begin\n    mm &lt;= 8'd0;\nend\n\n如果用 % 运算符来处理:\n\n-1 % 16 的结果是 -1, 而不是 15 (所以 (a-1)%16 应该写成 (a+15)%16).\n1~12 的循环先转换为 0~11 的循环, 再换元.\n\n\nBCD (Binary-Coded Decimal): 一种从 0 到 9 的计数器, 输出是四位二进制编码的十进制数.\nBlocking 和 Non-blocking assignments:\n\n=: Blocking assignment, 若在 always 块中使用, 则必须按照顺序执行!\n&lt;=: Non-blocking assignment, 在 always 块中使用时, 会同时执行所有赋值. (一般 always 里面都用这个!)\n\n\n\nVerilog Testbench\n`timescale 1ns / 1ps // #1 代表 1ns, 最精确可以到 #1.001\n`timescale 1ns / 1ns // #1 代表 1ns, #1.01 等是不合法的\n\n$stop //停下来",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
@@ -678,7 +744,7 @@
     "text": "Chisel\n\n+&: 如果 io.in_a 和 io.in_b 为 4.W 时, 则 sum 为 5.W (带溢出).\nval sum = io.in_a +& io.in_b\n允许多个 := 赋值到同一个输出:\nio.out := 0.U\nio.out := 1.U // 覆盖上一个\nif 和 when 的区别:\n\nif 用来在编译阶段决定电路是哪一种\nwhen 用来生成固定的 verilog 电路, 相当于 verilog 的 if.\n\norR: reduction OR, 对所有位进行 OR 操作. 比如 GPR 读寄存器时, 只要地址不是全 0，就读出寄存器的值 (即创建了一个虚拟的 x0 寄存器，值恒为 0):\nio.rdata1 := Mux(io.raddr1.orR, regs(io.raddr1), 0.U)\nio.rdata2 := Mux(io.raddr2.orR, regs(io.raddr2), 0.U)\n\n\nArea Optimization 面积优化方法\n\n有时可读性强的代码会导致使用的逻辑门更多, 占用更多面积. 所以一个模块有时会写两种版本, 一种是可读性强的, 另一种是面积优化的版本.\n\n\nCSE 公共子表达式消除\nCommon Subexpression Elimination 也是编译器优化的一种. 举个简单的例子:\nint x = a + b;\nint y = a + b;\n可以优化为:\nint temp = a + b;\nint x = temp;\nint y = temp;\n这样就避免了重复计算 a + b 两次.\n在 RTL 设计中, 比如 Listing lst-AddSubSimple 这个简单的加减法模块, 注意到 “减法” 其实等价于 “加上 B 的补码”, 可以得到更优化的版本 Listing lst-AddSubArea:\n\n\n\n\n\nAddSubSimple.scala\n\nclass AddSubSimple extends Module {\n  val io = IO(new Bundle {\n    val a = Input(UInt(8.W))\n    val b = Input(UInt(8.W))\n    val sub = Input(Bool())   // true 表示减法\n    val out = Output(UInt(8.W))\n  })\n\n  // 两个独立运算单元\n  val addRes = io.a + io.b\n  val subRes = io.a - io.b\n\n  io.out := Mux(io.sub, subRes, addRes)\n}\n\n\n\n\n\n\nAddSubArea.scala\n\nclass AddSubOptimized extends Module {\n  val io = IO(new Bundle {\n    val a = Input(UInt(8.W))\n    val b = Input(UInt(8.W))\n    val sub = Input(Bool())\n    val out = Output(UInt(8.W))\n  })\n\n  // 如果是减法，就取 -B；否则取 B\n  val b_eff = Mux(io.sub, -io.b, io.b)\n  io.out := io.a + b_eff\n}\n\n\n\n\n\n对比他们两个 sbt 出来的 verilog 代码:\n\n\n\n\n\nAddSubSimple.v\n\nmodule AddSubSimple(\n  input        clock,\n  input        reset,\n  input  [7:0] io_a,\n  input  [7:0] io_b,\n  input        io_sub,\n  output [7:0] io_out\n);\n  wire [7:0] addRes = io_a + io_b;\n  wire [7:0] subRes = io_a - io_b;\n  assign io_out = io_sub ? subRes : addRes;\nendmodule\n\n\n\n\n\n\nAddSubArea.v\n\nmodule AddSubArea(\n  input        clock,\n  input        reset,\n  input  [7:0] io_a,\n  input  [7:0] io_b,\n  input        io_sub,\n  output [7:0] io_out\n);\n  wire [7:0] _b_eff_T_1 = 8'h0 - io_b;\n  wire [7:0] b_eff = io_sub ? _b_eff_T_1 : io_b;\n  assign io_out = io_a + b_eff;\nendmodule",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
@@ -689,7 +755,7 @@
     "text": "FPGA Structure 结构",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   },
   {
@@ -700,7 +766,7 @@
     "text": "PL (Programmable Logic) 可编程部分\n这个部分是一个 FPGA 开发板 “软” 的部分, 即可以通过 verilog 来控制硬件电路的部分. 要理清一下几个概念:\n\nBLE (Basic Logic Element): 基本逻辑单元. LUT 和 FF 的「经典」的组合.\n\n见 Figure fig-ble, 方框代表 LUT (Look up Table), 本质上就是一个 Mux (Multiplexer, 多路选择器).\n红色的位置将来的 bitstream 会写入 (用来配置这个 BLE 的功能), i0-i3 是这个 BLE 的输入, 右边是输出.\n\n\n\n\n\n\nFigure 1: 这个 BLE 由 LUT-4 和 D-FF 组成\n\n\n\n\nCLB (Configurable Logic Block, Xilinx) 可配置逻辑块: 一个或者多个 BLE 的组合.\n\n也叫 Slice (Vivado HLS) 或 LAB (Logic Array Block) 或 ALM (Adaptive Logic Module, Intel).\n\n\n\n\n\n\n\n\n由 1 个 BLE 构成的 CLB (e.g. Xilinx Spartan 6)\n\n\n\n\n\n\n\n由 4 个 BLE 构成的 CLB\n\n\n\n\n\n\nSB (SwitchBox): 连接不同 CLB 的开关盒.\n\n\n\n\n\n\nFigure 2: Slice (蓝色) 和其周围的 SB (SwitchBox) [1]\n\n\n\n\n\n\n\n\n\nFigure fig-slice-sb 的放大结构\n\n\n\n\nPS (Processing System) 处理器部分\n不要认为一个开发板只有 “软” 部分, 有些 (ZYNQ) 经常用的模块会用硬件 “焊死” 在板子上 (Heterogenous 异构、SoC). 这些硬件通过 I/O 口与 PL 部分通信, 比如:\n\n\n\nZYNQ PS 和 PL 通过 AXI 通信\n\n\n以 ZYNQ XC7Z010 为例, 在 Vivado 中创建工程 Create Block Design 后, 添加 ZYNQ7 Processing System IP 核 (Figure fig-zynq-xz7z-ps-pl), 可以看到 PS (白色) 和 PL (灰色) 以及他们之间的连接:\n\n\n\n\n\n\nFigure 3: ZYNQ XC7Z010 的 PS 和 PL",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   },
   {
@@ -711,7 +777,7 @@
     "text": "AXI4 总线协议\n\nPort 接口\n\nGP (General Purpose): 通用接口, 位宽 32 bits, 使用 AXI4_LITE 协议, 传输小数据量 (比如命令和地址).\nHP (High Performance): 高性能接口, 位宽 32 或 64 bits, 使用 AXI4_FULL 协议, 传输大数据量.\nACP (Accelerator Coherency Port): 加速器一致性端口, 位宽 64 bits, 使用 AXI_FULL 协议, 适合高速通信 (用的比较少).\n\n\n\n\n\n\nFigure 4: 两种 AXI 和在 ZYNQ 7010 上面使用的接口",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   },
   {
@@ -722,7 +788,7 @@
     "text": "编译过程\n\nSynthesis 综合\n\n动机: FPGA 不懂 “行为”, 它需要的是 “你想用哪些门, 怎么连线”. 所以 Synthesis 是将你写的 .v 逻辑翻译成各种 Logic gates 应该如何连接 (门级网表) 的过程 (以 .json 格式输出).",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   },
   {
@@ -733,7 +799,7 @@
     "text": "References\n\n\n\n\n[1] R. Kastner, J. Matai, and S. Neuendorffer, “Parallel Programming for FPGAs,” ArXiv e-prints, May 2018, Available: https://arxiv.org/abs/1805.03648",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>11</span>  <span class='chapter-title'>FPGA 原理速成</span>"
+      "<span class='chapter-number'>12</span>  <span class='chapter-title'>FPGA 原理速成</span>"
     ]
   },
   {
@@ -744,7 +810,7 @@
     "text": "Change of Mind",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>12</span>  <span class='chapter-title'>CPU 原理速成</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>CPU 原理速成</span>"
     ]
   },
   {
@@ -755,7 +821,7 @@
     "text": "对于有时钟的电路, 我们应该想象成: 电路的状态只在时钟的上升沿「瞬间」变化. 时钟的上升沿发生时电路做了两件事情:\n\n前一个时钟周期的计算结果该锁存的 锁存到寄存器 中.\n下一个时钟周期的结果瞬间计算出来并 放在线上 (他们目前还不能被 CPU “看到”).",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>12</span>  <span class='chapter-title'>CPU 原理速成</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>CPU 原理速成</span>"
     ]
   },
   {
@@ -766,7 +832,7 @@
     "text": "CPU 是如何成为现在这个样子的?\n\nThe following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.\n\n\n分而治之, 穷举 + 控制信号\n\n分而治之: 一条指令的执行可以拆分为这几个阶段 (phase):\n\nIF (Instruction Fetch): 取指.\nID (Instruction Decode): 译码.\n\nID 后面有些地方 [1] 后面还细分了 Evaluate Address 和 Fetch Operands.\n\nEX (Execute): 执行.\nME (Memory Access): 访存.\nWB (Write Back): 写回.\n每个 phase 都可以有固定的输入和输出, 所以每个 phase 都对应一个 (或多个) 电路模块.\n\n\n\n这个 phase 的 CPU 可以通过我的 my-riscv 项目 可视化地理解\n\n\n\n\n\n\n\n\n\n\n\nRISC-V 指令分类\n\n\n\n\n\n\nArithmetic 运算: 读取某些寄存器的值, 运算之后再放回某个寄存器中 (不能读写内存)\nLoad/Store 访存: 唯一能访问内存的指令. 将某个寄存器的值写到某个内存地址 (或者反过来)\nControl 控制流: 跳转 (其实就是改变 pc 寄存器的值 (还有顺带改变一下 ra 寄存器))\n\n\n\n\n\n\n穷举 + 控制信号 思想: 每个电路模块用硬件写死, 以 ALU 单元 (Execute 的其中一个模块) 为例, 所有可能的输出都计算出来 (说是计算, 其实就是一个数字电路通了而已, 电路通了结果自然就在输出端口显示出来了, 没有「计算」的过程. 比如 ALU), 只不过在输出之前用控制信号来决定哪个计算结果才是我们要的 (一般控制信号都由 Decoder 产生, 因为 Decoder 的作用就是 (根据 Opcode) 将一条指令解读为如何控制各个模块应该输出什么结果).\n\n\n\n穷举 + 控制信号 思想在 ALU 内部的体现\n\n\n一条指令的执行的那几个 phase 可以设计成:\n\nSingle-Cycle: 在一个时钟周期内完成所有 phases. 由于电路有延迟, 所有 phase 的电路很长, 要求时钟频率不能很高.\nMulti-Cycle: 每个时钟周期只执行一个 phase.\n\n\n\n\n\n\nFigure 1: 为了提升指令执行效率引入了 Pipeline [2]\n\n\n\n\n这样的 CPU: simple, general, 但是 not efficient!\n\n\n\n流水线\n\nPipeline 流水线: 见 Figure fig-single-mult-pipelined.\n在每两个 phase 之间插入一些受始终控制的寄存器:\n\nIF-ID 之间: 当前指令, PC 值 (jal 要用)\nID-EX 之间: 指令类型, rs1, rs2, rd, imm.\n\n\n\n\n第三阶段\n\n总线: ARM 公司研发了很多总线, 他们的集合称为 AMBA (Advanced Microcontroller Bus Architecture). 包括: APB, AHB, AXI. Xilinx 公司很多异构的 FPGA都需要引入 AXI 总线.\nAXI 特点:\n\n面向存储: 指主、从机在读到数据之后一般都会将这些数据先放在某种储存里面.\n突发总线:\n\n\n\n\nCache\n\n\nMemory\n\n内存: working memory, main memory\nDRAM & SSD 内存与硬盘\n\n读写速度 (3000 倍): 17 ns vs 50 ms, 超音速飞机和龟速\n容量: 16GB vs 4TB\n\nSIMM & DIMM\n\nDIMM (Dual In-line Memory Module)",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>12</span>  <span class='chapter-title'>CPU 原理速成</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>CPU 原理速成</span>"
     ]
   },
   {
@@ -777,7 +843,7 @@
     "text": "Macros 宏\n\nxlen = 32: Word length 字长, 即 GPR 寄存器宽度 (由于通用寄存器被命名为 x0~x31)\n\n\n\n\n\n[1] Y. N. Patt and S. J. Patel, Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill, 2020.\n\n\n[2] Slchoi, “Multi-cycle implementation & pipelining,” 2025, Available: https://velog.io/@taegon1998/4.2-4.3-Multi-Cycle-Implementation-Pipelining",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>12</span>  <span class='chapter-title'>CPU 原理速成</span>"
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>CPU 原理速成</span>"
     ]
   },
   {
@@ -788,7 +854,7 @@
     "text": "CUDA",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>GPU 原理速成</span>"
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
     ]
   },
   {
@@ -799,7 +865,18 @@
     "text": "2026 年之前 GPU 只能做特定的函数运算, 2026 年之后引入了 GPGPU (General Purpose GPU), 有一整套库函数来对 GPU 进行编程.\n\nCUDA: Compute Unified Device Architecture (NVIDIA, 闭源)\nOpenCL: Open Computing Language (Apple Inc., 开源)\n\nGPU device memory 可以被所有 CUDA 核心共享:\n\n\n\n\n\n\nFigure 2: NVidia GPU 架构 [1]\n\n\n\n连接有 GPU 的 CPU 二者的 memory 是不共享的 [1], 二者之间的数据由 DMA 搬运.\n\n\n\n\n\n\nFigure 3: Seperate memory systems [1]\n\n\n\nKernel functions [1]:\n\n__host__: 默认在 CPU (host) 上运行的函数.\n__global__: 在 GPU 上运行, 可被 CPU 调用的函数.\n__device__: 在 GPU 上运行, 只能被 GPU 调用的函数.\n\n\n\nUnified Memory 统一内存\n\n全局变量: 可以被 CPU 和 GPU 访问的变量, 不能用 local variable 的方式声明!\n__managed__ int x;\n统一内存允许 CPU 和 GPU 共享同一块内存区域, 比如 Listing lst-managed 中的 CPU 和 GPU 都能访问和改变 x 变量:\n\n\n\nmanaged.cu\n\n#include &lt;stdio.h&gt;\n#include &lt;cuda_runtime.h&gt;\n\n__global__ void my_kernel(int* x_ptr) {\n    *x_ptr = 1;\n    printf(\"GPU sees x = %d\\n\", *x_ptr);\n}\n\nint main() {\n    int x = 0;\n    int* x_ptr = &x;\n    cudaMallocManaged(&x_ptr, sizeof(int));\n\n    my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);\n\n    printf(\"CPU sees x = %d\\n\", x);\n\n    cudaFree(x_ptr);\n    return 0;\n}\n\n输出:\nCPU sees x = 0\nGPU sees x = 1\n注意是 CPU 先打印 (因为没有用 cudaDeviceSynchronize())!\n\n\nSynchronization 同步\nCPU 将指令发到 GPU 之后不会等 GPU 执行完再继续往下执行 (默认 async), 如果需要等 GPU 执行完再继续, 将 my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr); 改为:\nmy_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);\ncudaDeviceSynchronize(); // Wait for GPU to finish\n输出:\nGPU sees x = 1\nCPU sees x = 1\n\n\nStream 流",
     "crumbs": [
       "Crash Courses",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>GPU 原理速成</span>"
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-gpu/cc-gpu.html#references",
+    "href": "cc-gpu/cc-gpu.html#references",
+    "title": "GPU 原理速成",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] S. Y. Cheung, “Lecture notes on computer science courses: Computer architecture (CS355),” 2025, Available: https://www.cs.emory.edu/~cheung/Courses/355/Syllabus/syl.html#CURRENT",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
     ]
   },
   {
@@ -954,105 +1031,6 @@
     "crumbs": [
       "CFU Playground",
       "<span class='chapter-number'>18</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
-    ]
-  },
-  {
-    "objectID": "cc-eda/cc-eda.html",
-    "href": "cc-eda/cc-eda.html",
-    "title": "EDA Basics 基础",
-    "section": "",
-    "text": "Some Terms",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>EDA Basics 基础</span>"
-    ]
-  },
-  {
-    "objectID": "cc-eda/cc-eda.html#sec-eda-terms",
-    "href": "cc-eda/cc-eda.html#sec-eda-terms",
-    "title": "EDA Basics 基础",
-    "section": "",
-    "text": "Hypergraph 超图: 图的一种推广, Netlist 常被建模成 (Directed) hypergraph \\((V, E)\\) (edge 可以有多个 vertex).\n\n\\(V\\) 中的元素代表 pin.\n\\(E\\) 中的元素称为一个 net.\n\nLayout: 元件或电路的 electric function 的几何图形表示 [1].\nStandard Cell (std cell) 标准单元: 一组实现逻辑门的物理单元 (AND, OR, NOT, NAND, etc.) [1]. 他们过于基础以至于被称为 “standard”.\n\n\n\n\n\n\nFigure 1: NOT 和 NAND 的 layout [1]\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 2: Std cell height 不一定等于 row height [1].",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>EDA Basics 基础</span>"
-    ]
-  },
-  {
-    "objectID": "cc-eda/cc-eda.html#placement-布局",
-    "href": "cc-eda/cc-eda.html#placement-布局",
-    "title": "EDA Basics 基础",
-    "section": "Placement 布局",
-    "text": "Placement 布局\n\n三个阶段\n\nGlobal (coarse/initial) placement: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) [1].\n\n\n\n\n\n\nFigure 3: Legalization 把 cell/macro 吸附到最近的 row/site 上并推开重叠 [1]\n\n\n\nLegalization 合法化: 消除重叠和在两个方向对齐的过程 (见 Figure fig-legalization). Cell/macro 不能随便放置, 而要在两个方向对齐:\n\nRow: 见 Figure fig-layout, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供同意的供电. 自然的, 所有 cell/macro 不能随便放置, 而要在水平方向成一条线, 使得 die 有“一层一层”的概念, 每一层称为一个 row. Row height 等于 std cell height; Row 分隔线 VDD 和 GND 交替.\nSite: Row 引入了「层」, 而 site 给每一层也数字化引入了「门牌号」, 每个 cell/macro 必须对齐到 row 和 site 边界!\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Cell/macro 必须放在 row 上 [1].\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: Std cell 必须上下对齐 row, 左右对齐 site [1].\n\n\n\n\n\n\n\nDetailed placement\n\n\n\nWirelength Model\n\n\n\n\n\n\nFigure 6: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 [2].\n\n\n\n\n\nDensity Model\n\nBin: 仅仅是为了方便计算1布局的密度 [3] (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin [4] (见 Figure fig-bindemo). 所有的 bin 组成的集合记作 \\(B\\).\n\n\n\n\n\n\nFigure 7: 此图中 bin 的高度是 row height 的 \\(4\\) 倍 [1]\n\n\n\n\n\n\n1 注意区分 bin 和 row/site 围成的小方格. 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.\n\n[1] J. Monteiro, “Algorithms to improve area density utilization, routability and timing during detailed placement and legalization of VLSI circuits,” PhD thesis, 2019.\n\n\n[2] iEDA, “A7-VLSI auto placement for circuit cells.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/practice/algorithms/a7.html. [Accessed: Dec. 05, 2025]\n\n\n[3] iEDA, “8.3 layout problems and modeling.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html. [Accessed: Dec. 05, 2025]\n\n\n[4] Y. Zhao, P. Liao, S. Liu, J. Jiang, Y. Lin, and B. Yu, “Analytical heterogeneous die-to-die 3D placement with macros.” 2024. Available: https://arxiv.org/abs/2403.09070",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>EDA Basics 基础</span>"
-    ]
-  },
-  {
-    "objectID": "cc-gpu/cc-gpu.html#references",
-    "href": "cc-gpu/cc-gpu.html#references",
-    "title": "GPU 原理速成",
-    "section": "References",
-    "text": "References\n\n\n\n\n[1] S. Y. Cheung, “Lecture notes on computer science courses: Computer architecture (CS355),” 2025, Available: https://www.cs.emory.edu/~cheung/Courses/355/Syllabus/syl.html#CURRENT",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>GPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "resources/resources.html#references",
-    "href": "resources/resources.html#references",
-    "title": "Resources 学习资料汇总",
-    "section": "References",
-    "text": "References\n\n\n\n\n[1] iEDA, “8.3 layout problems and modeling.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html. [Accessed: Dec. 05, 2025]",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Resources 学习资料汇总</span>"
-    ]
-  },
-  {
-    "objectID": "eda-notes/eda-notes.html",
-    "href": "eda-notes/eda-notes.html",
-    "title": "EDA Basics 基础",
-    "section": "",
-    "text": "Some Terms",
-    "crumbs": [
-      "EDA",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Basics 基础</span>"
-    ]
-  },
-  {
-    "objectID": "eda-notes/eda-notes.html#sec-eda-terms",
-    "href": "eda-notes/eda-notes.html#sec-eda-terms",
-    "title": "EDA Basics 基础",
-    "section": "",
-    "text": "Hypergraph 超图: 图的一种推广, Netlist 常被建模成 (Directed) hypergraph \\((V, E)\\) (edge 可以有多个 vertex).\n\n\\(V\\) 中的元素代表 pin.\n\\(E\\) 中的元素称为一个 net.\n\nLayout: 元件或电路的 electric function 的几何图形表示 [1].\nStandard Cell (std cell) 标准单元: 一组实现逻辑门的物理单元 (AND, OR, NOT, NAND, etc.) [1]. 他们过于基础以至于被称为 “standard”.\n\n\n\n\n\n\nFigure 1: NOT 和 NAND 的 layout [1]\n\n\n\n\n\n\n\n\n\n\n\n\nFigure 2: Std cell height 不一定等于 row height [1].",
-    "crumbs": [
-      "EDA",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Basics 基础</span>"
-    ]
-  },
-  {
-    "objectID": "eda-notes/eda-notes.html#placement-布局",
-    "href": "eda-notes/eda-notes.html#placement-布局",
-    "title": "EDA Basics 基础",
-    "section": "Placement 布局",
-    "text": "Placement 布局\n\n三个阶段\n\nGlobal (coarse/initial) placement: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) [1].\n\n\n\n\n\n\nFigure 3: Legalization 把 cell/macro 吸附到最近的 row/site 上并推开重叠 [1]\n\n\n\nLegalization 合法化: 消除重叠和在两个方向对齐的过程 (见 Figure fig-legalization). Cell/macro 不能随便放置, 而要在两个方向对齐:\n\nRow: 见 Figure fig-layout, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供同意的供电. 自然的, 所有 cell/macro 不能随便放置, 而要在水平方向成一条线, 使得 die 有“一层一层”的概念, 每一层称为一个 row. Row height 等于 std cell height; Row 分隔线 VDD 和 GND 交替.\nSite: Row 引入了「层」, 而 site 给每一层也数字化引入了「门牌号」, 每个 cell/macro 必须对齐到 row 和 site 边界!\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Cell/macro 必须放在 row 上 [1].\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: Std cell 必须上下对齐 row, 左右对齐 site [1].\n\n\n\n\n\n\n\nDetailed placement\n\n\n\nWirelength Model\n\n\n\n\n\n\nFigure 6: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 [2].\n\n\n\n\n\nDensity Model\n\nBin: 仅仅是为了方便计算1布局的密度 [3] (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin [4] (见 Figure fig-bindemo). 所有的 bin 组成的集合记作 \\(B\\).\n\n\n\n\n\n\nFigure 7: 此图中 bin 的高度是 row height 的 \\(4\\) 倍 [1]\n\n\n\n\n1 注意区分 bin 和 row/site 围成的小方格! 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.",
-    "crumbs": [
-      "EDA",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Basics 基础</span>"
-    ]
-  },
-  {
-    "objectID": "eda-notes/eda-notes.html#references",
-    "href": "eda-notes/eda-notes.html#references",
-    "title": "EDA Basics 基础",
-    "section": "References",
-    "text": "References\n\n\n\n\n[1] J. Monteiro, “Algorithms to improve area density utilization, routability and timing during detailed placement and legalization of VLSI circuits,” PhD thesis, 2019.\n\n\n[2] iEDA, “A7-VLSI auto placement for circuit cells.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/practice/algorithms/a7.html. [Accessed: Dec. 05, 2025]\n\n\n[3] iEDA, “8.3 layout problems and modeling.” Oscc.cc, Aug. 2024. Available: https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html. [Accessed: Dec. 05, 2025]\n\n\n[4] Y. Zhao, P. Liao, S. Liu, J. Jiang, Y. Lin, and B. Yu, “Analytical heterogeneous die-to-die 3D placement with macros.” 2024. Available: https://arxiv.org/abs/2403.09070",
-    "crumbs": [
-      "EDA",
-      "<span class='chapter-number'>6</span>  <span class='chapter-title'>EDA Basics 基础</span>"
     ]
   }
 ]
