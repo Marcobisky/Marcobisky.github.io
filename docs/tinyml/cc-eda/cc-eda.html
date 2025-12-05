@@ -20,7 +20,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -74,10 +94,39 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -475,11 +524,17 @@ ul.task-list li input[type="checkbox"] {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-eda-terms" id="toc-sec-eda-terms" class="nav-link active" data-scroll-target="#sec-eda-terms">Some Terms</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../cc-eda/cc-eda.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">EDA Basics 基础</span></a></li></ol></nav>
@@ -501,8 +556,104 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="sec-eda-terms" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-eda-terms">Some Terms</h2>
+<ul>
+<li><p><strong>Layout</strong>: 元件或电路的 electric function 的几何图形表示 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>.</p></li>
+<li><p><strong>Standard Cell (std cell) 标准单元</strong>: 一组实现逻辑门的物理单元 (AND, OR, NOT, NAND, etc.) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>. 他们过于基础以至于被称为 “standard”.</p>
+<div id="fig-layout" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="layout.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: NOT 和 NAND 的 layout <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>
+</figcaption>
+</figure>
+</div></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-mutideck-std-cell" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mutideck-std-cell-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="mutideck-std-cell.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mutideck-std-cell-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Std cell height 不一定等于 row height <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div></div><ul>
+<li><p><strong>Global (coarse) placement</strong>: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>.</p>
+<div id="fig-legalization" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-legalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="legalization.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-legalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Legalization 把 cell/macro 吸附到最近的 row/site 上并推开重叠 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>
+</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Legalization</strong>: 消除重叠和在<strong>两个</strong>方向对齐的过程 (见 <a href="#fig-legalization" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-legalization</span></a>). Cell/macro 不能随便放置, 而要在两个方向对齐:</p>
+<ul>
+<li><strong>Row</strong>: 见 <a href="#fig-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-layout</span></a>, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供同意的供电. 自然的, 所有 cell/macro 不能随便放置, 而要在水平方向成一条线, 使得 die 有“一层一层”的概念, <strong>每一层称为一个 row</strong>. Row height 等于 std cell height; Row 分隔线 VDD 和 GND 交替.</li>
+<li><strong>Site</strong>: Row 引入了「层」, 而 site 给每一层也数字化引入了「门牌号」, 每个 cell/macro 必须对齐到 row 和 site 边界!</li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[40,60]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 40.0%;justify-content: flex-start;">
+<div id="fig-rowdemo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rowdemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="rowdemo.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rowdemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Cell/macro 必须放在 row 上 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 60.0%;justify-content: flex-start;">
+<div id="fig-sitedemo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sitedemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="sitedemo.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sitedemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Std cell 必须上下对齐 row, 左右对齐 site <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><p><strong>Bin</strong>: 仅仅是为了方便 density 的<strong>计算</strong> (类似有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[2]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
+<div id="fig-bindemo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bindemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="bindemo.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bindemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: 此图中 bin 的高度是 row height 的 <span class="math inline">\(4\)</span> 倍 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>
+</figcaption>
+</figure>
+</div></li>
+</ul>
 
 
+<div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-phdthesisAlgorithms2019" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">J. Monteiro, <span>“Algorithms to improve area density utilization, routability and timing during detailed placement and legalization of VLSI circuits,”</span> PhD thesis, 2019.</div>
+</div>
+<div id="ref-zhao2024analyticalheterogeneousdietodie3d" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">Y. Zhao, P. Liao, S. Liu, J. Jiang, Y. Lin, and B. Yu, <span>“Analytical heterogeneous die-to-die 3D placement with macros.”</span> 2024. Available: <a href="https://arxiv.org/abs/2403.09070">https://arxiv.org/abs/2403.09070</a></div>
+</div>
+</div>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
