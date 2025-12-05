@@ -363,12 +363,14 @@ title: "Glossary 名词解释"
 
 [^gd]: *Abuse of Terms* 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!
 
-- **Momentum-based 动量优化器**: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可**加速**和**平滑**收敛、避免**陷入局部最优**. 也有一些基于次改良的版本:
+- **Momentum-based 动量优化器**: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可**加速**和**平滑**收敛、避免**陷入局部最优**[^momentum]. 也有一些基于次改良的版本:
     - **Nesterov Accelerated Gradient (NAG)**: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 `torch` 为例:
 
         ```python
         optimizer_nag = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, nesterov=True)
         ```
+
+[^momentum]: "SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast." @maciejbalawejder_2022_optimizers
 
 - **Adaptive Gradient (Adagrad) 自适应梯度优化器**: 有利于 Sparse Features 的学习 (通过给每个参数分配不同的学习率! 或者理解为对参数进行归一化):
 

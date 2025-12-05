@@ -4,6 +4,10 @@ title: "EDA Basics 基础"
 
 ## Some Terms {#sec-eda-terms}
 
+- **Hypergraph 超图**: 图的一种推广, Netlist 常被建模成 (Directed) hypergraph $(V, E)$ (edge 可以有多个 vertex).
+    - $V$ 中的元素代表 **pin**.
+    - $E$ 中的元素称为一个 **net**.
+
 - **Layout**: 元件或电路的 electric function 的几何图形表示 @phdthesisAlgorithms2019.
 
 - **Standard Cell (std cell) 标准单元**: 一组实现逻辑门的物理单元 (AND, OR, NOT, NAND, etc.) @phdthesisAlgorithms2019. 他们过于基础以至于被称为 "standard".
@@ -13,6 +17,10 @@ title: "EDA Basics 基础"
 :::{.column-margin}
 ![Std cell height 不一定等于 row height @phdthesisAlgorithms2019.](mutideck-std-cell.png){#fig-mutideck-std-cell}
 :::
+
+## Placement 布局
+
+### 三个阶段
 
 - **Global (coarse/initial) placement**: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) @phdthesisAlgorithms2019. 
 
@@ -28,12 +36,16 @@ title: "EDA Basics 基础"
 ![Std cell 必须上下对齐 row, 左右对齐 site @phdthesisAlgorithms2019.](sitedemo.png){#fig-sitedemo}
 :::
 
+- **Detailed placement**
 
-- **Bin**: 仅仅是为了**方便计算**布局的密度 @_2024_83 (类似有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin @zhao2024analyticalheterogeneousdietodie3d (见 @fig-bindemo). 所有的 bin 组成的集合记作 $B$.
+### Wirelength Model
+
+![两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 @_2024_a7vlsi.](wirelength-model.png){#fig-wirelength-model width=90%}
+
+### Density Model
+
+- **Bin**: 仅仅是为了**方便计算**[^bin]布局的密度 @_2024_83 (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin @zhao2024analyticalheterogeneousdietodie3d (见 @fig-bindemo). 所有的 bin 组成的集合记作 $B$.
 
     ![此图中 bin 的高度是 row height 的 $4$ 倍 @phdthesisAlgorithms2019](bindemo.png){#fig-bindemo width=70%}
 
-
-## Placement 布局
-
-- [**iEDA** 资料](https://ieda.oscc.cc/train/eda/eda-model/8_3_palcement.html) @_2024_83.
+[^bin]: 注意区分 bin 和 row/site 围成的小方格. 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.

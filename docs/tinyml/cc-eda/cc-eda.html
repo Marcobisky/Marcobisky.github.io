@@ -530,7 +530,12 @@ window.Quarto = {
    
   <ul>
   <li><a href="#sec-eda-terms" id="toc-sec-eda-terms" class="nav-link active" data-scroll-target="#sec-eda-terms">Some Terms</a></li>
-  <li><a href="#placement-布局" id="toc-placement-布局" class="nav-link" data-scroll-target="#placement-布局">Placement 布局</a></li>
+  <li><a href="#placement-布局" id="toc-placement-布局" class="nav-link" data-scroll-target="#placement-布局">Placement 布局</a>
+  <ul class="collapse">
+  <li><a href="#三个阶段" id="toc-三个阶段" class="nav-link" data-scroll-target="#三个阶段">三个阶段</a></li>
+  <li><a href="#wirelength-model" id="toc-wirelength-model" class="nav-link" data-scroll-target="#wirelength-model">Wirelength Model</a></li>
+  <li><a href="#density-model" id="toc-density-model" class="nav-link" data-scroll-target="#density-model">Density Model</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -560,6 +565,11 @@ window.Quarto = {
 <section id="sec-eda-terms" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="sec-eda-terms">Some Terms</h2>
 <ul>
+<li><p><strong>Hypergraph 超图</strong>: 图的一种推广, Netlist 常被建模成 (Directed) hypergraph <span class="math inline">\((V, E)\)</span> (edge 可以有多个 vertex).</p>
+<ul>
+<li><span class="math inline">\(V\)</span> 中的元素代表 <strong>pin</strong>.</li>
+<li><span class="math inline">\(E\)</span> 中的元素称为一个 <strong>net</strong>.</li>
+</ul></li>
 <li><p><strong>Layout</strong>: 元件或电路的 electric function 的几何图形表示 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>.</p></li>
 <li><p><strong>Standard Cell (std cell) 标准单元</strong>: 一组实现逻辑门的物理单元 (AND, OR, NOT, NAND, etc.) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>. 他们过于基础以至于被称为 “standard”.</p>
 <div id="fig-layout" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -585,7 +595,12 @@ Figure&nbsp;2: Std cell height 不一定等于 row height <span class="citation"
 </figcaption>
 </figure>
 </div>
-</div></div><ul>
+</div></div></section>
+<section id="placement-布局" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="placement-布局">Placement 布局</h2>
+<section id="三个阶段" class="level3">
+<h3 class="anchored" data-anchor-id="三个阶段">三个阶段</h3>
+<ul>
 <li><p><strong>Global (coarse/initial) placement</strong>: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>.</p>
 <div id="fig-legalization" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -632,38 +647,56 @@ Figure&nbsp;5: Std cell 必须上下对齐 row, 左右对齐 site <span class="c
 </div>
 </div>
 <ul>
-<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[2]</a></span> (类似有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[3]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
+<li><strong>Detailed placement</strong></li>
+</ul>
+</section>
+<section id="wirelength-model" class="level3">
+<h3 class="anchored" data-anchor-id="wirelength-model">Wirelength Model</h3>
+<div id="fig-wirelength-model" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-wirelength-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="wirelength-model.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-wirelength-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 <span class="citation" data-cites="_2024_a7vlsi"><a href="#ref-_2024_a7vlsi" role="doc-biblioref">[2]</a></span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="density-model" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="density-model">Density Model</h3>
+<ul>
+<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[3]</a></span> (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[4]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
 <div id="fig-bindemo" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bindemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="bindemo.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bindemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: 此图中 bin 的高度是 row height 的 <span class="math inline">\(4\)</span> 倍 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>
+Figure&nbsp;7: 此图中 bin 的高度是 row height 的 <span class="math inline">\(4\)</span> 倍 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[1]</a></span>
 </figcaption>
 </figure>
 </div></li>
 </ul>
-</section>
-<section id="placement-布局" class="level2">
-<h2 class="anchored" data-anchor-id="placement-布局">Placement 布局</h2>
-<ul>
-<li><a href="https://ieda.oscc.cc/train/eda/eda-model/8_3_palcement.html"><strong>iEDA</strong> 资料</a> <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[2]</a></span>.</li>
-</ul>
 
 
-<div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;注意区分 bin 和 row/site 围成的小方格. 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.</p></div></div><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
 <div id="ref-phdthesisAlgorithms2019" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[1] </div><div class="csl-right-inline">J. Monteiro, <span>“Algorithms to improve area density utilization, routability and timing during detailed placement and legalization of VLSI circuits,”</span> PhD thesis, 2019.</div>
 </div>
+<div id="ref-_2024_a7vlsi" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">iEDA, <span>“A7-VLSI auto placement for circuit cells.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/practice/algorithms/a7.html">https://ieda.oscc.cc/en/train/practice/algorithms/a7.html</a>. [Accessed: Dec. 05, 2025]</div>
+</div>
 <div id="ref-_2024_83" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[2] </div><div class="csl-right-inline">iEDA, <span>“8.3 layout problems and modeling.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html">https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html</a>. [Accessed: Dec. 05, 2025]</div>
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">iEDA, <span>“8.3 layout problems and modeling.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html">https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html</a>. [Accessed: Dec. 05, 2025]</div>
 </div>
 <div id="ref-zhao2024analyticalheterogeneousdietodie3d" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[3] </div><div class="csl-right-inline">Y. Zhao, P. Liao, S. Liu, J. Jiang, Y. Lin, and B. Yu, <span>“Analytical heterogeneous die-to-die 3D placement with macros.”</span> 2024. Available: <a href="https://arxiv.org/abs/2403.09070">https://arxiv.org/abs/2403.09070</a></div>
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">Y. Zhao, P. Liao, S. Liu, J. Jiang, Y. Lin, and B. Yu, <span>“Analytical heterogeneous die-to-die 3D placement with macros.”</span> 2024. Available: <a href="https://arxiv.org/abs/2403.09070">https://arxiv.org/abs/2403.09070</a></div>
 </div>
 </div>
 </section>
+</section>
+
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
