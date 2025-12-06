@@ -1010,7 +1010,7 @@ Figure&nbsp;9: <span class="math inline">\(\# \text{Steiner points} \le \# \text
 <li><strong>Driver/source cell/pin (of a net <span class="math inline">\(e\)</span>)</strong>: <span class="math inline">\(e\)</span> 中没有箭头指向它的 cell/pin 集 (一定唯一, 见<a href="../eda-notes/eda-notes.html#fig-hypergraph">此图</a>) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[8]</a></span>, 常记为 <span class="math inline">\(s(e)\)</span>.</li>
 <li><strong>Sink cell/pin (of a net <span class="math inline">\(e\)</span>)</strong>: <span class="math inline">\(e\)</span> 中没有从它出发的箭头的 cell/pin 集 (可以不唯一) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[8]</a></span>.</li>
 </ul></li>
-<li><p><strong>Slack (时序)裕量</strong>: Timing arc 不可避免, 但 arc delay 必须满足要求即可, 信号不能提前到 (<strong>Hold/early time violation</strong>), 也不能晚到 (<strong>Setup/late time violation</strong>). 即信号到达时间 AT (arrival time) 有一个 required 范围 (见 <a href="#fig-slack" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-slack</span></a>): <span class="math display">\[\operatorname{min} \text{RAT} \le \text{AT} \le \operatorname{max} \text{RAT}.\]</span></p>
+<li><p><strong>Slack (时序)裕量</strong>: Timing arc 不可避免, 但 arc delay 必须满足要求即可, 信号不能提前到 (<strong>Hold/early time violation</strong>), 也不能晚到 (<strong>Setup/late time violation</strong>)<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. 即信号到达时间 AT (arrival time) 有一个 required 范围 (见 <a href="#fig-slack" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-slack</span></a>): <span class="math display">\[\operatorname{min} \text{RAT} \le \text{AT} \le \operatorname{max} \text{RAT}.\]</span></p>
 <div id="fig-slack" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-slack-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1027,10 +1027,10 @@ Figure&nbsp;10: Slack 的定义. <span class="math inline">\(\text{slack} &gt; 0
 <ul>
 <li>一般 WNS 和 TNS 都只关心 Primary output endpoint pins (<strong>PO</strong>, 如 flip-flop inputs, outputs ports <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[3]</a></span>) 中的违规情况.</li>
 </ul></li>
-<li><strong>Critical path (CP)</strong>: 造成 WNS 的那条路径<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</li>
+<li><strong>Critical path (CP)</strong>: 造成 WNS 的那条路径<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;这个词在多个领域内都有使用 (比如项目管理中的 CPM), 总体来说想表达的就是「搅屎棍」的意思.</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;一般只考虑 Setup 违规, Hold 违规比较容易解决.</p></div><div id="fn2"><p><sup>2</sup>&nbsp;这个词在多个领域内都有使用 (比如项目管理中的 CPM), 总体来说想表达的就是「搅屎棍」的意思.</p></div></div><ul>
 <li><strong>Buffer 缓冲器</strong>: 输入等于输出的逻辑门, 但是输入的 <code>1</code> 相当于引出电源的 <code>1</code>, 可以增强驱动. 还可以调节时延</li>
 </ul>
 </section>
@@ -1123,21 +1123,21 @@ Figure&nbsp;12: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <h3 class="anchored" data-anchor-id="optimizer-in-ml">Optimizer in ML</h3>
 <ul>
 <li><p><strong>Optimizer 优化器</strong>: 更新模型参数的算法.</p></li>
-<li><p><strong>Gradient Descent (GD) 梯度下降<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a></strong>: 所有优化方法都从这个基础方法改进而来.</p>
+<li><p><strong>Gradient Descent (GD) 梯度下降<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></strong>: 所有优化方法都从这个基础方法改进而来.</p>
 <ul>
 <li><strong>Batch Gradient Descent (BGD) 全批量梯度下降</strong>: 用整个训练集计算梯度并更新参数.</li>
 <li><strong>Stochastic Gradient Descent (SGD) 随机梯度下降</strong>: 每次用一个样本计算梯度并更新参数.</li>
 <li><strong>Mini-batch Gradient Descent 小批量梯度下降</strong>: 每次用一个 mini-batch (如 32 个样本) 计算梯度并更新参数.</li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;<em>Abuse of Terms</em> 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!</p></div></div><ul>
-<li><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可<strong>加速</strong>和<strong>平滑</strong>收敛、避免<strong>陷入局部最优</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>. 也有一些基于次改良的版本:
+<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;<em>Abuse of Terms</em> 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!</p></div></div><ul>
+<li><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可<strong>加速</strong>和<strong>平滑</strong>收敛、避免<strong>陷入局部最优</strong><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. 也有一些基于次改良的版本:
 <ul>
 <li><p><strong>Nesterov Accelerated Gradient (NAG)</strong>: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 <code>torch</code> 为例:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>optimizer_nag <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>, momentum<span class="op">=</span><span class="fl">0.9</span>, nesterov<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;“SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast.” <span class="citation" data-cites="maciejbalawejder_2022_optimizers"><a href="#ref-maciejbalawejder_2022_optimizers" role="doc-biblioref">[13]</a></span></p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;“SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast.” <span class="citation" data-cites="maciejbalawejder_2022_optimizers"><a href="#ref-maciejbalawejder_2022_optimizers" role="doc-biblioref">[13]</a></span></p></div></div><ul>
 <li><p><strong>Adaptive Gradient (Adagrad) 自适应梯度优化器</strong>: 有利于 Sparse Features 的学习 (通过给每个参数分配不同的学习率! 或者理解为对参数进行归一化):</p>
 <div id="fig-adagrad" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1212,7 +1212,7 @@ Figure&nbsp;14: AI 编译栈和编程体系
 <li><p><strong>Benchmark</strong>: 基准测试. 用于测试系统或工具的功能/性能.</p></li>
 <li><p><strong>QEMU (Quick Emulator)</strong>: 开源的模拟器, 可模拟多种 CPU 架构 (如 ARM, x86, RISCV 等).</p></li>
 <li><p><strong>Renode</strong>: 开源的模拟器, 主要面向嵌入式系统.</p></li>
-<li><p><strong>Endianness</strong><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>:</p>
+<li><p><strong>Endianness</strong><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="endianness.png" class="img-fluid figure-img" style="width:80.0%"></p>
@@ -1220,7 +1220,7 @@ Figure&nbsp;14: AI 编译栈和编程体系
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn5"><p><sup>5</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
 <li><p><strong>MMU (Memory Management Unit)</strong>: 内存管理单元, 负责虚拟内存和物理内存之间的映射.</p>
 <ul>
 <li><strong>TLB (Translation Lookaside Buffer)</strong>: 很像 CPU 的 Cache, 用于加速虚拟地址到物理地址的转换. 也有 TLB miss, TLB hit, spacial locality, temporal locality, etc. 这些概念.</li>

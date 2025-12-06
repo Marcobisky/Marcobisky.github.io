@@ -582,11 +582,17 @@ window.Quarto = {
 <li><p>Net weight <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 的 idea 告诉我们有些难以单读开一个表达式的「因素」可以融入其它的「因素」里!</p></li>
 <li><p><strong>体会概念背后的直觉意义而不是定义本身</strong></p>
 <ul>
-<li>这在数学和工程学上同样重要. 学科中都有很多「原子」概念, 比如数学中的 group, topological space, EDA 中的 pin, node 等, 他们封装了一些非常基本的思想, 出现频率非常高, 需要牢记. 但是在科研领域, 会发现出现了很多为了研究某种<strong>特定的对象</strong>外延出来或者人为定义的新概念, 比如数学中的 Schwartz space (为了严格化 Fourier transform 而定义的函数空间), <span class="math inline">\(\pi\)</span>-system / semialgebra (为了定义 measure 而定义的集合族), EDA 中的 net slack (为了外延 slack 到 net 上而人为定义的量<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>), 它们<strong>没有所谓的「正确」定义</strong>, 只要定义出来的量能够反映你想表达的东西即可. 不需要花时间记住定义问题, 理解作者的研究方法和解决问题的思路! 如果作者没有说明具体定义, 大不了你自己定义一个类似的量来替代它们!</li>
+<li>这在数学和工程学上同样重要. 学科中都有很多「原子」概念, 比如数学中的 group, topological space, EDA 中的 pin, node 等, 他们封装了一些非常基本的思想, 出现频率非常高, 需要牢记. 但是在科研领域, 会发现出现了很多为了研究某种<strong>特定的对象</strong>外延出来或者人为定义的新概念, 比如数学中的 Schwartz space (为了严格化 Fourier transform 而定义的函数空间), <span class="math inline">\(\pi\)</span>-system / semialgebra (为了定义 measure 而定义的集合族), EDA 中的 net slack (为了外延 slack 到 net 上而人为定义的量<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>) 和 Criticality <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span>, 它们<strong>没有所谓的「正确」定义</strong>, 只要定义出来的量能够反映你想表达的东西即可. 不需要花时间记住定义问题, 理解作者的研究方法和解决问题的思路! 如果作者没有说明具体定义, 大不了你自己定义一个类似的量来替代它们!</li>
 <li>再比如 Netlist <span class="math inline">\((V, E)\)</span> 的两种定义方式, “Undirected convention”, lol.</li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;Slack 本来是针对某个 pin/node 定义的, <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 却不加定义地在文章中使用了 “net slack” 这个概念, 可见作者想去度量一个 net 的时序违规程度, 如何定义呢? 可以用该 net 中所有 sink 的最坏 slack, 当然也可以用该 net 中所有 sink 的 slack 之和, 没有唯一答案!</p></div></div></section>
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;Slack 本来是针对某个 pin/node 定义的, <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 却<strong>不加定义地</strong>在文章中使用了 “net slack” 这个概念, 可见作者想去度量一个 net 的时序违规程度, 如何定义呢? 可以用该 net 中所有 sink 的最坏 slack, 当然也可以用该 net 中所有 sink 的 slack 之和, 没有唯一答案!</p></div></div><ul>
+<li>Unitary operator 的思考方式: 当作没有!
+<ul>
+<li>比如定义 <span class="math inline">\(\tilde{w} := \log w\)</span>, 由于 <span class="math inline">\(w\)</span> 和 <span class="math inline">\(\tilde{w}\)</span> 的单调性, 优化问题不会变, 思考的时候直接忽略 <span class="math inline">\(\log\)</span> 就行了 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span>.</li>
+</ul></li>
+</ul>
+</section>
 <section id="sec-eda-terms" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="sec-eda-terms">Some Terms</h2>
 <ul>
@@ -725,12 +731,22 @@ Figure&nbsp;8: 此图中 bin 的高度是 row height 的 <span class="math inlin
 <section id="timing-model" class="level3">
 <h3 class="anchored" data-anchor-id="timing-model">Timing Model</h3>
 <ul>
-<li>现在我们还要考虑 slack 的问题. 由于 slack 跟 wirelength 是有关系的, 将 timing term 与线长解耦是不可能的, 即无法在 Loss function 里单独引入衡量 Timing 的项. <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 天才般地通过引入 <strong>Net weight</strong> 这个概念将 timing 的信息融合进 wirelength model 里 (Timing-driven placement).
+<li>现在我们还要考虑 slack 的问题 (只考虑 Setup 违规). 由于 slack 跟 wirelength 是有关系的, 将 timing term 与线长解耦是不方便的, 即无法在 Loss function 里单独引入衡量 Timing 的项. <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 天才般地通过引入 <strong>Net weight</strong> 这个概念将 timing 的信息融合进 wirelength model 里 (Timing-driven placement).
 <ul>
-<li>一个自然的想法是</li>
+<li>一个自然的想法是<strong>给每个 net 加上权重</strong>, 如果一个 net 的 slack 非常负, 说明它的线长急需减小, 那么就给它一个很大的权重. 所以, 可以考虑将 <span class="math inline">\(-\text{slack}\)</span> 直接作为 net weight.</li>
+<li>但是这样实际操作的话会发现优化过程不稳定甚至发散. <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 文中用了两个貌似 heuristic 的方法来稳定训练过程:
+<ul>
+<li>将 <span class="math inline">\(-\text{slack}\)</span> 作为 net weight 的<strong>增量</strong> (而不是直接作为 net weight) ——</li>
+<li>也不完全是, 这个增量本身的变化是带动量的 (需要进行历史平滑).</li>
+</ul></li>
+<li>当然我忽略了以下细节 (不重要):
+<ul>
+<li>所有量都在 Log scale 下运算.</li>
+<li>先要把 slack 转为另一个叫 Criticality 的量.</li>
+<li>作者还引入了两个超参数 <span class="math inline">\(\alpha, \eta\)</span> 来调节历史平滑的程度和「小球」的质量大小.</li>
+</ul></li>
 </ul></li>
 </ul>
-<p>TODO</p>
 </section>
 </section>
 <section id="references" class="level2">
