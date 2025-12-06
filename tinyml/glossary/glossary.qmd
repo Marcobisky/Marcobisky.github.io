@@ -269,22 +269,29 @@ title: "Glossary 名词解释"
 
 - **RC 提取**: 从物理变量抽取电容、电阻.
 
-- **STA (Static Timing Analysis)**: 静态时序分析 @liao_2023_dreamplace. 信号在导线上的传输是需要时间的, 静态指通过电路的电容、电阻算出电路的 delay (而不需要通过实际输入信号然后仿真).
+- **STA (Static Timing Analysis)**: 静态时序分析 @liao_2023_dreamplace. 信号在导线上的传输是需要时间的. "Static" 指通过电路的电容、电阻算出电路的 delay (而不需要通过实际输入信号然后仿真).
 
 - **Timing arc**: 若 pin $i$ 的信号变化会影响 pin $j$ 的信号变化, 则称 pin $i$ 到 pin $j$ 之间存在一个 timing arc (注意有方向).
     - **Cell arc**: 某个 cell (如 AND gate) 内部的 timing arc.
-    - **Net arc**: 金属层走线或 via 上的 timing arc.
+    - **Net/edge arc**: 金属层走线或 via 上的 timing arc.
     - **Arc delay**: 若 $(p_i, p_j)$ 间存在 timing arc, 则 arc delay 表示从 pin $p_i$ 信号变化到 pin $p_j$ 信号变化所需的时间.
+    - **Driver**: 存在 output pin 是某信号的 source 的 cell @phdthesisAlgorithms2019.
+    - **Sink**: 存在 input pin 接收某信号的 cell @phdthesisAlgorithms2019.
 
 
-- **Slack (时序)裕量**: Timing arc 不可避免, 但 arc delay 必须满足要求即可. slack = 信号要求到达时间 - 信号实际到达时间. $\text{slack} > 0$ 安全, $\text{slack} < 0$ 违规 @liao_2023_dreamplace.
+- **Slack (时序)裕量**: Timing arc 不可避免, 但 arc delay 必须满足要求即可, 信号不能提前到 (**Hold/early time violation**), 也不能晚到 (**Setup/late time violation**). 即信号到达时间 AT (arrival time) 有一个 required 范围 (见 @fig-slack): $$\operatorname{min} \text{RAT} \le \text{AT} \le \operatorname{max} \text{RAT}.$$
+
+    ![Slack 的定义. $\text{slack} > 0$ 安全, $\text{slack} < 0$ 违规 @liao_2023_dreamplace.](slack.png){#fig-slack width=70%}
+
     - **WNS (Worst Negative Slack) $s_{\text{wns}}$**: 违规里面的最坏 slack @liao_2023_dreamplace (如果没有违规, 则 $s_{\text{wns}}$ 不存在).
     - **TNS (Total Negative Slack) $s_{\text{tns}}$**: 所有违规 slack 相加 @liao_2023_dreamplace (如果没有违规, 则 $s_{\text{tns}}$ 不存在).
-        - 一般 WNS 和 TNS 都只关心 Primary output endpoint pins (PO, 如 flip-flop inputs, outputs ports @liao_2023_dreamplace) 中的违规情况.
-    - **Critical path (CP)**: 造成 WNS 的那条路径 [^cp].
+        - 一般 WNS 和 TNS 都只关心 Primary output endpoint pins (**PO**, 如 flip-flop inputs, outputs ports @liao_2023_dreamplace) 中的违规情况.
+    - **Critical path (CP)**: 造成 WNS 的那条路径[^cp].
 
 
 [^cp]: 这个词在多个领域内都有使用 (比如项目管理中的 CPM), 总体来说想表达的就是「搅屎棍」的意思.
+
+- **Buffer 缓冲器**: 输入等于输出的逻辑门, 但是输入的 `1` 相当于引出电源的 `1`, 可以增强驱动. 还可以调节时延
 
 ## ML Terms
 
