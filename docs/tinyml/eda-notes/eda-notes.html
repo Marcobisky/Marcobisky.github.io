@@ -579,7 +579,11 @@ window.Quarto = {
 </ul></li>
 </ul>
 <div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;要增大的话填负号即可; 当然这些「因素」很多时候是相互冲突的, 而且有些「因素」比较定性, 一时间很难想出清晰的表达式, 即使有清晰的表达式计算量也极其大.</p></div></div><ul>
-<li>Net weight <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 的 idea 告诉我们有些难以单读开一个表达式的「因素」可以融入其它的「因素」里!</li>
+<li><p>Net weight <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 的 idea 告诉我们有些难以单读开一个表达式的「因素」可以融入其它的「因素」里!</p></li>
+<li><p>EDA 中很多定义不像数学中那样严谨, 不必深究, 意识到这点即可.</p>
+<ul>
+<li>比如 Netlist <span class="math inline">\((V, E)\)</span>, <span class="math inline">\(V\)</span> 在不同上下文中可能代表 pin 集或者 cell/macro 集. 如果是 directed hypergraph, 则 edge 集在数学上表现为比如 <span class="math display">\[E = \bigl\{\{(p_1, p_3), (p_2, p_3), \cdots\}, \{(p_4, p_6), (p_5, p_6), \cdots\}, \cdots \bigr\}\]</span> E.g., <span class="math display">\[E \ni e = \{(p_1, p_3), (p_2, p_3), \cdots\}\]</span> 但实际上我们还是把 <span class="math inline">\(E\)</span> 当作 vertex 的集合来看待 (下文称 “Undirected convention”): <span class="math display">\[E \ni e = \{p_1, p_2, p_3\}\]</span></li>
+</ul></li>
 </ul>
 </section>
 <section id="sec-eda-terms" class="level2 page-columns page-full">
@@ -587,18 +591,35 @@ window.Quarto = {
 <ul>
 <li><p><strong>Hypergraph 超图</strong>: 图的一种推广, Netlist 常被建模成 (Directed <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span>) hypergraph <span class="math inline">\((V, E)\)</span> (edge 可以有多个 vertex).</p>
 <ul>
-<li><span class="math inline">\(V\)</span> 中的元素代表 <strong>cell/macro</strong> (统称为 node <span class="citation" data-cites="liao2023analyticaldietodie3dplacement liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a>, <a href="#ref-liao2023analyticaldietodie3dplacement" role="doc-biblioref">[2]</a></span> 或 instance <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[3]</a></span>).</li>
-<li><span class="math inline">\(E\)</span> 中的元素称为一个 <strong>net</strong>.</li>
+<li><span class="math inline">\(V\)</span>:
+<ul>
+<li>如果 <span class="math inline">\(V\)</span> 中的元素的坐标是可以<strong>独立</strong>更新的, 则其中的元素代表 <strong>cell/macro</strong> (统称为 node <span class="citation" data-cites="liao2023analyticaldietodie3dplacement liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a>, <a href="#ref-liao2023analyticaldietodie3dplacement" role="doc-biblioref">[2]</a></span> 或 instance <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[3]</a></span>, 注意不能理解为 pin, 多个 pin 可能属于同一个 cell/macro, 他们的相对位置是固定的不能独立更新).</li>
+<li>如果不关心 <span class="math inline">\(V\)</span> 中元素的坐标更新, 有时 <span class="math inline">\(V\)</span> 也代表 <strong>pin</strong> 集.</li>
 </ul></li>
-<li><p><strong>Layout</strong>: 元件或电路的 electric function 的几何图形表示 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[4]</a></span>.</p></li>
-<li><p><strong>Standard Cell (std cell) 标准单元</strong>: 一组实现逻辑门的物理单元 (AND, OR, NOT, NAND, etc.) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[4]</a></span>. 他们过于基础以至于被称为 “standard”.</p>
+<li><span class="math inline">\(E\)</span> 有直接连接关系的 node 集合, 其中的元素称为一个 <strong>net</strong>.
+<ul>
+<li>在 Timing-driven placement 里, 一般 <span class="math inline">\(E\)</span> 可能仅代表 Timing arc 集合.</li>
+</ul></li>
+</ul>
+<div id="fig-hypergraph" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hypergraph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="hypergraph.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hypergraph-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Directed Hypergraph <span class="math inline">\((V, E)\)</span> 的两种意义 (Adapted from <span class="citation" data-cites="pingali_2018_beyond"><a href="#ref-pingali_2018_beyond" role="doc-biblioref">[4]</a></span>, 采用 “Undirected convention”); Pin-level 的 <span class="math inline">\(E\)</span> 之间一定没有 intersection; PIs (primary inputs); POs (primary outputs).
+</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Layout</strong>: 元件或电路的 electric function 的几何图形表示 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[5]</a></span>.</p></li>
+<li><p><strong>Standard Cell (std cell) 标准单元</strong>: 一组实现逻辑门的物理单元 (AND, OR, NOT, NAND, etc.) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[5]</a></span>. 他们过于基础以至于被称为 “standard”.</p>
 <div id="fig-layout" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="layout.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: NOT 和 NAND 的 layout <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[4]</a></span>
+Figure&nbsp;2: NOT 和 NAND 的 layout <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[5]</a></span>
 </figcaption>
 </figure>
 </div></li>
@@ -611,7 +632,7 @@ Figure&nbsp;1: NOT 和 NAND 的 layout <span class="citation" data-cites="phdthe
 <img src="mutideck-std-cell.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mutideck-std-cell-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Std cell height 可以是 row height 的整数倍 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[4]</a></span> (其实 Std cell width 也可以是 site width 的整数倍).
+Figure&nbsp;3: Std cell height 可以是 row height 的整数倍 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[5]</a></span> (其实 Std cell width 也可以是 site width 的整数倍).
 </figcaption>
 </figure>
 </div>
@@ -621,7 +642,7 @@ Figure&nbsp;2: Std cell height 可以是 row height 的整数倍 <span class="ci
 <section id="三个阶段" class="level3">
 <h3 class="anchored" data-anchor-id="三个阶段">三个阶段</h3>
 <ul>
-<li><strong>Global (coarse/initial) placement</strong>: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[4]</a></span>.</li>
+<li><strong>Global (coarse/initial) placement</strong>: 把 cell/macro 粗略地放置在芯片上的过程 (不必对齐 row/site, 单元之间允许重叠, 但其实会尽量避免重叠) <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[5]</a></span>.</li>
 </ul>
 <div class="quarto-layout-panel" data-layout="[65,35]">
 <div class="quarto-layout-row">
@@ -632,7 +653,7 @@ Figure&nbsp;2: Std cell height 可以是 row height 的整数倍 <span class="ci
 <img src="legalization.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-legalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Legalization 把 cell/macro 吸附到最近的 row/site 上并推开重叠 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[4]</a></span>
+Figure&nbsp;4: Legalization 把 cell/macro 吸附到最近的 row/site 上并推开重叠 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[5]</a></span>
 </figcaption>
 </figure>
 </div>
@@ -644,7 +665,7 @@ Figure&nbsp;3: Legalization 把 cell/macro 吸附到最近的 row/site 上并推
 <img src="rowdemo.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rowdemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Cell/macro 必须放在 row 上 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[4]</a></span>.
+Figure&nbsp;5: Cell/macro 必须放在 row 上 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[5]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -663,7 +684,7 @@ Figure&nbsp;4: Cell/macro 必须放在 row 上 <span class="citation" data-cites
 <img src="sitedemo.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sitedemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Std cell 必须上下对齐 row, 左右对齐 site <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[4]</a></span>; 且下面一层的 std cell 需要 flip!
+Figure&nbsp;6: Std cell 必须上下对齐 row, 左右对齐 site <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[5]</a></span>; 且下面一层的 std cell 需要 flip!
 </figcaption>
 </figure>
 </div></li>
@@ -678,7 +699,7 @@ Figure&nbsp;5: Std cell 必须上下对齐 row, 左右对齐 site <span class="c
 <img src="wirelength-model.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-wirelength-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 <span class="citation" data-cites="_2024_a7vlsi"><a href="#ref-_2024_a7vlsi" role="doc-biblioref">[5]</a></span>.
+Figure&nbsp;7: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 <span class="citation" data-cites="_2024_a7vlsi"><a href="#ref-_2024_a7vlsi" role="doc-biblioref">[6]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -686,14 +707,14 @@ Figure&nbsp;6: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构
 <section id="density-model" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="density-model">Density Model</h3>
 <ul>
-<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[6]</a></span> (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[3]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
+<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[7]</a></span> (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[3]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
 <div id="fig-bindemo" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bindemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="bindemo.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bindemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: 此图中 bin 的高度是 row height 的 <span class="math inline">\(4\)</span> 倍 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[4]</a></span>
+Figure&nbsp;8: 此图中 bin 的高度是 row height 的 <span class="math inline">\(4\)</span> 倍 <span class="citation" data-cites="phdthesisAlgorithms2019"><a href="#ref-phdthesisAlgorithms2019" role="doc-biblioref">[5]</a></span>
 </figcaption>
 </figure>
 </div></li>
@@ -702,7 +723,10 @@ Figure&nbsp;7: 此图中 bin 的高度是 row height 的 <span class="math inlin
 <section id="timing-model" class="level3">
 <h3 class="anchored" data-anchor-id="timing-model">Timing Model</h3>
 <ul>
-<li>单独引入衡量 Timing 的 explicit form 是困难的 (为什么?). 于是 <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 天才般地通过<strong>引入 net weight 将 timing 的信息融合进 wirelength model 里</strong> 从而使得优化过程考虑了 timing 因素!!</li>
+<li>现在我们还要考虑 slack 的问题. 由于 slack 跟 wirelength 是有关系的, 将 timing term 与线长解耦是不可能的, 即无法在 Loss function 里单独引入衡量 Timing 的项. <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 天才般地通过引入 <strong>Net weight</strong> 这个概念将 timing 的信息融合进 wirelength model 里 (Timing-driven placement).
+<ul>
+<li>一个自然的想法是</li>
+</ul></li>
 </ul>
 <p>TODO</p>
 </section>
@@ -721,14 +745,17 @@ Figure&nbsp;7: 此图中 bin 的高度是 row height 的 <span class="math inlin
 <div id="ref-zhao2024analyticalheterogeneousdietodie3d" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[3] </div><div class="csl-right-inline">Y. Zhao, P. Liao, S. Liu, J. Jiang, Y. Lin, and B. Yu, <span>“Analytical heterogeneous die-to-die 3D placement with macros.”</span> 2024. Available: <a href="https://arxiv.org/abs/2403.09070">https://arxiv.org/abs/2403.09070</a></div>
 </div>
+<div id="ref-pingali_2018_beyond" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">K. Pingali, <span>“Beyond vertex programs: EDA 3.0.”</span> Sigarch, Dec. 2018. Available: <a href="https://www.sigarch.org/beyond-vertex-programs-eda-3-0/">https://www.sigarch.org/beyond-vertex-programs-eda-3-0/</a>. [Accessed: Dec. 06, 2025]</div>
+</div>
 <div id="ref-phdthesisAlgorithms2019" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[4] </div><div class="csl-right-inline">J. Monteiro, <span>“Algorithms to improve area density utilization, routability and timing during detailed placement and legalization of VLSI circuits,”</span> PhD thesis, 2019.</div>
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">J. Monteiro, <span>“Algorithms to improve area density utilization, routability and timing during detailed placement and legalization of VLSI circuits,”</span> PhD thesis, 2019.</div>
 </div>
 <div id="ref-_2024_a7vlsi" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[5] </div><div class="csl-right-inline">iEDA, <span>“A7-VLSI auto placement for circuit cells.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/practice/algorithms/a7.html">https://ieda.oscc.cc/en/train/practice/algorithms/a7.html</a>. [Accessed: Dec. 05, 2025]</div>
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">iEDA, <span>“A7-VLSI auto placement for circuit cells.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/practice/algorithms/a7.html">https://ieda.oscc.cc/en/train/practice/algorithms/a7.html</a>. [Accessed: Dec. 05, 2025]</div>
 </div>
 <div id="ref-_2024_83" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[6] </div><div class="csl-right-inline">iEDA, <span>“8.3 layout problems and modeling.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html">https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html</a>. [Accessed: Dec. 05, 2025]</div>
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">iEDA, <span>“8.3 layout problems and modeling.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html">https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html</a>. [Accessed: Dec. 05, 2025]</div>
 </div>
 </div>
 </section>

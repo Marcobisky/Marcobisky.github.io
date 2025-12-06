@@ -14,11 +14,19 @@ title: "EDA Notes 笔记"
 
 - Net weight @liao_2023_dreamplace 的 idea 告诉我们有些难以单读开一个表达式的「因素」可以融入其它的「因素」里!
 
+- EDA 中很多定义不像数学中那样严谨, 不必深究, 意识到这点即可.
+    - 比如 Netlist $(V, E)$, $V$ 在不同上下文中可能代表 pin 集或者 cell/macro 集. 如果是 directed hypergraph, 则 edge 集在数学上表现为比如 $$E = \bigl\{\{(p_1, p_3), (p_2, p_3), \cdots\}, \{(p_4, p_6), (p_5, p_6), \cdots\}, \cdots \bigr\}$$ E.g., $$E \ni e = \{(p_1, p_3), (p_2, p_3), \cdots\}$$ 但实际上我们还是把 $E$ 当作 vertex 的集合来看待 (下文称 "Undirected convention"): $$E \ni e = \{p_1, p_2, p_3\}$$
+
 ## Some Terms {#sec-eda-terms}
 
 - **Hypergraph 超图**: 图的一种推广, Netlist 常被建模成 (Directed @liao_2023_dreamplace) hypergraph $(V, E)$ (edge 可以有多个 vertex).
-    - $V$ 中的元素代表 **cell/macro** (统称为 node [@liao2023analyticaldietodie3dplacement; @liao_2023_dreamplace] 或 instance @zhao2024analyticalheterogeneousdietodie3d).
-    - $E$ 中的元素称为一个 **net**.
+    - $V$: 
+        - 如果 $V$ 中的元素的坐标是可以**独立**更新的, 则其中的元素代表 **cell/macro** (统称为 node [@liao2023analyticaldietodie3dplacement; @liao_2023_dreamplace] 或 instance @zhao2024analyticalheterogeneousdietodie3d, 注意不能理解为 pin, 多个 pin 可能属于同一个 cell/macro, 他们的相对位置是固定的不能独立更新).
+        - 如果不关心 $V$ 中元素的坐标更新, 有时 $V$ 也代表 **pin** 集.
+    - $E$ 有直接连接关系的 node 集合, 其中的元素称为一个 **net**.
+        - 在 Timing-driven placement 里, 一般 $E$ 可能仅代表 Timing arc 集合.
+
+    ![Directed Hypergraph $(V, E)$ 的两种意义 (Adapted from @pingali_2018_beyond, 采用 "Undirected convention"); Pin-level 的 $E$ 之间一定没有 intersection; PIs (primary inputs); POs (primary outputs).](hypergraph.png){#fig-hypergraph width=90%}
 
 - **Layout**: 元件或电路的 electric function 的几何图形表示 @phdthesisAlgorithms2019.
 
@@ -66,7 +74,8 @@ title: "EDA Notes 笔记"
 
 ### Timing Model
 
-- 单独引入衡量 Timing 的 explicit form 是困难的 (为什么?). 于是 @liao_2023_dreamplace 天才般地通过**引入 net weight 将 timing 的信息融合进 wirelength model 里** 从而使得优化过程考虑了 timing 因素!!
+- 现在我们还要考虑 slack 的问题. 由于 slack 跟 wirelength 是有关系的, 将 timing term 与线长解耦是不可能的, 即无法在 Loss function 里单独引入衡量 Timing 的项. @liao_2023_dreamplace 天才般地通过引入 **Net weight** 这个概念将 timing 的信息融合进 wirelength model 里 (Timing-driven placement).
+    - 一个自然的想法是
 
 TODO
 
