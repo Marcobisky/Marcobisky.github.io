@@ -529,7 +529,7 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#takeaways" id="toc-takeaways" class="nav-link active" data-scroll-target="#takeaways">Takeaways</a></li>
+  <li><a href="#sec-eda-takeaways" id="toc-sec-eda-takeaways" class="nav-link active" data-scroll-target="#sec-eda-takeaways">Takeaways</a></li>
   <li><a href="#sec-eda-terms" id="toc-sec-eda-terms" class="nav-link" data-scroll-target="#sec-eda-terms">Some Terms</a></li>
   <li><a href="#placement-布局" id="toc-placement-布局" class="nav-link" data-scroll-target="#placement-布局">Placement 布局</a>
   <ul class="collapse">
@@ -565,8 +565,8 @@ window.Quarto = {
 </header>
 
 
-<section id="takeaways" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="takeaways">Takeaways</h2>
+<section id="sec-eda-takeaways" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-eda-takeaways">Takeaways</h2>
 <ul>
 <li>处处都是优化问题, 一般的思路就是先 brainstorm 你能想到的<strong>要减小</strong>的「因素<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>」, 然后一股脑<strong>全加起来</strong>作为 Loss function. 然后:
 <ul>
@@ -580,16 +580,17 @@ window.Quarto = {
 </ul>
 <div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;要增大的话填负号即可; 当然这些「因素」很多时候是相互冲突的, 而且有些「因素」比较定性, 一时间很难想出清晰的表达式, 即使有清晰的表达式计算量也极其大.</p></div></div><ul>
 <li><p>Net weight <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 的 idea 告诉我们有些难以单读开一个表达式的「因素」可以融入其它的「因素」里!</p></li>
-<li><p>EDA 中很多定义不像数学中那样严谨, 不必深究, 意识到这点即可.</p>
+<li><p><strong>体会概念背后的直觉意义而不是定义本身</strong></p>
 <ul>
-<li>比如 Netlist <span class="math inline">\((V, E)\)</span>, <span class="math inline">\(V\)</span> 在不同上下文中可能代表 pin 集或者 cell/macro 集. 如果是 directed hypergraph, 则 edge 集在数学上表现为比如 <span class="math display">\[E = \bigl\{\{(p_1, p_3), (p_2, p_3), \cdots\}, \{(p_4, p_6), (p_5, p_6), \cdots\}, \cdots \bigr\}\]</span> E.g., <span class="math display">\[E \ni e = \{(p_1, p_3), (p_2, p_3), \cdots\}\]</span> 但实际上我们还是把 <span class="math inline">\(E\)</span> 当作 vertex 的集合来看待 (下文称 “Undirected convention”): <span class="math display">\[E \ni e = \{p_1, p_2, p_3\}\]</span></li>
+<li>这在数学和工程学上同样重要. 学科中都有很多「原子」概念, 比如数学中的 group, topological space, EDA 中的 pin, node 等, 他们封装了一些非常基本的思想, 出现频率非常高, 需要牢记. 但是在科研领域, 会发现出现了很多为了研究某种<strong>特定的对象</strong>外延出来或者人为定义的新概念, 比如数学中的 Schwartz space (为了严格化 Fourier transform 而定义的函数空间), <span class="math inline">\(\pi\)</span>-system / semialgebra (为了定义 measure 而定义的集合族), EDA 中的 net slack (为了外延 slack 到 net 上而人为定义的量<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>), 它们<strong>没有所谓的「正确」定义</strong>, 只要定义出来的量能够反映你想表达的东西即可. 不需要花时间记住定义问题, 理解作者的研究方法和解决问题的思路! 如果作者没有说明具体定义, 大不了你自己定义一个类似的量来替代它们!</li>
+<li>再比如 Netlist <span class="math inline">\((V, E)\)</span> 的两种定义方式, “Undirected convention”, lol.</li>
 </ul></li>
 </ul>
-</section>
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;Slack 本来是针对某个 pin/node 定义的, <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span> 却不加定义地在文章中使用了 “net slack” 这个概念, 可见作者想去度量一个 net 的时序违规程度, 如何定义呢? 可以用该 net 中所有 sink 的最坏 slack, 当然也可以用该 net 中所有 sink 的 slack 之和, 没有唯一答案!</p></div></div></section>
 <section id="sec-eda-terms" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="sec-eda-terms">Some Terms</h2>
 <ul>
-<li><p><strong>Hypergraph 超图</strong>: 图的一种推广, Netlist 常被建模成 (Directed <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span>) hypergraph <span class="math inline">\((V, E)\)</span> (edge 可以有多个 vertex).</p>
+<li><p><strong>Hypergraph 超图</strong>: 图的一种推广, Netlist 常被建模成 (Directed <span class="citation" data-cites="liao_2023_dreamplace"><a href="#ref-liao_2023_dreamplace" role="doc-biblioref">[1]</a></span>) hypergraph <span class="math inline">\((V, E)\)</span> (edge 可以有多个 vertex). 一般有 Node-level 和 Pin-level 两种定义方式:</p>
 <ul>
 <li><span class="math inline">\(V\)</span>:
 <ul>
@@ -599,6 +600,7 @@ window.Quarto = {
 <li><span class="math inline">\(E\)</span> 有直接连接关系的 node 集合, 其中的元素称为一个 <strong>net</strong>.
 <ul>
 <li>在 Timing-driven placement 里, 一般 <span class="math inline">\(E\)</span> 可能仅代表 Timing arc 集合.</li>
+<li><strong>“Undirected convention”</strong>: 虽然 hypergraph 是 directed 的, 即 edge 集在数学上表现为比如: <span class="math display">\[E = \bigl\{\{(p_1, p_3), (p_2, p_3), \cdots\}, \{(p_4, p_6), (p_5, p_6), \cdots\}, \cdots \bigr\}\]</span> E.g., <span class="math display">\[E \ni e = \{(p_1, p_3), (p_2, p_3), \cdots\}\]</span> 但为了 Notation 的简洁性, 我们还是把 <span class="math inline">\(E\)</span> 当作 vertex 的集合来看待 (即看作 undirected hypergraph): <span class="math display">\[E \ni e = \{p_1, p_2, p_3\}\]</span></li>
 </ul></li>
 </ul>
 <div id="fig-hypergraph" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -707,7 +709,7 @@ Figure&nbsp;7: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构
 <section id="density-model" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="density-model">Density Model</h3>
 <ul>
-<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[7]</a></span> (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[3]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
+<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[7]</a></span> (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[3]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
 <div id="fig-bindemo" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bindemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -719,7 +721,7 @@ Figure&nbsp;8: 此图中 bin 的高度是 row height 的 <span class="math inlin
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;注意区分 bin 和 row/site 围成的小方格! 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.</p></div></div></section>
+<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;注意区分 bin 和 row/site 围成的小方格! 前者是为了计算密度而人为划分的区域, 后者是为了放置 cell/macro 而划分的区域.</p></div></div></section>
 <section id="timing-model" class="level3">
 <h3 class="anchored" data-anchor-id="timing-model">Timing Model</h3>
 <ul>
