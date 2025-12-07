@@ -229,12 +229,31 @@ title: "Glossary 名词解释"
 ![Sparse matrix 可以用三个数组来储存](sparse-matrix-csr.png){#fig-sparse-matrix-csr width=85%}
 :::
 
+- Transistor Architectures: 通过改变晶体管的**物理构造** (但基本原理不变!), 主要为了解决在**沟道尺寸减小**后的 **Leakage current** 问题.
+    - **PlanarFET**: 最传统的平面型晶体管, 沟道宽度极限 $W_G = 20\text{ nm}$ (N20/20N, 见 @fig-planar).
+    - **FinFET**: 鳍式场效应管. $W_G = 3\text{ nm}$ (N3). 2011 年 Intel 首次量产 FinFET 工艺. 2015 年, TSMC (N16), Samsung (N14) 也开始量产 FinFET.
+    - **GAAFET (Gate-All-Around)**: 栅极全环绕晶体管, 亦称 **MBC-FET (Samsung), Nanosheet-FET (TSMC), Ribbon-FET (Intel)**. 从 N2 开始将全面取代 FinFET. 可以向 $z$ 方向堆叠纳米片 (nanosheet), 而不需要像 FinFET 只能横着长 fin 鳞片, 可以提升 PPA.
+        - **Intel 18A** 叠了 $4$ 片 nanosheet @11075006, TSMC 和 Samsung 初代只有 $3$ 片.
+    - **Forksheet-FET**: 将 NMOS 和 PMOS 的 nanosheet 直接放在一起, 通过中间的介电质墙隔开.
+    - **CFET (Complementary FET)**: 直接将 PMOS 的 nanosheet 堆叠在 NMOS 的 nanosheet 上方, 这样面积直接减半.
+
+:::{layout = "[28,72]"}
+![PlanarFET (Adapted from @semiecosystem_2024_imec).](planar.png){#fig-planar}
+
+![Transistor architecture 的后续发展 @verschueren_2017_outer. CH: Cell height, CPP: Contacted Poly Pitch](tranarch.png){#fig-tranarch}
+:::
+
+- **Power delivery network (PDN)**: 电源分配网络.
+    - **Backside power delivery (BSPD)**: 通过芯片背面供电 (而不是跟信号线在同一侧)
+
+    ![BSPD 示意图 @Hossen2020PowerDN.](bspd.png){#fig-bspd width=90%}
+
 ### Packaging 封装
 
 - **Wafer 晶圆, Die, Chiplet Arch**
     - Die 和 Tile: 一样的概念, 前者强调物理实体, 后者强调逻辑功能单元.
 
-    ![Wafer 是圆圆的一整块, 上面可以切下来 $A,B,C,D$ 四种不同的 die; Chiplet 思想 (Use smaller dies) 与其如何提高良率、降低成本 @filho_2024_what](chiplet.png){#fig-chiplet}
+    ![Wafer 是圆圆的一整块, 上面可以切下来 $A,B,C,D$ 四种不同的 die; Chiplet 思想 (Use smaller dies) 与其如何提高良率、降低成本 @filho_2024_what](chiplet.png){#fig-chiplet width=90%}
 
 :::{.column-margin}
 ![多个 Die 通过 D2D connection (die-to-die) 形成 SoC @filho_2024_what](die2soc.png){#fig-die2soc}
@@ -247,9 +266,6 @@ title: "Glossary 名词解释"
 
 - **pitch 间距**: 两个相邻的重复元件中心之间的距离. HBT 的优点就是 pitch 比较小 (fine), 集成度高.
 
-:::{.column-margin}
-![FinFET (鳍式场效应管) 的 transistor-to-transistor pitch 仅有 $57$ nm @brancheducation_2024_how.](finfet.png){#fig-finfet}
-:::
 
 - **RSMTs (Rectilinear Steiner Minimal Trees)**: 简单理解为 Manhattan 走线的最小生成树 (可以引入额外的 point 作为中间点, 称为 **Steiner points** @fig-steiner-pt, 原始给定的点一般是 pins). 
 

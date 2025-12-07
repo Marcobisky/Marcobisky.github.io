@@ -1,0 +1,178 @@
+---
+title: "EDA: 3D IC Placement"
+---
+
+## 3D Global Placement
+
+> 目前为乱序. 所有 terms 见 [Glossary 名词解释](../glossary/glossary.qmd#sec-eda-terms).
+
+### Problem Formulation
+
+给定 Netlist $(V, E)$, 给出每个 cell 的每个 pin 的 3D 坐标 $(x, y, z)$, 使得某个目标函数 $L$ (如 wirelength + density + timing) 最小.
+
+- 已知:
+    - cell 和 macro 都是长方体, 所有 cell 的高度 $z$ 统一为所在 die 的厚度 (且两个 die 厚度一样) @10323747. 所有 std cell 宽度均为 row height. 而且给定 Macro & std cell library.
+    - $z$ 为二值 (top/bottom die).
+    - HBT 大小和 pitch 已知, pin spacing 上限 和 die boundary 已知.
+    - 上下 die row 信息.
+
+- 约束:
+    - HBT 在两个 die 的表面 (有大小, pitch 要求 (比 cell size 大很多) 和**数量上限** (每加一个 HBT 会有相同大小的惩罚)).
+    - 如果一个 net 跨层 ("Split net"), 则必须插入且仅插入一个 HBT.
+    - **Heterogeneous tech 不同工艺**: 上 die 和下 die 的工艺不同, 比如如果上 die 的工艺较差, 同一个 AND 门放在上 die 上的占面积会更大. 不同工艺的 cell characteristic, cell height, cell size, cell pin locations 可能不同 @10323747.
+
+        ![由于上下 die 工艺不同, 同一个 cell/macro 在不同 die 上占面积不同 @zhao2024analyticalheterogeneousdietodie3d](heterogeneous_tech.png){#fig-heterogeneous-tech width=70%}
+    
+    - 所有 std cell 必须放在 row 上 (macro 不做要求), 且任意两个元件不能重叠 @10323747.
+    - 上下 die 的 utilization ratio (所有该 die 的 cell/macro area 之和除以该 die 面积) 有上限 (分别记作 $u^+, u^-$ @10323747, cell 不能全挤在一边).
+    - std cell 不能旋转 (R0). Macro只能旋转 R0/R90/R180/R270. cell 和 macro 都不能镜像.
+
+- 求解:
+    - 上/下 die placement 结果 (每个 cell 左下角坐标和旋转角度).
+    - HBT placement 结果 (加上 net 信息)
+
+### Loss Function 目标函数构成
+
+#### ePlace
+
+- **动机**: 为了使 cell 之间保持距离, 用电场的排斥力来建模这个过程 @eplace2015.
+- 电荷量 $q$ 用 cell 的体积表示, 大 cell 对其它 cell 的排斥力很大.
+- 用总 potential energy 来作为 $L$ 的一部分 (希望 cell 之间距离更远), 跟 wirelength 是冲突的目标.
+- **Fillers**: 为了解决 maximum utilization constraint 而提出的假象的带电液体. 有两类 fillers:
+    - **z-fixed fillers**: 想象上/下 die 是两个**独立封闭**的长方体容器, 以 top die 为例, 如果 $u^+ = 80\%$, 则加入体积为 top die 总体积 $20\%$ 的液体 @10323747, bottom die 同理. 该液体密度均匀, 容易想象当 cell 太多时, 液体会把 cell 挤到另一层去 (而液体本身不会跨层).
+        - Initialization: **均匀**地滴灌在该层 die 上 [@eplace2015; @liao2023analyticaldietodie3dplacement].
+    - **free fillers**: 将上下 die 作为一个整体的「大容器」$\Omega$ @zhao2024analyticalheterogeneousdietodie3d, cell 和 macro 浮在其中, 它们总体积是固定的, 那么剩下的空间 $\text{vol}_{fr}$ (也是固定的) 填满了 free fillers. 具体原因不明, 可能是为了缓冲? 也可以不用 (E.g., @Chen2024 没有用 free fillers) 
+        - Initialization: @zhao2024analyticalheterogeneousdietodie3d 的方法是: 想象有体积为 $\text{vol}_{fr}$ 的液体, 用滴灌按照以 $\Omega$ 中心为均值的正态分布逐滴滴在「大容器」内 (重合的液滴不合并, 所以密度可能不均匀).
+
+- **Cell 和 macro 的 initialization**: 跟 free filler 一模一样 @liao2023analyticaldietodie3dplacement, 也是用滴灌的方法.
+
+![z-fixed fillers (gray); macros (red); std cells (top/bottom, blue); free filler (hide) @zhao2024analyticalheterogeneousdietodie3d](eplace-init.png){#fig-eplace-init width=90%}
+
+#### Total half-perimeter wirelength (HPWL)
+
+- **动机**: 同一个 net 的 pin 不要太分散以至于连接的导线太长.
+- 上下 die 都可以分别算出一个 HPWL, 然后求和. (HBT 用中心点位置来算 @10323747)
+
+### 数据格式要求
+
+- 上下 die 的 bottom-left corner 规定坐标为 $(0, 0)$, 且同坐标代表物理上的同一位置 (E.g., top die 的 (10, 20) 和 bottom die 的 (10, 20) 是垂直对齐的) @10323747.
+
+
+
+## DREAMPlace Naming Manual 命名法
+
+- `flat_netpin`, `netpin_start`: 见下方 pin-list 表示法 (CSR).
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## pin-list 表示法 (CSR)
+
+我们的目标是设计一种储存 net-pin 对应关系的数据结构. 首先将所有 net 的所有 pin 安排上**全局索引**. E.g., 假设我们有 $3$ 个 net, 分别包含以下 pin (用全局索引表示):
+
+```plain
+net0 = [p1, p7, p3]
+net1 = [p8, p2]
+net2 = [p6, p5, p9, p4]
+```
+
+将上述 pin 展平来定义 `flat_netpin` 数组:
+
+```plain
+flat_netpin = [p1, p7, p3, p8, p2, p6, p5, p9, p4]
+``` 
+
+当然实际上我们会用 pin 的全局索引值来表示 pin:
+
+```cpp
+int flat_netpin[] = {1, 7, 3, 8, 2, 6, 5, 9, 4};
+```
+
+再定义 `netpin_start` 数组来记录每个 net 的起始位置:
+
+```cpp
+int netpin_start[] = {0, 3, 5, 9};
+```
+
+这样, net-pin 对应关系就编码在了两个数组 `flat_netpin` 和 `netpin_start` 中. 这种方法 **节省内存空间、方便 GPU 并行处理**.
+:::
+<!-- ----------------------------------------- -->
+
+### Database 数据库
+
+#### Place2D
+
+- **Index 规则**: `layer = 0` (top), `1` (bottom), `2` (HBT).
+
+- `xl(0)`, `yl(0)`, `xh(0)`, `yh(0)`: Top die 可放置 cell 的区域 (xlow, ylow, xhigh, yhigh).
+    - `xl(2)`, `yl(2)`, `xh(2)`, `yh(2)`: 中间层放置 bonding terminal 的区域 (有 padding).
+
+- `raw_xl(0)`, `raw_yl(0)`, `raw_xh(0)`, `raw_yh(0)`; `gp_xl(0)`, `gp_yl(0)`, `gp_xh(0)`, `gp_yh(0)`: 跟上面没区别 (就是复制).
+
+- `die_area`: Die 面积 (> (`xh(0)`-`xl(0)`) * (`yh(0)`-`yl(0)`) ).
+
+- `site_width`, `row_height`: Site 的宽度和高度.
+
+- `num_physical_nodes`：原始 placedb 里的所有 node 数 (movable + 固定 + IO + HBT), 还没加 filler.
+
+- `num_movable_nodes`：所有 movable nodes 数 (对 2D 情形就是 num_nodes - num_terminals).
+
+- `num_total_all_nodes`：按 pin map 数出来的 node 数, 要求和 `num_movable_nodes` 一致 (有 assert).
+
+- `num_nets` / `num_pins`：普通意义上的 nets / pins 数目.
+
+- `num_movable_pins`：可动节点 + IO 节点上的 pin 总数 (因为 IO 也要参与布线 / timing).
+
+- `num_bonding_terminals`：插入的 HBT 个数.
+
+#### ops/partition
+
+- `node_partition_mask = [1, 1, 0, 0]`: 表示前两个 node 在 bottom die, 后两个在 top die.
+
+- `net_bonding_terminal_mask = [0, 1, 0]`: 表示只有第二个 net 跨层 (需要 HBT).
+
+## Environment Setup
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## MacOS (未成功)
+
+Clone 仓库:
+
+```bash
+git clone <repository-url>
+git submodule update --init --recursive
+```
+
+创建 `Python` 环境:
+
+```bash
+conda create -n cupid python=3.9
+conda activate cupid
+pip install torch torchvision torchaudio
+pip install pyunpack patool matplotlib cairocffi pkgconfig scipy
+pip install "numpy>=1.15.4,<2.0"
+pip install setuptools
+mkdir -p build
+cd build
+```
+
+安装 `openMP` 支持:
+
+```bash
+brew install libomp
+brew --prefix libomp
+export OpenMP_ROOT=/opt/homebrew/opt/libomp
+export OpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I/opt/homebrew/opt/libomp/include"
+export OpenMP_CXX_LIB_NAMES="omp"
+export OpenMP_omp_LIBRARY=/opt/homebrew/opt/libomp/lib/libomp.dylib
+```
+
+安装 `bison`:
+
+```bash
+brew install bison
+```
+:::
+<!-- ----------------------------------------- -->
+
+
