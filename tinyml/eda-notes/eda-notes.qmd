@@ -7,7 +7,7 @@ title: "EDA Notes 笔记"
 - 处处都是优化问题, 一般的思路就是先 brainstorm 你能想到的**要减小**的「因素[^factors]」, 然后一股脑**全加起来**作为 Loss function. 然后:
     - @liao_2023_dreamplace 给我们的启发就是将这个问题等价变成一个训练神经网络的问题, 利用 `torch` 的生态来并行计算.
     - 如果 Loss function 里有不可微的部分. 两种办法: 
-        - 直接分段函数哈哈哈 (反正 `torch` 里面也是用查找表算的梯度, 它也不知道它优化的函数可不可微哈哈, 这个办法在 @liao2023analyticaldietodie3dplacement 叫做 **subgradient**).
+        - 直接分段函数哈哈哈 (反正 `torch` 里面也是用查找表算的梯度, 它也不知道它优化的函数可不可微哈哈, 这个办法在 @liao2023analyticaldietodie3dplacement 叫做 **subgradient**, 但是很多时候如果微小自变量的变化输出不变时会导致训练停滞! 如果梯度突变的话有可能带来震荡和停滞).
         - 用某种平滑的方法来强行可微, 方法很多, 你也可以自己设计.
 
 [^factors]: 要增大的话填负号即可; 当然这些「因素」很多时候是相互冲突的, 而且有些「因素」比较定性, 一时间很难想出清晰的表达式, 即使有清晰的表达式计算量也极其大.
@@ -88,7 +88,7 @@ title: "EDA Notes 笔记"
         - 也不完全是, 这个增量本身的变化是带动量的 (需要进行历史平滑).
     - 当然我忽略了以下细节 (不重要): 
         - 所有量都在 Log scale 下运算.
-        - 先要把 slack 转为另一个叫 Criticality 的量.
+        - slack 还要先被 WNS normalized 到一个叫 Criticality 的量.
         - 作者还引入了两个超参数 $\alpha, \eta$ 来调节历史平滑的程度和「小球」的质量大小.
 
 ## References

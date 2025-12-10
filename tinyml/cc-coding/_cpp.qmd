@@ -181,6 +181,29 @@ using IntList = std::vector<int>;
 typedef std::vector<int> IntList;
 ```
 
+#### Overloading 重载
+
+- 重载使得 `+`, `*` 这些运算符可以用于自定义 class 之间的运算 (而不仅限于 `int`, `float` 等).
+- `Python` 里面也有 `__add__` 这种魔法方法实现重载.
+- 重载是不好的编程习惯! 但在写 API 的时候要提供重载和非重载两种接口供开发者使用 (比如下面的 `Add()` 和 `operator+()` 方法), 定义的时候可以用重载定义非重载, 也可以反过来:
+
+::: {layout-ncol=2}
+```{.cpp filename="overload_op_calls_method.cpp" #lst-overload_op_calls_methodcpp}
+{{< include src/cpp/overload_op_calls_method.cpp >}}
+```
+
+```{.cpp filename="overload_method_calls_op.cpp" #lst-overload_method_calls_opcpp}
+{{< include src/cpp/overload_method_calls_op.cpp >}}
+```
+:::
+
+这样就可以直接这样来将两个 `Point` 对象相加:
+
+```{.cpp filename="overload_main.cpp" #lst-overloadmaincpp}
+{{< include src/cpp/overload_main.cpp >}}
+```
+
+
 ### Namespace 命名空间
 
 - 我们希望在不同的场景中给功能类似的函数起**完全相同的名字** (比如下面例子的 `print()` 函数), 为了**避免命名冲突**, 我们可以使用 `namespace`:

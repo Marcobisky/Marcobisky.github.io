@@ -956,6 +956,90 @@ Figure&nbsp;1: 循环引用问题
 <div class="sourceCode" id="cb11"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> IntList <span class="op">=</span> <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;;</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="kw">typedef</span> <span class="bu">std::</span>vector<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> IntList<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
+<section id="overloading-重载" class="level4">
+<h4 class="anchored" data-anchor-id="overloading-重载">Overloading 重载</h4>
+<ul>
+<li>重载使得 <code>+</code>, <code>*</code> 这些运算符可以用于自定义 class 之间的运算 (而不仅限于 <code>int</code>, <code>float</code> 等).</li>
+<li><code>Python</code> 里面也有 <code>__add__</code> 这种魔法方法实现重载.</li>
+<li>重载是不好的编程习惯! 但在写 API 的时候要提供重载和非重载两种接口供开发者使用 (比如下面的 <code>Add()</code> 和 <code>operator+()</code> 方法), 定义的时候可以用重载定义非重载, 也可以反过来:</li>
+</ul>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>overload_op_calls_method.cpp</strong></pre>
+</div>
+<div class="sourceCode" id="lst-overload_op_calls_methodcpp" data-filename="overload_op_calls_method.cpp"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-overload_op_calls_methodcpp-1"><a href="#lst-overload_op_calls_methodcpp-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Point</span>
+<span id="lst-overload_op_calls_methodcpp-2"><a href="#lst-overload_op_calls_methodcpp-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="lst-overload_op_calls_methodcpp-3"><a href="#lst-overload_op_calls_methodcpp-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="lst-overload_op_calls_methodcpp-4"><a href="#lst-overload_op_calls_methodcpp-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> x<span class="op">,</span> y<span class="op">;</span></span>
+<span id="lst-overload_op_calls_methodcpp-5"><a href="#lst-overload_op_calls_methodcpp-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-overload_op_calls_methodcpp-6"><a href="#lst-overload_op_calls_methodcpp-6" aria-hidden="true" tabindex="-1"></a>    Point<span class="op">(</span><span class="dt">double</span> x_coor<span class="op">,</span> <span class="dt">double</span> y_coor<span class="op">)</span></span>
+<span id="lst-overload_op_calls_methodcpp-7"><a href="#lst-overload_op_calls_methodcpp-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">:</span> x<span class="op">(</span>x_coor<span class="op">),</span> y<span class="op">(</span>y_coor<span class="op">)</span> <span class="op">{}</span></span>
+<span id="lst-overload_op_calls_methodcpp-8"><a href="#lst-overload_op_calls_methodcpp-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-overload_op_calls_methodcpp-9"><a href="#lst-overload_op_calls_methodcpp-9" aria-hidden="true" tabindex="-1"></a>    Point Add<span class="op">(</span><span class="at">const</span> Point<span class="op">&amp;</span> other<span class="op">)</span> <span class="at">const</span></span>
+<span id="lst-overload_op_calls_methodcpp-10"><a href="#lst-overload_op_calls_methodcpp-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-overload_op_calls_methodcpp-11"><a href="#lst-overload_op_calls_methodcpp-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Point<span class="op">(</span>x <span class="op">+</span> other<span class="op">.</span>x<span class="op">,</span> y <span class="op">+</span> other<span class="op">.</span>y<span class="op">);</span></span>
+<span id="lst-overload_op_calls_methodcpp-12"><a href="#lst-overload_op_calls_methodcpp-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-overload_op_calls_methodcpp-13"><a href="#lst-overload_op_calls_methodcpp-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-overload_op_calls_methodcpp-14"><a href="#lst-overload_op_calls_methodcpp-14" aria-hidden="true" tabindex="-1"></a>    Point <span class="kw">operator</span><span class="op">+(</span><span class="at">const</span> Point<span class="op">&amp;</span> other<span class="op">)</span> <span class="at">const</span></span>
+<span id="lst-overload_op_calls_methodcpp-15"><a href="#lst-overload_op_calls_methodcpp-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-overload_op_calls_methodcpp-16"><a href="#lst-overload_op_calls_methodcpp-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Add<span class="op">(</span>other<span class="op">);</span></span>
+<span id="lst-overload_op_calls_methodcpp-17"><a href="#lst-overload_op_calls_methodcpp-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-overload_op_calls_methodcpp-18"><a href="#lst-overload_op_calls_methodcpp-18" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="lst-overload_op_calls_methodcpp-19"><a href="#lst-overload_op_calls_methodcpp-19" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>overload_method_calls_op.cpp</strong></pre>
+</div>
+<div class="sourceCode" id="lst-overload_method_calls_opcpp" data-filename="overload_method_calls_op.cpp"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-overload_method_calls_opcpp-1"><a href="#lst-overload_method_calls_opcpp-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Point</span>
+<span id="lst-overload_method_calls_opcpp-2"><a href="#lst-overload_method_calls_opcpp-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="lst-overload_method_calls_opcpp-3"><a href="#lst-overload_method_calls_opcpp-3" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="lst-overload_method_calls_opcpp-4"><a href="#lst-overload_method_calls_opcpp-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> x<span class="op">,</span> y<span class="op">;</span></span>
+<span id="lst-overload_method_calls_opcpp-5"><a href="#lst-overload_method_calls_opcpp-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-overload_method_calls_opcpp-6"><a href="#lst-overload_method_calls_opcpp-6" aria-hidden="true" tabindex="-1"></a>    Point<span class="op">(</span><span class="dt">double</span> x_coor<span class="op">,</span> <span class="dt">double</span> y_coor<span class="op">)</span></span>
+<span id="lst-overload_method_calls_opcpp-7"><a href="#lst-overload_method_calls_opcpp-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">:</span> x<span class="op">(</span>x_coor<span class="op">),</span> y<span class="op">(</span>y_coor<span class="op">)</span> <span class="op">{}</span></span>
+<span id="lst-overload_method_calls_opcpp-8"><a href="#lst-overload_method_calls_opcpp-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-overload_method_calls_opcpp-9"><a href="#lst-overload_method_calls_opcpp-9" aria-hidden="true" tabindex="-1"></a>    Point Add<span class="op">(</span><span class="at">const</span> Point<span class="op">&amp;</span> other<span class="op">)</span> <span class="at">const</span></span>
+<span id="lst-overload_method_calls_opcpp-10"><a href="#lst-overload_method_calls_opcpp-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-overload_method_calls_opcpp-11"><a href="#lst-overload_method_calls_opcpp-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">*</span><span class="kw">this</span> <span class="op">+</span> other<span class="op">;</span></span>
+<span id="lst-overload_method_calls_opcpp-12"><a href="#lst-overload_method_calls_opcpp-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-overload_method_calls_opcpp-13"><a href="#lst-overload_method_calls_opcpp-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-overload_method_calls_opcpp-14"><a href="#lst-overload_method_calls_opcpp-14" aria-hidden="true" tabindex="-1"></a>    Point <span class="kw">operator</span><span class="op">+(</span><span class="at">const</span> Point<span class="op">&amp;</span> other<span class="op">)</span> <span class="at">const</span></span>
+<span id="lst-overload_method_calls_opcpp-15"><a href="#lst-overload_method_calls_opcpp-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-overload_method_calls_opcpp-16"><a href="#lst-overload_method_calls_opcpp-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> Point<span class="op">(</span>x <span class="op">+</span> other<span class="op">.</span>x<span class="op">,</span> y <span class="op">+</span> other<span class="op">.</span>y<span class="op">);</span></span>
+<span id="lst-overload_method_calls_opcpp-17"><a href="#lst-overload_method_calls_opcpp-17" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-overload_method_calls_opcpp-18"><a href="#lst-overload_method_calls_opcpp-18" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="lst-overload_method_calls_opcpp-19"><a href="#lst-overload_method_calls_opcpp-19" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<p>这样就可以直接这样来将两个 <code>Point</code> 对象相加:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>overload_main.cpp</strong></pre>
+</div>
+<div class="sourceCode" id="lst-overloadmaincpp" data-filename="overload_main.cpp"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-overloadmaincpp-1"><a href="#lst-overloadmaincpp-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="lst-overloadmaincpp-2"><a href="#lst-overloadmaincpp-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">"overload_op_calls_method.cpp"</span></span>
+<span id="lst-overloadmaincpp-3"><a href="#lst-overloadmaincpp-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-overloadmaincpp-4"><a href="#lst-overloadmaincpp-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span></span>
+<span id="lst-overloadmaincpp-5"><a href="#lst-overloadmaincpp-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="lst-overloadmaincpp-6"><a href="#lst-overloadmaincpp-6" aria-hidden="true" tabindex="-1"></a>    Point p1<span class="op">(</span><span class="fl">1.0</span><span class="op">,</span> <span class="fl">2.0</span><span class="op">);</span></span>
+<span id="lst-overloadmaincpp-7"><a href="#lst-overloadmaincpp-7" aria-hidden="true" tabindex="-1"></a>    Point p2<span class="op">(</span><span class="fl">3.0</span><span class="op">,</span> <span class="fl">4.0</span><span class="op">);</span></span>
+<span id="lst-overloadmaincpp-8"><a href="#lst-overloadmaincpp-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-overloadmaincpp-9"><a href="#lst-overloadmaincpp-9" aria-hidden="true" tabindex="-1"></a>    Point p3 <span class="op">=</span> p1 <span class="op">+</span> p2<span class="op">;</span>  <span class="co">// i.e., p3 = p1.operator+(p2);</span></span>
+<span id="lst-overloadmaincpp-10"><a href="#lst-overloadmaincpp-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"p3: ("</span> <span class="op">&lt;&lt;</span> p3<span class="op">.</span>x <span class="op">&lt;&lt;</span> <span class="st">", "</span> <span class="op">&lt;&lt;</span> p3<span class="op">.</span>y <span class="op">&lt;&lt;</span> <span class="st">")</span><span class="sc">\n</span><span class="st">"</span><span class="op">;</span> <span class="co">// p3: (4, 6)</span></span>
+<span id="lst-overloadmaincpp-11"><a href="#lst-overloadmaincpp-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-overloadmaincpp-12"><a href="#lst-overloadmaincpp-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="lst-overloadmaincpp-13"><a href="#lst-overloadmaincpp-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-overloadmaincpp-14"><a href="#lst-overloadmaincpp-14" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 <section id="namespace-命名空间" class="level3">
 <h3 class="anchored" data-anchor-id="namespace-命名空间">Namespace 命名空间</h3>
