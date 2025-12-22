@@ -10,7 +10,1170 @@
 <atom:link href="https://marcobisky.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Getting better every second!</description>
 <generator>quarto-1.7.32</generator>
-<lastBuildDate>Tue, 04 Nov 2025 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Fri, 19 Dec 2025 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>DIP Crash Course 数字图像处理速成笔记</title>
+  <dc:creator>Marcobisky </dc:creator>
+  <link>https://marcobisky.github.io/posts/dip-crash-course/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<blockquote class="blockquote">
+<p>将所有的开放问题的 solution 当作一个普通的解决方法来看待, 它们绝不是最优或者唯一的解决方案.</p>
+</blockquote>
+<section id="basic-conventions-基本约定" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="basic-conventions-基本约定"><span class="header-section-number">1</span> Basic Conventions 基本约定</h2>
+<ul>
+<li><p>Image 默认为 <strong>sampling</strong> 和 <strong>quantization</strong> 之后的数字图像</p>
+<ul>
+<li><strong>Spacial resolution 空间分辨率</strong>: 长宽方向的采样点数的乘积.</li>
+<li><strong>Intensity resolution 强度分辨率</strong>: 量化的精度, 一般用每个像素的 bit 数表示. <strong>默认为 <img src="https://latex.codecogs.com/png.latex?8"> bit (<img src="https://latex.codecogs.com/png.latex?%5B0,%20255%5D">)</strong>.</li>
+</ul></li>
+<li><p><strong>Color space 颜色空间</strong>: 单色可见光的波长在 <img src="https://latex.codecogs.com/png.latex?%5B380,%20780%5D%20%5Ctext%7B%20nm%7D">, 每一束光都可以有任意强度的单色光分量 (即「光谱」), 因此所有光构成一个<strong>不可数无穷维拓扑向量空间</strong>.</p>
+<ul>
+<li>但是人眼有三种类型的视锥细胞 (L, M, S) 对不同的频率成分有 (不会变化的) 不同的敏感度, 它们自动将所有光<strong>线性映射</strong>到一个三维子空间 <img src="https://latex.codecogs.com/png.latex?%5COmega"> 中 (想想为什么是线性的, 因为是积分). 即使两个光的光谱不同, 但它们在这个三维子空间的投影相同, 人眼也无法区分它们.</li>
+<li>不同的应用场景在 <img src="https://latex.codecogs.com/png.latex?%5COmega"> 中选择不同的基底:
+<ul>
+<li><strong>RGB</strong> (Red, Green, Blue): 显示器, 图像储存.</li>
+<li><strong>CMY/CMYK</strong> (Cyan, Magenta, Yellow, K: Black ink): 打印机, K 成分是多余的, 就当作是为了节省墨水 lol.</li>
+<li><strong>HSI/HSV</strong> (Hue, Saturation, Intensity/Value): 图像编辑软件.</li>
+</ul></li>
+</ul></li>
+<li><p>默认情况下图片丢失拓扑结构 <code>view()</code> 成一个 vector. <img src="https://latex.codecogs.com/png.latex?r"> 代表处理前的图像 vector, <img src="https://latex.codecogs.com/png.latex?s"> 代表处理后的图像 vector.</p></li>
+<li><p><strong>RGB2Gray 转换方法</strong>: 可以任选一通道 / 取最大 / 平均值 / 加权平均.</p></li>
+<li><p><strong>Contrast 对比度</strong>: 灰度图像中像素值最大值与最小值之差 (去掉 outlier).</p></li>
+<li><p><strong>Binary Image 二值图像 <img src="https://latex.codecogs.com/png.latex?f"></strong>: <img src="https://latex.codecogs.com/png.latex?0"> 表示 background, <img src="https://latex.codecogs.com/png.latex?1"> 表示 foreground.</p></li>
+</ul>
+</section>
+<section id="kernel-based-processing-基于核的处理" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="kernel-based-processing-基于核的处理"><span class="header-section-number">2</span> Kernel-based processing 基于核的处理</h2>
+<blockquote class="blockquote">
+<p>本人没有按照 Spatial domain 和 Frequency domain 来划分, 因为他们本质上是等价的, 无法将二者严格区分.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Kernel-based method 就是将原图片与一个 kernel 做滑动内积 (纠结是内积还是卷积毫无意义). 重点在于 kernel 的设计, 我们通过 kernel 设计的<strong>思维路径</strong>将其划分为 Spatial filtering 和 Frequency filtering 两大类.</p>
+</blockquote>
+<section id="spatial-filtering-空间滤波" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="spatial-filtering-空间滤波"><span class="header-section-number">2.1</span> Spatial Filtering 空间滤波</h3>
+<blockquote class="blockquote">
+<p>Spatial filtering 指 kernel 的设计过程没有经过频域分析.</p>
+</blockquote>
+<ul>
+<li><p><strong>Padding 填充</strong></p></li>
+<li><p><strong>NCC (Normalized Cross-Correlation)</strong>: 图像 vector 之间的夹角余弦值.</p></li>
+<li><p><strong>Common filters 常用滤波器</strong></p>
+<ul>
+<li><strong>Smoothing filters 平滑滤波器 (低通滤波器)</strong></li>
+<li><strong>Order-statistic filters 次序统计滤波器</strong>: 将某框内的像素排序后取中位数, 一般可去除 salt-and-pepper (impulse) noise.</li>
+<li><strong>Sharpening (derivative) filters 锐化滤波器 (高通滤波器)</strong>: 将梯度、Laplacian 算子移植到图片上; 由于这些算子是线性的, 可等价于与一个 kernel 做卷积; 这些 kernel 也可以在形式上被强化来达到更强的锐化效果.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="non-kernel-based-processing-非基于核的处理" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="non-kernel-based-processing-非基于核的处理"><span class="header-section-number">3</span> Non-kernel-based processing 非基于核的处理</h2>
+<blockquote class="blockquote">
+<p>Non-kernel-based method 指处理过程无法被等价为与一个确定的 kernel 做内积的过程.</p>
+</blockquote>
+<section id="intensity-transformation" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="intensity-transformation"><span class="header-section-number">3.1</span> Intensity Transformation</h3>
+<blockquote class="blockquote">
+<p>强度变换仅仅是<strong>单灰度像素</strong>的操作, 即用一个函数 <img src="https://latex.codecogs.com/png.latex?s%20=%20T(r)"> 来<strong>独立地</strong>映射所有像素值.</p>
+</blockquote>
+<ul>
+<li><p><strong>Linear transformation</strong></p>
+<ul>
+<li><strong>Image Negatives 图像反相</strong>: <img src="https://latex.codecogs.com/png.latex?s%20=%20L%20-%201%20-%20r">.</li>
+<li><strong>Contrast stretching 对比度拉伸</strong></li>
+</ul></li>
+<li><p><strong>Log transformation 对数变换</strong>: <img src="https://latex.codecogs.com/png.latex?s%20=%20c%20%5Ccdot%20%5Clog(1%20+%20r)">.</p></li>
+<li><p><strong>Power-Law (Gamma) transformation 幂律变换</strong>: <img src="https://latex.codecogs.com/png.latex?s%20=%20c%20%5Ccdot%20r%5E%7B%5Cgamma%7D">.</p></li>
+</ul>
+</section>
+<section id="histogram-processing-直方图处理" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="histogram-processing-直方图处理"><span class="header-section-number">3.2</span> Histogram Processing 直方图处理</h3>
+<ul>
+<li><strong>Histogram 图像直方图</strong>
+<ul>
+<li><strong>Normalized histogram 归一化直方图</strong>: 纵坐标要除以图像总像素数, 可表达概率.</li>
+</ul></li>
+<li><strong>Histogram processing 方法</strong>
+<ul>
+<li><strong>Histogram equalization 直方图均衡化</strong></li>
+<li><strong>Histogram matching (specification) 直方图匹配</strong>: 「我想让这张暗图看起来像那张亮图」.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="image-segmentation-图像分割" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="image-segmentation-图像分割"><span class="header-section-number">4</span> Image Segmentation 图像分割</h2>
+<blockquote class="blockquote">
+<p>一个非常自然的需求是把一张图像分割成若干个有意义的区域. 由于「有意义」无法准确定义, 因此图像分割非常开放.</p>
+</blockquote>
+<ul>
+<li><strong>Neighbors of a pixel 二值图像像素的邻域</strong>: 有不同的定义! 4-neighbors (上下左右), 8-neighbors, diagonal-neighbors (对角线).
+<ul>
+<li>领域不一定是等价关系!</li>
+<li><strong>Path 路径</strong>: 一个像素的有序序列, 后一个像素都是前一个像素的 neighbor.</li>
+<li><strong>Connected set 连通集</strong>: 当邻域是等价关系 <img src="https://latex.codecogs.com/png.latex?%5Csim"> 时, 二值图像 <img src="https://latex.codecogs.com/png.latex?b/%5Csim"> 中的每个等价类就是一个连通集.
+<ul>
+<li><strong>Boundary 边界</strong>: 跟拓扑学里的定义一样, 边界点的邻域包含区域外的像素.</li>
+</ul></li>
+</ul></li>
+<li><strong>Edge detection 边缘检测</strong>
+<ul>
+<li><strong>Gradient + Thresholding</strong></li>
+<li><strong>LPF + Laplacian</strong>: 比如 LoG (Laplacian of Gaussian).</li>
+<li><strong>Edge linking 边缘连接</strong>: 边缘可能不连续, 可以利用梯度方向等信息把边缘连接起来.</li>
+<li><strong>Hough Transform 霍夫变换</strong></li>
+</ul></li>
+<li><strong>Edge-based object detection 基于边缘的目标检测</strong>
+<ul>
+<li><strong>Distance Transform (DT) 距离变换</strong>: 计算每个像素到最近边界像素的 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D%5E2"> 距离.</li>
+</ul></li>
+<li><strong>Region-based segmentation 基于区域的分割</strong></li>
+</ul>
+</section>
+<section id="morphological-形态学图像处理" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="morphological-形态学图像处理"><span class="header-section-number">5</span> Morphological 形态学图像处理</h2>
+<blockquote class="blockquote">
+<p>这里主要涉及 PS 软件中的各种基础操作的原理.</p>
+</blockquote>
+<ul>
+<li><strong>Binary erosion / dilation 二值图像腐蚀/膨胀</strong>: 想象一个 binary image <img src="https://latex.codecogs.com/png.latex?f"> 的前景是凹下去的模具, 想象 SE (Structuring Element) 像俄罗斯方块一样掉落在 <img src="https://latex.codecogs.com/png.latex?f"> 上, 记录下:
+<ul>
+<li>SE 能<strong>整体</strong>掉进去的地方, 这些就是腐蚀 <img src="https://latex.codecogs.com/png.latex?f%20%5Cominus%20se"> 的结果. 腐蚀过的前景 (<img src="https://latex.codecogs.com/png.latex?f%20%5Cominus%20se">) 只会比 <img src="https://latex.codecogs.com/png.latex?f"> 一样大或者更小.</li>
+<li>任何<strong>一个</strong> SE 方块能掉进去的地方, 这些就是膨胀 <img src="https://latex.codecogs.com/png.latex?f%20%5Coplus%20se"> 的结果. 膨胀过的前景 (<img src="https://latex.codecogs.com/png.latex?f%20%5Coplus%20se">) 只会比 <img src="https://latex.codecogs.com/png.latex?f"> 一样大或者更大.</li>
+<li><strong>Erosion 和 Dilation 互为 dual</strong></li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-erosion" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-erosion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/erosion.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-erosion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Binary Erosion <span class="citation" data-cites="Mardiris2016ACD">[1]</span>
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-dilation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/dilation.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Binary Dilation <span class="citation" data-cites="Mardiris2016ACD">[1]</span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><p><strong>Opening 开运算</strong>: 先腐蚀后膨胀, <img src="https://latex.codecogs.com/png.latex?b%20%5Ccirc%20se%20%5Cequiv%20(b%20%5Cominus%20se)%20%5Coplus%20se">.</p></li>
+<li><p><strong>Closing 闭运算</strong>: 先膨胀后腐蚀, <img src="https://latex.codecogs.com/png.latex?b%20%5Cbullet%20se%20%5Cequiv%20(b%20%5Coplus%20se)%20%5Cominus%20se">.</p></li>
+</ul>
+</section>
+<section id="pca-主成分分析" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="pca-主成分分析"><span class="header-section-number">6</span> PCA 主成分分析</h2>
+</section>
+<section id="image-compression-图像压缩" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="image-compression-图像压缩"><span class="header-section-number">7</span> Image Compression 图像压缩</h2>
+<blockquote class="blockquote">
+<p>信息永远<strong>不能</strong>被压缩, 只是被压缩的部分变成编解码规则了.</p>
+</blockquote>
+<section id="basic-concepts-基本概念" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="basic-concepts-基本概念"><span class="header-section-number">7.1</span> Basic Concepts 基本概念</h3>
+<ul>
+<li>若图片 <img src="https://latex.codecogs.com/png.latex?f"> 压缩前可以被 <img src="https://latex.codecogs.com/png.latex?100"> bit 表示, 压缩后可以被 <img src="https://latex.codecogs.com/png.latex?75"> bit 表示, 则:
+<ul>
+<li><strong>Compression ratio 压缩比</strong> <img src="https://latex.codecogs.com/png.latex?C%20=%20100/75">.</li>
+<li><strong>Relative data redundancy 相对数据冗余</strong> <img src="https://latex.codecogs.com/png.latex?R%20=%201-0.75">.</li>
+</ul></li>
+</ul>
+</section>
+<section id="lossless-compression-无损压缩" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="lossless-compression-无损压缩"><span class="header-section-number">7.2</span> Lossless Compression 无损压缩</h3>
+<ul>
+<li><strong>Huffman coding 霍夫曼编码</strong></li>
+<li><strong>Arithmetic coding 算术编码</strong></li>
+<li><strong>LZW 编码</strong></li>
+</ul>
+</section>
+<section id="lossy-compression-有损压缩" class="level3" data-number="7.3">
+<h3 data-number="7.3" class="anchored" data-anchor-id="lossy-compression-有损压缩"><span class="header-section-number">7.3</span> Lossy Compression 有损压缩</h3>
+<ul>
+<li><strong>JPEG</strong>:
+<ul>
+<li>颜色空间变换 (RGB <img src="https://latex.codecogs.com/png.latex?%5Cto"> YCbCr): 利用人眼对亮度更敏感的特点.</li>
+<li>分块 (<img src="https://latex.codecogs.com/png.latex?8%5Ctimes%208"> blocks): 计算较快.</li>
+<li>DCT (离散余弦变换): 就是 DFT.</li>
+<li>Quantization (量化，唯一真正「有损」的一步): 在频域被选择性地 mask 掉一些系数.</li>
+<li>Zig-zag 扫描</li>
+<li>Entropy coding (Huffman / Arithmetic)</li>
+</ul></li>
+</ul>
+</section>
+<section id="watermarking-数字水印" class="level3" data-number="7.4">
+<h3 data-number="7.4" class="anchored" data-anchor-id="watermarking-数字水印"><span class="header-section-number">7.4</span> Watermarking 数字水印</h3>
+<ul>
+<li><p><strong>Visible watermark 可见水印</strong>: 直接把水印叠加在图片上.</p></li>
+<li><p><strong>Invisible watermark 隐形水印</strong></p>
+<ul>
+<li>Robustness 水印必须能抵抗以下操作: 压缩, 缩小/放大, 裁剪, 加噪声, 滤波, 镜像, etc.</li>
+<li>简单来说, 可以将水印直接叠加在<strong>频域</strong>系数上, 再反变换得到水印图像.</li>
+</ul></li>
+</ul>
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0">
+<div id="ref-Mardiris2016ACD" class="csl-entry">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">V. A. Mardiris and V. Chatzis, <span>“A configurable design for morphological erosion and dilation operations in image processing using quantum-dot cellular automata,”</span> <em>Journal of Engineering Science and Technology Review</em>, vol. 9, pp. 25–30, 2016, Available: <a href="https://api.semanticscholar.org/CorpusID:117395774">https://api.semanticscholar.org/CorpusID:117395774</a></div>
+</div>
+</div></section></div> ]]></description>
+  <category>Crash-Course</category>
+  <category>CN-blogs</category>
+  <guid>https://marcobisky.github.io/posts/dip-crash-course/</guid>
+  <pubDate>Fri, 19 Dec 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://marcobisky.github.io/posts/dip-crash-course/cover.png" medium="image" type="image/png" height="60" width="144"/>
+</item>
+<item>
+  <title>Information Security Crash Course 信息安全速成笔记</title>
+  <dc:creator>Marcobisky </dc:creator>
+  <link>https://marcobisky.github.io/posts/info-secu-crash-course/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<blockquote class="blockquote">
+<p>所有计算机的问题都是文本处理的问题.</p>
+</blockquote>
+<section id="blockchain-区块链" class="level2 page-columns page-full" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="blockchain-区块链"><span class="header-section-number">1</span> Blockchain 区块链</h2>
+<ul>
+<li><strong>Motivation and related concept</strong>
+<ul>
+<li><strong>Ledger 交易账本</strong>: 记录对某种财产 (property) 的状态变化 (maintenance) 的历史 (比如银行卡转账记录).
+<ul>
+<li>传统的 Ledger 时中心化地由银行的 DBMS (Database Management System) 来维护的, 我们信任银行本质上是信任国家的信用, 可是 xxx? 为了摆脱对中心化机构的信任, 需要一个 DLT (Distributed Ledger Technology) 来分布式地维护 Ledger! 我们希望它的机制公开透明, 并在数学上能保证其安全性.</li>
+</ul></li>
+<li>DLT 可以利用多种数据结构来组织数据 (Blockchain 可以同时具有下面的数据结构):
+<ul>
+<li><strong>Linked list 链表</strong></li>
+<li><strong>DAG (Directed Acyclic Graph 有向无环图)</strong></li>
+<li><strong>Tree 树</strong></li>
+</ul></li>
+</ul></li>
+<li><strong>Blockchain features 特点</strong>
+<ul>
+<li><strong>Decentralization 去中心化</strong></li>
+<li><strong>Immutability 不可篡改性</strong></li>
+<li><strong>Transparency 透明性</strong></li>
+<li><strong>Pseudonymity 匿名性</strong></li>
+<li><strong>Non-Repudiation 不可否认性</strong>: 一旦交易记录成功不可撤回和修改.</li>
+</ul></li>
+<li><strong>Blockchain classification 分类</strong>
+<ul>
+<li><strong>Permissionless 无需许可</strong>: 任何人都可以参与添加区块.
+<ul>
+<li><strong>Public 公开链</strong>: 任何有可以上网的电脑的人都可以查看区块链数据 (如 Bitcoin 区块链). 特点: 比如 Bitcoin 区块链的 TPS (Transactions Per Second) 每秒 <img src="https://latex.codecogs.com/png.latex?%3C10">; Scalability 可扩展性差; Block size 区块大小有限制; 挖矿能耗高.</li>
+</ul></li>
+<li><strong>Permissioned 需要许可</strong>: 只有被授权的用户才能参与添加区块.
+<ul>
+<li><strong>Private 私有链</strong>: 只有被授权的用户才能查看区块链数据.</li>
+<li><strong>Consortium 联盟链</strong>: 由多个组织共同维护的区块链, 只有被授权的组织才能查看相应部分的区块链数据.</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-bc-classification" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bc-classification-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/info-secu-crash-course/bc-classification.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-classification-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Blockchain 分类
+</figcaption>
+</figure>
+</div>
+</div></div><section id="build-the-bitcoin-blockchain-from-scratch" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="build-the-bitcoin-blockchain-from-scratch"><span class="header-section-number">1.1</span> Build the bitcoin blockchain from scratch</h3>
+<ul>
+<li><p><strong>P2P network</strong>: 假设你有 <img src="https://latex.codecogs.com/png.latex?10"> 台电脑, 手动输入每台电脑附近一两台电脑的 IP 和它们监听的端口 (bootstrapping). 写一个程序比如 <code>node.py</code> 来让每台电脑都运行这个程序, 监听自己端口的同时向认识的电脑发送邻居 IP. 这样方便以后路由.</p></li>
+<li><p><strong>Wallet</strong>:</p>
+<ul>
+<li>首先每台电脑随机生成一个 <img src="https://latex.codecogs.com/png.latex?256"> bit 的私钥 <img src="https://latex.codecogs.com/png.latex?sk">.</li>
+<li>用一个 one-way function (比如 hashing function, ECDSA (Elliptic Curve Digital Signature Algorithm)) 从私钥 <img src="https://latex.codecogs.com/png.latex?sk"> 计算出公钥 <img src="https://latex.codecogs.com/png.latex?pk"> (也是 <img src="https://latex.codecogs.com/png.latex?256"> bit).</li>
+<li><img src="https://latex.codecogs.com/png.latex?pk"> 作为节点的身份 ID, <img src="https://latex.codecogs.com/png.latex?sk"> 用来签名消息.</li>
+</ul></li>
+<li><p><strong>Transaction (Tx) 交易</strong>: 定义交易数据结构, 比如:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb1-1"><span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Transaction</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">{</span></span>
+<span id="cb1-2">    <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">from</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:</span> <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">PublicKey_A</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb1-3">    <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">to</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:</span> <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">PublicKey_B</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb1-4">    <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">amount</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">,</span></span>
+<span id="cb1-5">    <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">signature</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">:</span> <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Sign(privateKey_A</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">,</span> <span class="er" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">above_fields)</span></span>
+<span id="cb1-6"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">}</span></span></code></pre></div>
+<ul>
+<li>每个节点可以用公钥验证交易的合法性.</li>
+</ul></li>
+<li><p><strong>Mempool 交易池</strong>: 每个节点如果有交易记录产生, 就生成一个 Transaction 转发给相邻节点, 它们会先验证合法性, 然后将其加入自己的交易池中 (每个节点维护一个交易池, 存放收到但还未打包进区块的交易).</p></li>
+<li><p><strong>Block 区块</strong>: TODO</p></li>
+</ul>
+</section>
+<section id="some-questions" class="level3 page-columns page-full" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="some-questions"><span class="header-section-number">1.2</span> Some Questions</h3>
+<blockquote class="blockquote">
+<p>Blockchain 很难用线性的讲法来解释清楚, 这里列出一些常见的问题.</p>
+</blockquote>
+<ul>
+<li>记账系统跟发行一种币有什么关系? 发行的新的币又是如何跟现存的币交换的?
+<ul>
+<li>这涉及到货币的本质. 衡量价值依赖两个特性, 一是获取他需要付出一定的成本; 二是大家都承认可以一般化地等价其他东西.</li>
+<li>bitcoin 只记录比特币的交易.</li>
+</ul></li>
+<li>为什么最初会有人自发来用这个系统记账?
+<ul>
+<li><strong>Incentives for minors</strong>: <strong>transaction fee</strong> (手续费, 转账的人要多付出一点点给打包区块的人 (比银行低多了)) + <strong>凭空送</strong> (中本聪设计 PoW 使得全世界一起算的话平均每 10 分钟能产生一个新区块, 第一个包奖励 <img src="https://latex.codecogs.com/png.latex?50"> BTC (in 2009), <img src="https://latex.codecogs.com/png.latex?4"> 年之内都是如此, 第二个 <img src="https://latex.codecogs.com/png.latex?4"> 年挖出一个区块奖励减半 (<img src="https://latex.codecogs.com/png.latex?25"> BTC) <span class="citation" data-cites="a2023_introduction">[1]</span>, etc.<sup>1</sup>)</li>
+<li>Follow-up: 如果他获得的奖励不是现实世界中的物品而也只是这个虚拟世界的货币, 一开始的驱动力是哪来的?
+<ul>
+<li>可以有很多因素: 意识形态动机 (比如对银行的不信任, 冻结与审查的反感), 有限下行风险 + 极大上行空间 (Option-like payoff).</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;这是一个收敛的几何级数, 所以比特币的数量是固定的 (<img src="https://latex.codecogs.com/png.latex?21"> million). 2025 年挖出一个区块奖励是 <img src="https://latex.codecogs.com/png.latex?3.125"> BTC. 凭空送的部分是有最小值的 (<img src="https://latex.codecogs.com/png.latex?10%5E%7B-8%7D"> BTC, 即 <img src="https://latex.codecogs.com/png.latex?1"> Satoshi), 约在 2140 年达到这个值, 以后凭空送部分就没有了, 以后矿工的收入就全靠 transaction fee 了 <span class="citation" data-cites="a2023_introduction">[1]</span>.</p></div></div><ul>
+<li><p>如果在网络的两个角落同时产生了两个区块, 如何处理?</p>
+<ul>
+<li><strong>LCP (Longest Chain Principle) 最长链原则</strong>: 每个节点只在<strong>它认为的最长链上</strong>继续打包新的区块 (每个节点可能会有不同的最长链).</li>
+<li>所以你挖出来的区块<strong>可能最终不会被承认</strong>.</li>
+</ul></li>
+<li><p>如何防止恶意用户篡改数据?</p>
+<ul>
+<li>防止不了. 但几乎不可能, 因为</li>
+</ul></li>
+<li><p>如何防止随意给自己转账?</p></li>
+<li><p>当某节点收到一笔交易时, 会做什么? 收到新区块呢?</p>
+<ul>
+<li>收到交易: 进行余额检查 (通过追溯之前的交易记录) + 验证签名, 合法就放进交易池.</li>
+<li>收到新区块:</li>
+</ul></li>
+<li><p>如何防止双重支付 (Double spending, 即某个节点 <img src="https://latex.codecogs.com/png.latex?A"> 给两批相邻节点试图用同一笔余额给不同的人转账, 这两批节点经过余额检查后都会认为 <img src="https://latex.codecogs.com/png.latex?A"> 的交易是合法的)?</p>
+<ul>
+<li>只承认打包好的区块里的交易记录. 哪一笔交易先被打包进区块, 哪一笔交易就有效.</li>
+</ul></li>
+</ul>
+</section>
+<section id="consenus-algorithm-共识算法" class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="consenus-algorithm-共识算法"><span class="header-section-number">1.3</span> Consenus Algorithm 共识算法</h3>
+<blockquote class="blockquote">
+<p>用来让分布式网络中的节点就某个数据达成一致的算法. (不是区块链特有的概念!)</p>
+</blockquote>
+<ul>
+<li><p><strong>Basic concepts</strong></p>
+<ul>
+<li><strong>节点类型</strong>: <strong>Legitimate/honest nodes</strong> (诚实节点), <strong>Malicious nodes</strong> (恶意节点).</li>
+<li><strong>故障类型</strong>: <strong>Crash fault</strong> (由诚实节点导致的故障), <strong>Byzantine fault</strong> (拜占庭故障, 由恶意节点导致的故障).</li>
+</ul></li>
+<li><p><strong>PoW (Proof of Work 工作量证明)</strong>: 通过尝试 nonce 的值来找到一个 hash 值满足某个条件 (比如前面有 <img src="https://latex.codecogs.com/png.latex?n"> 个 <img src="https://latex.codecogs.com/png.latex?0">). Hash rate 越高, 挖矿越快. 安全性非常高, 但验证时间较长、挖矿能耗很高.</p>
+<ul>
+<li><strong>Winning probability</strong>: 设有 <img src="https://latex.codecogs.com/png.latex?N"> 个 miners, 第 <img src="https://latex.codecogs.com/png.latex?i"> 个 miner 的 hash rate 是 <img src="https://latex.codecogs.com/png.latex?%5Cvarphi_i">, 则它的 winning probability <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BP%7D_i%20=%20%5Cfrac%7B%5Cvarphi_i%7D%7B%5Csum_%7Bj=1%7D%5EN%20%5Cvarphi_j%7D."></li>
+<li><strong><img src="https://latex.codecogs.com/png.latex?51%5C%25"> attack</strong>: 如果某个恶意矿工控制了超过 <img src="https://latex.codecogs.com/png.latex?50%5C%25"> 的算力, 它就可以随意篡改区块链数据.</li>
+</ul></li>
+<li><p><strong>PoS (Proof of Stake 权益证明)</strong>: 交 stake (押金), 用押金的多少做权重随机选择下一个打包区块的节点. 节点如果作恶, 会被没收押金. 验证时间较短, 能耗低, 但安全性不如 PoW (有钱就行).</p></li>
+<li><p><strong>PAXOS</strong></p>
+<ul>
+<li>PAXOS 不处理 Byzantine fault!</li>
+<li>用 PAXOS 协议的系统中必须有三种节点: <strong>Proposer, Acceptor, Learner</strong>.</li>
+<li>三个 phase: <strong>Prepare, Promise, Accept</strong>.</li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[60,40]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 60.0%;justify-content: flex-start;">
+<div id="fig-paxos" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-paxos-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/info-secu-crash-course/paxos.gif" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-paxos-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 绿色的节点是 client, 右边有 <img src="https://latex.codecogs.com/png.latex?1"> 个 proposer, <img src="https://latex.codecogs.com/png.latex?3"> 个 acceptor, <img src="https://latex.codecogs.com/png.latex?2"> 个 learner. <span class="citation" data-cites="_2025_paxos">[2]</span>
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 40.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://marcobisky.github.io/posts/info-secu-crash-course/paxos-flow-chart.png" class="img-fluid figure-img"></p>
+<figcaption>Basic Paxos without failures <span class="citation" data-cites="wikipediacontributors_2025_paxos">[3]</span>. 注意这里是 acceptor 通知 learner, 而 Figure&nbsp;2 是 proposer 通知 learner, 以此图为准.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>RAFT</strong> (Replicated And Fault Tolerant, 比 sb PAXOS 好理解多了 lol)
+<ul>
+<li><p>RAFT 也不处理 Byzantine fault!</p></li>
+<li><p>每个节点在任意时刻只处于三种状态之一: <strong>Leader, Follower, Candidate</strong>, leader 是唯一的.</p></li>
+<li><p>两个 phase: <strong>Leader Election, Log Replication</strong>.</p></li>
+<li><p>所有节点初始状态都是 follower, 每个 follower 有一个随机的 election timeout (<img src="https://latex.codecogs.com/png.latex?150"> 到 <img src="https://latex.codecogs.com/png.latex?300"> ms 之间), 如果在这个时间内没有收到 leader 的 heartbeat (如果存在 leader 的话, 按协议它会向所有 follower 定期发送 heartbeat 证明自己还活着别选别人当 leader), 就变成 candidate 并向所有 follower 发起支持自己的 leader election. 当这个 candidate 收到<strong>超过半数</strong> follower 的投票后, 就变成 leader (总共有多少 node 大家事先都知道)</p>
+<div id="fig-raft-election" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-raft-election-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/info-secu-crash-course/raft-election.gif" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-raft-election-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Leader election 过程, 你可以自行在 <span class="citation" data-cites="_2025_raft">[4]</span> 进行其它挂机或者 leader request 实验, omitted here.
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+<li><strong>PBFT</strong> (Practical Byzantine Fault Tolerance)
+<ul>
+<li>由名字知道它能处理 Byzantine fault.</li>
+<li>三种节点: <strong>Leader, Replicas, Backup</strong></li>
+<li>TODO</li>
+</ul></li>
+<li><strong>Metrics 衡量标准</strong>
+<ul>
+<li><strong>Performance</strong>
+<ul>
+<li><strong>TPS</strong> (Transactions Per Second)</li>
+<li><strong>Block comfirmation time 区块确认时间</strong></li>
+</ul></li>
+<li><strong>Scalability 可扩展性</strong>: 对于增加的节点数和交易量, 系统能否有效地处理.</li>
+</ul></li>
+</ul>
+</section>
+<section id="一些八股" class="level3" data-number="1.4">
+<h3 data-number="1.4" class="anchored" data-anchor-id="一些八股"><span class="header-section-number">1.4</span> 一些八股</h3>
+<ul>
+<li><p><strong>Hash rate 哈希率</strong>: 全网每秒能做多少次哈希运算 (代表算力).</p></li>
+<li><p><strong>Sharding 分片技术</strong>: 将各个节点分组 (shards), 每个组内的节点负责维护该组内的交易记录 (而不要验证全网的交易记录), 以提高系统的验证效率和可扩展性. 但是 shards 之间的通信和协调极其复杂!</p></li>
+</ul>
+</section>
+</section>
+<section id="cryptography-密码学基础" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="cryptography-密码学基础"><span class="header-section-number">2</span> Cryptography 密码学基础</h2>
+<section id="一些八股-1" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="一些八股-1"><span class="header-section-number">2.1</span> 一些八股</h3>
+<ul>
+<li><strong>Three Ds of security</strong>:
+<ul>
+<li><strong>Defence 防护</strong>: 保护系统免受攻击.</li>
+<li><strong>Detection 检测</strong>: 发现攻击或异常行为.</li>
+<li><strong>Deterrence 威慑</strong>: 通过威胁惩罚来降低攻击频率.</li>
+</ul></li>
+<li><strong>攻击分类</strong> (但现实情况是三种结合起来使用哈哈):
+<ul>
+<li>按目的:
+<ul>
+<li><strong>Passive 被动攻击</strong>: 监听和窃取信息, 不改变系统状态.</li>
+<li><strong>Active 主动攻击</strong>: 篡改、伪造或破坏信息, 改变系统状态.</li>
+</ul></li>
+<li>按手段:
+<ul>
+<li><strong>Virus 病毒</strong>: 自我复制, 不单独存在而是嵌入进宿主程序.</li>
+<li><strong>Worm 蠕虫</strong>: 自我复制, 独立存在.</li>
+<li><strong>Trojan 木马</strong>: 不自我复制 (usu.), 伪装成合法程序诱骗用户安装.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="symmetric-cipher-model-对称加密模型" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="symmetric-cipher-model-对称加密模型"><span class="header-section-number">2.2</span> Symmetric Cipher Model 对称加密模型</h3>
+</section>
+<section id="asymmetric-cipher-model-非对称加密模型" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="asymmetric-cipher-model-非对称加密模型"><span class="header-section-number">2.3</span> Asymmetric Cipher Model 非对称加密模型</h3>
+<ul>
+<li><strong>生成过程</strong>: 用一个随机数产生私钥, 再用私钥算出公钥.
+<ul>
+<li>几乎不可能通过公钥反推私钥. 私钥必须保密, 公钥可以公开.</li>
+<li>私钥可以用来加密字符串, 相应的公钥可以用来解密这个字符串.</li>
+<li><strong>Digital Signature 电子签名</strong>: 只有私钥持有者能加密字符串, 任何知道公钥的人都能解密这个字符串. 这跟签名的本质是一样的.</li>
+</ul></li>
+</ul>
+
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0">
+<div id="ref-a2023_introduction" class="csl-entry">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline"><span>“Introduction to bitcoin.”</span> Ntu.edu.sg, 2023. Available: <a href="https://www3.ntu.edu.sg/home/ehchua/programming/blockchain/bitcoin.html">https://www3.ntu.edu.sg/home/ehchua/programming/blockchain/bitcoin.html</a>. [Accessed: Dec. 21, 2025]</div>
+</div>
+<div id="ref-_2025_paxos" class="csl-entry">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">The Secret Lives of Data, <span>“Paxos.”</span> Ofcoder.com, 2025. Available: <a href="https://visual.ofcoder.com/paxos/basic-paxos/">https://visual.ofcoder.com/paxos/basic-paxos/</a>. [Accessed: Dec. 21, 2025]</div>
+</div>
+<div id="ref-wikipediacontributors_2025_paxos" class="csl-entry">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">W. Contributors, <span>“Paxos (computer science).”</span> Wikipedia; Wikimedia Foundation, Dec. 2025. Available: <a href="https://en.wikipedia.org/wiki/Paxos_%28computer_science%29#Basic_Paxos_without_failures">https://en.wikipedia.org/wiki/Paxos_%28computer_science%29#Basic_Paxos_without_failures</a>. [Accessed: Dec. 21, 2025]</div>
+</div>
+<div id="ref-_2025_raft" class="csl-entry">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">The Secret Lives of Data, <span>“Raft.”</span> Ofcoder.com, 2025. Available: <a href="https://visual.ofcoder.com/raft/">https://visual.ofcoder.com/raft/</a>. [Accessed: Dec. 21, 2025]</div>
+</div>
+</div></section></div> ]]></description>
+  <category>Crash-Course</category>
+  <category>CN-blogs</category>
+  <guid>https://marcobisky.github.io/posts/info-secu-crash-course/</guid>
+  <pubDate>Fri, 19 Dec 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://marcobisky.github.io/posts/info-secu-crash-course/cover.png" medium="image" type="image/png" height="125" width="144"/>
+</item>
+<item>
+  <title>WSN Crash Course 无线传感器网络速成笔记</title>
+  <dc:creator>Marcobisky </dc:creator>
+  <link>https://marcobisky.github.io/posts/wsn-crash-course/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="phy-physical-layer-物理层" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="phy-physical-layer-物理层"><span class="header-section-number">1</span> PHY (Physical Layer) 物理层</h2>
+<blockquote class="blockquote">
+<p>物理层负责决定信号具体以什么方式存在以及频率、电压等参数.</p>
+</blockquote>
+<ul>
+<li><strong>Wireless medium 无线传输介质</strong>
+<ul>
+<li><strong>Radio Frequencies (RF)</strong> (使用最多, 本篇只关注这个)
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?3%20%5Ctext%7B%20Hz%20to%20%7D%20300%5Ctext%7B%20GHz%7D"></li>
+<li>ISM (Industrial, Scientific, and Medical) bands: RF 频段中为工业、科研、医疗保留的频段, 用户可以无需许可证在功率范围内自由使用.</li>
+<li>Main techs:
+<ul>
+<li><strong>Narrowband 窄带</strong></li>
+<li><strong>Spread Spectrum 扩频</strong></li>
+<li><strong>Ultra-Wideband (UWB) 超宽带</strong></li>
+</ul></li>
+</ul></li>
+<li>Optical</li>
+<li>Acoustic</li>
+<li>Magnetic Induction Techniques</li>
+</ul></li>
+</ul>
+<section id="sec-spread-spectrum" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="sec-spread-spectrum"><span class="header-section-number">1.1</span> Spread Spectrum 扩频</h3>
+<ul>
+<li><p><strong>DSSS 直接序列扩频</strong> (Direct Sequence Spread Spectrum)</p>
+<ul>
+<li>DSSS 通过将原始二进制信息 (Baseband) 异或上一串快速变化的 PN chip (见 Figure&nbsp;1) 来提高<strong>基带</strong>带宽 (因为时域变化更快, 频域带宽会更宽).
+<ul>
+<li>PN chip 比特率高于原始信号比特率!</li>
+</ul></li>
+<li><strong>PN chip (Pseudo-Noise chip) sequence</strong> 伪随机码片, TX/RX 会产生相同的 PN 序列来进行扩频和解扩.
+<ul>
+<li>只有知道 PN 序列的 RX 才能正确解扩.</li>
+</ul></li>
+</ul>
+<div id="fig-dsss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dsss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/dsss.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dsss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: DSSS 示意图 (中间调制的过程忽略了) <span class="citation" data-cites="Hira2014">[1]</span>
+</figcaption>
+</figure>
+</div></li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Modulation in brief
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="fig-modulation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-modulation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/modulation.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-modulation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 注意区分数字调制和模拟调制 <span class="citation" data-cites="wikipediacontributors_2025_signal">[2]</span>, 另外 Digital carrier 我们之前接触地很少.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<ul>
+<li><p><strong>FHSS 频率跳变扩频</strong> (Frequency Hopping Spread Spectrum)</p>
+<ul>
+<li>通过在多个频率间跳变来实现扩频. <strong>跳变的频率中心由 PN chip 控制</strong>.
+<ul>
+<li>PN chip 的符号率与原始信息的符号率的大小不一定谁大, 若 PN chip 变化很慢, 称为 <strong>Slow FHSS</strong> (Figure&nbsp;3), 反之为 <strong>Fast FHSS</strong> (Figure&nbsp;4).</li>
+<li><strong>Chip duration</strong>: Figure&nbsp;3 中的 <img src="https://latex.codecogs.com/png.latex?T_c">.</li>
+<li><strong>Fast FHSS 的抗干扰能力更强!</strong>, 因为一般 jamming 都是窄带 (省能量), 只要击中一个调制 symbol 的中心频率, 那么这个 symbol 就会被破坏掉. 而 Fast FHSS 在一个调制 symbol 内会跳变多个频率, 因此被击中的概率更低.</li>
+</ul></li>
+<li>FHSS 之后可以 FSK 也可以 ASK 调制 (Figure&nbsp;2)!</li>
+<li>以 Figure&nbsp;3 为例, 若 FHSS 与 FSK 结合, 则设计两个重要参数 <img src="https://latex.codecogs.com/png.latex?M,%20k">:
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?M%20=%204">: <strong>FSK 符号数量</strong>. 每次 FSK 以 <img src="https://latex.codecogs.com/png.latex?f_c"> 为中心有 <img src="https://latex.codecogs.com/png.latex?4"> 个偏移的频率 (即 <img src="https://latex.codecogs.com/png.latex?4"> 个 symbol, 每个承载 <img src="https://latex.codecogs.com/png.latex?2"> bit 信息).</li>
+<li><img src="https://latex.codecogs.com/png.latex?k%20=%202">: <strong>PN 分组长度</strong>, 代表有 <img src="https://latex.codecogs.com/png.latex?4"> 个不同的 <img src="https://latex.codecogs.com/png.latex?f_c">.</li>
+<li><strong>注意区分用于跳频的中心频率 <img src="https://latex.codecogs.com/png.latex?f_c"> 和用来调制的偏移频率</strong>!</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-fhss-slow" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-fhss-slow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/fhss-slow.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fhss-slow-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Slow FHSS
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-fhss-fast" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-fhss-fast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/fhss-fast.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fhss-fast-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Fast FHSS
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-uwb" class="level3" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="sec-uwb"><span class="header-section-number">1.2</span> UWB (Ultra-Wideband) 超宽带</h3>
+<ul>
+<li><strong>Motivation</strong>: UWB 采用完全不同的路线, 它不用载波, <strong>直接在时间轴上发送非常短的脉冲</strong> (ns 级别), 自然地由 Fourier 变换知, 这种短脉冲在频域上会有<strong>非常宽</strong>的带宽! 由于<strong>无需维持稳定的高频载波</strong>, UWB 传输<strong>功耗非常低</strong>.
+<ul>
+<li>但是 UWB 的传输距离 <img src="https://latex.codecogs.com/png.latex?%3C10%20%5Ctext%7B%20m%7D">.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="data-link-layer-数据链路层" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="data-link-layer-数据链路层"><span class="header-section-number">2</span> Data Link Layer 数据链路层</h2>
+<section id="llc-logical-link-control-逻辑链路控制" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="llc-logical-link-control-逻辑链路控制"><span class="header-section-number">2.1</span> LLC (Logical Link Control) 逻辑链路控制</h3>
+<blockquote class="blockquote">
+<p>LLC 提供统一接口给网络层.</p>
+</blockquote>
+<ul>
+<li><strong>Frame management 帧管理</strong>
+<ul>
+<li><strong>Byte Count 字节计数</strong>: 在帧头部存储帧的字节数.
+<ul>
+<li>问题: 若字节数出错, 则会 **out of sync.</li>
+</ul></li>
+<li><strong>Flag Bytes + Byte Stuffing 标志字节 + 转义符</strong>: 为了解决 frame 之间的同步 (分割) 问题, 在每个 frame 的头尾添加特殊的 flag byte (如 0b01111110). 若这个 flag byte 出现在 frame 内部, 则在它前面添加一个转义符 (ESC, escape byte). 若 ESC 本身出现在 frame 内部, 则也在它前面添加一个 ESC.</li>
+</ul></li>
+</ul>
+</section>
+<section id="mac-medium-access-control-介质访问控制" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="mac-medium-access-control-介质访问控制"><span class="header-section-number">2.2</span> MAC (Medium Access Control) 介质访问控制</h3>
+<blockquote class="blockquote">
+<p>MAC 子层非常接近物理层, 控制物理层什么时候发、发多久.</p>
+</blockquote>
+<ul>
+<li><strong>Broadcast channel 广播信道</strong> (Multiaccess channel / random access channel)
+<ul>
+<li>在一个广播信道上, 同一时间、同一频段、同一空间接收点只能有一个节点发送数据, 否则会发生碰撞 (collision).</li>
+</ul></li>
+<li><strong>MAC Protocol</strong>: 用来控制物理层什么时候发、发多久的协议.
+<ul>
+<li><strong>Contention-free 非竞争型</strong>
+<ul>
+<li><strong>Static channel allocation 静态信道分配</strong>: <strong>FDMA</strong> (每个人固定分配一个频段), <strong>TDMA</strong> (每个人固定分配一个时间片), <strong>CDMA</strong> (每个人固定分配一个信号空间的方向).</li>
+<li><strong>Dynamic channel allocation 动态信道分配</strong>: <strong>Polling 轮询</strong>, <strong>Token Passing 令牌传递</strong>, <strong>Reservation 预约</strong>.</li>
+</ul></li>
+<li><strong>Contention-based 竞争型</strong>
+<ul>
+<li><strong>ALOHA</strong>: 想发就发, 撞了重来.</li>
+<li><strong>CSMA (Carrier Sense Multiple Access) 载波监听多路访问</strong>: 先听一听, 没人说话再发.</li>
+<li><strong>MACA (Multiple Access with Collision Avoidance) 多路访问与碰撞避免</strong>: 先举手再说话.</li>
+<li><strong>MACAW (MACA with ACK) 带确认的多路访问与碰撞避免</strong>: 先举手再说话, 说完还要等确认 (MACA 的改进版).</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="network-layer-网络层" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="network-layer-网络层"><span class="header-section-number">3</span> Network Layer 网络层</h2>
+<ul>
+<li><p><strong>Routing Protocols 路由算法</strong></p></li>
+<li><p><strong>Routing metrics 路由指标</strong> (见 Figure&nbsp;6)</p>
+<ul>
+<li><strong>(Min) Number of hops 跳数</strong>: (<strong>relay node</strong> 指中继节点的个数 (不算 source 和 sink)).</li>
+<li><strong>(Min) Energy consumption (per packet) 能量消耗</strong>: 每条链路上的能量消耗加起来即可.</li>
+<li><strong>(Max) Average energy capacity 平均能量容量</strong>: relay node 上剩余能量的平均值.</li>
+<li><strong>(Max) Minimum energy capacity 最小能量容量</strong>: relay node 上剩余能量的最小值 (要尽可能大).</li>
+<li><strong>(Min) Latency 延迟</strong>: 每条链路上的延迟加起来即可.</li>
+<li><strong>(Max) Time to network partition 网络分裂时间</strong>: 由于 WSN 中节点由电池供电, 当确定一种路由算法时, 节点上的数值 (电量) 会逐渐消耗, 直到网络中存在两个节点无法通信 (网络分裂). 网络分裂时间越长越好.</li>
+</ul></li>
+<li><p>Hierarchical routing</p></li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+EXAMPLE: 找路径题目
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="fig-path-example" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-path-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/path-example.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-path-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: 这种找路径的题目就是纯**, 暴力枚举即可
+</figcaption>
+</figure>
+</div>
+<div id="fig-path-example-sol" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-path-example-sol-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/path-example-sol.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-path-example-sol-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Solution to Figure&nbsp;5
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+<section id="localization-定位" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="localization-定位"><span class="header-section-number">4</span> Localization 定位</h2>
+<blockquote class="blockquote">
+<p>「温度传感器报告 <img src="https://latex.codecogs.com/png.latex?80%20%5E%5Ccirc%20%5Ctext%7BC%7D">」 是没有意义的, 「在 A 区域第 3 号设备旁」 才有意义.</p>
+</blockquote>
+<section id="range-based-依赖距离测量" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="range-based-依赖距离测量"><span class="header-section-number">4.1</span> Range-based 依赖距离测量</h3>
+<ul>
+<li><strong>Ranging techniques 测距技术</strong>
+<ul>
+<li><strong>RSS (Received Signal Strength) 接收信号强度</strong>: 在已知 path-loss model 的情况下, 可通过比较接收信号强度与发射信号强度来估计距离. 如果不是 LoS (对着发), 误差会很大.</li>
+<li><strong>ToA (Time of Arrival) 到达时间</strong>: 利用初中物理 路程 = 光速 × 时间, 知道时间即可算出距离.
+<ul>
+<li><strong>One-way ToA</strong>: 需要 TX 和 RX <strong>sync</strong> (Figure&nbsp;7 (a)), 由于光速太快, 需要极高精度的时钟同步!</li>
+<li><strong>Two-way ToA</strong>: 不需要 sync! 但要知道 RX 端的处理时间 (processing delay <img src="https://latex.codecogs.com/png.latex?t_3-t_2"> in Figure&nbsp;7 (b)).</li>
+</ul></li>
+<li><strong>TDoA (Time Difference of Arrival) 到达时间差</strong>: 不需要 sync! 如 Figure&nbsp;7 (c), <img src="https://latex.codecogs.com/png.latex?t_1"> 发 RF, <img src="https://latex.codecogs.com/png.latex?t_3"> 发 sound, 则距离 <img src="https://latex.codecogs.com/png.latex?d%20=%20(v_1-v_2)%20%5Ccdot%20((t_4-t_2)%20-%20(t_3-t_1))"></li>
+</ul>
+<div id="fig-toa" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-toa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/toa.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-toa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation" data-cites="Gkiokas2015">[3]</span>
+</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>AoA (Angle of Arrival) 到达角度</strong>: 单看角度当然不能知道距离, 需要多个节点测量同一个 TX 的 AoA 来三角定位 (Triangulation). 计算相对复杂.</li>
+</ul></li>
+<li><strong>Range-based protocols</strong>
+<ul>
+<li><strong>Triangulation 三角测量</strong>: 见 Figure&nbsp;8, 两个 anchor node <img src="https://latex.codecogs.com/png.latex?A,%20B"> <strong>相对位置已知</strong>, 再测量两个角度即可.</li>
+<li><strong>Trilateration 三边测量</strong>: 见 Figure&nbsp;9, 三个球相交于一点. GPS 的工作原理 (只不过 GPS 需要 <img src="https://latex.codecogs.com/png.latex?4"> 个卫星来同时解出时间偏移).
+<ul>
+<li><strong>Iterative multilateration 迭代多边测量</strong>: 在一个 WSN 系统中, 先用人工或 GPS 确定少量几个 anchor node 相对位置, 然后用 Trilateration 算出其他 node 位置, 这些 node 就变成新的 anchor node … (这种方法会有 <strong>Error propagation</strong> 问题, 但仍在使用).</li>
+<li><strong>Collaborative multilateration 协同多边测量</strong>: 一个 node 附近不一定会有 <img src="https://latex.codecogs.com/png.latex?3"> 个 anchor node, 所有 node 都可以用 Trilateration 开始测量周围的 node 位置, 然后用一些复杂的优化算法来算出所有 node 位置 (更准确).</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-triangulation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-triangulation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/triangulation.png" class="img-fluid figure-img" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-triangulation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Triangulation
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-trilateration" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-trilateration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/trilateration.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-trilateration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Trilateration
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="range-free-不依赖距离测量" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="range-free-不依赖距离测量"><span class="header-section-number">4.2</span> Range-free 不依赖距离测量</h3>
+</section>
+<section id="localization-style" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="localization-style"><span class="header-section-number">4.3</span> Localization style</h3>
+<ul>
+<li><p><strong>Periodic</strong>: 周期性地对所有节点进行定位.</p></li>
+<li><p><strong>Event-driven</strong>: 只有当某个感知事件发生时, 相关节点才触发定位过程.</p></li>
+</ul>
+</section>
+</section>
+<section id="synchronization-同步" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="synchronization-同步"><span class="header-section-number">5</span> Synchronization 同步</h2>
+<blockquote class="blockquote">
+<p>节点 <img src="https://latex.codecogs.com/png.latex?A,B"> 的时钟是<strong>同步</strong>的意思是: 在非狭义相对论的范围内,「12:20」这个时间戳对于 <img src="https://latex.codecogs.com/png.latex?A,B"> 节点没有歧义.</p>
+</blockquote>
+<ul>
+<li>一些概念:
+<ul>
+<li><strong>Clock offset</strong>: 路程差.「快了 20 s」</li>
+<li><strong>Clock rate</strong>: 速率. 1 s 内这个时钟实际只走了 0.9 s (clock rate = 0.9).
+<ul>
+<li><strong>Clock skew</strong>: 速率差. 两个时钟的 Clock rates difference.</li>
+</ul></li>
+<li><strong>Drift rate</strong>: 加速度. 一个时钟时快时慢的程度.</li>
+</ul></li>
+<li>Challenges:
+<ul>
+<li>Environmental effects: 天太冷影响同步.</li>
+<li>Energy constraints: 电池没电钟走慢了.</li>
+<li>Wireless medium and mobility: ACK 信号丢包了.</li>
+</ul></li>
+<li><strong>Sync methods 同步方法</strong>
+<ul>
+<li><strong>One-way sync 单向同步</strong>: Node <img src="https://latex.codecogs.com/png.latex?A"> 将发送时刻的时间戳 <img src="https://latex.codecogs.com/png.latex?t_1"> 附加在消息中发送给 Node <img src="https://latex.codecogs.com/png.latex?B">, 传播时间 <img src="https://latex.codecogs.com/png.latex?D"> 很小 (一般忽略或设为常数), <img src="https://latex.codecogs.com/png.latex?B"> 在 <img src="https://latex.codecogs.com/png.latex?t_2"> 收到. 如果 <img src="https://latex.codecogs.com/png.latex?t_2"> 和 <img src="https://latex.codecogs.com/png.latex?t_1%20+%20D"> 有差异, 则这个差异就是 clock offset <img src="https://latex.codecogs.com/png.latex?%5Cdelta">.</li>
+<li><strong>Two-way sync 双向同步</strong></li>
+<li><strong>Receiver-receiver sync</strong></li>
+</ul></li>
+</ul>
+</section>
+<section id="security-in-wsns" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="security-in-wsns"><span class="header-section-number">6</span> Security in WSNs</h2>
+<ul>
+<li><strong>CIA Model</strong>
+<ul>
+<li>Components:
+<ul>
+<li><strong>Confidentiality 机密性</strong>: 不该看到的人, 看不到数据.</li>
+<li><strong>Integrity 完整性</strong>: 数据在传输过程中不被篡改.</li>
+<li><strong>Availability 可用性</strong>: 正常工作的概率.</li>
+</ul></li>
+<li>在不同的场景中, 这三者的重要性不同.
+<ul>
+<li>火灾检测: IA &gt; C</li>
+<li>机场生物识别信息收集: CI &gt; A</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="queuing-theory-排队论" class="level2 page-columns page-full" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="queuing-theory-排队论"><span class="header-section-number">7</span> Queuing Theory 排队论</h2>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Bernoulli, Poisson, Exponential, Binomial, Geometric, Negative Binomial 分布复习
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><p>连续时间 Bernoulli 过程 <img src="https://latex.codecogs.com/png.latex?%5Ciff"> 单位时间到达人数 <img src="https://latex.codecogs.com/png.latex?%5Csim%20%5Coperatorname%7BPois%7D%20(%5Clambda)%20%5Ciff"> 相邻两次到达时间间隔 <img src="https://latex.codecogs.com/png.latex?%5Csim%20%5Coperatorname%7BExp%7D%20(%5Clambda)">.</p></li>
+<li><p>离散时间 Bernoulli 过程 <img src="https://latex.codecogs.com/png.latex?%5Ciff"> 单位时间到达人数 <img src="https://latex.codecogs.com/png.latex?%5Csim%20B(n,p)%20%5Ciff"> 相邻两次到达时间间隔 <img src="https://latex.codecogs.com/png.latex?%5Csim%20G(p)">.</p>
+<ul>
+<li>几何分布是负二项分布的特殊情况: <img src="https://latex.codecogs.com/png.latex?G(p)%20%5Ciff%20NB(1,%20p)">.</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<section id="kendalls-notation" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="kendalls-notation"><span class="header-section-number">7.1</span> Kendall’s Notation</h3>
+<p><img src="https://latex.codecogs.com/png.latex?%0AA/S/C/K/N/D%0A"></p>
+<ul>
+<li><p><img src="https://latex.codecogs.com/png.latex?A">: Arrival model 到达模型, 可选:</p>
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?M">: Memoryless (Poisson process).</li>
+<li><img src="https://latex.codecogs.com/png.latex?E_k">: Erlang distribution (Sum of k i.i.d. exponential R.V.).</li>
+<li><img src="https://latex.codecogs.com/png.latex?G">: General distribution.</li>
+</ul></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?S">: Service model 服务模型, 可选同上.</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?C">: Number of parallel servers 并行服务器数量 (<img src="https://latex.codecogs.com/png.latex?%5Cneq"> number of queues).</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?K">: Capacity of queue 队列容量 (maximum number of people allowed in each queue), 可选:</p>
+<ul>
+<li>Finite.</li>
+<li>Infinite (<img src="https://latex.codecogs.com/png.latex?%5Cinfty">).</li>
+</ul></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?N">: Capacity of calling population (队里的人从哪里来的, 如果是有限的则会影响 arrival rate), 可选同上.</p></li>
+<li><p><img src="https://latex.codecogs.com/png.latex?D">: Service discipline 服务纪律, 可选:</p>
+<ul>
+<li><strong>FIFO/FCFS</strong>: First In (Come), First Out (Serve).</li>
+<li><strong>LIFO/LCFS</strong>: Last In (Come), First Out (Serve).</li>
+<li><strong>SIRO</strong>: Serve In Random Order.</li>
+<li><strong>PQ</strong>: Priority Queueing.</li>
+</ul></li>
+</ul>
+</section>
+<section id="examples" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="examples"><span class="header-section-number">7.2</span> Examples</h3>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-queue-ex1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-queue-ex1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/queue-ex1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-queue-ex1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: <img src="https://latex.codecogs.com/png.latex?M%20/%20M%20/%201%20/%207%20/%20%5Cinfty%20/%20%5Ctext%7BFIFO%7D"> Queue
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-queue-ex2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-queue-ex2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/queue-ex2.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-queue-ex2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: <img src="https://latex.codecogs.com/png.latex?M%20/%20M%20/%203%20/%208%20/%20%5Cinfty%20/%20%5Ctext%7BFIFO%7D"> Queue
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="notation-of-parameters" class="level3" data-number="7.3">
+<h3 data-number="7.3" class="anchored" data-anchor-id="notation-of-parameters"><span class="header-section-number">7.3</span> Notation of Parameters</h3>
+<ul>
+<li>cust.: customer.</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Clambda">: <strong>Mean arrival rate</strong>, <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BE%7D%20(%5C#%20%5Ctext%7Bcust.%20arrived%7D)"> per unit time.</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Cmu">: <strong>Mean service rate</strong>, <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BE%7D%20(%5C#%20%5Ctext%7Bcust.%20served%7D)"> per unit time.</li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Crho%20:=%20%5Clambda%20/%20(C%20%5Cmu)">: <strong>Utilization factor / Traffic intensity</strong>.</li>
+<li><img src="https://latex.codecogs.com/png.latex?n">: <img src="https://latex.codecogs.com/png.latex?%5C#%20%5Ctext%7Bcust.%7D"> in the:
+<ul>
+<li>system: <img src="https://latex.codecogs.com/png.latex?n_s">.</li>
+<li>queue: <img src="https://latex.codecogs.com/png.latex?n_q">.</li>
+</ul></li>
+<li><img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BP%7D_n(t)">: Probability of having <img src="https://latex.codecogs.com/png.latex?n"> customers in the <strong>system</strong> at time <img src="https://latex.codecogs.com/png.latex?t">.
+<ul>
+<li>Write <img src="https://latex.codecogs.com/png.latex?%5Cpi_n%20%5Cequiv%20%5Cmathbb%7BP%7D_n%20(%5Cinfty)">, 平稳后 system 中有 <img src="https://latex.codecogs.com/png.latex?n"> 个 cust. 的概率.</li>
+</ul></li>
+<li><img src="https://latex.codecogs.com/png.latex?W">: <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BE%7D(%5Ctext%7Bwaiting%20time%7D)"> per cust. in the:
+<ul>
+<li>system: <img src="https://latex.codecogs.com/png.latex?W_s"> (见 Equation&nbsp;2).</li>
+<li>queue: <img src="https://latex.codecogs.com/png.latex?W_q"> (见 Equation&nbsp;2).</li>
+</ul></li>
+<li><img src="https://latex.codecogs.com/png.latex?L">: <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BE%7D(%5C#%20%5Ctext%7Bcust.%7D)"> in the:
+<ul>
+<li>system: <img src="https://latex.codecogs.com/png.latex?L_s"> (见 Equation&nbsp;1).</li>
+<li>queue: <img src="https://latex.codecogs.com/png.latex?L_q"> (见 Equation&nbsp;2).</li>
+</ul></li>
+</ul>
+</section>
+<section id="m-m-1-infty-infty-textfifo-queue-生灭过程" class="level3 page-columns page-full" data-number="7.4">
+<h3 data-number="7.4" class="anchored" data-anchor-id="m-m-1-infty-infty-textfifo-queue-生灭过程"><span class="header-section-number">7.4</span> <img src="https://latex.codecogs.com/png.latex?M%20/%20M%20/%201%20/%20%5Cinfty%20/%20%5Cinfty%20/%20%5Ctext%7BFIFO%7D"> Queue 生灭过程</h3>
+<blockquote class="blockquote">
+<p>cust. 到达和离开可以代表生命的诞生和死亡, 因此这种排队过程也叫生灭过程 (birth-death process).</p>
+</blockquote>
+<section id="系统中的稳态人数为几何分布" class="level4 page-columns page-full" data-number="7.4.1">
+<h4 data-number="7.4.1" class="anchored" data-anchor-id="系统中的稳态人数为几何分布"><span class="header-section-number">7.4.1</span> 系统中的稳态人数为几何分布</h4>
+<blockquote class="blockquote">
+<p>这是一切生灭过程结论的起点!</p>
+</blockquote>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Geometric Distribution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div id="thm-geo" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 1</strong></span> 平稳后 system (not queue!) 中的人数 <img src="https://latex.codecogs.com/png.latex?%5Cpi"> 满足<strong>几何分布</strong><sup>1</sup>: <img src="https://latex.codecogs.com/png.latex?%5Cpi+1%20%5Csim%20G(1-%5Crho)."></p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;加一的原因是: 几何分布从 <img src="https://latex.codecogs.com/png.latex?1"> 开始, 而 <img src="https://latex.codecogs.com/png.latex?%5Cpi"> 的取值从 <img src="https://latex.codecogs.com/png.latex?0"> 开始.</p></div></div><ul>
+<li>并且这是一个全局稳定解, 即最终 system 中的分布与队中的初始人数无关!! (可理解为 <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bbmatrix%7D%20%5Cpi_0%20%5C%5C%20%5Cpi_1%20%5C%5C%20%5Cpi_2%20%5C%5C%20%5Cvdots%20%5Cend%7Bbmatrix%7D"> 为无穷维相空间中的吸引子).</li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+系统中的平均人数
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div id="cor-ls" class="theorem corollary">
+<p><span class="theorem-title"><strong>Corollary 1</strong></span> 由 Theorem&nbsp;1 和 Geometric Distribution 的性质可知: <span id="eq-ls"><img src="https://latex.codecogs.com/png.latex?%5Cboxed%7BL_s%20=%20%5Cfrac%7B%5Crho%7D%7B1-%5Crho%7D%7D%20%5Ctag%7B1%7D"></span></p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+<section id="expectation-space-es" class="level4" data-number="7.4.2">
+<h4 data-number="7.4.2" class="anchored" data-anchor-id="expectation-space-es"><span class="header-section-number">7.4.2</span> Expectation Space (ES)</h4>
+<blockquote class="blockquote">
+<p>这是生灭过程剩余所有结论的直接诱导思想!</p>
+</blockquote>
+<ul>
+<li>ES 基本思想和局限性:
+<ul>
+<li>对于任何随机过程, 很多时候可以将随机性忽略, 让考虑所有量都按照<strong>期望</strong>稳定存在的 mental picture. 由于没有找到已知的合适的名词, 我们姑且将此称为 Expectation Space 吧.</li>
+<li><strong>Advantage</strong>: ES 可以让很多结论变得显然.</li>
+<li><strong>Limitation</strong>: 对于生灭过程, 若 <img src="https://latex.codecogs.com/png.latex?%5Clambda%20%3C%20%5Cmu">, 若想象成水按速率 <img src="https://latex.codecogs.com/png.latex?%5Clambda"> 流入管道, 流出速率最大值可达 <img src="https://latex.codecogs.com/png.latex?%5Cmu">, 则管道里永远也不会留下水, 而后面我们会知道实际上管道里平均来说会留下 <img src="https://latex.codecogs.com/png.latex?L_s%20=%20%5Crho%20/%20(1-%5Crho)"> 的水量. 这是因为 cust. 到达和离开是随机的, 有可能一小段时间内有很多 cust. 到达而处理时间又比较长, 这样管道里就会积累一些水.</li>
+</ul></li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+生灭过程的 Expectation Space 结论
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div id="thm-es" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 2</strong></span> 由 Figure&nbsp;12:</p>
+<div id="fig-es" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-es-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/es.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-es-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: 生灭过程的 ES.
+</figcaption>
+</figure>
+</div>
+<p>结合 Corollary&nbsp;1 显然有:</p>
+<p><span id="eq-es"><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0AL_s%20=%20%5Clambda%20W_s%20&amp;%5Cimplies%20%5Cboxed%7BW_s%20=%20%5Cfrac%7BL_s%7D%7B%5Clambda%7D%20=%20%5Cfrac%7B1%7D%7B%5Cmu-%5Clambda%7D%7D%20%5C%5C%0AW_s%20-%20W_q%20=%20%5Cfrac%7B1%7D%7B%5Cmu%7D%20&amp;%5Cimplies%20%5Cboxed%7BW_q%20=%20W_s%20-%20%5Cfrac%7B1%7D%7B%5Cmu%7D%20=%20%5Cfrac%7B%5Crho%7D%7B%5Cmu%20-%20%5Clambda%7D%7D%20%5C%5C%0AL_q%20=%20%5Clambda%20W_q%20&amp;%5Cimplies%20%5Cboxed%7BL_q%20=%20%5Cfrac%7B%5Crho%5E2%7D%7B1-%5Crho%7D%7D.%0A%5Cend%7Baligned%7D%0A%5Ctag%7B2%7D"></span></p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+
+
+
+</section>
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0">
+<div id="ref-Hira2014" class="csl-entry">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">A. Hira, N. Sakib, N. Sarker, Md. N. Mollah, S. Mohamed, and M. Rashid, <span>“A novel approach to signal encryption: Improved version of conventional direct sequence spread spectrum scheme,”</span> <em>Advanced Science Letters</em>, vol. 20, Oct. 2014, doi: <a href="https://doi.org/10.1166/asl.2014.5684">10.1166/asl.2014.5684</a></div>
+</div>
+<div id="ref-wikipediacontributors_2025_signal" class="csl-entry">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">W. Contributors, <span>“Signal modulation.”</span> Wikipedia; Wikimedia Foundation, Mar. 2025. Available: <a href="https://en.wikipedia.org/wiki/Signal_modulation">https://en.wikipedia.org/wiki/Signal_modulation</a>. [Accessed: Dec. 19, 2025]</div>
+</div>
+<div id="ref-Gkiokas2015" class="csl-entry">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">C. Gkiokas, <span>“Localization of a mobile node in a wireless sensor network: An evaluation of RSSI as a distance metric,”</span> PhD thesis, 2015.</div>
+</div>
+</div></section></div> ]]></description>
+  <category>Crash-Course</category>
+  <category>CN-blogs</category>
+  <guid>https://marcobisky.github.io/posts/wsn-crash-course/</guid>
+  <pubDate>Wed, 17 Dec 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://marcobisky.github.io/posts/wsn-crash-course/cover.png" medium="image" type="image/png" height="48" width="144"/>
+</item>
 <item>
   <title>Probability Theory Takeaways 概率论极简笔记</title>
   <dc:creator>Marcobisky </dc:creator>
@@ -13605,569 +14768,6 @@ Powell, J David. 2012. <em>Feedback Control of Dynamic Systems : International V
   <guid>https://marcobisky.github.io/posts/inverted-pendulum/</guid>
   <pubDate>Mon, 24 Mar 2025 16:00:00 GMT</pubDate>
   <media:content url="https://marcobisky.github.io/posts/inverted-pendulum/src/cover.gif" medium="image" type="image/gif"/>
-</item>
-<item>
-  <title>Special Matrices 特殊矩阵与算子</title>
-  <dc:creator>Marcobisky </dc:creator>
-  <link>https://marcobisky.github.io/posts/special-matrix/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<!-- ## Big Picture -->
-<section id="normal-operator" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="normal-operator"><span class="header-section-number">1</span> Normal Operator</h2>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Definition: Normal Operator
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-normal-operator" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 1</strong></span> <img src="https://latex.codecogs.com/png.latex?A%20%5Cin%20%5Cmathbb%7BC%7D%5E%7Bn%20%5Ctimes%20n%7D"> is called <strong><em>normal</em></strong> iff <img src="https://latex.codecogs.com/png.latex?A%5EH%20A%20=%20AA%5EH"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<section id="notes" class="level3" data-number="1.1">
-<h3 data-number="1.1" class="anchored" data-anchor-id="notes"><span class="header-section-number">1.1</span> Notes</h3>
-<ol type="1">
-<li><p><img src="https://latex.codecogs.com/png.latex?%5Ciff"> <img src="https://latex.codecogs.com/png.latex?A"> is <em>unitarily-diagonalizable</em>, i.e., <img src="https://latex.codecogs.com/png.latex?%0A%5Cexists%20U%20%5Cin%20U(n),%20%5Ctext%7Bdiagonal%20%7D%20D,%20%5Ctext%7Bs.t.%20%7D%20A%20=%20UDU%5EH.%20%5Cquad%20(%5Ctext%7BSpectral%20Thm%202%7D)%0A"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Ciff"> <img src="https://latex.codecogs.com/png.latex?%5Cexists%20%5Ctext%7B%20orthogonal%20eigenvectors%20that%20span%20%7D%20%5Cmathbb%7BC%7D%5En."></p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Ciff"> <img src="https://latex.codecogs.com/png.latex?A%20%5Ctext%7B%20orthogonally%20non-defective%7D"></p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Ciff"> <img src="https://latex.codecogs.com/png.latex?%5Ctext%7Brow%20covariance%20matrix%20of%20%7DA%20=%20%5Ctext%7Bcolumn%20covariance%20matrix%20of%20%7DA"></p></li>
-<li><p>Normal matrix <img src="https://latex.codecogs.com/png.latex?A"> does not necessarily invertible. Its eigenvalues can be <img src="https://latex.codecogs.com/png.latex?0,%20%5Cmathbb%7BR%7D"> or <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BC%7D">.</p></li>
-<li><p>Mental picture for normal operator:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%5Ctext%7BNormal%20operators%7D%20%5Ciff%20%5Ctext%7BSqueezing%20complex%20rectangular%20box.%7D%7D%0A"></p></li>
-</ol>
-</section>
-</section>
-<section id="hermitian-self-adjoint-operator" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="hermitian-self-adjoint-operator"><span class="header-section-number">2</span> Hermitian (Self-adjoint) Operator</h2>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Definition: Hermitian Operator
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-hermitian-operator" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 2</strong></span> <img src="https://latex.codecogs.com/png.latex?A%20%5Cin%20%5Cmathbb%7BC%7D%5E%7Bn%20%5Ctimes%20n%7D"> is called <strong><em>hermitian (self-adjoint)</em></strong> iff <img src="https://latex.codecogs.com/png.latex?A%20=%20A%5EH"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<section id="notes-1" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="notes-1"><span class="header-section-number">2.1</span> Notes</h3>
-<ol type="1">
-<li><p><img src="https://latex.codecogs.com/png.latex?%0AA%20%5Ctext%7B%20hermitian%7D%0A%5Ciff%20%5Cbegin%7Bequation*%7D%0A%20%20%5Cbegin%7Bcases%7D%20A%20%5Ctext%7B%20normal%7D%20&amp;%20%20%5C%5C%20%5Ctext%7Bspectrum%20of%20%7DA%20%5Csubseteq%20%5Cmathbb%7BR%7D.%20&amp;%20%20%5Cend%7Bcases%7D%0A%5Cend%7Bequation*%7D%0A"></p></li>
-<li><p>Also self-adjoint operators do not necessarily invertible.</p></li>
-<li><p>Self-adjoint operators could be think of as normal operators with real spectrum.</p></li>
-<li><p>Mental picture for hermitian operators:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%5Ctext%7BHermitian%20operators%7D%20%5Ciff%20%5Ctext%7BSqueezing%20complex%20rectangular%20box%20in%20a%20particular%20way%20that%20creatures%20living%20under%20projection%20%7D%5Cpi:%20%5Cmathbb%7BC%7D%5En%20%5Cto%20%5Cmathbb%7BR%7D%5En%20%5Ctext%7B%20do%20NOT%20think%20it%20is%20a%20rotation.%7D%7D%0A"></p></li>
-<li><p>If <img src="https://latex.codecogs.com/png.latex?A%20%5Cin%20%5Cmathbb%7BR%7D%5E%7Bn%5Ctimes%20n%7D%20%3C%20%5Cmathbb%7BC%7D%5E%7Bn%5Ctimes%20n%7D"> is hermitian, it is also called <strong><em>symmetric</em></strong>, i.e., <img src="https://latex.codecogs.com/png.latex?%0AA%20=%20A%5Et.%0A"></p></li>
-</ol>
-</section>
-</section>
-<section id="skew-hermitian-operator" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="skew-hermitian-operator"><span class="header-section-number">3</span> Skew-Hermitian Operator</h2>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Definition: Hermitian Operator
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-skew-hermitian-operator" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 3</strong></span> <img src="https://latex.codecogs.com/png.latex?A%20%5Cin%20%5Cmathbb%7BC%7D%5E%7Bn%20%5Ctimes%20n%7D"> is called <strong><em>skew-hermitian</em></strong> iff <img src="https://latex.codecogs.com/png.latex?-A%20=%20A%5EH"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<section id="notes-2" class="level3" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="notes-2"><span class="header-section-number">3.1</span> Notes</h3>
-<ol type="1">
-<li>Skew-hermitian operators are very close to hermitian: <img src="https://latex.codecogs.com/png.latex?%0AA%20%5Ctext%7B%20skew-hermitian%7D%20%5Ciff%20iA%20%5Ctext%7B%20hermitian%7D%0A"></li>
-</ol>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Proof
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Let <img src="https://latex.codecogs.com/png.latex?A%20%5Cin%20%5Cmathbb%7BC%7D%5E%7Bn%20%5Ctimes%20n%7D"> be skew-hermitian, i.e., <img src="https://latex.codecogs.com/png.latex?-A%20=%20A%5EH">. Let <img src="https://latex.codecogs.com/png.latex?B%20=%20iA">. Then <img src="https://latex.codecogs.com/png.latex?%0AB%5EH%20=%20(iA)%5EH%20=%20-iA%5EH%20=%20iA%20=%20B.%0A"></p>
-<p>Therefore, <img src="https://latex.codecogs.com/png.latex?B"> is hermitian.</p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<ol start="2" type="1">
-<li><p>By the property that hermitian operators have real spectrum, <strong>all skew-hermitian operators have purely imaginary spectrum.</strong></p></li>
-<li><p><img src="https://latex.codecogs.com/png.latex?%0AA%20%5Ctext%7B%20skew-hermitian%7D%0A%5Ciff%20%5Cbegin%7Bequation*%7D%0A%5Cbegin%7Bcases%7D%20A%20%5Ctext%7B%20normal%7D%20&amp;%20%20%5C%5C%20%5Ctext%7Bspectrum%20of%20%7DA%20%5Csubseteq%20i%5Cmathbb%7BR%7D.%20&amp;%20%20%5Cend%7Bcases%7D%0A%5Cend%7Bequation*%7D%0A"></p></li>
-</ol>
-</section>
-</section>
-<section id="unitary-operator" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="unitary-operator"><span class="header-section-number">4</span> Unitary Operator</h2>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Definition: Unitary Operator
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="def-unitary-operator" class="callout-def theorem definition">
-<p><span class="theorem-title"><strong>Definition 4</strong></span> <img src="https://latex.codecogs.com/png.latex?A%20%5Cin%20%5Cmathbb%7BC%7D%5E%7Bn%20%5Ctimes%20n%7D"> is called <strong><em>unitary</em></strong> iff <img src="https://latex.codecogs.com/png.latex?AA%5EH%20=%20I">, denoted <img src="https://latex.codecogs.com/png.latex?A%20%5Cin%20U(n)"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Proposition
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="prp-" class="callout-prp theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 1</strong></span> <img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bequation*%7D%0A%20%20%20%20%5Cbegin%7Bcases%7D%20A%20%5Ctext%7B%20square%7D%20&amp;%20%20%5C%5C%20A%5EHA%20=%20I%20&amp;%20%20%5Cend%7Bcases%7D%0A%0A%20%20%20%20%5Cimplies%20A%20A%5EH%20=%20I%0A%5Cend%7Bequation*%7D"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<div class="proof">
-<p><span class="proof-title"><em>Proof</em>. </span>From <img src="https://latex.codecogs.com/png.latex?A%5EH%20A%20=%20I"> we know that the <em>columns</em> of <img src="https://latex.codecogs.com/png.latex?A"> are <em>orthonormal</em></p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cimplies"> <img src="https://latex.codecogs.com/png.latex?A"> injective</p>
-<p>Also <img src="https://latex.codecogs.com/png.latex?A"> is square. Since injective automorphisms are epimorphisms, we have:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cimplies"> <img src="https://latex.codecogs.com/png.latex?A"> is an isomorphism</p>
-<p><img src="https://latex.codecogs.com/png.latex?%5Cimplies"> <img src="https://latex.codecogs.com/png.latex?A"> is invertible, and <img src="https://latex.codecogs.com/png.latex?A%5EH%20=%20A%5E%7B-1%7D"></p>
-<p>This finished the proof.</p>
-</div>
-<section id="notes-3" class="level3" data-number="4.1">
-<h3 data-number="4.1" class="anchored" data-anchor-id="notes-3"><span class="header-section-number">4.1</span> Notes</h3>
-<ol type="1">
-<li><p>Hence for unitary operators: <img src="https://latex.codecogs.com/png.latex?%0AA%5EH%20A%20=%20A%20A%5EH%20=%20I%0A"></p></li>
-<li><p>Note <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A&amp;%5Cquad%20%5Cquad%20%5C%20%5Cbegin%7Bcases%7D%0A%20%20%20%20%20A%20%5Ctext%7B%20is%20normal%7D%20%5C%5C%0A%20%20%20%20%20%5Ctext%7BSpectrum%20of%20%7D%20A%20%5Csubseteq%20%5Cmathbb%7BS%7D%5E1%20%5Csubseteq%20%5Cmathbb%7BC%7D%0A%5Cend%7Bcases%7D%20%5C%5C%0A&amp;%5Ciff%20A%5EH%20=%20A%5E%7B-1%7D%20%5C%5C%0A&amp;%5Ciff%0A%5Cbegin%7Bcases%7D%0A%20%20%20%20%20A%20%5Ctext%7B%20is%20square%7D%20%5C%5C%0A%20%20%20%20%20A%5EH%20A%20=%20I%0A%5Cend%7Bcases%7D%20%5C%5C%0A&amp;%5Ciff%0A%5Cbegin%7Bcases%7D%0A%20%20%20%20%20A%20%5Ctext%7B%20is%20square%7D%20%5C%5C%0A%20%20%20%20%20A%20A%5EH%20=%20I%0A%5Cend%7Bcases%7D%0A%5Cend%7Baligned%7D%0A"></p></li>
-</ol>
-<!-- ## Rotation Matrix (Special Unitary) -->
-
-
-</section>
-</section>
-
- ]]></description>
-  <category>Algebra</category>
-  <category>EN-blogs</category>
-  <guid>https://marcobisky.github.io/posts/special-matrix/</guid>
-  <pubDate>Fri, 14 Mar 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://marcobisky.github.io/posts/special-matrix/cover.png" medium="image" type="image/png" height="89" width="144"/>
-</item>
-<item>
-  <title>Three ways to Understand the Mixed Product of Vectors! 向量混合积的三种理解</title>
-  <dc:creator>Marcobisky </dc:creator>
-  <link>https://marcobisky.github.io/posts/vector-operation/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="hello" class="level2 page-columns page-full" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="hello"><span class="header-section-number">1</span> Hello!</h2>
-<p>This property of vector operation bother me for a loooooong time:</p>
-<p><strong>Mixed product</strong><sup>1</sup>: <span id="eq-scalar"><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0Aa%20%5Ccdot%20(b%20%5Ctimes%20c)%20=%20b%20%5Ccdot%20(c%20%5Ctimes%20a)%20=%20c%20%5Ccdot%20(a%20%5Ctimes%20b).%0A%7D%0A%5Ctag%7B1%7D"></span></p>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;Also known as “scalar triple product”.</p></div></div><p>This says nothing but the mixed product is unchanged under a circular shift.</p>
-<p>You will understand it in this article!</p>
-</section>
-<section id="three-approaches-to-the-mixed-product" class="level2 page-columns page-full" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="three-approaches-to-the-mixed-product"><span class="header-section-number">2</span> Three Approaches to the Mixed Product</h2>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Lemma
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="lem-determinant" class="callout-lem theorem lemma">
-<p><span class="theorem-title"><strong>Lemma 1</strong></span> Let <img src="https://latex.codecogs.com/png.latex?a,%20b,%20c%20%5Cin%20%5Cmathbb%7BR%7D%5E3">, then <img src="https://latex.codecogs.com/png.latex?%0Aa%20%5Ccdot%20(b%20%5Ctimes%20c)%20=%0A%5Cbegin%7Bvmatrix%7D%0A%7C%20&amp;%20%7C%20&amp;%20%7C%20%5C%5C%0Aa%20&amp;%20b%20&amp;%20c%20%5C%5C%0A%7C%20&amp;%20%7C%20&amp;%20%7C%0A%5Cend%7Bvmatrix%7D%0A"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<p>Once this is established, we can use the fact that: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Bvmatrix%7D%0A%7C%20&amp;%20%7C%20&amp;%20%7C%20%5C%5C%0Aa%20&amp;%20b%20&amp;%20c%20%5C%5C%0A%7C%20&amp;%20%7C%20&amp;%20%7C%0A%5Cend%7Bvmatrix%7D%20=%0A%5Cbegin%7Bvmatrix%7D%0A%7C%20&amp;%20%7C%20&amp;%20%7C%20%5C%5C%0Ab%20&amp;%20c%20&amp;%20a%20%5C%5C%0A%7C%20&amp;%20%7C%20&amp;%20%7C%0A%5Cend%7Bvmatrix%7D%20=%0A%5Cbegin%7Bvmatrix%7D%0A%7C%20&amp;%20%7C%20&amp;%20%7C%20%5C%5C%0Ac%20&amp;%20a%20&amp;%20b%20%5C%5C%0A%7C%20&amp;%20%7C%20&amp;%20%7C%0A%5Cend%7Bvmatrix%7D%0A"> to prove Equation&nbsp;1.</p>
-<p>Now let’s understand Lemma&nbsp;1 in three different ways!</p>
-<section id="geometric-approach" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="geometric-approach"><span class="header-section-number">2.1</span> Geometric Approach</h3>
-<p>See Figure&nbsp;1, dot product make the slanted black box straight but maintains its volume.</p>
-<div id="fig-determinant-geometric" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-determinant-geometric-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/vector-operation/determinant-geometric.png" class="img-fluid figure-img" style="width:80.0%">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-determinant-geometric-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Geometric proof of Lemma&nbsp;1
-</figcaption>
-</figure>
-</div>
-</section>
-<section id="b1b-approach" class="level3 page-columns page-full" data-number="2.2">
-<h3 data-number="2.2" class="anchored" data-anchor-id="b1b-approach"><span class="header-section-number">2.2</span> 3b1b Approach</h3>
-<p>I called this “3b1b Approach” because this method is inspired by a great mathematician Grant Sanderson. “3b1b” is the name of <a href="https://www.youtube.com/@3blue1brown">his Youtube channel</a>.</p>
-<p>In a <a href="https://www.youtube.com/watch?v=BaM7OCEm3G0">video</a> created by him, there is a very interesting function <img src="https://latex.codecogs.com/png.latex?f:%20%5Cmathbb%7BR%7D%5E3%20%5Cto%20%5Cmathbb%7BR%7D">: <span id="eq-nice-function"><img src="https://latex.codecogs.com/png.latex?%0Af(x)%20=%0A%5Cbegin%7Bvmatrix%7D%0A%7C%20&amp;%20%7C%20&amp;%20%7C%20%5C%5C%0Ax%20&amp;%20v%20&amp;%20w%20%5C%5C%0A%7C%20&amp;%20%7C%20&amp;%20%7C%0A%5Cend%7Bvmatrix%7D%0A%5Ctag%7B2%7D"></span> which takes in a vector in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5E3"> and output a number in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D"> (<img src="https://latex.codecogs.com/png.latex?v"> and <img src="https://latex.codecogs.com/png.latex?w"> are predefined and fixed).<sup>2</sup> Now I claim that:</p>
-<!-- ----------------------------------------- -->
-<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;Functions from a vector space to a scalar is often referred to as a <strong><em>functional</em></strong>.</p></div></div><div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Claim
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="thm-claim" class="callout-thm theorem">
-<p><span class="theorem-title"><strong>Theorem 1</strong></span> The functional <img src="https://latex.codecogs.com/png.latex?f"> in Equation&nbsp;2 is <em>linear</em>, i.e., <img src="https://latex.codecogs.com/png.latex?%0Af(x%20+%20y)%20=%20f(x)%20+%20f(y),%20%5Cforall%20x,%20y%20%5Cin%20%5Cmathbb%7BR%7D%5E3%0A"> and <img src="https://latex.codecogs.com/png.latex?%0Af(%5Calpha%20x)%20=%20%5Calpha%20f(x),%20%5Cforall%20%5Calpha%20%5Cin%20%5Cmathbb%7BR%7D.%0A"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<p>This is trivial.</p>
-<p>There is another theorem<sup>3</sup>:</p>
-<!-- ----------------------------------------- -->
-<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;There is a <a href="https://www.bilibili.com/video/BV1AterevErt/?spm_id_from=333.1387.list.card_archive.click&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">video</a> created by myself that explains this in detail.</p></div></div><div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Riesz Representation Theorem (reduced version)
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="thm-riesz" class="callout-thm theorem">
-<p><span class="theorem-title"><strong>Theorem 2</strong></span> Every linear functional in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5En"> induces a vector <img src="https://latex.codecogs.com/png.latex?p%20%5Cin%20%5Cmathbb%7BR%7D%5En"> such that <img src="https://latex.codecogs.com/png.latex?%0Af(x)%20=%20x%20%5Ccdot%20p,%20%5Cforall%20x%20%5Cin%20%5Cmathbb%7BR%7D%5En.%0A"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<p>Therefore, Equation&nbsp;2 becomes <span id="eq-x-dot-p"><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0Ax%20%5Ccdot%20p%20=%0A%5Cbegin%7Bvmatrix%7D%0A%7C%20&amp;%20%7C%20&amp;%20%7C%20%5C%5C%0Ax%20&amp;%20v%20&amp;%20w%20%5C%5C%0A%7C%20&amp;%20%7C%20&amp;%20%7C%0A%5Cend%7Bvmatrix%7D%0A%7D%0A%5Ctag%7B3%7D"></span></p>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Mnemonic device inspired by Equation&nbsp;3
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-4" class="callout-4-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>The Equation&nbsp;3 gives us a way to write the cross product in a more “dot-product” way: <img src="https://latex.codecogs.com/png.latex?%0Av%20%5Ctimes%20w%20=%0A%5Cbegin%7Bvmatrix%7D%0A%5Chat%7B%5Cimath%7D%20&amp;%20v_1%20&amp;%20w_1%20%5C%5C%0A%5Chat%7B%5Cjmath%7D%20&amp;%20v_2%20&amp;%20w_2%20%5C%5C%0A%5Chat%7Bk%7D%20&amp;%20v_3%20&amp;%20w_3%0A%5Cend%7Bvmatrix%7D%0A"> because the result <img src="https://latex.codecogs.com/png.latex?v%20%5Ctimes%20w%20=%20(v_2w_3%20-%20v_3w_2)%5Chat%7B%5Cimath%7D%20+%20(v_3w_1%20-%20v_1w_3)%5Chat%7B%5Cjmath%7D%20+%20(v_1w_2%20-%20v_2w_1)%5Chat%7Bk%7D"> is very much like a dot product! Remember <img src="https://latex.codecogs.com/png.latex?v_2w_3%20-%20v_3w_2,%20v_3w_1%20-%20v_1w_3,%20v_1w_2%20-%20v_2w_1"> are just three numbers unless you you associate each number with a direction.</p>
-<p>If you feel uncomfortable with this notation, there is more: <img src="https://latex.codecogs.com/png.latex?%0A%5Coperatorname%7Bcurl%7D%20F%0A%5Cequiv%20%5Cnabla%20%5Ctimes%20F%20=%0A%5Cbegin%7Bvmatrix%7D%0A%5Chat%7B%5Cimath%7D%20&amp;%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20x%7D%20&amp;%20F_x%20%5C%5C%0A%5Chat%7B%5Cjmath%7D%20&amp;%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20y%7D%20&amp;%20F_y%20%5C%5C%0A%5Chat%7Bk%7D%20&amp;%20%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20z%7D%20&amp;%20F_z%0A%5Cend%7Bvmatrix%7D%0A"> where we treat <img src="https://latex.codecogs.com/png.latex?%5Cnabla"> like a vector! The first column is just an indicator that the result should be interpreted as a vector not a dot product. I took long time to think <img src="https://latex.codecogs.com/png.latex?%5Cnabla"> as a kind of special vector, but I failed. Feel free to ignore the notation <img src="https://latex.codecogs.com/png.latex?%5Cnabla%20%5Ctimes%20F"> if you don’t like it!</p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<p>What is <img src="https://latex.codecogs.com/png.latex?p"> then? Well, <strong><img src="https://latex.codecogs.com/png.latex?p"> is a special vector in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5E3"> such that the dot product with <em>any</em> vector <img src="https://latex.codecogs.com/png.latex?x"> gives a number that is equal to the volume of a box spaned by <img src="https://latex.codecogs.com/png.latex?x">, <img src="https://latex.codecogs.com/png.latex?v">, and <img src="https://latex.codecogs.com/png.latex?w">.</strong> This is a little bit mouthful, but we can see immediately from Figure&nbsp;1 that <img src="https://latex.codecogs.com/png.latex?p"> is just the blue vector, which is <img src="https://latex.codecogs.com/png.latex?v%20%5Ctimes%20w"> in this case! So Equation&nbsp;3 becomes: <img src="https://latex.codecogs.com/png.latex?%0Ax%20%5Ccdot%20(v%20%5Ctimes%20w)%20=%20%5Cbegin%7Bvmatrix%7D%0A%7C%20&amp;%20%7C%20&amp;%20%7C%20%5C%5C%0Ax%20&amp;%20v%20&amp;%20w%20%5C%5C%0A%7C%20&amp;%20%7C%20&amp;%20%7C%0A%5Cend%7Bvmatrix%7D%0A"></p>
-<p>We are done!</p>
-</section>
-<section id="tensor-approach" class="level3 page-columns page-full" data-number="2.3">
-<h3 data-number="2.3" class="anchored" data-anchor-id="tensor-approach"><span class="header-section-number">2.3</span> Tensor Approach</h3>
-<p>Now this explanation requires some knowledge about tensors<sup>4</sup>. But once you understand it, <strong>you will completely change your view on <em>determinants</em></strong>! (If you did not respect them at all in the past anyway.)</p>
-<!-- ----------------------------------------- -->
-<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;Just a quick joke, tensors are exactly linear functionals but we allow multiple vectors to be the input (instead of one).</p></div></div><div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Proposition
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="prp-alternating" class="callout-prp theorem proposition">
-<p><span class="theorem-title"><strong>Proposition 1</strong></span> The mapping <img src="https://latex.codecogs.com/png.latex?g(a,%20b,%20c)%20:=%20a%20%5Ccdot%20(b%20%5Ctimes%20c)"> and <img src="https://latex.codecogs.com/png.latex?%5Cdet"> are both alternating 3-tensor, i.e., <span id="eq-g-det"><img src="https://latex.codecogs.com/png.latex?%0Ag,%20%5Cdet%20%5Cin%20%5Cbigwedge%5Cnolimits%5E%7B%5C!3%7D%20%5Cleft(%5Cmathbb%7BR%7D%5E3%5Cright).%0A%5Ctag%7B4%7D"></span></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<p>We also have this theorem:</p>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip no-icon callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon no-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Uniqueness of volume form
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<div id="thm-dimension-1" class="callout-thm theorem">
-<p><span class="theorem-title"><strong>Theorem 3</strong></span> The dimension of the vector space of <img src="https://latex.codecogs.com/png.latex?k">-tensors on <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5En"> is <img src="https://latex.codecogs.com/png.latex?%7Bn%20%5Cchoose%20k%7D">: <img src="https://latex.codecogs.com/png.latex?%0A%5Coperatorname%7Bdim%7D%20%5Cbigwedge%5Cnolimits%5E%7B%5C!k%7D%20%5Cleft(%5Cmathbb%7BR%7D%5En%5Cright)%20=%20%7Bn%20%5Cchoose%20k%7D.%0A"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Demonstration of Theorem&nbsp;3
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-7" class="callout-7-contents callout-collapse collapse">
-<div class="callout-body-container callout-body">
-<p>Pick <img src="https://latex.codecogs.com/png.latex?n%20=%203"> and <img src="https://latex.codecogs.com/png.latex?k%20=%202">. This is because in order to get the result of a <img src="https://latex.codecogs.com/png.latex?2">-tensor<sup>5</sup> <img src="https://latex.codecogs.com/png.latex?B"> acting on <em>any</em> two vectors of dimension <img src="https://latex.codecogs.com/png.latex?3">, we would only need to specify the values of <img src="https://latex.codecogs.com/png.latex?B"> acting on any <img src="https://latex.codecogs.com/png.latex?2"> of the three basis vectors (<img src="https://latex.codecogs.com/png.latex?e_x,%20e_y,%20e_z">). How many numbers do we need? Well, only <img src="https://latex.codecogs.com/png.latex?%7B3%20%5Cchoose%202%7D%20=%203"> numbers: <img src="https://latex.codecogs.com/png.latex?%0AB(e_x,%20e_y)%20=%20a_%7B12%7D,%20B(e_y,%20e_z)%20=%20a_%7B23%7D,%20B(e_z,%20e_x)%20=%20a_%7B31%7D.%0A"></p>
-<p>These are the “basis” of the space <img src="https://latex.codecogs.com/png.latex?%5Cbigwedge%5Cnolimits%5E%7B%5C!2%7D%20%5Cleft(%5Cmathbb%7BR%7D%5E3%5Cright)">. So its dimension is <img src="https://latex.codecogs.com/png.latex?3">. Then we just use the bilinear and alternating property of <img src="https://latex.codecogs.com/png.latex?B"> to calculate the result of <em>any</em> two input vectors say <img src="https://latex.codecogs.com/png.latex?x%20=%202e_x%20+%20e_y%20-%20e_z"> and <img src="https://latex.codecogs.com/png.latex?y%20=%20-e_x%20+%203e_z">: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0AB(x,%20y)%0A&amp;=%20B(2e_x%20+%20e_y%20-%20e_z,%20-e_x%20+%203e_z)%20%5C%5C%0A&amp;=%20B(2e_x%20+%20e_y%20-%20e_z,%20-e_x)%20+%20B(2e_x%20+%20e_y%20-%20e_z,%203e_z)%20%5C%5C%0A&amp;=%20-2B(e_x,%20e_x)%20-%20B(e_y,%20e_x)%20+%20B(e_z,%20e_x)%20%5C%5C%0A&amp;+%206B(e_x,%20e_z)%20+%203B(e_y,%20e_z)%20-%203B(e_z,%20e_z)%20%5C%5C%0A&amp;=%200%20-%20(-a_%7B12%7D)%20+%20a_%7B31%7D%20%5C%5C%0A&amp;+%206(-a_%7B31%7D)%20+%203a_%7B23%7D%20-%200%20%5C%5C%0A&amp;=%20a_%7B12%7D%20+%203a_%7B23%7D%20-%205a_%7B31%7D.%0A%5Cend%7Baligned%7D%0A"></p>
-</div>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<div class="no-row-height column-margin column-container"><div id="fn5"><p><sup>5</sup>&nbsp;This is also called an alternating bilinear form.</p></div><div id="fn6"><p><sup>6</sup>&nbsp;This type of tensor is also called “volume form”.</p></div></div><p>As a special case<sup>6</sup> when <img src="https://latex.codecogs.com/png.latex?n%20=%20k%20=%203">, we have: <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0A%5Coperatorname%7Bdim%7D%20%5Cbigwedge%5Cnolimits%5E%7B%5C!3%7D%20%5Cleft(%5Cmathbb%7BR%7D%5E3%5Cright)%20=%20%7B3%20%5Cchoose%203%7D%20=%201.%0A%7D%0A"></p>
-<p>Let’s think about what this means. <strong>The determinant is a very special object that <em>every</em> volume form in <img src="https://latex.codecogs.com/png.latex?n"> dimension is just a scalar multiple of it! In other words, <em>every</em> alternating <img src="https://latex.codecogs.com/png.latex?n">-tensor in <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BR%7D%5En"> must be the determinant (up to a scalar)!</strong> So with Equation&nbsp;4, both <img src="https://latex.codecogs.com/png.latex?g"> and <img src="https://latex.codecogs.com/png.latex?%5Cdet"> are volume forms! So <img src="https://latex.codecogs.com/png.latex?g"> must be a scalar multiple of <img src="https://latex.codecogs.com/png.latex?%5Cdet">: <img src="https://latex.codecogs.com/png.latex?%0Ag%20=%20k%20%5Cdet.%0A"></p>
-<p>We can evaluate <img src="https://latex.codecogs.com/png.latex?k"> by choosing a very special set of <img src="https://latex.codecogs.com/png.latex?a,%20b,%20c%20%5Cin%20%5Cmathbb%7BR%7D%5E3">, say <img src="https://latex.codecogs.com/png.latex?a%20=%20e_x,%20b%20=%20e_y,%20c%20=%20e_z">: <img src="https://latex.codecogs.com/png.latex?%0Ag(e_x,%20e_y,%20e_z)%20=%20e_x%20%5Ccdot%20(e_y%20%5Ctimes%20e_z)%20=%20e_x%20%5Ccdot%20e_x%20=%201,%0A"> <img src="https://latex.codecogs.com/png.latex?%0A%5Cdet(e_x,%20e_y,%20e_z)%20=%0A%5Cbegin%7Bvmatrix%7D%0A1%20&amp;%200%20&amp;%200%20%5C%5C%0A0%20&amp;%201%20&amp;%200%20%5C%5C%0A0%20&amp;%200%20&amp;%201%0A%5Cend%7Bvmatrix%7D%20=%201.%0A"></p>
-<p>Therefore, <img src="https://latex.codecogs.com/png.latex?k%20=%201"> and <img src="https://latex.codecogs.com/png.latex?g%20=%20%5Cdet">. We are done!</p>
-
-
-</section>
-</section>
-
-
- ]]></description>
-  <category>Differential-Geometry</category>
-  <category>EN-blogs</category>
-  <guid>https://marcobisky.github.io/posts/vector-operation/</guid>
-  <pubDate>Sat, 08 Mar 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://marcobisky.github.io/posts/vector-operation/cover.png" medium="image" type="image/png" height="70" width="144"/>
-</item>
-<item>
-  <title>EM Chapter I: Maxwell’s First Equation</title>
-  <dc:creator>Marcobisky </dc:creator>
-  <link>https://marcobisky.github.io/posts/electrostatics/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="takeaway" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="takeaway">Takeaway</h2>
-<ol type="1">
-<li><p>Changing the mindset from <em>forces</em> to <em>fields</em>.</p></li>
-<li><p>Maxwell’s First Equation = Inverse Square + Superposition</p></li>
-<li><p>Curl-free (conservative) property of static electric field has nothing to do with the inverse square property! (It’s because the radial direction of the field.)</p></li>
-</ol>
-</section>
-<section id="sec-welcome" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="sec-welcome"><span class="header-section-number">1</span> Welcome!</h2>
-<p>This is the first chapter of my electromagnetics series. I will introduce to you the theory of electromagnetism through this series, not in the order of history, but in the order of a self-contained logic that satisfies people. The reason I did this is that history is too complicated, confusing and sometimes even wrong. One would not fully understand the trajactory of any subject (geometry, Newton’s law, General relativity, etc) without <em>experiencing</em> it. So I would NOT recommend you go through the tedious history of <em>any</em> subject but develop <strong>your own</strong> logic-complete explanation of it after reading tons of wikipedia and stackexchange, in other words, that explanation should make sense in the history in another parallel universe!</p>
-<p>You will understand the first one of the famous Maxwell’s Equations in this blog:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%20%20%20%20%5Cmathbf%7B%5Cnabla%7D%20%5Ccdot%20%5Cmathbf%7BE%7D%20&amp;=%20%5Cfrac%7B%5Crho%7D%7B%5Cvarepsilon_0%7D%20%5Cquad%20&amp;%5Ctext%7B(Gauss's%20law)%7D%20%5C%5C%0A%20%20%20%20%5Cmathbf%7B%5Cnabla%7D%20%5Ccdot%20%5Cmathbf%7BB%7D%20&amp;=%200%20%5Cquad%20&amp;%5Ctext%7B(Gauss's%20law%20for%20magnetism)%7D%20%5C%5C%0A%20%20%20%20%5Cmathbf%7B%5Cnabla%7D%20%5Ctimes%20%5Cmathbf%7BE%7D%20&amp;=%20-%5Cfrac%7B%5Cpartial%20%5Cmathbf%7BB%7D%7D%7B%5Cpartial%20t%7D%20%5Cquad%20&amp;%5Ctext%7B(Faraday's%20law)%7D%20%5C%5C%0A%20%20%20%20%5Cmathbf%7B%5Cnabla%7D%20%5Ctimes%20%5Cmathbf%7BB%7D%20&amp;=%20%5Cmu_0%20%5Cmathbf%7BJ%7D%20+%20%5Cmu_0%20%5Cvarepsilon_0%20%5Cfrac%7B%5Cpartial%20%5Cmathbf%7BE%7D%7D%7B%5Cpartial%20t%7D%20%5Cquad%20&amp;%5Ctext%7B(Amp%C3%A8re's%20law)%7D%0A%5Cend%7Baligned%7D%0A"></p>
-</section>
-<section id="physics-world-to-math-world" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="physics-world-to-math-world"><span class="header-section-number">2</span> Physics World to Math World</h2>
-<p>Physics originates from observations in the real world. If you keep an eye on it, you could discover the following phenomena yourself:</p>
-<ol type="1">
-<li><p>The force between two charges is proportional to their charge, and inversely proportional to their distance, squared.</p></li>
-<li><p>No isolated “magnetic charges” found in nature.</p></li>
-<li><p>Changing magnetic flux leads to current in a circuit!</p></li>
-<li><p>Two parallel wires attract or repel each other when current is applied!</p></li>
-</ol>
-<p>These four observations leads to the four equations by Maxwell.</p>
-</section>
-<section id="integral-form-of-maxwells-first-equation" class="level2 page-columns page-full" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="integral-form-of-maxwells-first-equation"><span class="header-section-number">3</span> Integral Form of Maxwell’s First Equation</h2>
-<section id="inverse-square-law" class="level3 page-columns page-full" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="inverse-square-law"><span class="header-section-number">3.1</span> Inverse Square Law</h3>
-<p>According to observation 1, we could write<sup>1</sup>: <img src="https://latex.codecogs.com/png.latex?%0AF%20%5Cpropto%20%5Cfrac%7BQq%7D%7Br%5E2%7D,%0A"> or in an equation: <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0AF%20=%20k%20%5Cfrac%7BQq%7D%7Br%5E2%7D,%0A%7D%0A"></p>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;Non-bold-face letters (<img src="https://latex.codecogs.com/png.latex?F">) are scalars, bold-face letters (<img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BF%7D">) are vectors.</p></div><div id="fn2"><p><sup>2</sup>&nbsp;The unit of charge (Coulomb) is defined in the following way (The reason <em>Ampere</em> are defined first is because <em>Ampere</em> happens to be one of the <em>base unit</em> of <a href="https://en.wikipedia.org/wiki/International_System_of_Units#:~:text=The%20SI%20comprises%20a%20coherent,candela%20(cd%2C%20luminous%20intensity)">SI</a>): - <strong>Current: Ampere</strong> (I: A): First we define Ampere (surprise!) to be the intensity of current on two ideal wires that are 1 metre apart and produces a force of <img src="https://latex.codecogs.com/png.latex?2%20%5Ctimes%2010%5E%7B-7%7D"> N between them (1N is defined to be the force that makes an object of mass 1kg moves at the acceleration of <img src="https://latex.codecogs.com/png.latex?1%5Ctext%7Bm%7D/%5Ctext%7Bs%7D%5E2">) - <strong>Charge: Coulomb</strong> (Q: C): Then we define Coulomb to be the amount of charge the that passes through a point with a current of 1A over 1 second.</p></div></div><p>where <img src="https://latex.codecogs.com/png.latex?k"> is a constant, <img src="https://latex.codecogs.com/png.latex?Q"> and <img src="https://latex.codecogs.com/png.latex?q"> are the amount of <strong><em>charge</em></strong><sup>2</sup> on two small objects, <img src="https://latex.codecogs.com/png.latex?r"> is their distance.</p>
-</section>
-<section id="conservative-property" class="level3 page-columns page-full" data-number="3.2">
-<h3 data-number="3.2" class="anchored" data-anchor-id="conservative-property"><span class="header-section-number">3.2</span> Conservative Property</h3>
-<p>Let’s consider the work done when we fix <img src="https://latex.codecogs.com/png.latex?Q"> and gradually move <img src="https://latex.codecogs.com/png.latex?q"> in a certain path. Since the force from <img src="https://latex.codecogs.com/png.latex?Q"> to <img src="https://latex.codecogs.com/png.latex?q"> is always radially from <img src="https://latex.codecogs.com/png.latex?Q">, it turns out that the work done only depends on the <em>initial</em> and <em>final</em> position of <img src="https://latex.codecogs.com/png.latex?q"> regardless of the moving process in between! We say a force like this <strong><em>Conservative</em></strong><sup>3</sup>. We would like to think that there is a number <img src="https://latex.codecogs.com/png.latex?U"> attached at every spatial point around <img src="https://latex.codecogs.com/png.latex?Q"> such that the the work done from point <img src="https://latex.codecogs.com/png.latex?A"> and <img src="https://latex.codecogs.com/png.latex?B"> is just that <img src="https://latex.codecogs.com/png.latex?U(A)-U(B)"><sup>4</sup>, i.e., <img src="https://latex.codecogs.com/png.latex?%0AW_%7BAB%7D%20=:%20U(A)%20-%20U(B).%0A"></p>
-<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;It’s worth noting that <em>conservativity</em> has nothing to do with the inverse square property. The potential energy of hypothetical “inverse force” and “inverse cubic force” are: <img src="https://latex.codecogs.com/png.latex?%0AU_%7B%5Cfrac%7B1%7D%7Br%7D%7D%20=%20-kQq%20%5Cln%20r,%0A"> and <img src="https://latex.codecogs.com/png.latex?%0AU_%7B%5Cfrac%7B1%7D%7Br%5E3%7D%7D%20=%20%5Cfrac%7BkQq%7D%7B2%7D%20%5Cfrac%7B1%7D%7Br%5E2%7D.%0A"></p></div><div id="fn4"><p><sup>4</sup>&nbsp;Why not <img src="https://latex.codecogs.com/png.latex?U(B)-U(A)">? Because we want the quantity <img src="https://latex.codecogs.com/png.latex?U"> also indicates the tendancy that <img src="https://latex.codecogs.com/png.latex?q"> would move. More likely to move, <img src="https://latex.codecogs.com/png.latex?U"> should be larger.</p></div><div class="">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/electrostatics/potential_energy.png" class="img-fluid figure-img"></p>
-<figcaption><img src="https://latex.codecogs.com/png.latex?U(A)"> is expected to be larger than <img src="https://latex.codecogs.com/png.latex?U(B)"></figcaption>
-</figure>
-</div>
-</div><div id="fn5"><p><sup>5</sup>&nbsp;Actually, should be <img src="https://latex.codecogs.com/png.latex?U(r)%20=%20-k%20%5Cfrac%7BQ%7D%7Br%7D%20+%20%5Coperatorname%7Bconst%7D">. But when <img src="https://latex.codecogs.com/png.latex?r%20%5Cto%20%5Cinfty">, we expect <img src="https://latex.codecogs.com/png.latex?U"> to be <img src="https://latex.codecogs.com/png.latex?0"> because <img src="https://latex.codecogs.com/png.latex?q"> do not have the ability to do work.</p></div></div>
-<p><img src="https://latex.codecogs.com/png.latex?U(r)"> is called the <strong><em>potential energy</em></strong> at <img src="https://latex.codecogs.com/png.latex?r">. We claim<sup>5</sup> that <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0AU(r)%20=%20-k%20%5Cfrac%7BQq%7D%7Br%7D,%0A%7D%0A"> because <img src="https://latex.codecogs.com/png.latex?%0AW_%7BAB%7D%0A=%20%5Cint_%7BA%20%5Cto%20B%7D%20%5Cmathbf%7BF%7D%20%5Ccdot%20%5Cmathbf%7B%5Cmathrm%7Bd%7Dr%7D%0A=%20%5Cint_%7Br_0%7D%5E%7Br_1%7D%20k%20%5Cfrac%7BQq%7D%7Br%5E2%7D%20%5Cmathrm%7Bd%7Dr%0A=%20-k%20%5Cfrac%7BQq%7D%7Br_1%7D%20-%20k%20%5Cfrac%7BQq%7D%7Br_0%7D%0A=:%20U(A)%20-%20U(B).%0A"></p>
-<p>Therefore, the work done is just the difference of <img src="https://latex.codecogs.com/png.latex?U"> with a negative sign: <img src="https://latex.codecogs.com/png.latex?%0AW_%7BAB%7D%20=%20-%20%5CDelta%20U.%0A"></p>
-<p>We also know that</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cmathrm%7Bd%7D%20W_%7BAB%7D%20=%20%5Cmathbf%7BF%7D%20%5Ccdot%20%5Cmathrm%7Bd%7D%20%5Cmathbf%7Bl%7D%20=%20F%20%5Ccdot%20%5Cmathrm%7Bd%7D%20l_%5Cparallel,%0A"> where <img src="https://latex.codecogs.com/png.latex?%5Cmathrm%7Bd%7D%20%5Cmathbf%7Bl%7D"> is a small displacement and <img src="https://latex.codecogs.com/png.latex?%5Cmathrm%7Bd%7D%20l_%5Cparallel"> is the length of the projection of that small displacement onto the direction of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BF%7D">, i.e., the direction of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7B%5Cnabla%7D%20U">, reversed. Hence, <img src="https://latex.codecogs.com/png.latex?%0AF%20=%20%5Cfrac%7B%5Cmathrm%7Bd%7D%20W_%7BAB%7D%7D%7B%5Cmathrm%7Bd%7D%20l_%5Cparallel%7D%20=%20-%20%5Cfrac%7B%5Cmathrm%7Bd%7D%20U%7D%7B%5Cmathrm%7Bd%7D%20l_%5Cparallel%7D.%0A"></p>
-<p>In vector notation, <span id="eq-FU"><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0A%5Cmathbf%7BF%7D%20=%20-%20%5Cmathbf%7B%5Cnabla%7D%20U.%0A%7D%0A%5Ctag%7B1%7D"></span></p>
-</section>
-<section id="get-rid-of-test-charge" class="level3 page-columns page-full" data-number="3.3">
-<h3 data-number="3.3" class="anchored" data-anchor-id="get-rid-of-test-charge"><span class="header-section-number">3.3</span> Get Rid of Test-charge</h3>
-<p>When <img src="https://latex.codecogs.com/png.latex?q"> is far smaller than <img src="https://latex.codecogs.com/png.latex?Q">, it is called a test charge, which is used to “test” the effect of <img src="https://latex.codecogs.com/png.latex?Q"> to its surroundings and minimize other interference. It is naturally to get rid of <img src="https://latex.codecogs.com/png.latex?q"> and define a quantity <img src="https://latex.codecogs.com/png.latex?E"> that only depends on <img src="https://latex.codecogs.com/png.latex?Q">, we expect that <img src="https://latex.codecogs.com/png.latex?E"> satisfies: <img src="https://latex.codecogs.com/png.latex?%0A%5Cmathbf%7BF%7D%20=:%20%5Cmathbf%7BE%7D%20q,%0A"> where <img src="https://latex.codecogs.com/png.latex?E"> obviously equal to: <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0AE%20=%20k%20%5Cfrac%7BQ%7D%7Br%5E2%7D.%0A%7D%0A"></p>
-<p>We call <img src="https://latex.codecogs.com/png.latex?E"> the <strong>electric field</strong> generated by <img src="https://latex.codecogs.com/png.latex?Q"><sup>6</sup>.</p>
-<div class="no-row-height column-margin column-container"><div id="fn6"><p><sup>6</sup>&nbsp;Since <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BE%7D"> is equivalent to force (just up to a constant), all properties of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BE%7D"> is inherited from <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BF%7D">, such as <em>vector property</em>, <em>superposition</em>, <em>conservativity</em>, etc.</p></div></div><p>Therefore, Equation&nbsp;1 could be written as: <span id="eq-EqU"><img src="https://latex.codecogs.com/png.latex?%0A%5Cmathbf%7BE%7Dq%20=%20-%20%5Cmathbf%7B%5Cnabla%7D%20U.%0A%5Ctag%7B2%7D"></span></p>
-<p>We could also get rid of <img src="https://latex.codecogs.com/png.latex?q"> in Equation&nbsp;2 by defining a quantity <img src="https://latex.codecogs.com/png.latex?V"> called the <strong><em>(Electric) potential</em></strong> generated by <img src="https://latex.codecogs.com/png.latex?Q">: <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0AU%20:=%20Vq,%0A%7D%0A"> so we have <img src="https://latex.codecogs.com/png.latex?%0A%5Cmathbf%7BE%7Dq%20=%20-%5Cmathbf%7B%5Cnabla%7D%20V%20q%0A"> <span id="eq-EV"><img src="https://latex.codecogs.com/png.latex?%0A%5Cimplies%0A%5Cboxed%7B%0A%5Cmathbf%7BE%7D%20=%20-%20%5Cmathbf%7B%5Cnabla%7D%20V.%0A%7D%0A%5Ctag%7B3%7D"></span></p>
-<p>You can compare Equation&nbsp;1 and Equation&nbsp;3, the latter is test-charge-free version of the former!</p>
-<div id="tip-field" class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Tip&nbsp;1: The spirit of <em>fields</em>
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><span style="color: orange">This mindset from <em>force</em> to <em>field</em> is extremely important!</span> “Field” originates from “force” but later evolves independently from it, as you will see. Thinking in terms of “fields” rather than “forces” is a key factor that distinguishes beginners from experts. Now you have evolved to the second level – make “fields” be your <strong>second nature</strong>!</p>
-</div>
-</div>
-</section>
-<section id="an-interesting-question" class="level3 page-columns page-full" data-number="3.4">
-<h3 data-number="3.4" class="anchored" data-anchor-id="an-interesting-question"><span class="header-section-number">3.4</span> An Interesting Question</h3>
-<p>How to know how many charges inside some closed region?</p>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/electrostatics/the-question.png" class="img-fluid figure-img"></p>
-<figcaption>The question</figcaption>
-</figure>
-</div>
-</div></div><div id="prp-smallprob" class="theorem proposition page-columns page-full">
-<p><span class="theorem-title"><strong>Proposition 1</strong></span> The charge inside some closed surface <img src="https://latex.codecogs.com/png.latex?S"> can be calculated by only looking at the field sitting on its <em>surface</em><sup>7</sup>: <img src="https://latex.codecogs.com/png.latex?%0A%5Ctext%7BFlux%7D%20%5Cpropto%20Q_%7B%5Ctext%7Bin%7D%7D,%0A"> where the flux <img src="https://latex.codecogs.com/png.latex?%5CPhi"> is defined: <img src="https://latex.codecogs.com/png.latex?%0A%5CPhi%20:=%20%5Coiint_S%20%5Cmathbf%7BE%7D%20%5Ccdot%20%5Cmathrm%7Bd%7D%20%5Cboldsymbol%7BA%7D.%0A"></p>
-<div class="no-row-height column-margin column-container"><div id="fn7"><p><sup>7</sup>&nbsp;This claim directly comes from the <em>inverse square law</em> and <em>superposition principle of fields</em>.</p></div></div></div>
-<div id="sol-smallprob" class="proof solution page-columns page-full">
-<p><span class="proof-title"><em>Solution 1</em>. </span></p>
-<ol type="1">
-<li><p>We will consider the case then there is only one point charge <img src="https://latex.codecogs.com/png.latex?q"> inside <img src="https://latex.codecogs.com/png.latex?S">.</p>
-<p>Consider a sphere <img src="https://latex.codecogs.com/png.latex?R"> of radius <img src="https://latex.codecogs.com/png.latex?r"> around <img src="https://latex.codecogs.com/png.latex?q"> in Figure&nbsp;1, it’s obviously that the flux through <img src="https://latex.codecogs.com/png.latex?R"> does not related to <img src="https://latex.codecogs.com/png.latex?r">, because the surface area increases at the rate of <img src="https://latex.codecogs.com/png.latex?r%5E2"> and the field decays at the rate of <img src="https://latex.codecogs.com/png.latex?1/r%5E2">. Just to be intimidating, <img src="https://latex.codecogs.com/png.latex?%0A%5CPhi_R%20=%20%5Coiint_R%20k%20%5Cfrac%7Bq%7D%7Br%5E2%7D%20dA%20=%20k%20%5Cfrac%7Bq%7D%7Br%5E2%7D%20%5Ccdot%204%20%5Cpi%20r%5E2%20=%204%20%5Cpi%20k%20q%20%5Cpropto%20q.%0A"></p>
-<p>We commonly let <span id="eq-flux"><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0A%20%20%20%20%20k%20=%20%5Cfrac%7B1%7D%7B4%20%5Cpi%20%5Cepsilon_0%7D%0A%7D%0A%20%20%5Ctag%7B4%7D"></span> to simpify<sup>8</sup> Equation&nbsp;4 to be <img src="https://latex.codecogs.com/png.latex?%0A%5CPhi_R%20=%20%5Cfrac%7Bq%7D%7B%5Cepsilon_0%7D.%0A"></p></li>
-</ol>
-<div class="no-row-height column-margin column-container"><div id="fn8"><p><sup>8</sup>&nbsp;We introduce the symbol <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_0"> by the motivation to eliminate the “<img src="https://latex.codecogs.com/png.latex?4%20%5Cpi">” Equation&nbsp;4. But the meaning of <img src="https://latex.codecogs.com/png.latex?%5Cepsilon_0"> would be clear later until we introduce the electric fields in matter. Don’t worry.</p></div></div><ol start="2" type="1">
-<li><p>Now we claim that <img src="https://latex.codecogs.com/png.latex?%0A%5CPhi_R%20=%20%5CPhi_S,%0A"> where <img src="https://latex.codecogs.com/png.latex?S"> is an arbitrary closed surface outside <img src="https://latex.codecogs.com/png.latex?R">.</p>
-<p>Again we use the <em>inverse square property</em>, the flux through <img src="https://latex.codecogs.com/png.latex?%5Cmathrm%7Bd%7DR"> should be same as the flux through the blue circle in Figure&nbsp;1. Plus, the flux through the blue circle is exactly the same as the flux through <img src="https://latex.codecogs.com/png.latex?%5Cmathrm%7Bd%7DS"> as shown in Figure&nbsp;2 (since their “perpendicular” surface area are the same)</p></li>
-<li><p>We then use <em>superposition property</em> of fields to obtain the equation of multiple charges enclosed.</p>
-<p>Suppose there are <img src="https://latex.codecogs.com/png.latex?N=3"> point charges inside <img src="https://latex.codecogs.com/png.latex?S"> as shown in Figure&nbsp;3, the total flux is</p>
-<p><span id="eq-n3"><img src="https://latex.codecogs.com/png.latex?%0A%5CPhi%0A=%20%5Coiint_S%20%5Cmathbf%7BE%7D%20%5Ccdot%20%20%5Cmathrm%7Bd%7D%20%5Cmathbf%7BA%7D%0A=%20%5Csum_%7Bi%20=%201%7D%5E3%20%5Cleft(%5Coiint_S%20%5Cmathbf%7BE%7D_i%20%5Ccdot%20%20%5Cmathrm%7Bd%7D%20%5Cmathbf%7BA%7D%5Cright)%0A=%20%5Csum_%7Bi%20=%201%7D%5E3%20%5Cfrac%7Bq_i%7D%7B%5Cepsilon_0%7D%0A=%20%5Cfrac%7BQ_%7B%5Ctext%7Bin%7D%7D%7D%7B%5Cepsilon_0%7D.%0A%20%20%5Ctag%7B5%7D"></span></p>
-<p>Of course Equation&nbsp;5 can be generalized when <img src="https://latex.codecogs.com/png.latex?N"> is arbitrary. And ura! We have just proof the integral version of Maxwell’s first equation! <span id="eq-maxwellintegralform"><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0A%5Coiint_S%20%5Cmathbf%7BE%7D%20%5Ccdot%20%20%5Cmathrm%7Bd%7D%20%5Cmathbf%7BA%7D%20=%20%5Cfrac%7BQ_%7B%5Ctext%7Bin%7D%7D%7D%7B%5Cepsilon_0%7D.%0A%7D%0A%20%20%5Ctag%7B6%7D"></span></p>
-<p>This is also known as <strong>Gauss’s Law</strong>. Equation&nbsp;6 holds for <em>any</em> closed surface <img src="https://latex.codecogs.com/png.latex?S">.</p></li>
-</ol>
-</div>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<div id="fig-pointcharge" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-pointcharge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/electrostatics/point-charge-case.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pointcharge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Single point charge case
-</figcaption>
-</figure>
-</div>
-<div id="fig-fluxcomp" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-fluxcomp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/electrostatics/flux-compare.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fluxcomp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: The flux through the blue circle is exactly the same as the flux through <img src="https://latex.codecogs.com/png.latex?%5Cmathrm%7Bd%7DS">
-</figcaption>
-</figure>
-</div>
-<div id="fig-super" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-super-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/electrostatics/superposition.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-super-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Superposition of the fields of every point charge inside <img src="https://latex.codecogs.com/png.latex?S">
-</figcaption>
-</figure>
-</div>
-</div></div></section>
-</section>
-<section id="differential-form-of-maxwells-first-equation" class="level2 page-columns page-full" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="differential-form-of-maxwells-first-equation"><span class="header-section-number">4</span> Differential Form of Maxwell’s First Equation</h2>
-<p>The charges in the real world are not commonly appears like an infinitesimal point. They distributed evenly through a body instead of concentrate on a point of no size. Therefore, <img src="https://latex.codecogs.com/png.latex?Q_%7B%5Ctext%7Bin%7D%7D"> on the RHS<sup>9</sup> of Equation&nbsp;6 could be write as an integral: <img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7BQ_%7B%5Ctext%7Bin%7D%7D%7D%7B%5Cepsilon_0%7D%20=%20%5Ciiint_V%20%5Cfrac%7B%5Crho%7D%7B%5Cepsilon_0%7D%20%5Cmathrm%7Bd%7DV,%0A"> where <img src="https://latex.codecogs.com/png.latex?V"> is the region enclosed by <img src="https://latex.codecogs.com/png.latex?S">, <img src="https://latex.codecogs.com/png.latex?%5Crho"> is the <strong>density</strong><sup>10</sup> of charges at some place inside <img src="https://latex.codecogs.com/png.latex?S">.</p>
-<div class="no-row-height column-margin column-container"><div id="fn9"><p><sup>9</sup>&nbsp;Right hand side.</p></div><div id="fn10"><p><sup>10</sup>&nbsp;In the case of point charges, this density if <em>infinite</em>. Mathematicians use so-called <a href="https://en.wikipedia.org/wiki/Dirac_delta_function"><img src="https://latex.codecogs.com/png.latex?%5Cdelta">-function</a> to describe the behaviour of this kind of “degenerated” density. It is not a function, just a symbol following some rules that deals with the Mathematical OCD that forces the form of a certain integral unchanged when some mass is concentrated on a small point.</p></div><div class="">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/electrostatics/image.png" class="img-fluid figure-img"></p>
-<figcaption>Real world charges are not point charge</figcaption>
-</figure>
-</div>
-</div></div>
-<p>What about the LHS of Equation&nbsp;6? We <em>expect</em> it to be also written in a kind of volume integral to cancel it out with the RHS: <img src="https://latex.codecogs.com/png.latex?%0A%5Coiint_S%20%5Cmathbf%7BE%7D%20%5Ccdot%20%20%5Cmathrm%7Bd%7D%20%5Cmathbf%7BA%7D%20=%20%5Ciiint_V%20%5Cboxed%7B???%7D%20%5Cmathrm%7Bd%7DV.%0A"></p>
-<p>And then <span id="eq-tripleint"><img src="https://latex.codecogs.com/png.latex?%0A%5Ciiint_V%20%5Cboxed%7B???%7D%20%5Cmathrm%7Bd%7DV%20=%20%5Ciiint_V%20%5Cfrac%7B%5Crho%7D%7B%5Cepsilon_0%7D%20%5Cmathrm%7Bd%7DV%0A%5Ctag%7B7%7D"></span> holds for <em>any</em><sup>11</sup> volume <img src="https://latex.codecogs.com/png.latex?V">, so we can claim that <span id="eq-tripleintDiff"><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B???%7D%20=%20%5Cfrac%7B%5Crho%7D%7B%5Cepsilon_0%7D.%0A%5Ctag%7B8%7D"></span></p>
-<div class="no-row-height column-margin column-container"><div id="fn11"><p><sup>11</sup>&nbsp;<em>Any</em> is very important! Without <em>any</em>, we cannot derive Equation&nbsp;7 from Equation&nbsp;8.</p></div><div id="fn12"><p><sup>12</sup>&nbsp;Also denoted <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7B%5Cnabla%7D%20%5Ccdot%20%5Cmathbf%7BE%7D">.</p></div></div><p>Luckily! <a href="https://en.wikipedia.org/wiki/Stokes%27_theorem"><strong>Stoke’s Theorem</strong></a> tells us <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B???%7D%20=%20%5Coperatorname%7Bdiv%7D%20%5Cmathbf%7BE%7D.%0A"> For those of you not familiar with multivariable calculus, <img src="https://latex.codecogs.com/png.latex?%5Coperatorname%7Bdiv%7D%20%5Cmathbf%7BE%7D"> is called the <strong>divergence</strong><sup>12</sup> of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BE%7D">, which is a scalar-valued function purely derived from <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BE%7D">.</p>
-<p>Finally! We got the differential form: <span id="eq-diff"><img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0A%5Coperatorname%7Bdiv%7D%20%5Cmathbf%7BE%7D%20=%20%5Cfrac%7B%5Crho%7D%7B%5Cepsilon_0%7D.%0A%7D%0A%5Ctag%7B9%7D"></span></p>
-</section>
-<section id="thinking-problem" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="thinking-problem"><span class="header-section-number">5</span> Thinking Problem</h2>
-<div id="exr-thinking" class="theorem exercise">
-<p><span class="theorem-title"><strong>Exercise 1</strong></span> Think about what properties of <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7BE%7D"> ensures that Equation&nbsp;9 holds true?</p>
-</div>
-<div id="sol-thinking" class="proof solution">
-<p><span class="proof-title"><em>Solution 2</em>. </span>There are only two properties of electric fields that are used to obtain Equation&nbsp;9:</p>
-<ul>
-<li>Inverse square</li>
-<li>Superposition</li>
-</ul>
-<p>Stoke’s Theorem don’t count because it holds for any vector fields.</p>
-<p>Superposition is trivial. The non-trivial part is inverse square. This property ensures that we can extend the sphere to an arbitrary surface in Figure&nbsp;1. What is the nature of inverse square?</p>
-<p>Well, we live in 3-dimensional space. Everything that spreads should somehow decay at the rate of <img src="https://latex.codecogs.com/png.latex?1/r%5E2">, like light, gravity, sound, etc. Otherwise it will against the conservation of energy. In general, if we live in a <img src="https://latex.codecogs.com/png.latex?N">-dim world, fields should naturally decay at the rate of <img src="https://latex.codecogs.com/png.latex?1/r%5E%7BN-1%7D">. In other words, everything in <img src="https://latex.codecogs.com/png.latex?N">-dim world should decay at the rate of “area” decay. <a href="../../cv/physics-paper.pdf">This paper</a> by myself delved a little deeper inside this inspiration.</p>
-</div>
-
-
-</section>
-
-
- ]]></description>
-  <category>Physics</category>
-  <category>EN-blogs</category>
-  <guid>https://marcobisky.github.io/posts/electrostatics/</guid>
-  <pubDate>Thu, 06 Mar 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://marcobisky.github.io/posts/electrostatics/point-charge-case.png" medium="image" type="image/png" height="103" width="144"/>
 </item>
 </channel>
 </rss>

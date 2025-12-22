@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Marcobisky">
+<meta name="dcterms.date" content="2025-12-20">
+<meta name="description" content="更新中…">
+
+<title>DIP Crash Course 数字图像处理速成笔记 – Marcobisky</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-5bc7f946787c109e621af665ddda306b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-611d27bfacf889a592cb25f4080bab07.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-5bc7f946787c109e621af665ddda306b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="DIP Crash Course 数字图像处理速成笔记 – Marcobisky">
+<meta property="og:description" content="更新中…">
+<meta property="og:image" content="https://marcobisky.github.io/posts/dip-crash-course/cover.png">
+<meta property="og:site_name" content="Marcobisky">
+<meta property="og:locale" content="en_US">
+<meta property="og:image:height" content="1555">
+<meta property="og:image:width" content="3761">
+<meta name="twitter:title" content="DIP Crash Course 数字图像处理速成笔记 – Marcobisky">
+<meta name="twitter:description" content="更新中…">
+<meta name="twitter:image" content="https://marcobisky.github.io/posts/dip-crash-course/cover.png">
+<meta name="twitter:creator" content="@Marcobisky77">
+<meta name="twitter:image-height" content="1555">
+<meta name="twitter:image-width" content="3761">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Marcobisky</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tinyml/index.html"> 
+<span class="menu-text">TinyML</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../blog.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#basic-conventions-基本约定" id="toc-basic-conventions-基本约定" class="nav-link active" data-scroll-target="#basic-conventions-基本约定"><span class="header-section-number">1</span> Basic Conventions 基本约定</a></li>
+  <li><a href="#kernel-based-processing-基于核的处理" id="toc-kernel-based-processing-基于核的处理" class="nav-link" data-scroll-target="#kernel-based-processing-基于核的处理"><span class="header-section-number">2</span> Kernel-based processing 基于核的处理</a>
+  <ul class="collapse">
+  <li><a href="#spatial-filtering-空间滤波" id="toc-spatial-filtering-空间滤波" class="nav-link" data-scroll-target="#spatial-filtering-空间滤波"><span class="header-section-number">2.1</span> Spatial Filtering 空间滤波</a></li>
+  </ul></li>
+  <li><a href="#non-kernel-based-processing-非基于核的处理" id="toc-non-kernel-based-processing-非基于核的处理" class="nav-link" data-scroll-target="#non-kernel-based-processing-非基于核的处理"><span class="header-section-number">3</span> Non-kernel-based processing 非基于核的处理</a>
+  <ul class="collapse">
+  <li><a href="#intensity-transformation" id="toc-intensity-transformation" class="nav-link" data-scroll-target="#intensity-transformation"><span class="header-section-number">3.1</span> Intensity Transformation</a></li>
+  <li><a href="#histogram-processing-直方图处理" id="toc-histogram-processing-直方图处理" class="nav-link" data-scroll-target="#histogram-processing-直方图处理"><span class="header-section-number">3.2</span> Histogram Processing 直方图处理</a></li>
+  </ul></li>
+  <li><a href="#image-segmentation-图像分割" id="toc-image-segmentation-图像分割" class="nav-link" data-scroll-target="#image-segmentation-图像分割"><span class="header-section-number">4</span> Image Segmentation 图像分割</a></li>
+  <li><a href="#morphological-形态学图像处理" id="toc-morphological-形态学图像处理" class="nav-link" data-scroll-target="#morphological-形态学图像处理"><span class="header-section-number">5</span> Morphological 形态学图像处理</a></li>
+  <li><a href="#pca-主成分分析" id="toc-pca-主成分分析" class="nav-link" data-scroll-target="#pca-主成分分析"><span class="header-section-number">6</span> PCA 主成分分析</a></li>
+  <li><a href="#image-compression-图像压缩" id="toc-image-compression-图像压缩" class="nav-link" data-scroll-target="#image-compression-图像压缩"><span class="header-section-number">7</span> Image Compression 图像压缩</a>
+  <ul class="collapse">
+  <li><a href="#basic-concepts-基本概念" id="toc-basic-concepts-基本概念" class="nav-link" data-scroll-target="#basic-concepts-基本概念"><span class="header-section-number">7.1</span> Basic Concepts 基本概念</a></li>
+  <li><a href="#lossless-compression-无损压缩" id="toc-lossless-compression-无损压缩" class="nav-link" data-scroll-target="#lossless-compression-无损压缩"><span class="header-section-number">7.2</span> Lossless Compression 无损压缩</a></li>
+  <li><a href="#lossy-compression-有损压缩" id="toc-lossy-compression-有损压缩" class="nav-link" data-scroll-target="#lossy-compression-有损压缩"><span class="header-section-number">7.3</span> Lossy Compression 有损压缩</a></li>
+  <li><a href="#watermarking-数字水印" id="toc-watermarking-数字水印" class="nav-link" data-scroll-target="#watermarking-数字水印"><span class="header-section-number">7.4</span> Watermarking 数字水印</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-page-left" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">DIP Crash Course 数字图像处理速成笔记</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Crash-Course</div>
+    <div class="quarto-category">CN-blogs</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    更新中…
+  </div>
+</div>
+
+
+<div class="quarto-title-meta column-page-left">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Marcobisky </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 20, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<blockquote class="blockquote">
+<p>将所有的开放问题的 solution 当作一个普通的解决方法来看待, 它们绝不是最优或者唯一的解决方案.</p>
+</blockquote>
+<section id="basic-conventions-基本约定" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="basic-conventions-基本约定"><span class="header-section-number">1</span> Basic Conventions 基本约定</h2>
+<ul>
+<li><p>Image 默认为 <strong>sampling</strong> 和 <strong>quantization</strong> 之后的数字图像</p>
+<ul>
+<li><strong>Spacial resolution 空间分辨率</strong>: 长宽方向的采样点数的乘积.</li>
+<li><strong>Intensity resolution 强度分辨率</strong>: 量化的精度, 一般用每个像素的 bit 数表示. <strong>默认为 <span class="math inline">\(8\)</span> bit (<span class="math inline">\([0, 255]\)</span>)</strong>.</li>
+</ul></li>
+<li><p><strong>Color space 颜色空间</strong>: 单色可见光的波长在 <span class="math inline">\([380, 780] \text{ nm}\)</span>, 每一束光都可以有任意强度的单色光分量 (即「光谱」), 因此所有光构成一个<strong>不可数无穷维拓扑向量空间</strong>.</p>
+<ul>
+<li>但是人眼有三种类型的视锥细胞 (L, M, S) 对不同的频率成分有 (不会变化的) 不同的敏感度, 它们自动将所有光<strong>线性映射</strong>到一个三维子空间 <span class="math inline">\(\Omega\)</span> 中 (想想为什么是线性的, 因为是积分). 即使两个光的光谱不同, 但它们在这个三维子空间的投影相同, 人眼也无法区分它们.</li>
+<li>不同的应用场景在 <span class="math inline">\(\Omega\)</span> 中选择不同的基底:
+<ul>
+<li><strong>RGB</strong> (Red, Green, Blue): 显示器, 图像储存.</li>
+<li><strong>CMY/CMYK</strong> (Cyan, Magenta, Yellow, K: Black ink): 打印机, K 成分是多余的, 就当作是为了节省墨水 lol.</li>
+<li><strong>HSI/HSV</strong> (Hue, Saturation, Intensity/Value): 图像编辑软件.</li>
+</ul></li>
+</ul></li>
+<li><p>默认情况下图片丢失拓扑结构 <code>view()</code> 成一个 vector. <span class="math inline">\(r\)</span> 代表处理前的图像 vector, <span class="math inline">\(s\)</span> 代表处理后的图像 vector.</p></li>
+<li><p><strong>RGB2Gray 转换方法</strong>: 可以任选一通道 / 取最大 / 平均值 / 加权平均.</p></li>
+<li><p><strong>Contrast 对比度</strong>: 灰度图像中像素值最大值与最小值之差 (去掉 outlier).</p></li>
+<li><p><strong>Binary Image 二值图像 <span class="math inline">\(f\)</span></strong>: <span class="math inline">\(0\)</span> 表示 background, <span class="math inline">\(1\)</span> 表示 foreground.</p></li>
+</ul>
+</section>
+<section id="kernel-based-processing-基于核的处理" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="kernel-based-processing-基于核的处理"><span class="header-section-number">2</span> Kernel-based processing 基于核的处理</h2>
+<blockquote class="blockquote">
+<p>本人没有按照 Spatial domain 和 Frequency domain 来划分, 因为他们本质上是等价的, 无法将二者严格区分.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Kernel-based method 就是将原图片与一个 kernel 做滑动内积 (纠结是内积还是卷积毫无意义). 重点在于 kernel 的设计, 我们通过 kernel 设计的<strong>思维路径</strong>将其划分为 Spatial filtering 和 Frequency filtering 两大类.</p>
+</blockquote>
+<section id="spatial-filtering-空间滤波" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="spatial-filtering-空间滤波"><span class="header-section-number">2.1</span> Spatial Filtering 空间滤波</h3>
+<blockquote class="blockquote">
+<p>Spatial filtering 指 kernel 的设计过程没有经过频域分析.</p>
+</blockquote>
+<ul>
+<li><p><strong>Padding 填充</strong></p></li>
+<li><p><strong>NCC (Normalized Cross-Correlation)</strong>: 图像 vector 之间的夹角余弦值.</p></li>
+<li><p><strong>Common filters 常用滤波器</strong></p>
+<ul>
+<li><strong>Smoothing filters 平滑滤波器 (低通滤波器)</strong></li>
+<li><strong>Order-statistic filters 次序统计滤波器</strong>: 将某框内的像素排序后取中位数, 一般可去除 salt-and-pepper (impulse) noise.</li>
+<li><strong>Sharpening (derivative) filters 锐化滤波器 (高通滤波器)</strong>: 将梯度、Laplacian 算子移植到图片上; 由于这些算子是线性的, 可等价于与一个 kernel 做卷积; 这些 kernel 也可以在形式上被强化来达到更强的锐化效果.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="non-kernel-based-processing-非基于核的处理" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="non-kernel-based-processing-非基于核的处理"><span class="header-section-number">3</span> Non-kernel-based processing 非基于核的处理</h2>
+<blockquote class="blockquote">
+<p>Non-kernel-based method 指处理过程无法被等价为与一个确定的 kernel 做内积的过程.</p>
+</blockquote>
+<section id="intensity-transformation" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="intensity-transformation"><span class="header-section-number">3.1</span> Intensity Transformation</h3>
+<blockquote class="blockquote">
+<p>强度变换仅仅是<strong>单灰度像素</strong>的操作, 即用一个函数 <span class="math inline">\(s = T(r)\)</span> 来<strong>独立地</strong>映射所有像素值.</p>
+</blockquote>
+<ul>
+<li><p><strong>Linear transformation</strong></p>
+<ul>
+<li><strong>Image Negatives 图像反相</strong>: <span class="math inline">\(s = L - 1 - r\)</span>.</li>
+<li><strong>Contrast stretching 对比度拉伸</strong></li>
+</ul></li>
+<li><p><strong>Log transformation 对数变换</strong>: <span class="math inline">\(s = c \cdot \log(1 + r)\)</span>.</p></li>
+<li><p><strong>Power-Law (Gamma) transformation 幂律变换</strong>: <span class="math inline">\(s = c \cdot r^{\gamma}\)</span>.</p></li>
+</ul>
+</section>
+<section id="histogram-processing-直方图处理" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="histogram-processing-直方图处理"><span class="header-section-number">3.2</span> Histogram Processing 直方图处理</h3>
+<ul>
+<li><strong>Histogram 图像直方图</strong>
+<ul>
+<li><strong>Normalized histogram 归一化直方图</strong>: 纵坐标要除以图像总像素数, 可表达概率.</li>
+</ul></li>
+<li><strong>Histogram processing 方法</strong>
+<ul>
+<li><strong>Histogram equalization 直方图均衡化</strong></li>
+<li><strong>Histogram matching (specification) 直方图匹配</strong>: 「我想让这张暗图看起来像那张亮图」.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="image-segmentation-图像分割" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="image-segmentation-图像分割"><span class="header-section-number">4</span> Image Segmentation 图像分割</h2>
+<blockquote class="blockquote">
+<p>一个非常自然的需求是把一张图像分割成若干个有意义的区域. 由于「有意义」无法准确定义, 因此图像分割非常开放.</p>
+</blockquote>
+<ul>
+<li><strong>Neighbors of a pixel 二值图像像素的邻域</strong>: 有不同的定义! 4-neighbors (上下左右), 8-neighbors, diagonal-neighbors (对角线).
+<ul>
+<li>领域不一定是等价关系!</li>
+<li><strong>Path 路径</strong>: 一个像素的有序序列, 后一个像素都是前一个像素的 neighbor.</li>
+<li><strong>Connected set 连通集</strong>: 当邻域是等价关系 <span class="math inline">\(\sim\)</span> 时, 二值图像 <span class="math inline">\(b/\sim\)</span> 中的每个等价类就是一个连通集.
+<ul>
+<li><strong>Boundary 边界</strong>: 跟拓扑学里的定义一样, 边界点的邻域包含区域外的像素.</li>
+</ul></li>
+</ul></li>
+<li><strong>Edge detection 边缘检测</strong>
+<ul>
+<li><strong>Gradient + Thresholding</strong></li>
+<li><strong>LPF + Laplacian</strong>: 比如 LoG (Laplacian of Gaussian).</li>
+<li><strong>Edge linking 边缘连接</strong>: 边缘可能不连续, 可以利用梯度方向等信息把边缘连接起来.</li>
+<li><strong>Hough Transform 霍夫变换</strong></li>
+</ul></li>
+<li><strong>Edge-based object detection 基于边缘的目标检测</strong>
+<ul>
+<li><strong>Distance Transform (DT) 距离变换</strong>: 计算每个像素到最近边界像素的 <span class="math inline">\(\mathcal{L}^2\)</span> 距离.</li>
+</ul></li>
+<li><strong>Region-based segmentation 基于区域的分割</strong></li>
+</ul>
+</section>
+<section id="morphological-形态学图像处理" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="morphological-形态学图像处理"><span class="header-section-number">5</span> Morphological 形态学图像处理</h2>
+<blockquote class="blockquote">
+<p>这里主要涉及 PS 软件中的各种基础操作的原理.</p>
+</blockquote>
+<ul>
+<li><strong>Binary erosion / dilation 二值图像腐蚀/膨胀</strong>: 想象一个 binary image <span class="math inline">\(f\)</span> 的前景是凹下去的模具, 想象 SE (Structuring Element) 像俄罗斯方块一样掉落在 <span class="math inline">\(f\)</span> 上, 记录下:
+<ul>
+<li>SE 能<strong>整体</strong>掉进去的地方, 这些就是腐蚀 <span class="math inline">\(f \ominus se\)</span> 的结果. 腐蚀过的前景 (<span class="math inline">\(f \ominus se\)</span>) 只会比 <span class="math inline">\(f\)</span> 一样大或者更小.</li>
+<li>任何<strong>一个</strong> SE 方块能掉进去的地方, 这些就是膨胀 <span class="math inline">\(f \oplus se\)</span> 的结果. 膨胀过的前景 (<span class="math inline">\(f \oplus se\)</span>) 只会比 <span class="math inline">\(f\)</span> 一样大或者更大.</li>
+<li><strong>Erosion 和 Dilation 互为 dual</strong></li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-erosion" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-erosion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="erosion.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-erosion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Binary Erosion <span class="citation" data-cites="Mardiris2016ACD"><a href="#ref-Mardiris2016ACD" role="doc-biblioref">[1]</a></span>
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-dilation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="dilation.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Binary Dilation <span class="citation" data-cites="Mardiris2016ACD"><a href="#ref-Mardiris2016ACD" role="doc-biblioref">[1]</a></span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><p><strong>Opening 开运算</strong>: 先腐蚀后膨胀, <span class="math inline">\(b \circ se \equiv (b \ominus se) \oplus se\)</span>.</p></li>
+<li><p><strong>Closing 闭运算</strong>: 先膨胀后腐蚀, <span class="math inline">\(b \bullet se \equiv (b \oplus se) \ominus se\)</span>.</p></li>
+</ul>
+</section>
+<section id="pca-主成分分析" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="pca-主成分分析"><span class="header-section-number">6</span> PCA 主成分分析</h2>
+</section>
+<section id="image-compression-图像压缩" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="image-compression-图像压缩"><span class="header-section-number">7</span> Image Compression 图像压缩</h2>
+<blockquote class="blockquote">
+<p>信息永远<strong>不能</strong>被压缩, 只是被压缩的部分变成编解码规则了.</p>
+</blockquote>
+<section id="basic-concepts-基本概念" class="level3" data-number="7.1">
+<h3 data-number="7.1" class="anchored" data-anchor-id="basic-concepts-基本概念"><span class="header-section-number">7.1</span> Basic Concepts 基本概念</h3>
+<ul>
+<li>若图片 <span class="math inline">\(f\)</span> 压缩前可以被 <span class="math inline">\(100\)</span> bit 表示, 压缩后可以被 <span class="math inline">\(75\)</span> bit 表示, 则:
+<ul>
+<li><strong>Compression ratio 压缩比</strong> <span class="math inline">\(C = 100/75\)</span>.</li>
+<li><strong>Relative data redundancy 相对数据冗余</strong> <span class="math inline">\(R = 1-0.75\)</span>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="lossless-compression-无损压缩" class="level3" data-number="7.2">
+<h3 data-number="7.2" class="anchored" data-anchor-id="lossless-compression-无损压缩"><span class="header-section-number">7.2</span> Lossless Compression 无损压缩</h3>
+<ul>
+<li><strong>Huffman coding 霍夫曼编码</strong></li>
+<li><strong>Arithmetic coding 算术编码</strong></li>
+<li><strong>LZW 编码</strong></li>
+</ul>
+</section>
+<section id="lossy-compression-有损压缩" class="level3" data-number="7.3">
+<h3 data-number="7.3" class="anchored" data-anchor-id="lossy-compression-有损压缩"><span class="header-section-number">7.3</span> Lossy Compression 有损压缩</h3>
+<ul>
+<li><strong>JPEG</strong>:
+<ul>
+<li>颜色空间变换 (RGB <span class="math inline">\(\to\)</span> YCbCr): 利用人眼对亮度更敏感的特点.</li>
+<li>分块 (<span class="math inline">\(8\times 8\)</span> blocks): 计算较快.</li>
+<li>DCT (离散余弦变换): 就是 DFT.</li>
+<li>Quantization (量化，唯一真正「有损」的一步): 在频域被选择性地 mask 掉一些系数.</li>
+<li>Zig-zag 扫描</li>
+<li>Entropy coding (Huffman / Arithmetic)</li>
+</ul></li>
+</ul>
+</section>
+<section id="watermarking-数字水印" class="level3" data-number="7.4">
+<h3 data-number="7.4" class="anchored" data-anchor-id="watermarking-数字水印"><span class="header-section-number">7.4</span> Watermarking 数字水印</h3>
+<ul>
+<li><p><strong>Visible watermark 可见水印</strong>: 直接把水印叠加在图片上.</p></li>
+<li><p><strong>Invisible watermark 隐形水印</strong></p>
+<ul>
+<li>Robustness 水印必须能抵抗以下操作: 压缩, 缩小/放大, 裁剪, 加噪声, 滤波, 镜像, etc.</li>
+<li>简单来说, 可以将水印直接叠加在<strong>频域</strong>系数上, 再反变换得到水印图像.</li>
+</ul></li>
+</ul>
+
+
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-Mardiris2016ACD" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">V. A. Mardiris and V. Chatzis, <span>“A configurable design for morphological erosion and dilation operations in image processing using quantum-dot cellular automata,”</span> <em>Journal of Engineering Science and Technology Review</em>, vol. 9, pp. 25–30, 2016, Available: <a href="https://api.semanticscholar.org/CorpusID:117395774">https://api.semanticscholar.org/CorpusID:117395774</a></div>
+</div>
+</div></section></div></main> <!-- /main -->
+<!-- Cloudflare Web Analytics --><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;d0b3c27b7e5c43938065722a5136416f&quot;}"></script><!-- End Cloudflare Web Analytics -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/marcobisky\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<script src="https://utteranc.es/client.js" repo="Marcobisky.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2025 Marcobisky.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

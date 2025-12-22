@@ -1,0 +1,169 @@
+---
+author: Marcobisky
+title: DIP Crash Course 数字图像处理速成笔记
+description: 更新中...
+date: 2025-12-20
+image: cover.png
+categories:
+    - Crash-Course
+    - CN-blogs
+format: 
+    html: default
+bibliography: refs.bib
+bibliographystyle: ieee
+csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
+---
+
+> 将所有的开放问题的 solution 当作一个普通的解决方法来看待, 它们绝不是最优或者唯一的解决方案.
+
+## Basic Conventions 基本约定
+
+- Image 默认为 **sampling** 和 **quantization** 之后的数字图像
+    - **Spacial resolution 空间分辨率**: 长宽方向的采样点数的乘积.
+    - **Intensity resolution 强度分辨率**: 量化的精度, 一般用每个像素的 bit 数表示. **默认为 $8$ bit ($[0, 255]$)**.
+
+- **Color space 颜色空间**: 单色可见光的波长在 $[380, 780] \text{ nm}$, 每一束光都可以有任意强度的单色光分量 (即「光谱」), 因此所有光构成一个**不可数无穷维拓扑向量空间**.
+    - 但是人眼有三种类型的视锥细胞 (L, M, S) 对不同的频率成分有 (不会变化的) 不同的敏感度, 它们自动将所有光**线性映射**到一个三维子空间 $\Omega$ 中 (想想为什么是线性的, 因为是积分). 即使两个光的光谱不同, 但它们在这个三维子空间的投影相同, 人眼也无法区分它们.
+    - 不同的应用场景在 $\Omega$ 中选择不同的基底: 
+        - **RGB** (Red, Green, Blue): 显示器, 图像储存.
+        - **CMY/CMYK** (Cyan, Magenta, Yellow, K: Black ink): 打印机, K 成分是多余的, 就当作是为了节省墨水 lol.
+        - **HSI/HSV** (Hue, Saturation, Intensity/Value): 图像编辑软件.
+
+- 默认情况下图片丢失拓扑结构 `view()` 成一个 vector. $r$ 代表处理前的图像 vector, $s$ 代表处理后的图像 vector.
+
+- **RGB2Gray 转换方法**: 可以任选一通道 / 取最大 / 平均值 / 加权平均.
+
+- **Contrast 对比度**: 灰度图像中像素值最大值与最小值之差 (去掉 outlier).
+
+- **Binary Image 二值图像 $f$**: $0$ 表示 background, $1$ 表示 foreground.
+
+
+
+## Kernel-based processing 基于核的处理
+
+> 本人没有按照 Spatial domain 和 Frequency domain 来划分, 因为他们本质上是等价的, 无法将二者严格区分.
+
+> Kernel-based method 就是将原图片与一个 kernel 做滑动内积 (纠结是内积还是卷积毫无意义). 重点在于 kernel 的设计, 我们通过 kernel 设计的**思维路径**将其划分为 Spatial filtering 和 Frequency filtering 两大类.
+
+### Spatial Filtering 空间滤波
+
+> Spatial filtering 指 kernel 的设计过程没有经过频域分析.
+
+- **Padding 填充**
+
+- **NCC (Normalized Cross-Correlation)**: 图像 vector 之间的夹角余弦值.
+
+- **Common filters 常用滤波器**
+    - **Smoothing filters 平滑滤波器 (低通滤波器)**
+    - **Order-statistic filters 次序统计滤波器**: 将某框内的像素排序后取中位数, 一般可去除 salt-and-pepper (impulse) noise.
+    - **Sharpening (derivative) filters 锐化滤波器 (高通滤波器)**: 将梯度、Laplacian 算子移植到图片上; 由于这些算子是线性的, 可等价于与一个 kernel 做卷积; 这些 kernel 也可以在形式上被强化来达到更强的锐化效果.
+
+
+## Non-kernel-based processing 非基于核的处理
+
+> Non-kernel-based method 指处理过程无法被等价为与一个确定的 kernel 做内积的过程.
+
+### Intensity Transformation
+
+> 强度变换仅仅是**单灰度像素**的操作, 即用一个函数 $s = T(r)$ 来**独立地**映射所有像素值.
+
+- **Linear transformation**
+    - **Image Negatives 图像反相**: $s = L - 1 - r$.
+    - **Contrast stretching 对比度拉伸**
+
+- **Log transformation 对数变换**: $s = c \cdot \log(1 + r)$.
+
+- **Power-Law (Gamma) transformation 幂律变换**: $s = c \cdot r^{\gamma}$.
+
+### Histogram Processing 直方图处理
+
+- **Histogram 图像直方图**
+    - **Normalized histogram 归一化直方图**: 纵坐标要除以图像总像素数, 可表达概率.
+
+- **Histogram processing 方法**
+    - **Histogram equalization 直方图均衡化**
+    - **Histogram matching (specification) 直方图匹配**: 「我想让这张暗图看起来像那张亮图」.
+
+## Image Segmentation 图像分割
+
+> 一个非常自然的需求是把一张图像分割成若干个有意义的区域. 由于「有意义」无法准确定义, 因此图像分割非常开放.
+
+- **Neighbors of a pixel 二值图像像素的邻域**: 有不同的定义! 4-neighbors (上下左右), 8-neighbors, diagonal-neighbors (对角线).
+    - 领域不一定是等价关系!
+    - **Path 路径**: 一个像素的有序序列, 后一个像素都是前一个像素的 neighbor.
+    - **Connected set 连通集**: 当邻域是等价关系 $\sim$ 时, 二值图像 $b/\sim$ 中的每个等价类就是一个连通集.
+        - **Boundary 边界**: 跟拓扑学里的定义一样, 边界点的邻域包含区域外的像素.
+
+- **Edge detection 边缘检测**
+    - **Gradient + Thresholding**
+    - **LPF + Laplacian**: 比如 LoG (Laplacian of Gaussian).
+    - **Edge linking 边缘连接**: 边缘可能不连续, 可以利用梯度方向等信息把边缘连接起来.
+    - **Hough Transform 霍夫变换**
+
+- **Edge-based object detection 基于边缘的目标检测**
+    - **Distance Transform (DT) 距离变换**: 计算每个像素到最近边界像素的 $\mathcal{L}^2$ 距离.
+
+- **Region-based segmentation 基于区域的分割**
+
+
+## Morphological 形态学图像处理
+
+> 这里主要涉及 PS 软件中的各种基础操作的原理.
+
+- **Binary erosion / dilation 二值图像腐蚀/膨胀**: 想象一个 binary image $f$ 的前景是凹下去的模具, 想象 SE (Structuring Element) 像俄罗斯方块一样掉落在 $f$ 上, 记录下:
+    - SE 能**整体**掉进去的地方, 这些就是腐蚀 $f \ominus se$ 的结果. 腐蚀过的前景 ($f \ominus se$) 只会比 $f$ 一样大或者更小.
+    - 任何**一个** SE 方块能掉进去的地方, 这些就是膨胀 $f \oplus se$ 的结果. 膨胀过的前景 ($f \oplus se$) 只会比 $f$ 一样大或者更大.
+    - **Erosion 和 Dilation 互为 dual**
+
+::: {layout = "[50,50]"}
+![Binary Erosion @Mardiris2016ACD](erosion.png){#fig-erosion}
+
+![Binary Dilation @Mardiris2016ACD](dilation.png){#fig-dilation}
+:::
+
+
+
+
+- **Opening 开运算**: 先腐蚀后膨胀, $b \circ se \equiv (b \ominus se) \oplus se$.
+
+- **Closing 闭运算**: 先膨胀后腐蚀, $b \bullet se \equiv (b \oplus se) \ominus se$.
+
+
+## PCA 主成分分析
+
+
+
+
+## Image Compression 图像压缩
+
+> 信息永远**不能**被压缩, 只是被压缩的部分变成编解码规则了.
+
+### Basic Concepts 基本概念
+
+- 若图片 $f$ 压缩前可以被 $100$ bit 表示, 压缩后可以被 $75$ bit 表示, 则:
+    - **Compression ratio 压缩比** $C = 100/75$.
+    - **Relative data redundancy 相对数据冗余** $R = 1-0.75$.
+
+### Lossless Compression 无损压缩
+
+- **Huffman coding 霍夫曼编码**
+- **Arithmetic coding 算术编码**
+- **LZW 编码**
+
+### Lossy Compression 有损压缩
+
+- **JPEG**:
+    - 颜色空间变换 (RGB $\to$ YCbCr): 利用人眼对亮度更敏感的特点.
+    - 分块 ($8\times 8$ blocks): 计算较快.
+    - DCT (离散余弦变换): 就是 DFT.
+    - Quantization (量化，唯一真正「有损」的一步): 在频域被选择性地 mask 掉一些系数.
+    - Zig-zag 扫描
+    - Entropy coding (Huffman / Arithmetic)
+
+### Watermarking 数字水印
+
+- **Visible watermark 可见水印**: 直接把水印叠加在图片上.
+
+- **Invisible watermark 隐形水印**
+    - Robustness 水印必须能抵抗以下操作: 压缩, 缩小/放大, 裁剪, 加噪声, 滤波, 镜像, etc.
+    - 简单来说, 可以将水印直接叠加在**频域**系数上, 再反变换得到水印图像.

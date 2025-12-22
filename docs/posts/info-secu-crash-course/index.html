@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Marcobisky">
+<meta name="dcterms.date" content="2025-12-20">
+<meta name="description" content="更新中…">
+
+<title>Information Security Crash Course 信息安全速成笔记 – Marcobisky</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-5bc7f946787c109e621af665ddda306b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-611d27bfacf889a592cb25f4080bab07.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-5bc7f946787c109e621af665ddda306b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Information Security Crash Course 信息安全速成笔记 – Marcobisky">
+<meta property="og:description" content="更新中…">
+<meta property="og:image" content="https://marcobisky.github.io/posts/info-secu-crash-course/cover.png">
+<meta property="og:site_name" content="Marcobisky">
+<meta property="og:locale" content="en_US">
+<meta property="og:image:height" content="2259">
+<meta property="og:image:width" content="2595">
+<meta name="twitter:title" content="Information Security Crash Course 信息安全速成笔记 – Marcobisky">
+<meta name="twitter:description" content="更新中…">
+<meta name="twitter:image" content="https://marcobisky.github.io/posts/info-secu-crash-course/cover.png">
+<meta name="twitter:creator" content="@Marcobisky77">
+<meta name="twitter:image-height" content="2259">
+<meta name="twitter:image-width" content="2595">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Marcobisky</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tinyml/index.html"> 
+<span class="menu-text">TinyML</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../blog.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#blockchain-区块链" id="toc-blockchain-区块链" class="nav-link active" data-scroll-target="#blockchain-区块链"><span class="header-section-number">1</span> Blockchain 区块链</a>
+  <ul class="collapse">
+  <li><a href="#build-the-bitcoin-blockchain-from-scratch" id="toc-build-the-bitcoin-blockchain-from-scratch" class="nav-link" data-scroll-target="#build-the-bitcoin-blockchain-from-scratch"><span class="header-section-number">1.1</span> Build the bitcoin blockchain from scratch</a></li>
+  <li><a href="#some-questions" id="toc-some-questions" class="nav-link" data-scroll-target="#some-questions"><span class="header-section-number">1.2</span> Some Questions</a></li>
+  <li><a href="#consenus-algorithm-共识算法" id="toc-consenus-algorithm-共识算法" class="nav-link" data-scroll-target="#consenus-algorithm-共识算法"><span class="header-section-number">1.3</span> Consenus Algorithm 共识算法</a></li>
+  <li><a href="#一些八股" id="toc-一些八股" class="nav-link" data-scroll-target="#一些八股"><span class="header-section-number">1.4</span> 一些八股</a></li>
+  </ul></li>
+  <li><a href="#cryptography-密码学基础" id="toc-cryptography-密码学基础" class="nav-link" data-scroll-target="#cryptography-密码学基础"><span class="header-section-number">2</span> Cryptography 密码学基础</a>
+  <ul class="collapse">
+  <li><a href="#一些八股-1" id="toc-一些八股-1" class="nav-link" data-scroll-target="#一些八股-1"><span class="header-section-number">2.1</span> 一些八股</a></li>
+  <li><a href="#symmetric-cipher-model-对称加密模型" id="toc-symmetric-cipher-model-对称加密模型" class="nav-link" data-scroll-target="#symmetric-cipher-model-对称加密模型"><span class="header-section-number">2.2</span> Symmetric Cipher Model 对称加密模型</a></li>
+  <li><a href="#asymmetric-cipher-model-非对称加密模型" id="toc-asymmetric-cipher-model-非对称加密模型" class="nav-link" data-scroll-target="#asymmetric-cipher-model-非对称加密模型"><span class="header-section-number">2.3</span> Asymmetric Cipher Model 非对称加密模型</a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full column-page-left" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Information Security Crash Course 信息安全速成笔记</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Crash-Course</div>
+    <div class="quarto-category">CN-blogs</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    更新中…
+  </div>
+</div>
+
+
+<div class="quarto-title-meta column-page-left">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Marcobisky </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">December 20, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<blockquote class="blockquote">
+<p>所有计算机的问题都是文本处理的问题.</p>
+</blockquote>
+<section id="blockchain-区块链" class="level2 page-columns page-full" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="blockchain-区块链"><span class="header-section-number">1</span> Blockchain 区块链</h2>
+<ul>
+<li><strong>Motivation and related concept</strong>
+<ul>
+<li><strong>Ledger 交易账本</strong>: 记录对某种财产 (property) 的状态变化 (maintenance) 的历史 (比如银行卡转账记录).
+<ul>
+<li>传统的 Ledger 时中心化地由银行的 DBMS (Database Management System) 来维护的, 我们信任银行本质上是信任国家的信用, 可是 xxx? 为了摆脱对中心化机构的信任, 需要一个 DLT (Distributed Ledger Technology) 来分布式地维护 Ledger! 我们希望它的机制公开透明, 并在数学上能保证其安全性.</li>
+</ul></li>
+<li>DLT 可以利用多种数据结构来组织数据 (Blockchain 可以同时具有下面的数据结构):
+<ul>
+<li><strong>Linked list 链表</strong></li>
+<li><strong>DAG (Directed Acyclic Graph 有向无环图)</strong></li>
+<li><strong>Tree 树</strong></li>
+</ul></li>
+</ul></li>
+<li><strong>Blockchain features 特点</strong>
+<ul>
+<li><strong>Decentralization 去中心化</strong></li>
+<li><strong>Immutability 不可篡改性</strong></li>
+<li><strong>Transparency 透明性</strong></li>
+<li><strong>Pseudonymity 匿名性</strong></li>
+<li><strong>Non-Repudiation 不可否认性</strong>: 一旦交易记录成功不可撤回和修改.</li>
+</ul></li>
+<li><strong>Blockchain classification 分类</strong>
+<ul>
+<li><strong>Permissionless 无需许可</strong>: 任何人都可以参与添加区块.
+<ul>
+<li><strong>Public 公开链</strong>: 任何有可以上网的电脑的人都可以查看区块链数据 (如 Bitcoin 区块链). 特点: 比如 Bitcoin 区块链的 TPS (Transactions Per Second) 每秒 <span class="math inline">\(&lt;10\)</span>; Scalability 可扩展性差; Block size 区块大小有限制; 挖矿能耗高.</li>
+</ul></li>
+<li><strong>Permissioned 需要许可</strong>: 只有被授权的用户才能参与添加区块.
+<ul>
+<li><strong>Private 私有链</strong>: 只有被授权的用户才能查看区块链数据.</li>
+<li><strong>Consortium 联盟链</strong>: 由多个组织共同维护的区块链, 只有被授权的组织才能查看相应部分的区块链数据.</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-bc-classification" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bc-classification-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="bc-classification.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bc-classification-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Blockchain 分类
+</figcaption>
+</figure>
+</div>
+</div></div><section id="build-the-bitcoin-blockchain-from-scratch" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="build-the-bitcoin-blockchain-from-scratch"><span class="header-section-number">1.1</span> Build the bitcoin blockchain from scratch</h3>
+<ul>
+<li><p><strong>P2P network</strong>: 假设你有 <span class="math inline">\(10\)</span> 台电脑, 手动输入每台电脑附近一两台电脑的 IP 和它们监听的端口 (bootstrapping). 写一个程序比如 <code>node.py</code> 来让每台电脑都运行这个程序, 监听自己端口的同时向认识的电脑发送邻居 IP. 这样方便以后路由.</p></li>
+<li><p><strong>Wallet</strong>:</p>
+<ul>
+<li>首先每台电脑随机生成一个 <span class="math inline">\(256\)</span> bit 的私钥 <span class="math inline">\(sk\)</span>.</li>
+<li>用一个 one-way function (比如 hashing function, ECDSA (Elliptic Curve Digital Signature Algorithm)) 从私钥 <span class="math inline">\(sk\)</span> 计算出公钥 <span class="math inline">\(pk\)</span> (也是 <span class="math inline">\(256\)</span> bit).</li>
+<li><span class="math inline">\(pk\)</span> 作为节点的身份 ID, <span class="math inline">\(sk\)</span> 用来签名消息.</li>
+</ul></li>
+<li><p><strong>Transaction (Tx) 交易</strong>: 定义交易数据结构, 比如:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="er">Transaction</span> <span class="fu">{</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="er">from</span><span class="fu">:</span> <span class="er">PublicKey_A</span><span class="fu">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="er">to</span><span class="fu">:</span> <span class="er">PublicKey_B</span><span class="fu">,</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="er">amount</span><span class="fu">:</span> <span class="dv">10</span><span class="fu">,</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="er">signature</span><span class="fu">:</span> <span class="er">Sign(privateKey_A</span><span class="fu">,</span> <span class="er">above_fields)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li>每个节点可以用公钥验证交易的合法性.</li>
+</ul></li>
+<li><p><strong>Mempool 交易池</strong>: 每个节点如果有交易记录产生, 就生成一个 Transaction 转发给相邻节点, 它们会先验证合法性, 然后将其加入自己的交易池中 (每个节点维护一个交易池, 存放收到但还未打包进区块的交易).</p></li>
+<li><p><strong>Block 区块</strong>: TODO</p></li>
+</ul>
+</section>
+<section id="some-questions" class="level3 page-columns page-full" data-number="1.2">
+<h3 data-number="1.2" class="anchored" data-anchor-id="some-questions"><span class="header-section-number">1.2</span> Some Questions</h3>
+<blockquote class="blockquote">
+<p>Blockchain 很难用线性的讲法来解释清楚, 这里列出一些常见的问题.</p>
+</blockquote>
+<ul>
+<li>记账系统跟发行一种币有什么关系? 发行的新的币又是如何跟现存的币交换的?
+<ul>
+<li>这涉及到货币的本质. 衡量价值依赖两个特性, 一是获取他需要付出一定的成本; 二是大家都承认可以一般化地等价其他东西.</li>
+<li>bitcoin 只记录比特币的交易.</li>
+</ul></li>
+<li>为什么最初会有人自发来用这个系统记账?
+<ul>
+<li><strong>Incentives for minors</strong>: <strong>transaction fee</strong> (手续费, 转账的人要多付出一点点给打包区块的人 (比银行低多了)) + <strong>凭空送</strong> (中本聪设计 PoW 使得全世界一起算的话平均每 10 分钟能产生一个新区块, 第一个包奖励 <span class="math inline">\(50\)</span> BTC (in 2009), <span class="math inline">\(4\)</span> 年之内都是如此, 第二个 <span class="math inline">\(4\)</span> 年挖出一个区块奖励减半 (<span class="math inline">\(25\)</span> BTC) <span class="citation" data-cites="a2023_introduction"><a href="#ref-a2023_introduction" role="doc-biblioref">[1]</a></span>, etc.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>)</li>
+<li>Follow-up: 如果他获得的奖励不是现实世界中的物品而也只是这个虚拟世界的货币, 一开始的驱动力是哪来的?
+<ul>
+<li>可以有很多因素: 意识形态动机 (比如对银行的不信任, 冻结与审查的反感), 有限下行风险 + 极大上行空间 (Option-like payoff).</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;这是一个收敛的几何级数, 所以比特币的数量是固定的 (<span class="math inline">\(21\)</span> million). 2025 年挖出一个区块奖励是 <span class="math inline">\(3.125\)</span> BTC. 凭空送的部分是有最小值的 (<span class="math inline">\(10^{-8}\)</span> BTC, 即 <span class="math inline">\(1\)</span> Satoshi), 约在 2140 年达到这个值, 以后凭空送部分就没有了, 以后矿工的收入就全靠 transaction fee 了 <span class="citation" data-cites="a2023_introduction"><a href="#ref-a2023_introduction" role="doc-biblioref">[1]</a></span>.</p></div></div><ul>
+<li><p>如果在网络的两个角落同时产生了两个区块, 如何处理?</p>
+<ul>
+<li><strong>LCP (Longest Chain Principle) 最长链原则</strong>: 每个节点只在<strong>它认为的最长链上</strong>继续打包新的区块 (每个节点可能会有不同的最长链).</li>
+<li>所以你挖出来的区块<strong>可能最终不会被承认</strong>.</li>
+</ul></li>
+<li><p>如何防止恶意用户篡改数据?</p>
+<ul>
+<li>防止不了. 但几乎不可能, 因为</li>
+</ul></li>
+<li><p>如何防止随意给自己转账?</p></li>
+<li><p>当某节点收到一笔交易时, 会做什么? 收到新区块呢?</p>
+<ul>
+<li>收到交易: 进行余额检查 (通过追溯之前的交易记录) + 验证签名, 合法就放进交易池.</li>
+<li>收到新区块:</li>
+</ul></li>
+<li><p>如何防止双重支付 (Double spending, 即某个节点 <span class="math inline">\(A\)</span> 给两批相邻节点试图用同一笔余额给不同的人转账, 这两批节点经过余额检查后都会认为 <span class="math inline">\(A\)</span> 的交易是合法的)?</p>
+<ul>
+<li>只承认打包好的区块里的交易记录. 哪一笔交易先被打包进区块, 哪一笔交易就有效.</li>
+</ul></li>
+</ul>
+</section>
+<section id="consenus-algorithm-共识算法" class="level3" data-number="1.3">
+<h3 data-number="1.3" class="anchored" data-anchor-id="consenus-algorithm-共识算法"><span class="header-section-number">1.3</span> Consenus Algorithm 共识算法</h3>
+<blockquote class="blockquote">
+<p>用来让分布式网络中的节点就某个数据达成一致的算法. (不是区块链特有的概念!)</p>
+</blockquote>
+<ul>
+<li><p><strong>Basic concepts</strong></p>
+<ul>
+<li><strong>节点类型</strong>: <strong>Legitimate/honest nodes</strong> (诚实节点), <strong>Malicious nodes</strong> (恶意节点).</li>
+<li><strong>故障类型</strong>: <strong>Crash fault</strong> (由诚实节点导致的故障), <strong>Byzantine fault</strong> (拜占庭故障, 由恶意节点导致的故障).</li>
+</ul></li>
+<li><p><strong>PoW (Proof of Work 工作量证明)</strong>: 通过尝试 nonce 的值来找到一个 hash 值满足某个条件 (比如前面有 <span class="math inline">\(n\)</span> 个 <span class="math inline">\(0\)</span>). Hash rate 越高, 挖矿越快. 安全性非常高, 但验证时间较长、挖矿能耗很高.</p>
+<ul>
+<li><strong>Winning probability</strong>: 设有 <span class="math inline">\(N\)</span> 个 miners, 第 <span class="math inline">\(i\)</span> 个 miner 的 hash rate 是 <span class="math inline">\(\varphi_i\)</span>, 则它的 winning probability <span class="math display">\[\mathbb{P}_i = \frac{\varphi_i}{\sum_{j=1}^N \varphi_j}.\]</span></li>
+<li><strong><span class="math inline">\(51\%\)</span> attack</strong>: 如果某个恶意矿工控制了超过 <span class="math inline">\(50\%\)</span> 的算力, 它就可以随意篡改区块链数据.</li>
+</ul></li>
+<li><p><strong>PoS (Proof of Stake 权益证明)</strong>: 交 stake (押金), 用押金的多少做权重随机选择下一个打包区块的节点. 节点如果作恶, 会被没收押金. 验证时间较短, 能耗低, 但安全性不如 PoW (有钱就行).</p></li>
+<li><p><strong>PAXOS</strong></p>
+<ul>
+<li>PAXOS 不处理 Byzantine fault!</li>
+<li>用 PAXOS 协议的系统中必须有三种节点: <strong>Proposer, Acceptor, Learner</strong>.</li>
+<li>三个 phase: <strong>Prepare, Promise, Accept</strong>.</li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[60,40]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 60.0%;justify-content: flex-start;">
+<div id="fig-paxos" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-paxos-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="paxos.gif" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-paxos-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 绿色的节点是 client, 右边有 <span class="math inline">\(1\)</span> 个 proposer, <span class="math inline">\(3\)</span> 个 acceptor, <span class="math inline">\(2\)</span> 个 learner. <span class="citation" data-cites="_2025_paxos"><a href="#ref-_2025_paxos" role="doc-biblioref">[2]</a></span>
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 40.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="paxos-flow-chart.png" class="img-fluid figure-img"></p>
+<figcaption>Basic Paxos without failures <span class="citation" data-cites="wikipediacontributors_2025_paxos"><a href="#ref-wikipediacontributors_2025_paxos" role="doc-biblioref">[3]</a></span>. 注意这里是 acceptor 通知 learner, 而 <a href="#fig-paxos" class="quarto-xref">Figure&nbsp;2</a> 是 proposer 通知 learner, 以此图为准.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>RAFT</strong> (Replicated And Fault Tolerant, 比 sb PAXOS 好理解多了 lol)
+<ul>
+<li><p>RAFT 也不处理 Byzantine fault!</p></li>
+<li><p>每个节点在任意时刻只处于三种状态之一: <strong>Leader, Follower, Candidate</strong>, leader 是唯一的.</p></li>
+<li><p>两个 phase: <strong>Leader Election, Log Replication</strong>.</p></li>
+<li><p>所有节点初始状态都是 follower, 每个 follower 有一个随机的 election timeout (<span class="math inline">\(150\)</span> 到 <span class="math inline">\(300\)</span> ms 之间), 如果在这个时间内没有收到 leader 的 heartbeat (如果存在 leader 的话, 按协议它会向所有 follower 定期发送 heartbeat 证明自己还活着别选别人当 leader), 就变成 candidate 并向所有 follower 发起支持自己的 leader election. 当这个 candidate 收到<strong>超过半数</strong> follower 的投票后, 就变成 leader (总共有多少 node 大家事先都知道)</p>
+<div id="fig-raft-election" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-raft-election-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="raft-election.gif" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-raft-election-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Leader election 过程, 你可以自行在 <span class="citation" data-cites="_2025_raft"><a href="#ref-_2025_raft" role="doc-biblioref">[4]</a></span> 进行其它挂机或者 leader request 实验, omitted here.
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+<li><strong>PBFT</strong> (Practical Byzantine Fault Tolerance)
+<ul>
+<li>由名字知道它能处理 Byzantine fault.</li>
+<li>三种节点: <strong>Leader, Replicas, Backup</strong></li>
+<li>TODO</li>
+</ul></li>
+<li><strong>Metrics 衡量标准</strong>
+<ul>
+<li><strong>Performance</strong>
+<ul>
+<li><strong>TPS</strong> (Transactions Per Second)</li>
+<li><strong>Block comfirmation time 区块确认时间</strong></li>
+</ul></li>
+<li><strong>Scalability 可扩展性</strong>: 对于增加的节点数和交易量, 系统能否有效地处理.</li>
+</ul></li>
+</ul>
+</section>
+<section id="一些八股" class="level3" data-number="1.4">
+<h3 data-number="1.4" class="anchored" data-anchor-id="一些八股"><span class="header-section-number">1.4</span> 一些八股</h3>
+<ul>
+<li><p><strong>Hash rate 哈希率</strong>: 全网每秒能做多少次哈希运算 (代表算力).</p></li>
+<li><p><strong>Sharding 分片技术</strong>: 将各个节点分组 (shards), 每个组内的节点负责维护该组内的交易记录 (而不要验证全网的交易记录), 以提高系统的验证效率和可扩展性. 但是 shards 之间的通信和协调极其复杂!</p></li>
+</ul>
+</section>
+</section>
+<section id="cryptography-密码学基础" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="cryptography-密码学基础"><span class="header-section-number">2</span> Cryptography 密码学基础</h2>
+<section id="一些八股-1" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="一些八股-1"><span class="header-section-number">2.1</span> 一些八股</h3>
+<ul>
+<li><strong>Three Ds of security</strong>:
+<ul>
+<li><strong>Defence 防护</strong>: 保护系统免受攻击.</li>
+<li><strong>Detection 检测</strong>: 发现攻击或异常行为.</li>
+<li><strong>Deterrence 威慑</strong>: 通过威胁惩罚来降低攻击频率.</li>
+</ul></li>
+<li><strong>攻击分类</strong> (但现实情况是三种结合起来使用哈哈):
+<ul>
+<li>按目的:
+<ul>
+<li><strong>Passive 被动攻击</strong>: 监听和窃取信息, 不改变系统状态.</li>
+<li><strong>Active 主动攻击</strong>: 篡改、伪造或破坏信息, 改变系统状态.</li>
+</ul></li>
+<li>按手段:
+<ul>
+<li><strong>Virus 病毒</strong>: 自我复制, 不单独存在而是嵌入进宿主程序.</li>
+<li><strong>Worm 蠕虫</strong>: 自我复制, 独立存在.</li>
+<li><strong>Trojan 木马</strong>: 不自我复制 (usu.), 伪装成合法程序诱骗用户安装.</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="symmetric-cipher-model-对称加密模型" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="symmetric-cipher-model-对称加密模型"><span class="header-section-number">2.2</span> Symmetric Cipher Model 对称加密模型</h3>
+</section>
+<section id="asymmetric-cipher-model-非对称加密模型" class="level3" data-number="2.3">
+<h3 data-number="2.3" class="anchored" data-anchor-id="asymmetric-cipher-model-非对称加密模型"><span class="header-section-number">2.3</span> Asymmetric Cipher Model 非对称加密模型</h3>
+<ul>
+<li><strong>生成过程</strong>: 用一个随机数产生私钥, 再用私钥算出公钥.
+<ul>
+<li>几乎不可能通过公钥反推私钥. 私钥必须保密, 公钥可以公开.</li>
+<li>私钥可以用来加密字符串, 相应的公钥可以用来解密这个字符串.</li>
+<li><strong>Digital Signature 电子签名</strong>: 只有私钥持有者能加密字符串, 任何知道公钥的人都能解密这个字符串. 这跟签名的本质是一样的.</li>
+</ul></li>
+</ul>
+
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-a2023_introduction" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline"><span>“Introduction to bitcoin.”</span> Ntu.edu.sg, 2023. Available: <a href="https://www3.ntu.edu.sg/home/ehchua/programming/blockchain/bitcoin.html">https://www3.ntu.edu.sg/home/ehchua/programming/blockchain/bitcoin.html</a>. [Accessed: Dec. 21, 2025]</div>
+</div>
+<div id="ref-_2025_paxos" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">The Secret Lives of Data, <span>“Paxos.”</span> Ofcoder.com, 2025. Available: <a href="https://visual.ofcoder.com/paxos/basic-paxos/">https://visual.ofcoder.com/paxos/basic-paxos/</a>. [Accessed: Dec. 21, 2025]</div>
+</div>
+<div id="ref-wikipediacontributors_2025_paxos" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">W. Contributors, <span>“Paxos (computer science).”</span> Wikipedia; Wikimedia Foundation, Dec. 2025. Available: <a href="https://en.wikipedia.org/wiki/Paxos_%28computer_science%29#Basic_Paxos_without_failures">https://en.wikipedia.org/wiki/Paxos_%28computer_science%29#Basic_Paxos_without_failures</a>. [Accessed: Dec. 21, 2025]</div>
+</div>
+<div id="ref-_2025_raft" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">The Secret Lives of Data, <span>“Raft.”</span> Ofcoder.com, 2025. Available: <a href="https://visual.ofcoder.com/raft/">https://visual.ofcoder.com/raft/</a>. [Accessed: Dec. 21, 2025]</div>
+</div>
+</div></section></div></main> <!-- /main -->
+<!-- Cloudflare Web Analytics --><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;d0b3c27b7e5c43938065722a5136416f&quot;}"></script><!-- End Cloudflare Web Analytics -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/marcobisky\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<script src="https://utteranc.es/client.js" repo="Marcobisky.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2025 Marcobisky.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
