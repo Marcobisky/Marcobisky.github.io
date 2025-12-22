@@ -132,6 +132,68 @@ int netpin_start[] = {0, 3, 5, 9};
 
 ## Environment Setup
 
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## Debian (服务器)
+
+Clone 仓库:
+
+```bash
+git clone <repository-url>
+git submodule update --init --recursive
+```
+
+不能直接 `cmake` 编译, 会有一些工具缺少, 首先安装 `boost`:
+
+```bash
+wget https://archives.boost.io/release/1.90.0/source/boost_1_90_0.tar.gz
+tar -xzf boost_1_90_0.tar.gz
+cd boost_1_90_0/
+/bootstrap.sh --prefix=$HOME/tools/boost_1_90
+./b2 -j$(nproc) install
+```
+
+确保 `flute` 子模块在 `thirdparty` 目录下.
+
+编译脚本:
+
+```bash
+mkdir -p build
+cd build
+cmake \
+  -DTAUTIMER_LIB_SEARCH_PATH=/$HOME/projects/cupid-timing/thirdparty/tautimer \
+  -DCMAKE_PREFIX_PATH=$HOME/tools/boost_1_90 \
+  -DCMAKE_EXE_LINKER_FLAGS="-Wl,--allow-shlib-undefined -lpthread" \
+  -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--allow-shlib-undefined -lpthread" \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  ..
+make install -j16
+```
+
+```bash
+CC=$(which x86_64-conda-linux-gnu-gcc) \
+CXX=$(which x86_64-conda-linux-gnu-g++) \
+CUDAHOSTCXX=$(which x86_64-conda-linux-gnu-g++) \
+cmake \
+  -DCUDA_HOST_COMPILER=$(which x86_64-conda-linux-gnu-gcc) \
+  -DTAUTIMER_LIB_SEARCH_PATH=/$HOME/projects/cupid-timing/thirdparty/tautimer \
+  -DCMAKE_PREFIX_PATH=$HOME/tools/boost_1_90 \
+  -DCMAKE_EXE_LINKER_FLAGS="-Wl,--allow-shlib-undefined -lpthread" \
+  -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--allow-shlib-undefined -lpthread" \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+  ..
+```
+
+:::
+<!-- ----------------------------------------- -->
+
+
+
+
+
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=true collapse=true}
 ## MacOS (未成功)
