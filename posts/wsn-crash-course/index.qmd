@@ -55,7 +55,7 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
     - 通过在多个频率间跳变来实现扩频. **跳变的频率中心由 PN chip 控制**.
         - PN chip 的符号率与原始信息的符号率的大小不一定谁大, 若 PN chip 变化很慢, 称为 **Slow FHSS** (@fig-fhss-slow), 反之为 **Fast FHSS** (@fig-fhss-fast).
         - **Chip duration**: @fig-fhss-slow 中的 $T_c$.
-        - **Fast FHSS 的抗干扰能力更强!**, 因为一般 jamming 都是窄带 (省能量), 只要击中一个调制 symbol 的中心频率, 那么这个 symbol 就会被破坏掉. 而 Fast FHSS 在一个调制 symbol 内会跳变多个频率, 因此被击中的概率更低.
+        - **Fast FHSS 的抗干扰能力更强!** 因为一般 jamming 都是窄带 (攻击起来省能量哈哈), 只要击中一个调制 symbol 的中心频率, 那么这个 symbol 就会被破坏掉. 而 Fast FHSS 在一个调制 symbol 内会跳变多个频率, 因此被击中的概率更低.
 
     - FHSS 之后可以 FSK 也可以 ASK 调制 (@fig-modulation)! 
     - 以 @fig-fhss-slow 为例, 若 FHSS 与 FSK 结合, 则设计两个重要参数 $M, k$:
@@ -77,17 +77,17 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 
 ## Data Link Layer 数据链路层
 
-### LLC (Logical Link Control) 逻辑链路控制
+### LLC (Logical Link Control) 逻辑链路控制子层
 
 > LLC 提供统一接口给网络层.
 
 - **Frame management 帧管理**
     - **Byte Count 字节计数**: 在帧头部存储帧的字节数.
-        - 问题: 若字节数出错, 则会 **out of sync.
+        - 问题: 若字节数出错, 则会 **out of sync**.
     - **Flag Bytes + Byte Stuffing 标志字节 + 转义符**: 为了解决 frame 之间的同步 (分割) 问题, 在每个 frame 的头尾添加特殊的 flag byte (如 0b01111110). 若这个 flag byte 出现在 frame 内部, 则在它前面添加一个转义符 (ESC, escape byte). 若 ESC 本身出现在 frame 内部, 则也在它前面添加一个 ESC.
         
 
-### MAC (Medium Access Control) 介质访问控制
+### MAC (Medium Access Control) 介质访问控制子层
 
 > MAC 子层非常接近物理层, 控制物理层什么时候发、发多久.
 
@@ -96,13 +96,41 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 
 - **MAC Protocol**: 用来控制物理层什么时候发、发多久的协议.
     - **Contention-free 非竞争型**
-        - **Static channel allocation 静态信道分配**: **FDMA** (每个人固定分配一个频段), **TDMA** (每个人固定分配一个时间片), **CDMA** (每个人固定分配一个信号空间的方向).
-        - **Dynamic channel allocation 动态信道分配**: **Polling 轮询**, **Token Passing 令牌传递**, **Reservation 预约**.
+        - **Static channel allocation 静态信道分配**: 
+            - **FDMA** (每个人固定分配一个频段).
+            - **TDMA** (每个人固定分配一个时间片).
+            - **CDMA** (每个人固定分配一个信号空间的方向).
+        - **Dynamic channel allocation 动态信道分配**: 
+            - **Polling 轮询**.
+            - **Token Passing 令牌传递**.
+            - **Reservation 预约**.
     - **Contention-based 竞争型**
-        - **ALOHA**: 想发就发, 撞了重来.
+        - **ALOHA** (见 @fig-aloha-demo 和 @fig-aloha-performance)
+            - **Pure ALOHA**: 随时 (async) 想发就发, 撞了重来.
+            - **Slotted ALOHA**: 时间分成一个个时隙 (sync), 只能在时隙开始时发, 撞了重来.
         - **CSMA (Carrier Sense Multiple Access) 载波监听多路访问**: 先听一听, 没人说话再发.
+            - **CSMA/CD (Collision Detection, 一般用于有线网络)**: 有线网信号衰减慢, 有人说话大家听得很清楚. 所以先听, 没人再发; 发的同时继续听, 撞了立即停, 并且发 jamming signal 通知其它节点现在发会撞; 等一个随机时间 (会这个随机时间的范围会随着碰撞次数的增加指数增加, 但是不会一直增加) 后重发.
+            - **CSMA/CA (Collision Avoidance, 一般用于无线网络)**: 无线网中别人发的信号衰减很快, 远的话几乎区分不了信号和噪声. 也是先听, **感觉**没人后不急着发, 等一个随机时间再发 (backoff 退避), 发的过程中就听不了了 (因为自己的声音太大). 如果在规定时间内收到 ACK 则成功, 否则推断发生了冲突, 重发.
+                - 现实情况是上面的方案处理 **Hidden node problem 隐藏站问题** (@fig-hidden-node-prob) 的效率很低. 我们在 CSMA/CA 中加入一个可选协议:
+                - **RTS/CTS + NAV (Network allocation vector)**: 在正式发送数据前, 先发 Request to Send 请求发送, 对方收到后**广播**一个 Clear to Send 确认可以发送的信号, 这两个信号中都带有从现在开始到这次通信完成所需的时间长度, 收到 RTS 或 CTS 的节点会将这个时间段内的信道标记为忙 (更新 NAV), 避免在这段时间内发送数据造成冲突 (@fig-rts-cts-nav). 这样做并不会解决隐蔽站问题, 但能大大降低冲突概率.
         - **MACA (Multiple Access with Collision Avoidance) 多路访问与碰撞避免**: 先举手再说话.
         - **MACAW (MACA with ACK) 带确认的多路访问与碰撞避免**: 先举手再说话, 说完还要等确认 (MACA 的改进版).
+
+::: {.column-margin}
+![**Hidden node problem 隐蔽站问题**: Node $A,B,C$ 的信号覆盖范围如图所示, $A$ 和 $C$ 都想跟 $B$ 交流, 它们各自感觉信道空闲的时候都先退避再发, 但是有一定概率同时对吧? 如果发出来的信息同时到 $B$ 就产生干扰. 虽然 backoff 的策略多重发几次也许就不同时了, 但是这样效率很低.](hidden-node-prob.png){#fig-hidden-node-prob}
+:::
+
+
+::: {layout = "[[33,67], [31,69]]"}
+![两种 ALOHA 对比, 红框代表这些包都作废 @ahn_2015_slotted.](aloha-demo.png){#fig-aloha-demo}
+
+![$G$ 就是 Poisson 分布里的 $\lambda$ (即单位时间 (一般用 frame time 作单位, 即平均一个包被天线发出去的时间) 平均下来会发出多少个包); $S$ 为平均意义下单位时间**成功发出**的包数量. 可见同步的吞吐量更高!](aloha-performance.png){#fig-aloha-performance}
+
+![**RTS/CTS** 简单示意 @Nguyen2013](rts-cts.png){#fig-rts-cts}
+
+![RTS/CTS 如何与 NAV 协同工作 @s17010032](rts-cts-nav.png){#fig-rts-cts-nav}
+:::
+
 
 ## Network Layer 网络层
 
@@ -154,7 +182,7 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
         - **Collaborative multilateration 协同多边测量**: 一个 node 附近不一定会有 $3$ 个 anchor node, 所有 node 都可以用 Trilateration 开始测量周围的 node 位置, 然后用一些复杂的优化算法来算出所有 node 位置 (更准确).
 
 ::: {layout = "[50,50]"}
-![Triangulation](triangulation.png){#fig-triangulation width=60%}
+![Triangulation](triangulation.png){#fig-triangulation width=55%}
 
 ![Trilateration](trilateration.png){#fig-trilateration}
 :::
@@ -297,8 +325,9 @@ $$
 ![移动到原点的 $G(p)$ 的 p.m.f. 随 $p$ 的变化 @a2020_geometric.](geo-dis.png){#fig-geo-dis}
 :::
 
+- @thm-geo 肯定不显然, 需要离散化然, 取极限再让时间 $t \to \infty$ 来证明 (就像 Poisson 分布的推到一样), omitted here.
 
-- 并且这是一个全局稳定解, 即最终 system 中的分布与队中的初始人数无关!! (可理解为 $\begin{bmatrix} \pi_0 \\ \pi_1 \\ \pi_2 \\ \vdots \end{bmatrix}$ 为无穷维相空间中的吸引子).
+- 并且这是一个全局稳定解, 即最终 system 中的分布与队中的初始人数无关!! (可理解为 $\begin{bmatrix} \pi_0 \\ \pi_1 \\ \pi_2 \\ \vdots \end{bmatrix}$ 为无穷维相空间中的稳定吸引子).
 
 <!-- ----------------------------------------- -->
 ::: {.callout-tip icon=false}

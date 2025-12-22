@@ -375,8 +375,8 @@ window.Quarto = {
   </ul></li>
   <li><a href="#data-link-layer-数据链路层" id="toc-data-link-layer-数据链路层" class="nav-link" data-scroll-target="#data-link-layer-数据链路层"><span class="header-section-number">2</span> Data Link Layer 数据链路层</a>
   <ul class="collapse">
-  <li><a href="#llc-logical-link-control-逻辑链路控制" id="toc-llc-logical-link-control-逻辑链路控制" class="nav-link" data-scroll-target="#llc-logical-link-control-逻辑链路控制"><span class="header-section-number">2.1</span> LLC (Logical Link Control) 逻辑链路控制</a></li>
-  <li><a href="#mac-medium-access-control-介质访问控制" id="toc-mac-medium-access-control-介质访问控制" class="nav-link" data-scroll-target="#mac-medium-access-control-介质访问控制"><span class="header-section-number">2.2</span> MAC (Medium Access Control) 介质访问控制</a></li>
+  <li><a href="#llc-logical-link-control-逻辑链路控制子层" id="toc-llc-logical-link-control-逻辑链路控制子层" class="nav-link" data-scroll-target="#llc-logical-link-control-逻辑链路控制子层"><span class="header-section-number">2.1</span> LLC (Logical Link Control) 逻辑链路控制子层</a></li>
+  <li><a href="#mac-medium-access-control-介质访问控制子层" id="toc-mac-medium-access-control-介质访问控制子层" class="nav-link" data-scroll-target="#mac-medium-access-control-介质访问控制子层"><span class="header-section-number">2.2</span> MAC (Medium Access Control) 介质访问控制子层</a></li>
   </ul></li>
   <li><a href="#network-layer-网络层" id="toc-network-layer-网络层" class="nav-link" data-scroll-target="#network-layer-网络层"><span class="header-section-number">3</span> Network Layer 网络层</a></li>
   <li><a href="#localization-定位" id="toc-localization-定位" class="nav-link" data-scroll-target="#localization-定位"><span class="header-section-number">4</span> Localization 定位</a>
@@ -524,7 +524,7 @@ Figure&nbsp;2: 注意区分数字调制和模拟调制 <span class="citation" da
 <ul>
 <li>PN chip 的符号率与原始信息的符号率的大小不一定谁大, 若 PN chip 变化很慢, 称为 <strong>Slow FHSS</strong> (<a href="#fig-fhss-slow" class="quarto-xref">Figure&nbsp;3</a>), 反之为 <strong>Fast FHSS</strong> (<a href="#fig-fhss-fast" class="quarto-xref">Figure&nbsp;4</a>).</li>
 <li><strong>Chip duration</strong>: <a href="#fig-fhss-slow" class="quarto-xref">Figure&nbsp;3</a> 中的 <span class="math inline">\(T_c\)</span>.</li>
-<li><strong>Fast FHSS 的抗干扰能力更强!</strong>, 因为一般 jamming 都是窄带 (省能量), 只要击中一个调制 symbol 的中心频率, 那么这个 symbol 就会被破坏掉. 而 Fast FHSS 在一个调制 symbol 内会跳变多个频率, 因此被击中的概率更低.</li>
+<li><strong>Fast FHSS 的抗干扰能力更强!</strong> 因为一般 jamming 都是窄带 (攻击起来省能量哈哈), 只要击中一个调制 symbol 的中心频率, 那么这个 symbol 就会被破坏掉. 而 Fast FHSS 在一个调制 symbol 内会跳变多个频率, 因此被击中的概率更低.</li>
 </ul></li>
 <li>FHSS 之后可以 FSK 也可以 ASK 调制 (<a href="#fig-modulation" class="quarto-xref">Figure&nbsp;2</a>)!</li>
 <li>以 <a href="#fig-fhss-slow" class="quarto-xref">Figure&nbsp;3</a> 为例, 若 FHSS 与 FSK 结合, 则设计两个重要参数 <span class="math inline">\(M, k\)</span>:
@@ -574,10 +574,10 @@ Figure&nbsp;4: Fast FHSS
 </ul>
 </section>
 </section>
-<section id="data-link-layer-数据链路层" class="level2" data-number="2">
+<section id="data-link-layer-数据链路层" class="level2 page-columns page-full" data-number="2">
 <h2 data-number="2" class="anchored" data-anchor-id="data-link-layer-数据链路层"><span class="header-section-number">2</span> Data Link Layer 数据链路层</h2>
-<section id="llc-logical-link-control-逻辑链路控制" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="llc-logical-link-control-逻辑链路控制"><span class="header-section-number">2.1</span> LLC (Logical Link Control) 逻辑链路控制</h3>
+<section id="llc-logical-link-control-逻辑链路控制子层" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="llc-logical-link-control-逻辑链路控制子层"><span class="header-section-number">2.1</span> LLC (Logical Link Control) 逻辑链路控制子层</h3>
 <blockquote class="blockquote">
 <p>LLC 提供统一接口给网络层.</p>
 </blockquote>
@@ -586,14 +586,14 @@ Figure&nbsp;4: Fast FHSS
 <ul>
 <li><strong>Byte Count 字节计数</strong>: 在帧头部存储帧的字节数.
 <ul>
-<li>问题: 若字节数出错, 则会 **out of sync.</li>
+<li>问题: 若字节数出错, 则会 <strong>out of sync</strong>.</li>
 </ul></li>
 <li><strong>Flag Bytes + Byte Stuffing 标志字节 + 转义符</strong>: 为了解决 frame 之间的同步 (分割) 问题, 在每个 frame 的头尾添加特殊的 flag byte (如 0b01111110). 若这个 flag byte 出现在 frame 内部, 则在它前面添加一个转义符 (ESC, escape byte). 若 ESC 本身出现在 frame 内部, 则也在它前面添加一个 ESC.</li>
 </ul></li>
 </ul>
 </section>
-<section id="mac-medium-access-control-介质访问控制" class="level3" data-number="2.2">
-<h3 data-number="2.2" class="anchored" data-anchor-id="mac-medium-access-control-介质访问控制"><span class="header-section-number">2.2</span> MAC (Medium Access Control) 介质访问控制</h3>
+<section id="mac-medium-access-control-介质访问控制子层" class="level3 page-columns page-full" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="mac-medium-access-control-介质访问控制子层"><span class="header-section-number">2.2</span> MAC (Medium Access Control) 介质访问控制子层</h3>
 <blockquote class="blockquote">
 <p>MAC 子层非常接近物理层, 控制物理层什么时候发、发多久.</p>
 </blockquote>
@@ -606,25 +606,113 @@ Figure&nbsp;4: Fast FHSS
 <ul>
 <li><strong>Contention-free 非竞争型</strong>
 <ul>
-<li><strong>Static channel allocation 静态信道分配</strong>: <strong>FDMA</strong> (每个人固定分配一个频段), <strong>TDMA</strong> (每个人固定分配一个时间片), <strong>CDMA</strong> (每个人固定分配一个信号空间的方向).</li>
-<li><strong>Dynamic channel allocation 动态信道分配</strong>: <strong>Polling 轮询</strong>, <strong>Token Passing 令牌传递</strong>, <strong>Reservation 预约</strong>.</li>
+<li><strong>Static channel allocation 静态信道分配</strong>:
+<ul>
+<li><strong>FDMA</strong> (每个人固定分配一个频段).</li>
+<li><strong>TDMA</strong> (每个人固定分配一个时间片).</li>
+<li><strong>CDMA</strong> (每个人固定分配一个信号空间的方向).</li>
+</ul></li>
+<li><strong>Dynamic channel allocation 动态信道分配</strong>:
+<ul>
+<li><strong>Polling 轮询</strong>.</li>
+<li><strong>Token Passing 令牌传递</strong>.</li>
+<li><strong>Reservation 预约</strong>.</li>
+</ul></li>
 </ul></li>
 <li><strong>Contention-based 竞争型</strong>
 <ul>
-<li><strong>ALOHA</strong>: 想发就发, 撞了重来.</li>
-<li><strong>CSMA (Carrier Sense Multiple Access) 载波监听多路访问</strong>: 先听一听, 没人说话再发.</li>
+<li><strong>ALOHA</strong> (见 <a href="#fig-aloha-demo" class="quarto-xref">Figure&nbsp;6</a> 和 <a href="#fig-aloha-performance" class="quarto-xref">Figure&nbsp;7</a>)
+<ul>
+<li><strong>Pure ALOHA</strong>: 随时 (async) 想发就发, 撞了重来.</li>
+<li><strong>Slotted ALOHA</strong>: 时间分成一个个时隙 (sync), 只能在时隙开始时发, 撞了重来.</li>
+</ul></li>
+<li><strong>CSMA (Carrier Sense Multiple Access) 载波监听多路访问</strong>: 先听一听, 没人说话再发.
+<ul>
+<li><strong>CSMA/CD (Collision Detection, 一般用于有线网络)</strong>: 有线网信号衰减慢, 有人说话大家听得很清楚. 所以先听, 没人再发; 发的同时继续听, 撞了立即停, 并且发 jamming signal 通知其它节点现在发会撞; 等一个随机时间 (会这个随机时间的范围会随着碰撞次数的增加指数增加, 但是不会一直增加) 后重发.</li>
+<li><strong>CSMA/CA (Collision Avoidance, 一般用于无线网络)</strong>: 无线网中别人发的信号衰减很快, 远的话几乎区分不了信号和噪声. 也是先听, <strong>感觉</strong>没人后不急着发, 等一个随机时间再发 (backoff 退避), 发的过程中就听不了了 (因为自己的声音太大). 如果在规定时间内收到 ACK 则成功, 否则推断发生了冲突, 重发.
+<ul>
+<li>现实情况是上面的方案处理 <strong>Hidden node problem 隐藏站问题</strong> (<a href="#fig-hidden-node-prob" class="quarto-xref">Figure&nbsp;5</a>) 的效率很低. 我们在 CSMA/CA 中加入一个可选协议:</li>
+<li><strong>RTS/CTS + NAV (Network allocation vector)</strong>: 在正式发送数据前, 先发 Request to Send 请求发送, 对方收到后<strong>广播</strong>一个 Clear to Send 确认可以发送的信号, 这两个信号中都带有从现在开始到这次通信完成所需的时间长度, 收到 RTS 或 CTS 的节点会将这个时间段内的信道标记为忙 (更新 NAV), 避免在这段时间内发送数据造成冲突 (<a href="#fig-rts-cts-nav" class="quarto-xref">Figure&nbsp;9</a>). 这样做并不会解决隐蔽站问题, 但能大大降低冲突概率.</li>
+</ul></li>
+</ul></li>
 <li><strong>MACA (Multiple Access with Collision Avoidance) 多路访问与碰撞避免</strong>: 先举手再说话.</li>
 <li><strong>MACAW (MACA with ACK) 带确认的多路访问与碰撞避免</strong>: 先举手再说话, 说完还要等确认 (MACA 的改进版).</li>
 </ul></li>
 </ul></li>
 </ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-hidden-node-prob" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hidden-node-prob-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="hidden-node-prob.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hidden-node-prob-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: <strong>Hidden node problem 隐蔽站问题</strong>: Node <span class="math inline">\(A,B,C\)</span> 的信号覆盖范围如图所示, <span class="math inline">\(A\)</span> 和 <span class="math inline">\(C\)</span> 都想跟 <span class="math inline">\(B\)</span> 交流, 它们各自感觉信道空闲的时候都先退避再发, 但是有一定概率同时对吧? 如果发出来的信息同时到 <span class="math inline">\(B\)</span> 就产生干扰. 虽然 backoff 的策略多重发几次也许就不同时了, 但是这样效率很低.
+</figcaption>
+</figure>
+</div>
+</div></div><div class="quarto-layout-panel" data-layout="[[33,67], [31,69]]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 33.0%;justify-content: flex-start;">
+<div id="fig-aloha-demo" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-aloha-demo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="aloha-demo.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-aloha-demo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: 两种 ALOHA 对比, 红框代表这些包都作废 <span class="citation" data-cites="ahn_2015_slotted"><a href="#ref-ahn_2015_slotted" role="doc-biblioref">[3]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 67.0%;justify-content: flex-start;">
+<div id="fig-aloha-performance" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-aloha-performance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="aloha-performance.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-aloha-performance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: <span class="math inline">\(G\)</span> 就是 Poisson 分布里的 <span class="math inline">\(\lambda\)</span> (即单位时间 (一般用 frame time 作单位, 即平均一个包被天线发出去的时间) 平均下来会发出多少个包); <span class="math inline">\(S\)</span> 为平均意义下单位时间<strong>成功发出</strong>的包数量. 可见同步的吞吐量更高!
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 31.0%;justify-content: flex-start;">
+<div id="fig-rts-cts" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rts-cts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="rts-cts.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rts-cts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: <strong>RTS/CTS</strong> 简单示意 <span class="citation" data-cites="Nguyen2013"><a href="#ref-Nguyen2013" role="doc-biblioref">[4]</a></span>
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 69.0%;justify-content: flex-start;">
+<div id="fig-rts-cts-nav" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rts-cts-nav-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="rts-cts-nav.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rts-cts-nav-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: RTS/CTS 如何与 NAV 协同工作 <span class="citation" data-cites="s17010032"><a href="#ref-s17010032" role="doc-biblioref">[5]</a></span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="network-layer-网络层" class="level2" data-number="3">
 <h2 data-number="3" class="anchored" data-anchor-id="network-layer-网络层"><span class="header-section-number">3</span> Network Layer 网络层</h2>
 <ul>
 <li><p><strong>Routing Protocols 路由算法</strong></p></li>
-<li><p><strong>Routing metrics 路由指标</strong> (见 <a href="#fig-path-example-sol" class="quarto-xref">Figure&nbsp;6</a>)</p>
+<li><p><strong>Routing metrics 路由指标</strong> (见 <a href="#fig-path-example-sol" class="quarto-xref">Figure&nbsp;11</a>)</p>
 <ul>
 <li><strong>(Min) Number of hops 跳数</strong>: (<strong>relay node</strong> 指中继节点的个数 (不算 source 和 sink)).</li>
 <li><strong>(Min) Energy consumption (per packet) 能量消耗</strong>: 每条链路上的能量消耗加起来即可.</li>
@@ -654,7 +742,7 @@ EXAMPLE: 找路径题目
 <img src="path-example.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-path-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: 这种找路径的题目就是纯**, 暴力枚举即可
+Figure&nbsp;10: 这种找路径的题目就是纯**, 暴力枚举即可
 </figcaption>
 </figure>
 </div>
@@ -664,7 +752,7 @@ Figure&nbsp;5: 这种找路径的题目就是纯**, 暴力枚举即可
 <img src="path-example-sol.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-path-example-sol-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: Solution to <a href="#fig-path-example" class="quarto-xref">Figure&nbsp;5</a>
+Figure&nbsp;11: Solution to <a href="#fig-path-example" class="quarto-xref">Figure&nbsp;10</a>
 </figcaption>
 </figure>
 </div>
@@ -686,10 +774,10 @@ Figure&nbsp;6: Solution to <a href="#fig-path-example" class="quarto-xref">Figur
 <li><strong>RSS (Received Signal Strength) 接收信号强度</strong>: 在已知 path-loss model 的情况下, 可通过比较接收信号强度与发射信号强度来估计距离. 如果不是 LoS (对着发), 误差会很大.</li>
 <li><strong>ToA (Time of Arrival) 到达时间</strong>: 利用初中物理 路程 = 光速 × 时间, 知道时间即可算出距离.
 <ul>
-<li><strong>One-way ToA</strong>: 需要 TX 和 RX <strong>sync</strong> (<a href="#fig-toa" class="quarto-xref">Figure&nbsp;7</a> (a)), 由于光速太快, 需要极高精度的时钟同步!</li>
-<li><strong>Two-way ToA</strong>: 不需要 sync! 但要知道 RX 端的处理时间 (processing delay <span class="math inline">\(t_3-t_2\)</span> in <a href="#fig-toa" class="quarto-xref">Figure&nbsp;7</a> (b)).</li>
+<li><strong>One-way ToA</strong>: 需要 TX 和 RX <strong>sync</strong> (<a href="#fig-toa" class="quarto-xref">Figure&nbsp;12</a> (a)), 由于光速太快, 需要极高精度的时钟同步!</li>
+<li><strong>Two-way ToA</strong>: 不需要 sync! 但要知道 RX 端的处理时间 (processing delay <span class="math inline">\(t_3-t_2\)</span> in <a href="#fig-toa" class="quarto-xref">Figure&nbsp;12</a> (b)).</li>
 </ul></li>
-<li><strong>TDoA (Time Difference of Arrival) 到达时间差</strong>: 不需要 sync! 如 <a href="#fig-toa" class="quarto-xref">Figure&nbsp;7</a> (c), <span class="math inline">\(t_1\)</span> 发 RF, <span class="math inline">\(t_3\)</span> 发 sound, 则距离 <span class="math display">\[d = (v_1-v_2) \cdot ((t_4-t_2) - (t_3-t_1))\]</span></li>
+<li><strong>TDoA (Time Difference of Arrival) 到达时间差</strong>: 不需要 sync! 如 <a href="#fig-toa" class="quarto-xref">Figure&nbsp;12</a> (c), <span class="math inline">\(t_1\)</span> 发 RF, <span class="math inline">\(t_3\)</span> 发 sound, 则距离 <span class="math display">\[d = (v_1-v_2) \cdot ((t_4-t_2) - (t_3-t_1))\]</span></li>
 </ul>
 <div id="fig-toa" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -697,7 +785,7 @@ Figure&nbsp;6: Solution to <a href="#fig-path-example" class="quarto-xref">Figur
 <img src="toa.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-toa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation" data-cites="Gkiokas2015"><a href="#ref-Gkiokas2015" role="doc-biblioref">[3]</a></span>
+Figure&nbsp;12: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation" data-cites="Gkiokas2015"><a href="#ref-Gkiokas2015" role="doc-biblioref">[6]</a></span>
 </figcaption>
 </figure>
 </div>
@@ -706,8 +794,8 @@ Figure&nbsp;7: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation"
 </ul></li>
 <li><strong>Range-based protocols</strong>
 <ul>
-<li><strong>Triangulation 三角测量</strong>: 见 <a href="#fig-triangulation" class="quarto-xref">Figure&nbsp;8</a>, 两个 anchor node <span class="math inline">\(A, B\)</span> <strong>相对位置已知</strong>, 再测量两个角度即可.</li>
-<li><strong>Trilateration 三边测量</strong>: 见 <a href="#fig-trilateration" class="quarto-xref">Figure&nbsp;9</a>, 三个球相交于一点. GPS 的工作原理 (只不过 GPS 需要 <span class="math inline">\(4\)</span> 个卫星来同时解出时间偏移).
+<li><strong>Triangulation 三角测量</strong>: 见 <a href="#fig-triangulation" class="quarto-xref">Figure&nbsp;13</a>, 两个 anchor node <span class="math inline">\(A, B\)</span> <strong>相对位置已知</strong>, 再测量两个角度即可.</li>
+<li><strong>Trilateration 三边测量</strong>: 见 <a href="#fig-trilateration" class="quarto-xref">Figure&nbsp;14</a>, 三个球相交于一点. GPS 的工作原理 (只不过 GPS 需要 <span class="math inline">\(4\)</span> 个卫星来同时解出时间偏移).
 <ul>
 <li><strong>Iterative multilateration 迭代多边测量</strong>: 在一个 WSN 系统中, 先用人工或 GPS 确定少量几个 anchor node 相对位置, 然后用 Trilateration 算出其他 node 位置, 这些 node 就变成新的 anchor node … (这种方法会有 <strong>Error propagation</strong> 问题, 但仍在使用).</li>
 <li><strong>Collaborative multilateration 协同多边测量</strong>: 一个 node 附近不一定会有 <span class="math inline">\(3\)</span> 个 anchor node, 所有 node 都可以用 Trilateration 开始测量周围的 node 位置, 然后用一些复杂的优化算法来算出所有 node 位置 (更准确).</li>
@@ -720,10 +808,10 @@ Figure&nbsp;7: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation"
 <div id="fig-triangulation" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-triangulation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="triangulation.png" class="img-fluid figure-img" style="width:60.0%">
+<img src="triangulation.png" class="img-fluid figure-img" style="width:55.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-triangulation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8: Triangulation
+Figure&nbsp;13: Triangulation
 </figcaption>
 </figure>
 </div>
@@ -735,7 +823,7 @@ Figure&nbsp;8: Triangulation
 <img src="trilateration.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-trilateration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9: Trilateration
+Figure&nbsp;14: Trilateration
 </figcaption>
 </figure>
 </div>
@@ -849,7 +937,7 @@ A/S/C/K/N/D
 <li>Infinite (<span class="math inline">\(\infty\)</span>).</li>
 </ul></li>
 <li><p><span class="math inline">\(N\)</span>: Capacity of calling population (队里的人从哪里来的, 如果是有限的则会影响 arrival rate), 可选同上.</p></li>
-<li><p><span class="math inline">\(D\)</span>: Service discipline 服务纪律, 可选:</p>
+<li><p><span class="math inline">\(D\)</span>: Service discipline 服务方式, 可选:</p>
 <ul>
 <li><strong>FIFO/FCFS</strong>: First In (Come), First Out (Serve).</li>
 <li><strong>LIFO/LCFS</strong>: Last In (Come), First Out (Serve).</li>
@@ -869,7 +957,7 @@ A/S/C/K/N/D
 <img src="queue-ex1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-queue-ex1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10: <span class="math inline">\(M / M / 1 / 7 / \infty / \text{FIFO}\)</span> Queue
+Figure&nbsp;15: <span class="math inline">\(M / M / 1 / 7 / \infty / \text{FIFO}\)</span> Queue
 </figcaption>
 </figure>
 </div>
@@ -881,7 +969,7 @@ Figure&nbsp;10: <span class="math inline">\(M / M / 1 / 7 / \infty / \text{FIFO}
 <img src="queue-ex2.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-queue-ex2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;11: <span class="math inline">\(M / M / 3 / 8 / \infty / \text{FIFO}\)</span> Queue
+Figure&nbsp;16: <span class="math inline">\(M / M / 3 / 8 / \infty / \text{FIFO}\)</span> Queue
 </figcaption>
 </figure>
 </div>
@@ -889,12 +977,12 @@ Figure&nbsp;11: <span class="math inline">\(M / M / 3 / 8 / \infty / \text{FIFO}
 </div>
 </div>
 </section>
-<section id="notation-of-parameters" class="level3" data-number="7.3">
+<section id="notation-of-parameters" class="level3 page-columns page-full" data-number="7.3">
 <h3 data-number="7.3" class="anchored" data-anchor-id="notation-of-parameters"><span class="header-section-number">7.3</span> Notation of Parameters</h3>
 <ul>
 <li>cust.: customer.</li>
-<li><span class="math inline">\(\lambda\)</span>: <strong>Mean arrival rate</strong>, <span class="math inline">\(\mathbb{E} (\# \text{cust. arrived})\)</span> per unit time.</li>
-<li><span class="math inline">\(\mu\)</span>: <strong>Mean service rate</strong>, <span class="math inline">\(\mathbb{E} (\# \text{cust. served})\)</span> per unit time.</li>
+<li><span class="math inline">\(\lambda\)</span>: <strong>Mean arrival rate</strong>, 平均来看单位时间会到多少人, <span class="math inline">\(\mathbb{E} (\# \text{cust. arrived})\)</span> per unit time.</li>
+<li><span class="math inline">\(\mu\)</span>: <strong>Mean service rate</strong>, 平均来看单位时间能服务多少人, <span class="math inline">\(\mathbb{E} (\# \text{cust. served})\)</span> per unit time.</li>
 <li><span class="math inline">\(\rho := \lambda / (C \mu)\)</span>: <strong>Utilization factor / Traffic intensity</strong>.</li>
 <li><span class="math inline">\(n\)</span>: <span class="math inline">\(\# \text{cust.}\)</span> in the:
 <ul>
@@ -907,16 +995,16 @@ Figure&nbsp;11: <span class="math inline">\(M / M / 3 / 8 / \infty / \text{FIFO}
 </ul></li>
 <li><span class="math inline">\(W\)</span>: <span class="math inline">\(\mathbb{E}(\text{waiting time})\)</span> per cust. in the:
 <ul>
-<li>system: <span class="math inline">\(W_s\)</span> (见 <a href="#eq-es" class="quarto-xref">Equation&nbsp;2</a>).</li>
-<li>queue: <span class="math inline">\(W_q\)</span> (见 <a href="#eq-es" class="quarto-xref">Equation&nbsp;2</a>).</li>
+<li>system: <span class="math inline">\(W_s\)</span>, 平均来看每人在系统里待了多久 (计算结果见 <a href="#eq-es" class="quarto-xref">Equation&nbsp;2</a>).</li>
+<li>queue: <span class="math inline">\(W_q\)</span>, 平均来看每人在队列里待了多久 (计算结果见 <a href="#eq-es" class="quarto-xref">Equation&nbsp;2</a>).</li>
 </ul></li>
 <li><span class="math inline">\(L\)</span>: <span class="math inline">\(\mathbb{E}(\# \text{cust.})\)</span> in the:
 <ul>
-<li>system: <span class="math inline">\(L_s\)</span> (见 <a href="#eq-ls" class="quarto-xref">Equation&nbsp;1</a>).</li>
-<li>queue: <span class="math inline">\(L_q\)</span> (见 <a href="#eq-es" class="quarto-xref">Equation&nbsp;2</a>).</li>
+<li>system<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>: <span class="math inline">\(L_s\)</span>, 平均来看系统中有多少人 (计算结果见 <a href="#eq-ls" class="quarto-xref">Equation&nbsp;1</a>).</li>
+<li>queue: <span class="math inline">\(L_q\)</span>, 平均来看队列中有多少人 (计算结果见 <a href="#eq-es" class="quarto-xref">Equation&nbsp;2</a>).</li>
 </ul></li>
 </ul>
-</section>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;试卷中这个概念被错误地称为 “Queue length”! 应叫 “System length”.</p></div></div></section>
 <section id="m-m-1-infty-infty-textfifo-queue-生灭过程" class="level3 page-columns page-full" data-number="7.4">
 <h3 data-number="7.4" class="anchored" data-anchor-id="m-m-1-infty-infty-textfifo-queue-生灭过程"><span class="header-section-number">7.4</span> <span class="math inline">\(M / M / 1 / \infty / \infty / \text{FIFO}\)</span> Queue 生灭过程</h3>
 <blockquote class="blockquote">
@@ -939,25 +1027,26 @@ Geometric Distribution
 </div>
 <div class="callout-body-container callout-body">
 <div id="thm-geo" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 1</strong></span> 平稳后 system (not queue!) 中的人数 <span class="math inline">\(\pi\)</span> 满足<strong>几何分布</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>: <span class="math display">\[\pi+1 \sim G(1-\rho).\]</span></p>
+<p><span class="theorem-title"><strong>Theorem 1</strong></span> 平稳后 system (not queue!) 中的人数 <span class="math inline">\(\pi\)</span> 满足<strong>几何分布</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>: <span class="math display">\[\pi+1 \sim G(1-\rho).\]</span></p>
 </div>
 </div>
 </div>
 <!-- ----------------------------------------- -->
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;加一的原因是: 几何分布从 <span class="math inline">\(1\)</span> 开始, 而 <span class="math inline">\(\pi\)</span> 的取值从 <span class="math inline">\(0\)</span> 开始.</p></div><div class="">
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;加一的原因是: 几何分布从 <span class="math inline">\(1\)</span> 开始, 而 <span class="math inline">\(\pi\)</span> 的取值从 <span class="math inline">\(0\)</span> 开始.</p></div><div class="">
 <div id="fig-geo-dis" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-geo-dis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="geo-dis.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-geo-dis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;12: 移动到原点的 <span class="math inline">\(G(p)\)</span> 的 p.m.f. 随 <span class="math inline">\(p\)</span> 的变化 <span class="citation" data-cites="a2020_geometric"><a href="#ref-a2020_geometric" role="doc-biblioref">[4]</a></span>.
+Figure&nbsp;17: 移动到原点的 <span class="math inline">\(G(p)\)</span> 的 p.m.f. 随 <span class="math inline">\(p\)</span> 的变化 <span class="citation" data-cites="a2020_geometric"><a href="#ref-a2020_geometric" role="doc-biblioref">[7]</a></span>.
 </figcaption>
 </figure>
 </div>
 </div></div>
 <ul>
-<li>并且这是一个全局稳定解, 即最终 system 中的分布与队中的初始人数无关!! (可理解为 <span class="math inline">\(\begin{bmatrix} \pi_0 \\ \pi_1 \\ \pi_2 \\ \vdots \end{bmatrix}\)</span> 为无穷维相空间中的吸引子).</li>
+<li><p><a href="#thm-geo" class="quarto-xref">Theorem&nbsp;1</a> 肯定不显然, 需要离散化然, 取极限再让时间 <span class="math inline">\(t \to \infty\)</span> 来证明 (就像 Poisson 分布的推到一样), omitted here.</p></li>
+<li><p>并且这是一个全局稳定解, 即最终 system 中的分布与队中的初始人数无关!! (可理解为 <span class="math inline">\(\begin{bmatrix} \pi_0 \\ \pi_1 \\ \pi_2 \\ \vdots \end{bmatrix}\)</span> 为无穷维相空间中的稳定吸引子).</p></li>
 </ul>
 <!-- ----------------------------------------- -->
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
@@ -1002,14 +1091,14 @@ Figure&nbsp;12: 移动到原点的 <span class="math inline">\(G(p)\)</span> 的
 </div>
 <div class="callout-body-container callout-body">
 <div id="thm-es" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 2</strong></span> 由 <a href="#fig-es" class="quarto-xref">Figure&nbsp;13</a>:</p>
+<p><span class="theorem-title"><strong>Theorem 2</strong></span> 由 <a href="#fig-es" class="quarto-xref">Figure&nbsp;18</a>:</p>
 <div id="fig-es" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-es-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="es.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-es-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;13: 生灭过程的 ES.
+Figure&nbsp;18: 生灭过程的 ES.
 </figcaption>
 </figure>
 </div>
@@ -1040,11 +1129,20 @@ L_q = \lambda W_q &amp;\implies \boxed{L_q = \frac{\rho^2}{1-\rho}}.
 <div id="ref-wikipediacontributors_2025_signal" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[2] </div><div class="csl-right-inline">W. Contributors, <span>“Signal modulation.”</span> Wikipedia; Wikimedia Foundation, Mar. 2025. Available: <a href="https://en.wikipedia.org/wiki/Signal_modulation">https://en.wikipedia.org/wiki/Signal_modulation</a>. [Accessed: Dec. 19, 2025]</div>
 </div>
+<div id="ref-ahn_2015_slotted" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">H. Ahn, <span>“Slotted ALOHA protocol.”</span> Hongseo Ahn’s Blog, Apr. 2015. Available: <a href="https://honser.github.io/project/2015/04/26/Slotted-ALOHA-Protocol/">https://honser.github.io/project/2015/04/26/Slotted-ALOHA-Protocol/</a>. [Accessed: Dec. 22, 2025]</div>
+</div>
+<div id="ref-Nguyen2013" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">C. Nguyen, A. Mokraoui, P. Duhamel, and L. Nguyen, <span>“Improved time and frequency synchronization algorithm for 802.11aWireless standard based on the SIGNAL field,”</span> <em>REV Journal on Electronics and Communications</em>, vol. 3, Jun. 2013, doi: <a href="https://doi.org/10.21553/rev-jec.53">10.21553/rev-jec.53</a></div>
+</div>
+<div id="ref-s17010032" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">J. Cho, E. Shitiri, and H.-S. Cho, <span>“Network allocation vector (NAV) optimization for underwater handshaking-based protocols,”</span> <em>Sensors</em>, vol. 17, no. 1, 2017, doi: <a href="https://doi.org/10.3390/s17010032">10.3390/s17010032</a>. Available: <a href="https://www.mdpi.com/1424-8220/17/1/32">https://www.mdpi.com/1424-8220/17/1/32</a></div>
+</div>
 <div id="ref-Gkiokas2015" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[3] </div><div class="csl-right-inline">C. Gkiokas, <span>“Localization of a mobile node in a wireless sensor network: An evaluation of RSSI as a distance metric,”</span> PhD thesis, 2015.</div>
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">C. Gkiokas, <span>“Localization of a mobile node in a wireless sensor network: An evaluation of RSSI as a distance metric,”</span> PhD thesis, 2015.</div>
 </div>
 <div id="ref-a2020_geometric" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[4] </div><div class="csl-right-inline"><span>“Geometric distribution.”</span> Wikipedia, Mar. 2020. Available: <a href="https://en.wikipedia.org/wiki/Geometric_distribution">https://en.wikipedia.org/wiki/Geometric_distribution</a>. [Accessed: Dec. 22, 2025]</div>
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline"><span>“Geometric distribution.”</span> Wikipedia, Mar. 2020. Available: <a href="https://en.wikipedia.org/wiki/Geometric_distribution">https://en.wikipedia.org/wiki/Geometric_distribution</a>. [Accessed: Dec. 22, 2025]</div>
 </div>
 </div></section></div></main> <!-- /main -->
 <!-- Cloudflare Web Analytics --><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;d0b3c27b7e5c43938065722a5136416f&quot;}"></script><!-- End Cloudflare Web Analytics -->
