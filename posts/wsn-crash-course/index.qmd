@@ -141,6 +141,7 @@ $$
         - **ALOHA** (见 @fig-aloha-demo 和 @fig-aloha-performance)
             - **Pure ALOHA**: 随时 (async) 想发就发, 撞了重来.
             - **Slotted ALOHA**: 时间分成一个个时隙 (sync), 只能在时隙开始时发, 撞了重来.
+                - *Question*:「$10\%$ of the slots are idle」, $G$ 是多少? (见例题 @fig-aloha-prob2g)!
         - **CSMA (Carrier Sense Multiple Access) 载波监听多路访问**: 先听一听, 没人说话再发.
             - **CSMA/CD (Collision Detection, 一般用于有线网络)**: 有线网信号衰减慢, 有人说话大家听得很清楚. 所以先听, 没人再发; 发的同时继续听, 撞了立即停, 并且发 jamming signal 通知其它节点现在发会撞; 等一个随机时间 (会这个随机时间的范围会随着碰撞次数的增加指数增加, 但是不会一直增加) 后重发.
             - **CSMA/CA (Collision Avoidance, 一般用于无线网络)**: 无线网中别人发的信号衰减很快, 远的话几乎区分不了信号和噪声. 也是先听, **感觉**没人后不急着发, 等一个随机时间再发 (backoff 退避), 发的过程中就听不了了 (因为自己的声音太大). 如果在规定时间内收到 ACK 则成功, 否则推断发生了冲突, 重发.
@@ -163,6 +164,30 @@ $$
 
 ![RTS/CTS 如何与 NAV 协同工作 @s17010032](rts-cts-nav.png){#fig-rts-cts-nav}
 :::
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## EXAMPLE: Slotted ALOHA 由空闲概率算 $G$
+
+![Question](aloha-prob2g.png){#fig-aloha-prob2g}
+
+::: {.callout-warning icon=false collapse=false}
+## Solution
+结合 Poisson 分布:
+$$
+\boxed{\mathbb{P}(k) = \frac{G^k e^{-G}}{k!}}
+$${#eq-pois} 
+
+idle 的概率即 $k=0$ 的概率: 
+$$
+\mathbb{P}(0) = e^{-G} = 10\%
+$$
+
+由此将 $G$ 算出来即可. 
+:::
+:::
+<!-- ----------------------------------------- -->
+
 
 
 ## Network Layer 网络层
