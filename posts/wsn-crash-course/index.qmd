@@ -171,14 +171,14 @@ $$
                 - *Question*:「$10\%$ of the slots are idle」, $G$ 是多少? (见例题 @fig-aloha-prob2g)!
         - **CSMA (Carrier Sense Multiple Access) 载波监听多路访问**: 先听一听, 没人说话再发.
             - **CSMA/CD (Collision Detection, 一般用于有线网络)**: 有线网信号衰减慢, 有人说话大家听得很清楚. 所以先听, 没人再发; 发的同时继续听, 撞了立即停, 并且发 jamming signal 通知其它节点现在发会撞; 等一个随机时间 (会这个随机时间的范围会随着碰撞次数的增加指数增加, 但是不会一直增加) 后重发.
-            - **CSMA/CA (Collision Avoidance, 一般用于无线网络)**: 无线网中别人发的信号衰减很快, 远的话几乎区分不了信号和噪声. 也是先听, **感觉**没人后不急着发, 等一个随机时间再发 (backoff 退避), 发的过程中就听不了了 (因为自己的声音太大). 如果在规定时间内收到 ACK 则成功, 否则推断发生了冲突, 重发.
-                - 现实情况是上面的方案处理 **Hidden node problem 隐藏站问题** (@fig-hidden-node-prob) 的效率很低. 我们在 CSMA/CA 中加入一个可选协议:
+            - **CSMA/CA (Collision Avoidance, 一般用于无线网络 WLAN)**: 无线网中别人发的信号衰减很快, 远的话几乎区分不了信号和噪声. 也是先听, **感觉**没人后不急着发, 等一个随机时间再发 (backoff 退避), 发的过程中就听不了了 (因为自己的声音太大). 如果在规定时间内收到 ACK 则成功, 否则推断发生了冲突, 重发.
+                - 现实情况是上面的方案处理 **Hidden node problem 隐藏站问题** 和 **Exposed node problem 暴露站问题** (@fig-hidden-node-prob) 的效率很低. 我们在 CSMA/CA 中加入一个可选协议:
                 - **RTS/CTS + NAV (Network allocation vector)**: 在正式发送数据前, 先发 Request to Send 请求发送, 对方收到后**广播**一个 Clear to Send 确认可以发送的信号, 这两个信号中都带有从现在开始到这次通信完成所需的时间长度, 收到 RTS 或 CTS 的节点会将这个时间段内的信道标记为忙 (更新 NAV), 避免在这段时间内发送数据造成冲突 (@fig-rts-cts-nav). 这样做并不会解决隐蔽站问题, 但能大大降低冲突概率.
         - **MACA (Multiple Access with Collision Avoidance) 多路访问与碰撞避免**: 先举手再说话.
         - **MACAW (MACA with ACK) 带确认的多路访问与碰撞避免**: 先举手再说话, 说完还要等确认 (MACA 的改进版).
 
 ::: {.column-margin}
-![**Hidden node problem 隐蔽站问题**: Node $A,B,C$ 的信号覆盖范围如图所示, $A$ 和 $C$ 都想跟 $B$ 交流, 它们各自感觉信道空闲的时候都先退避再发, 但是有一定概率同时对吧? 如果发出来的信息同时到 $B$ 就产生干扰. 虽然 backoff 的策略多重发几次也许就不同时了, 但是这样效率很低.](hidden-node-prob.png){#fig-hidden-node-prob}
+![(a) **Hidden node problem 隐蔽站问题**: Node $A,B,C$ 的信号覆盖范围如图所示, $A$ 和 $C$ 都想跟 $B$ 交流, 它们各自感觉信道空闲的时候都先退避再发, 但是有一定概率同时对吧? 如果发出来的信息同时到 $B$ 就产生干扰. 虽然 backoff 的策略多重发几次也许就不同时了, 但是这样效率很低. (b) **Exposed node problem 暴露站问题**: $B$ 想和 $A$ 交流, $C$ 想和 $D$ 交流, 但是 $C$ 在做监听信道的时候发现 $B$ 正在发送, 所以给 $D$ 的信息一直发不出去 (实际上可以发, 没有任何问题) @Wu2000.](hidden-node-prob.png){#fig-hidden-node-prob}
 :::
 
 

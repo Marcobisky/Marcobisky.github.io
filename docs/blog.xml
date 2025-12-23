@@ -326,9 +326,9 @@ Figure&nbsp;7: Fast FHSS
 <li><strong>CSMA (Carrier Sense Multiple Access) 载波监听多路访问</strong>: 先听一听, 没人说话再发.
 <ul>
 <li><strong>CSMA/CD (Collision Detection, 一般用于有线网络)</strong>: 有线网信号衰减慢, 有人说话大家听得很清楚. 所以先听, 没人再发; 发的同时继续听, 撞了立即停, 并且发 jamming signal 通知其它节点现在发会撞; 等一个随机时间 (会这个随机时间的范围会随着碰撞次数的增加指数增加, 但是不会一直增加) 后重发.</li>
-<li><strong>CSMA/CA (Collision Avoidance, 一般用于无线网络)</strong>: 无线网中别人发的信号衰减很快, 远的话几乎区分不了信号和噪声. 也是先听, <strong>感觉</strong>没人后不急着发, 等一个随机时间再发 (backoff 退避), 发的过程中就听不了了 (因为自己的声音太大). 如果在规定时间内收到 ACK 则成功, 否则推断发生了冲突, 重发.
+<li><strong>CSMA/CA (Collision Avoidance, 一般用于无线网络 WLAN)</strong>: 无线网中别人发的信号衰减很快, 远的话几乎区分不了信号和噪声. 也是先听, <strong>感觉</strong>没人后不急着发, 等一个随机时间再发 (backoff 退避), 发的过程中就听不了了 (因为自己的声音太大). 如果在规定时间内收到 ACK 则成功, 否则推断发生了冲突, 重发.
 <ul>
-<li>现实情况是上面的方案处理 <strong>Hidden node problem 隐藏站问题</strong> (Figure&nbsp;8) 的效率很低. 我们在 CSMA/CA 中加入一个可选协议:</li>
+<li>现实情况是上面的方案处理 <strong>Hidden node problem 隐藏站问题</strong> 和 <strong>Exposed node problem 暴露站问题</strong> (Figure&nbsp;8) 的效率很低. 我们在 CSMA/CA 中加入一个可选协议:</li>
 <li><strong>RTS/CTS + NAV (Network allocation vector)</strong>: 在正式发送数据前, 先发 Request to Send 请求发送, 对方收到后<strong>广播</strong>一个 Clear to Send 确认可以发送的信号, 这两个信号中都带有从现在开始到这次通信完成所需的时间长度, 收到 RTS 或 CTS 的节点会将这个时间段内的信道标记为忙 (更新 NAV), 避免在这段时间内发送数据造成冲突 (Figure&nbsp;12). 这样做并不会解决隐蔽站问题, 但能大大降低冲突概率.</li>
 </ul></li>
 </ul></li>
@@ -345,7 +345,7 @@ Figure&nbsp;7: Fast FHSS
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/hidden-node-prob.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hidden-node-prob-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8: <strong>Hidden node problem 隐蔽站问题</strong>: Node <img src="https://latex.codecogs.com/png.latex?A,B,C"> 的信号覆盖范围如图所示, <img src="https://latex.codecogs.com/png.latex?A"> 和 <img src="https://latex.codecogs.com/png.latex?C"> 都想跟 <img src="https://latex.codecogs.com/png.latex?B"> 交流, 它们各自感觉信道空闲的时候都先退避再发, 但是有一定概率同时对吧? 如果发出来的信息同时到 <img src="https://latex.codecogs.com/png.latex?B"> 就产生干扰. 虽然 backoff 的策略多重发几次也许就不同时了, 但是这样效率很低.
+Figure&nbsp;8: (a) <strong>Hidden node problem 隐蔽站问题</strong>: Node <img src="https://latex.codecogs.com/png.latex?A,B,C"> 的信号覆盖范围如图所示, <img src="https://latex.codecogs.com/png.latex?A"> 和 <img src="https://latex.codecogs.com/png.latex?C"> 都想跟 <img src="https://latex.codecogs.com/png.latex?B"> 交流, 它们各自感觉信道空闲的时候都先退避再发, 但是有一定概率同时对吧? 如果发出来的信息同时到 <img src="https://latex.codecogs.com/png.latex?B"> 就产生干扰. 虽然 backoff 的策略多重发几次也许就不同时了, 但是这样效率很低. (b) <strong>Exposed node problem 暴露站问题</strong>: <img src="https://latex.codecogs.com/png.latex?B"> 想和 <img src="https://latex.codecogs.com/png.latex?A"> 交流, <img src="https://latex.codecogs.com/png.latex?C"> 想和 <img src="https://latex.codecogs.com/png.latex?D"> 交流, 但是 <img src="https://latex.codecogs.com/png.latex?C"> 在做监听信道的时候发现 <img src="https://latex.codecogs.com/png.latex?B"> 正在发送, 所以给 <img src="https://latex.codecogs.com/png.latex?D"> 的信息一直发不出去 (实际上可以发, 没有任何问题) <span class="citation" data-cites="Wu2000">[3]</span>.
 </figcaption>
 </figure>
 </div>
@@ -358,7 +358,7 @@ Figure&nbsp;8: <strong>Hidden node problem 隐蔽站问题</strong>: Node <img s
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/aloha-demo.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-aloha-demo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;9: 两种 ALOHA 对比, 红框代表这些包都作废 <span class="citation" data-cites="ahn_2015_slotted">[3]</span>.
+Figure&nbsp;9: 两种 ALOHA 对比, 红框代表这些包都作废 <span class="citation" data-cites="ahn_2015_slotted">[4]</span>.
 </figcaption>
 </figure>
 </div>
@@ -384,7 +384,7 @@ Figure&nbsp;10: <img src="https://latex.codecogs.com/png.latex?G"> 就是 Poisso
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/rts-cts.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rts-cts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;11: <strong>RTS/CTS</strong> 简单示意 <span class="citation" data-cites="Nguyen2013">[4]</span>
+Figure&nbsp;11: <strong>RTS/CTS</strong> 简单示意 <span class="citation" data-cites="Nguyen2013">[5]</span>
 </figcaption>
 </figure>
 </div>
@@ -396,7 +396,7 @@ Figure&nbsp;11: <strong>RTS/CTS</strong> 简单示意 <span class="citation" dat
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/rts-cts-nav.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rts-cts-nav-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;12: RTS/CTS 如何与 NAV 协同工作 <span class="citation" data-cites="s17010032">[5]</span>
+Figure&nbsp;12: RTS/CTS 如何与 NAV 协同工作 <span class="citation" data-cites="s17010032">[6]</span>
 </figcaption>
 </figure>
 </div>
@@ -567,7 +567,7 @@ Figure&nbsp;16: Solution to Figure&nbsp;15
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/dd.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17: DD 分为 <img src="https://latex.codecogs.com/png.latex?4"> 个步骤 <span class="citation" data-cites="Lu2013">[6]</span>.
+Figure&nbsp;17: DD 分为 <img src="https://latex.codecogs.com/png.latex?4"> 个步骤 <span class="citation" data-cites="Lu2013">[7]</span>.
 </figcaption>
 </figure>
 </div>
@@ -760,7 +760,7 @@ Figure&nbsp;22: SR 协议
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/toa.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-toa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;23: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation" data-cites="Gkiokas2015">[7]</span>
+Figure&nbsp;23: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation" data-cites="Gkiokas2015">[8]</span>
 </figcaption>
 </figure>
 </div>
@@ -1012,7 +1012,7 @@ Geometric Distribution
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/geo-dis.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-geo-dis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;28: 移动到原点的 <img src="https://latex.codecogs.com/png.latex?G(p)"> 的 p.m.f. 随 <img src="https://latex.codecogs.com/png.latex?p"> 的变化 <span class="citation" data-cites="a2020_geometric">[8]</span>.
+Figure&nbsp;28: 移动到原点的 <img src="https://latex.codecogs.com/png.latex?G(p)"> 的 p.m.f. 随 <img src="https://latex.codecogs.com/png.latex?p"> 的变化 <span class="citation" data-cites="a2020_geometric">[9]</span>.
 </figcaption>
 </figure>
 </div>
@@ -1113,23 +1113,26 @@ Figure&nbsp;29: 生灭过程的 ES.
 <div id="ref-wikipediacontributors_2025_signal" class="csl-entry">
 <div class="csl-left-margin">[2] </div><div class="csl-right-inline">W. Contributors, <span>“Signal modulation.”</span> Wikipedia; Wikimedia Foundation, Mar. 2025. Available: <a href="https://en.wikipedia.org/wiki/Signal_modulation">https://en.wikipedia.org/wiki/Signal_modulation</a>. [Accessed: Dec. 19, 2025]</div>
 </div>
+<div id="ref-Wu2000" class="csl-entry">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">S.-L. Wu, Y.-C. Tseng, and J.-P. Sheu, <span>“Intelligent medium access for mobile ad hoc networks with busy tones and power control,”</span> <em>Selected Areas in Communications, IEEE Journal on</em>, vol. 18, pp. 1647–1657, Oct. 2000, doi: <a href="https://doi.org/10.1109/49.872953">10.1109/49.872953</a></div>
+</div>
 <div id="ref-ahn_2015_slotted" class="csl-entry">
-<div class="csl-left-margin">[3] </div><div class="csl-right-inline">H. Ahn, <span>“Slotted ALOHA protocol.”</span> Hongseo Ahn’s Blog, Apr. 2015. Available: <a href="https://honser.github.io/project/2015/04/26/Slotted-ALOHA-Protocol/">https://honser.github.io/project/2015/04/26/Slotted-ALOHA-Protocol/</a>. [Accessed: Dec. 22, 2025]</div>
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">H. Ahn, <span>“Slotted ALOHA protocol.”</span> Hongseo Ahn’s Blog, Apr. 2015. Available: <a href="https://honser.github.io/project/2015/04/26/Slotted-ALOHA-Protocol/">https://honser.github.io/project/2015/04/26/Slotted-ALOHA-Protocol/</a>. [Accessed: Dec. 22, 2025]</div>
 </div>
 <div id="ref-Nguyen2013" class="csl-entry">
-<div class="csl-left-margin">[4] </div><div class="csl-right-inline">C. Nguyen, A. Mokraoui, P. Duhamel, and L. Nguyen, <span>“Improved time and frequency synchronization algorithm for 802.11aWireless standard based on the SIGNAL field,”</span> <em>REV Journal on Electronics and Communications</em>, vol. 3, Jun. 2013, doi: <a href="https://doi.org/10.21553/rev-jec.53">10.21553/rev-jec.53</a></div>
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">C. Nguyen, A. Mokraoui, P. Duhamel, and L. Nguyen, <span>“Improved time and frequency synchronization algorithm for 802.11aWireless standard based on the SIGNAL field,”</span> <em>REV Journal on Electronics and Communications</em>, vol. 3, Jun. 2013, doi: <a href="https://doi.org/10.21553/rev-jec.53">10.21553/rev-jec.53</a></div>
 </div>
 <div id="ref-s17010032" class="csl-entry">
-<div class="csl-left-margin">[5] </div><div class="csl-right-inline">J. Cho, E. Shitiri, and H.-S. Cho, <span>“Network allocation vector (NAV) optimization for underwater handshaking-based protocols,”</span> <em>Sensors</em>, vol. 17, no. 1, 2017, doi: <a href="https://doi.org/10.3390/s17010032">10.3390/s17010032</a>. Available: <a href="https://www.mdpi.com/1424-8220/17/1/32">https://www.mdpi.com/1424-8220/17/1/32</a></div>
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">J. Cho, E. Shitiri, and H.-S. Cho, <span>“Network allocation vector (NAV) optimization for underwater handshaking-based protocols,”</span> <em>Sensors</em>, vol. 17, no. 1, 2017, doi: <a href="https://doi.org/10.3390/s17010032">10.3390/s17010032</a>. Available: <a href="https://www.mdpi.com/1424-8220/17/1/32">https://www.mdpi.com/1424-8220/17/1/32</a></div>
 </div>
 <div id="ref-Lu2013" class="csl-entry">
-<div class="csl-left-margin">[6] </div><div class="csl-right-inline">H. Lu, <span>“A novel routing algorithm for hierarchical wireless sensor networks,”</span> Jan. 2013, doi: <a href="https://doi.org/10.6084/M9.FIGSHARE.761940">10.6084/M9.FIGSHARE.761940</a></div>
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">H. Lu, <span>“A novel routing algorithm for hierarchical wireless sensor networks,”</span> Jan. 2013, doi: <a href="https://doi.org/10.6084/M9.FIGSHARE.761940">10.6084/M9.FIGSHARE.761940</a></div>
 </div>
 <div id="ref-Gkiokas2015" class="csl-entry">
-<div class="csl-left-margin">[7] </div><div class="csl-right-inline">C. Gkiokas, <span>“Localization of a mobile node in a wireless sensor network: An evaluation of RSSI as a distance metric,”</span> PhD thesis, 2015.</div>
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">C. Gkiokas, <span>“Localization of a mobile node in a wireless sensor network: An evaluation of RSSI as a distance metric,”</span> PhD thesis, 2015.</div>
 </div>
 <div id="ref-a2020_geometric" class="csl-entry">
-<div class="csl-left-margin">[8] </div><div class="csl-right-inline"><span>“Geometric distribution.”</span> Wikipedia, Mar. 2020. Available: <a href="https://en.wikipedia.org/wiki/Geometric_distribution">https://en.wikipedia.org/wiki/Geometric_distribution</a>. [Accessed: Dec. 22, 2025]</div>
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline"><span>“Geometric distribution.”</span> Wikipedia, Mar. 2020. Available: <a href="https://en.wikipedia.org/wiki/Geometric_distribution">https://en.wikipedia.org/wiki/Geometric_distribution</a>. [Accessed: Dec. 22, 2025]</div>
 </div>
 </div></section></div> ]]></description>
   <category>Crash-Course</category>
