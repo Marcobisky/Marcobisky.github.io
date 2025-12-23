@@ -1,7 +1,7 @@
 ---
 author: Marcobisky
 title: WSN Crash Course 无线传感器网络速成笔记
-description: 2025-12-23 16:34 更新
+description: 2025-12-23 16:55 更新
 date: 2025-12-23
 image: cover.png
 categories:
@@ -13,6 +13,10 @@ bibliography: refs.bib
 bibliographystyle: ieee
 csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 ---
+
+我们将**自底向上**地介绍 WSN 的 $4$ 层, 注意对比与计算机网络的 OSI Model (@fig-osi) 的差异.
+
+![Computer Network OSI Model. WSN 有下面的 $4$ 层, 但协议和侧重点非常不一样.](osi.png){#fig-osi width=48%}
 
 ## PHY (Physical Layer) 物理层
 
@@ -37,7 +41,7 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
     - $\lambda$ 和 频率 $f$ 的关系: $\boxed{c = \lambda f}$.
     - "Minimum received power requirement is $-60$ dBm" 中 **dBm** 是以 $1 \text{ mW}$ 为基准的功率单位, 设 $P \text{ mW} = x \text{ dBm}$, 则: $$\boxed{x = 10 \log_{10} \frac{P}{1 \text{ mW}}}$$
 
-[^dir]: $G_t(\theta, \phi)$ 定义为该方向的辐射功率密度 / 同功率各向同性天线的功率密度.
+[^dir]: $G_t(\theta, \phi)$ 定义为该方向的辐射功率密度 除以 同功率各向同性天线的功率密度.
 
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=true collapse=true}
@@ -67,7 +71,6 @@ $$
 ### Spread Spectrum 扩频 {#sec-spread-spectrum}
 
 - **DSSS 直接序列扩频** (Direct Sequence Spread Spectrum)
-
     - DSSS 通过将原始二进制信息 (Baseband) 异或上一串快速变化的 PN chip (见 @fig-dsss) 来提高**基带**带宽 (因为时域变化更快, 频域带宽会更宽).
         - PN chip 比特率高于原始信号比特率!
     - **PN chip (Pseudo-Noise chip) sequence** 伪随机码片, TX/RX 会产生相同的 PN 序列来进行扩频和解扩.
@@ -84,13 +87,12 @@ $$
 
 
 - **FHSS 频率跳变扩频** (Frequency Hopping Spread Spectrum)
-
-    - 通过在多个频率间跳变来实现扩频. **跳变的频率中心由 PN chip 控制**.
+    - 通过在多个频率间跳变来实现扩频. **跳变的频率中心由 PN chip 控制** (不再是异或了).
         - PN chip 的符号率与原始信息的符号率的大小不一定谁大, 若 PN chip 变化很慢, 称为 **Slow FHSS** (@fig-fhss-slow), 反之为 **Fast FHSS** (@fig-fhss-fast).
         - **Chip duration**: @fig-fhss-slow 中的 $T_c$.
-        - **Fast FHSS 的抗干扰能力更强!** 因为一般 jamming 都是窄带 (攻击起来省能量哈哈), 只要击中一个调制 symbol 的中心频率, 那么这个 symbol 就会被破坏掉. 而 Fast FHSS 在一个调制 symbol 内会跳变多个频率, 因此被击中的概率更低.
+        - **Fast FHSS 的抗干扰能力更强!** 因为一般 jamming 都是窄带 (攻击起来省能量哈哈), 只要击中一个调制 symbol 的中心频率, 那么这个 symbol 就会被破坏掉. 而 Fast FHSS 在一个调制 symbol 内会跳变多个频率, 破坏它需要跳好几次频率, 而且跳的还要跟 PN chip 跳的一样, 因此被击中的概率更低.
 
-    - FHSS 之后可以 FSK 也可以 ASK 调制 (@fig-modulation)! 
+    - FHSS 之后可以 FSK 也可以 ASK 调制 (调制分类见 @fig-modulation)! 
     - 以 @fig-fhss-slow 为例, 若 FHSS 与 FSK 结合, 则设计两个重要参数 $M, k$:
         - $M = 4$: **FSK 符号数量**. 每次 FSK 以 $f_c$ 为中心有 $4$ 个偏移的频率 (即 $4$ 个 symbol, 每个承载 $2$ bit 信息).
         - $k = 2$: **PN 分组长度**, 代表有 $4$ 个不同的 $f_c$.
@@ -513,7 +515,7 @@ $$
 ![移动到原点的 $G(p)$ 的 p.m.f. 随 $p$ 的变化 @a2020_geometric.](geo-dis.png){#fig-geo-dis}
 :::
 
-- @thm-geo 肯定不显然, 需要离散化然, 取极限再让时间 $t \to \infty$ 来证明 (就像 Poisson 分布的推到一样), omitted here.
+- @thm-geo 肯定不显然, 需要离散化然后取极限再让时间 $t \to \infty$ 来证明 (就像 Poisson 分布的推到一样), omitted here.
 
 - 并且这是一个全局稳定解, 即最终 system 中的分布与队中的初始人数无关!! (可理解为 $\begin{bmatrix} \pi_0 \\ \pi_1 \\ \pi_2 \\ \vdots \end{bmatrix}$ 为无穷维相空间中的稳定吸引子).
 
@@ -561,7 +563,7 @@ $${#eq-es}
 
 - **Delay bound**: 在 steady state 下, 一个随机到达的顾客, 其在 system 中的逗留时间 $W_s$ 的 c.d.f., $$\mathbb{P}(W_s \leq t) = 1 - e^{-(\mu - \lambda) t}.$$
 
-### $M / M / 1 / K / \infty / \text{FIFO}$ 有限长队列
+### $M / M / 1 / K / \infty / \text{FIFO}$ Queue 有限长队列
 
 > 我们在这里忽略这种队列的所有推导.
 
