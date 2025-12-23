@@ -322,6 +322,30 @@ $$
 
 - **(RT)$^2$** (Real-Time Reliable Transport): 强调实时性和能量最小. (了解即可)
 
+
+## Error Control 差错控制
+
+> Error control 不单独属于计算机网络 / WSN 的某一层. 在 PHY, Data link, Transport 层都可能会用到差错控制技术.
+
+- 处理差错的方法可以分为 $4$ 种:
+    - **Power control**: 直接提高发射功率.
+    - **ARQ (Automatic Repeat reQuest)**: 发送 packet + checksum, 接收端收到后校验, 正确发 ACK, 错误发 NACK 整包重传.
+        - **Stop-and-wait (SW)**: 等 ACK 再发下一个, 效率极低.
+        - **Go-Back-N (GBN) / Sliding Window**: 引入发送窗口 (Stop-and-wait 变成了窗口大小为 $1$ 的 GBN). 接收端丢弃不按序到达的包 (而不是缓存), 有累计确认机制. 如果丢包率高的话重传会很多.
+        - **Selective Repeat (SR)**: 改进了 GBN, 接收端缓存不按序到达的包, 所以不能有累计确认机制, 只能单独确认每个包. 重传最少, 但是需要 TX/RX 都有较大的缓存.
+    - **FEC (Forward Error Correction)**: 不要依赖重传了, 直接在发送端加入冗余信息 (编码, FEC (channel) codes), 期待接收端能自动纠错.
+        - **BCH**
+        - **Reed-Solomon codes**
+        - **Convolutional codes**
+    - **HARQ (Hybrid ARQ)**: ARQ 和 FEC 的结合. 
+
+::: {layout = "[47,53]"}
+![GBN 协议](gbn.jpeg){#fig-gbn}
+
+![SR 协议](sr.jpeg){#fig-sr}
+:::
+
+
 ## Localization 定位
 
 > 「温度传感器报告 $80 ^\circ \text{C}$」 是没有意义的, 「在 A 区域第 3 号设备旁」 才有意义.
