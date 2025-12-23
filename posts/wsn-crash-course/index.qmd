@@ -30,6 +30,39 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
     - Acoustic
     - Magnetic Induction Techniques
 
+### Path Loss and Received Power
+
+- **Friis 传输公式**: 在**自由空间** (no shadowing, no multipath) 中, 设 TX 和 RX 之间距离为 $d$, TX 发射功率为 $P_t$, 空间电磁能量经 RX 转换后出现在接收端口的可用功率为 $P_r$. TX/RX 的方向性增益[^dir]为 $G_t, G_r$. 波长为 $\lambda$. 则有: $$ P_r = P_t G_t G_r \left( \frac{\lambda}{4 \pi d} \right)^2.$${#eq-friis}
+    - 很多时候默认 $G_t = G_r = 1$ (各向同性天线).
+    - $\lambda$ 和 频率 $f$ 的关系: $\boxed{c = \lambda f}$.
+    - "Minimum received power requirement is $-60$ dBm" 中 **dBm** 是以 $1 \text{ mW}$ 为基准的功率单位, 设 $P \text{ mW} = x \text{ dBm}$, 则: $$\boxed{x = 10 \log_{10} \frac{P}{1 \text{ mW}}}$$
+
+[^dir]: $G_t(\theta, \phi)$ 定义为该方向的辐射功率密度 / 同功率各向同性天线的功率密度.
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## EXAMPLE: 套 Friis 传输公式
+
+![Question](example-friis.png)
+
+::: {.callout-warning icon=false collapse=false}
+## Solution
+Assumptions: Free space, isotropic antennas ($G_t = G_r = 1$).
+
+Given:
+- $P_r = -60 \text{ dBm} = 10^{-6} \text{ mW}$
+- $d = 100 \text{ m}$
+- $\lambda = c / f = (3 \times 10^8) / (3 \times 10^9) = 0.1 \text{ m}$
+
+From @eq-friis, we have:
+
+$$
+P_t = P_r \cdot \left( \frac{4 \pi d}{\lambda} \right)^2 = 10^{-6} \cdot \left( \frac{4 \pi \times 100}{0.1} \right)^2 = 157.9 \text{ mW}.
+$$
+:::
+:::
+<!-- ----------------------------------------- -->
+
 
 ### Spread Spectrum 扩频 {#sec-spread-spectrum}
 
@@ -157,6 +190,59 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 :::
 <!-- ----------------------------------------- -->
 
+## Transport Layer 传输层
+
+- **与计算机网络的传输层区别**: 
+    - **计算机网络**: Transport 层 $\approx$ TCP/UDP, 侧重从 source 到 destination 的可靠传输 (保证没有丢包)、包的顺序要对.
+    - **WSN**: 考虑由 $1000$ 个温度传感器组成的网络, 一般只关心数据有没有到中心 (sink) 而不是端到端, 不需要每丢一个包就重传 (不需要 TCP 那么可靠, 当然也看具体场景, 比如 RMST 就要求可靠), 这样会让本来就没多少电的节点耗能爆炸. 每个节点甚至都没有唯一的 ID (计算机网络中的 IP). WSN 的 Transport 层针对不同的应用场景设计了下面很多不同的协议!
+
+- **RMST (Reliable Multi-Segment Transport)**
+    - **目标**: 如何以尽量**低的能耗**, 把**Multi-segment**数据 (指一整块数据, 但是是被分成多个 segment) **可靠** (所有 segment 都要送到) 地传到 sink?
+    - **Directed Diffusion (DD) 路由算法**: RMST 默认有这种路由算法的存在. 如何让每个节点知道收到的数据发给谁? 由于 WSN 中数据几乎都是要发给 sink 的, 我们先让 sink 广播一个 Interest 消息 (@fig-dd (a)), 这样得到了从 sink 到每个节点的反向路径, 如果要反过来发的话直接将每个箭头反过来即可.
+    - **可靠传输机制**: 由 NACK 信号保证 (用 ACK 就要发大量的包, **占用大量带宽**).
+    - **工作模式** (见 @fig-rmst-non-caching 和 @fig-rmst-caching):
+        - **Non-caching**: 节点都没有缓存, 并且丢失的包必须由源节点重传, **易造成网络拥塞和丢包** (这个协议几乎不实用, 一般只是作对照用的).
+        - **Caching**: 一部分中间节点有缓存 (cache node), 这样可以**缓解网络拥塞**, 但是**内存读写会增加能耗开销**.
+
+::: {.column-margin}
+![DD 分为 $3$ 个步骤 @Lu2013.](dd.png){#fig-dd}
+:::
+
+
+::: {layout = "[50,50]"}
+![Non-caching RMST 丢失的包必须由源节点重传.](rmst-non-caching.png){#fig-rmst-non-caching}
+
+![Caching RMST 丢失的包可以由 cache node 重传.](rmst-caching.png){#fig-rmst-caching}
+:::
+
+- **PSFQ (Pump Slowly, Fetch Quickly)**
+    - **目标**: 信息传递方向跟 RMST 相反, 由 sink 向所有节点广播信息 (比如代码、配置参数等下发), 尽量不要造成拥塞.
+    - **工作机制**: sink 以较慢的速率注入数据包 (比如每隔 $T_\min = 100 \text{ ms}$ pump 一个 @fig-psfq), 节点收到数据包后立即向下一个节点转发, 如果不是按顺序收到, 则向**上一个节点**发送 NACK 快速获取 (fetch) 丢失的数据包 (所以是 **hop-by-hop** reliability 而不是 end-to-end)
+    - **特点**:
+        - **Scales well**.
+        - **Hop-by-hop reliability** (end-to-end may not be reliable).
+        - **大网络 latency 很高** (由于注入间隔 $T_\min$ 的存在).
+        - **网络边缘的节点 memory 需要较大** (因为包更容易 out-of-order 到, 需要存下后面的包).
+
+::: {.column-margin}
+![PSFQ 的 quick fetch.](psfq.png){#fig-psfq}
+:::
+
+- **CODA (Congestion Detection and Avoidance)**
+    - **目标**: 跟 RMST 和 PSFQ 不同, CODA 只关注**拥塞控制**, 不关心每个包是否送达.
+    - **工作机制** (简略): 下游节点会向上游节点发送 suppression message 来通知上游节点降低发送速率.
+
+- **ESRT (Event-to-Sink Reliable Transport)**
+    - **目标**: ESRT 同时关注 **拥塞控制** 和 **(event)可靠性** (在温度预警 WSN 中也许有很多节点传的都是是否火灾的信息, 不需要每个节点的信息都送到 sink, 只要确保火灾发生时这个 **event** 能被 sink 收到即可).
+    - **工作机制** (简略): 事件发生, 多个节点开始上报, sink 在时间窗 $\tau$ 内统计 $r_i$ 然后判断是否满足 $R$. sink 广播控制指令: "所有节点把速率调到 $f'$". 节点收到后调整速率, 进入下一轮 $\tau$.
+        - **Dicision interval $\tau$**: sink 每隔 $\tau$ 时间根据收到包的数量判断一下可靠性.
+        - **Desired event reliability $R$**: 在一个决策时间窗 $\tau$ 内, sink 至少需要收到多少个事件相关的数据包 (要提前给定).
+        - **Observed event reliability $r_i$**: sink 在第 $i$ 个决策时间窗 $\tau_i$ 内实际收到的事件相关的数据包数量.
+        - **Reporting rate $f$**: 所有节点的平均发送速率.
+
+- **GARUDA**: pulsing-based, 确保单个包送达. (了解即可)
+
+- **(RT)$^2$** (Real-Time Reliable Transport): 强调实时性和能量最小. (了解即可)
 
 ## Localization 定位
 
