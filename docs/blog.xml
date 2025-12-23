@@ -954,11 +954,47 @@ Solution
 <!-- ----------------------------------------- -->
 </section>
 </section>
-<section id="network-layer-网络层" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="network-layer-网络层"><span class="header-section-number">3</span> Network Layer 网络层</h2>
+<section id="sec-network-layer" class="level2 page-columns page-full" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="sec-network-layer"><span class="header-section-number">3</span> Network Layer 网络层</h2>
 <ul>
-<li><p><strong>Routing Protocols 路由算法</strong></p></li>
-<li><p><strong>Routing metrics 路由指标</strong> (见 Figure&nbsp;12)</p>
+<li><strong>与计算机网络的网络层区别</strong>: (相同点都是路由, 即每个节点收到的数据发给谁?)
+<ul>
+<li><strong>计算机网络</strong>: <strong>Address-centric</strong>, 每个节点都有唯一的地址 (IP), end-to-end 传输.</li>
+<li><strong>WSN</strong> (后面的子章节会详细介绍各种协议):
+<ul>
+<li><strong>Data-centric</strong>: 节点没有唯一地址, 传输基于包的内容 (payload, 一般会有标注内容的 attribute, 比如「这个包描述温度信息」,「给我多一些温度数据」这种), hop-by-hop 传输.
+<ul>
+<li><strong>Advantages</strong>: 无需管理大量节点地址, 而且可以在中间节点进行数据聚合 (data aggregation), 节省能量和带宽.</li>
+<li><strong>Drawbacks</strong>: Interest flooding 比较消耗能量, 流量<strong>不均衡</strong> (sink 附近节点流量大, 容易没电, 这是因为在 Data-centric 中, 各个节点都是等地位的 (<strong>flat</strong>), 这个问题在下面 Hierarchical Routing 会缓解).</li>
+</ul></li>
+<li><strong>Hierarchical routing</strong>: 不要再让全部的节点地位一样了, 分成 普通节点 + 少数 Cluster head 节点.
+<ul>
+<li><strong>Advantages</strong>: 由于只有少数节点需要直接跟 sink 通信, scalability 更好、能量消耗更少.</li>
+<li><strong>Drawbacks</strong>: 由于 CH 承担很大的通信责任, robustness 更低; 由于 CH 默认要和 sink 直接通信, 网络的面积不能太大.</li>
+</ul></li>
+<li><strong>Geographic routing</strong>: 直接用节点的 GPS 位置来辅助路由.
+<ul>
+<li><strong>Advantages</strong>: 无需路由表, scalability 非常好, 网络的面积可以很大.</li>
+<li><strong>Drawbacks</strong>: 依赖定位精度, GPS 增加额外的能耗.</li>
+</ul></li>
+<li><strong>QoS-based routing (Quality of Service)</strong>: 几乎只考虑服务质量 (比如延迟), 能量消耗考虑很少 (比如火灾报警、医疗传感).</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-hierarchical-routing" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hierarchical-routing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/hierarchical-routing.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hierarchical-routing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Hierarchical routing 中节点的地位是不同的
+</figcaption>
+</figure>
+</div>
+</div></div><ul>
+<li><strong>Routing metrics 路由指标</strong> (见 Figure&nbsp;13)
 <ul>
 <li><strong>(Min) Number of hops 跳数</strong>: (<strong>relay node</strong> 指中继节点的个数 (不算 source 和 sink)).</li>
 <li><strong>(Min) Energy consumption (per packet) 能量消耗</strong>: 每条链路上的能量消耗加起来即可.</li>
@@ -967,7 +1003,6 @@ Solution
 <li><strong>(Min) Latency 延迟</strong>: 每条链路上的延迟加起来即可.</li>
 <li><strong>(Max) Time to network partition 网络分裂时间</strong>: 由于 WSN 中节点由电池供电, 当确定一种路由算法时, 节点上的数值 (电量) 会逐渐消耗, 直到网络中存在两个节点无法通信 (网络分裂). 网络分裂时间越长越好.</li>
 </ul></li>
-<li><p>Hierarchical routing</p></li>
 </ul>
 <!-- ----------------------------------------- -->
 <div class="callout callout-style-default callout-note callout-titled">
@@ -988,7 +1023,7 @@ EXAMPLE: 找路径题目
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/path-example.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-path-example-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;11: 这种找路径的题目就是纯**, 暴力枚举即可
+Figure&nbsp;12: 这种找路径的题目就是纯**, 暴力枚举即可
 </figcaption>
 </figure>
 </div>
@@ -998,7 +1033,7 @@ Figure&nbsp;11: 这种找路径的题目就是纯**, 暴力枚举即可
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/path-example-sol.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-path-example-sol-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;12: Solution to Figure&nbsp;11
+Figure&nbsp;13: Solution to Figure&nbsp;12
 </figcaption>
 </figure>
 </div>
@@ -1006,6 +1041,56 @@ Figure&nbsp;12: Solution to Figure&nbsp;11
 </div>
 </div>
 <!-- ----------------------------------------- -->
+<section id="data-centric-routing" class="level3 page-columns page-full" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="data-centric-routing"><span class="header-section-number">3.1</span> Data-centric Routing</h3>
+<ul>
+<li><p><strong>Flooding 洪泛</strong>: 每个节点收到包后直接无脑 (blindness) 发给所有的邻居 (广播), 这样几乎可以保证所有的节点都能收到包, 但是这样<strong>重复</strong> (overlap) 的数据包会来回发, 大量<strong>能量</strong>和<strong>带宽</strong> (implosion)! 于是自然地:</p></li>
+<li><p><strong>Gossiping</strong>: 每个节点收到包后, 随机选择一个或几个邻居发包 (而不是全部的邻居). 这样缓解了 implosion, 但是由于随机选择, 网络延迟 (latency) 会变大.</p></li>
+<li><p><strong>SPIN (Sensor Protocol for Information via Negotiation)</strong>: 一系列有握手的协议, 都是基于 SPIN-PP 改良的:</p>
+<ul>
+<li><strong>SPIN-PP</strong> (point-to-point): 节点发之前先广播一个小的即将要发的数据的描述 (<strong>ADV (advertisement)</strong>), 周围感兴趣的节点则回复一个 <strong>REQ (request)</strong>, 然后对这些节点<strong>单播 DATA</strong>.
+<ul>
+<li><strong>SPIN-EC</strong> (energy conservation): 在 SPIN-PP 的基础上, 低电量节点不参与握手和数据传输.</li>
+<li><strong>SPIN-BC</strong> (broadcast): 仅仅是把 SPIN-PP 中的单播换成了广播, 节省了能量. 这是因为在无线 WSN 中, 有时很多遍单播的能量比广播一次的能量更大.</li>
+<li><strong>SPIN-RL</strong> (reliable): 在 SPIN-PP 的基础上 (依然是单播哦), 在 DATA 加入了 sequence number, 接收节点收到 DATA 后发 ACK 确认 (如果一段时间内没收到 ACK 则重传).</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Directed Diffusion (DD)</strong>: 由于 WSN 中节点产生的数据几乎都是要发给 sink 的, 我们先让 sink 广播一个 Interest 消息 (Figure&nbsp;14 (a)), 这样得到了从 sink 到每个节点的反向路径, 如果要反过来发的话直接将每个箭头反过来即可. 具体来说分为 <img src="https://latex.codecogs.com/png.latex?4"> 个步骤:</p>
+<ul>
+<li><strong>Interest propagation</strong>: sink 广播 Interest 消息 (比如「我要 A 区域的大于 <img src="https://latex.codecogs.com/png.latex?100%5E%5Ccirc%5Ctext%7BC%7D"> 的传感信息」), 网络中的节点收到后缓存消息、记录这个 Interest 时从哪个邻居来的 (这样就建立了反向路径), 然后发给剩余的邻居 (其实就是 flooding).</li>
+<li><strong>Gradient setup</strong>: 梯度就是「如果你有这类数据, 该往哪里送」的查找表 (可能是多值的).</li>
+<li><strong>Reinforcement</strong>: 由 sink 发出来选择性地发给节点来强化这些路径 (可能是延迟更小、节点有充足能量的路径), 让以后的数据包尽可能走这些路径.</li>
+<li><strong>Data delivery</strong></li>
+</ul></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-dd" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/wsn-crash-course/dd.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: DD 分为 <img src="https://latex.codecogs.com/png.latex?3"> 个步骤 <span class="citation" data-cites="Lu2013">[6]</span>.
+</figcaption>
+</figure>
+</div>
+</div></div></section>
+<section id="hierarchical-routing" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="hierarchical-routing"><span class="header-section-number">3.2</span> Hierarchical Routing</h3>
+<ul>
+<li><p><strong>LEACH (Low-Energy Adaptive Clustering Hierarchy)</strong>: 主要是每个 cluster 的 head 节点 (CH) 是通过随机的方式动态调整的. 这个协议分为以下几个步骤:</p>
+<ul>
+<li><strong>Advertisement</strong>: 竞选的时候每个节点都有一定概率成为 CH, 如果成为 CH 则向周围广播自己是 CH.</li>
+<li><strong>Cluster setup</strong>: 周围节点可能收到很多个不同 CH 的 advertisement, 它会选择依附信号最强的那个, 这样就形成了很多个 cluster.</li>
+<li><strong>Schedule creation</strong>: 每个 CH 给自己 cluster 中的 node 分配应该什么时候给自己汇报 (如果用 TDMA 的话就是分配时间片).</li>
+<li><strong>Steady state</strong>: cluster 中的节点开始按照 schedule 给 CH 汇报数据 (而不会盲目发, <strong>显著减少能量开销和碰撞</strong>), CH 做 aggregation 后直接发给 sink (注意由于 CH 需要直接跟 sink 通信, 而 CH 是随机选的, 这就要求所有节点必须<strong>能</strong>于 sink 直接通信)</li>
+</ul></li>
+<li><p><strong>PEGASIS (Power-Efficient GAthering in Sensor Information Systems)</strong></p></li>
+<li><p><strong>TEEN (Threshold-sensitive Energy-Efficient sensor Network)</strong></p></li>
+<li><p><strong>APTEEN (AdaPtive TEEN)</strong></p></li>
+</ul>
+</section>
 </section>
 <section id="transport-layer-传输层" class="level2 page-columns page-full" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="transport-layer-传输层"><span class="header-section-number">4</span> Transport Layer 传输层</h2>
@@ -1018,28 +1103,16 @@ Figure&nbsp;12: Solution to Figure&nbsp;11
 <li><strong>RMST (Reliable Multi-Segment Transport)</strong>
 <ul>
 <li><strong>目标</strong>: 如何以尽量<strong>低的能耗</strong>, 把<strong>Multi-segment</strong>数据 (指一整块数据, 但是是被分成多个 segment) <strong>可靠</strong> (所有 segment 都要送到) 地传到 sink?</li>
-<li><strong>Directed Diffusion (DD) 路由算法</strong>: RMST 默认有这种路由算法的存在. 如何让每个节点知道收到的数据发给谁? 由于 WSN 中数据几乎都是要发给 sink 的, 我们先让 sink 广播一个 Interest 消息 (Figure&nbsp;13 (a)), 这样得到了从 sink 到每个节点的反向路径, 如果要反过来发的话直接将每个箭头反过来即可.</li>
+<li>RMST 默认网络层 (Section&nbsp;3) 用 <strong>DD 路由算法</strong></li>
 <li><strong>可靠传输机制</strong>: 由 NACK 信号保证 (用 ACK 就要发大量的包, <strong>占用大量带宽</strong>).</li>
-<li><strong>工作模式</strong> (见 Figure&nbsp;14 和 Figure&nbsp;15):
+<li><strong>工作模式</strong> (见 Figure&nbsp;15 和 Figure&nbsp;16):
 <ul>
 <li><strong>Non-caching</strong>: 节点都没有缓存, 并且丢失的包必须由源节点重传, <strong>易造成网络拥塞和丢包</strong> (这个协议几乎不实用, 一般只是作对照用的).</li>
 <li><strong>Caching</strong>: 一部分中间节点有缓存 (cache node), 这样可以<strong>缓解网络拥塞</strong>, 但是<strong>内存读写会增加能耗开销</strong>.</li>
 </ul></li>
 </ul></li>
 </ul>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<div id="fig-dd" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-dd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/wsn-crash-course/dd.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;13: DD 分为 <img src="https://latex.codecogs.com/png.latex?3"> 个步骤 <span class="citation" data-cites="Lu2013">[6]</span>.
-</figcaption>
-</figure>
-</div>
-</div></div><div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-panel" data-layout="[50,50]">
 <div class="quarto-layout-row">
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
 <div id="fig-rmst-non-caching" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1048,7 +1121,7 @@ Figure&nbsp;13: DD 分为 <img src="https://latex.codecogs.com/png.latex?3"> 个
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/rmst-non-caching.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rmst-non-caching-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;14: Non-caching RMST 丢失的包必须由源节点重传.
+Figure&nbsp;15: Non-caching RMST 丢失的包必须由源节点重传.
 </figcaption>
 </figure>
 </div>
@@ -1060,7 +1133,7 @@ Figure&nbsp;14: Non-caching RMST 丢失的包必须由源节点重传.
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/rmst-caching.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rmst-caching-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15: Caching RMST 丢失的包可以由 cache node 重传.
+Figure&nbsp;16: Caching RMST 丢失的包可以由 cache node 重传.
 </figcaption>
 </figure>
 </div>
@@ -1071,7 +1144,7 @@ Figure&nbsp;15: Caching RMST 丢失的包可以由 cache node 重传.
 <li><strong>PSFQ (Pump Slowly, Fetch Quickly)</strong>
 <ul>
 <li><strong>目标</strong>: 信息传递方向跟 RMST 相反, 由 sink 向所有节点广播信息 (比如代码、配置参数等下发), 尽量不要造成拥塞.</li>
-<li><strong>工作机制</strong>: sink 以较慢的速率注入数据包 (比如每隔 <img src="https://latex.codecogs.com/png.latex?T_%5Cmin%20=%20100%20%5Ctext%7B%20ms%7D"> pump 一个 Figure&nbsp;16), 节点收到数据包后立即向下一个节点转发, 如果不是按顺序收到, 则向<strong>上一个节点</strong>发送 NACK 快速获取 (fetch) 丢失的数据包 (所以是 <strong>hop-by-hop</strong> reliability 而不是 end-to-end)</li>
+<li><strong>工作机制</strong>: sink 以较慢的速率注入数据包 (比如每隔 <img src="https://latex.codecogs.com/png.latex?T_%5Cmin%20=%20100%20%5Ctext%7B%20ms%7D"> pump 一个 Figure&nbsp;17), 节点收到数据包后立即向下一个节点转发, 如果不是按顺序收到, 则向<strong>上一个节点</strong>发送 NACK 快速获取 (fetch) 丢失的数据包 (所以是 <strong>hop-by-hop</strong> reliability 而不是 end-to-end)</li>
 <li><strong>特点</strong>:
 <ul>
 <li><strong>Scales well</strong>.</li>
@@ -1089,7 +1162,7 @@ Figure&nbsp;15: Caching RMST 丢失的包可以由 cache node 重传.
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/psfq.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-psfq-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16: PSFQ 的 quick fetch.
+Figure&nbsp;17: PSFQ 的 quick fetch.
 </figcaption>
 </figure>
 </div>
@@ -1127,10 +1200,10 @@ Figure&nbsp;16: PSFQ 的 quick fetch.
 <li><strong>RSS (Received Signal Strength) 接收信号强度</strong>: 在已知 path-loss model 的情况下, 可通过比较接收信号强度与发射信号强度来估计距离. 如果不是 LoS (对着发), 误差会很大.</li>
 <li><strong>ToA (Time of Arrival) 到达时间</strong>: 利用初中物理 路程 = 光速 × 时间, 知道时间即可算出距离.
 <ul>
-<li><strong>One-way ToA</strong>: 需要 TX 和 RX <strong>sync</strong> (Figure&nbsp;17 (a)), 由于光速太快, 需要极高精度的时钟同步!</li>
-<li><strong>Two-way ToA</strong>: 不需要 sync! 但要知道 RX 端的处理时间 (processing delay <img src="https://latex.codecogs.com/png.latex?t_3-t_2"> in Figure&nbsp;17 (b)).</li>
+<li><strong>One-way ToA</strong>: 需要 TX 和 RX <strong>sync</strong> (Figure&nbsp;18 (a)), 由于光速太快, 需要极高精度的时钟同步!</li>
+<li><strong>Two-way ToA</strong>: 不需要 sync! 但要知道 RX 端的处理时间 (processing delay <img src="https://latex.codecogs.com/png.latex?t_3-t_2"> in Figure&nbsp;18 (b)).</li>
 </ul></li>
-<li><strong>TDoA (Time Difference of Arrival) 到达时间差</strong>: 不需要 sync! 如 Figure&nbsp;17 (c), <img src="https://latex.codecogs.com/png.latex?t_1"> 发 RF, <img src="https://latex.codecogs.com/png.latex?t_3"> 发 sound, 则距离 <img src="https://latex.codecogs.com/png.latex?d%20=%20(v_1-v_2)%20%5Ccdot%20((t_4-t_2)%20-%20(t_3-t_1))"></li>
+<li><strong>TDoA (Time Difference of Arrival) 到达时间差</strong>: 不需要 sync! 如 Figure&nbsp;18 (c), <img src="https://latex.codecogs.com/png.latex?t_1"> 发 RF, <img src="https://latex.codecogs.com/png.latex?t_3"> 发 sound, 则距离 <img src="https://latex.codecogs.com/png.latex?d%20=%20(v_1-v_2)%20%5Ccdot%20((t_4-t_2)%20-%20(t_3-t_1))"></li>
 </ul>
 <div id="fig-toa" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1138,7 +1211,7 @@ Figure&nbsp;16: PSFQ 的 quick fetch.
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/toa.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-toa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation" data-cites="Gkiokas2015">[7]</span>
+Figure&nbsp;18: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation" data-cites="Gkiokas2015">[7]</span>
 </figcaption>
 </figure>
 </div>
@@ -1147,8 +1220,8 @@ Figure&nbsp;17: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation
 </ul></li>
 <li><strong>Range-based protocols</strong>
 <ul>
-<li><strong>Triangulation 三角测量</strong>: 见 Figure&nbsp;18, 两个 anchor node <img src="https://latex.codecogs.com/png.latex?A,%20B"> <strong>相对位置已知</strong>, 再测量两个角度即可.</li>
-<li><strong>Trilateration 三边测量</strong>: 见 Figure&nbsp;19, 三个球相交于一点. GPS 的工作原理 (只不过 GPS 需要 <img src="https://latex.codecogs.com/png.latex?4"> 个卫星来同时解出时间偏移).
+<li><strong>Triangulation 三角测量</strong>: 见 Figure&nbsp;19, 两个 anchor node <img src="https://latex.codecogs.com/png.latex?A,%20B"> <strong>相对位置已知</strong>, 再测量两个角度即可.</li>
+<li><strong>Trilateration 三边测量</strong>: 见 Figure&nbsp;20, 三个球相交于一点. GPS 的工作原理 (只不过 GPS 需要 <img src="https://latex.codecogs.com/png.latex?4"> 个卫星来同时解出时间偏移).
 <ul>
 <li><strong>Iterative multilateration 迭代多边测量</strong>: 在一个 WSN 系统中, 先用人工或 GPS 确定少量几个 anchor node 相对位置, 然后用 Trilateration 算出其他 node 位置, 这些 node 就变成新的 anchor node … (这种方法会有 <strong>Error propagation</strong> 问题, 但仍在使用).</li>
 <li><strong>Collaborative multilateration 协同多边测量</strong>: 一个 node 附近不一定会有 <img src="https://latex.codecogs.com/png.latex?3"> 个 anchor node, 所有 node 都可以用 Trilateration 开始测量周围的 node 位置, 然后用一些复杂的优化算法来算出所有 node 位置 (更准确).</li>
@@ -1164,7 +1237,7 @@ Figure&nbsp;17: (a) One-way ToA; (b) Two-way ToA; (c) TDoA <span class="citation
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/triangulation.png" class="img-fluid figure-img" style="width:55.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-triangulation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;18: Triangulation
+Figure&nbsp;19: Triangulation
 </figcaption>
 </figure>
 </div>
@@ -1176,7 +1249,7 @@ Figure&nbsp;18: Triangulation
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/trilateration.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-trilateration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;19: Trilateration
+Figure&nbsp;20: Trilateration
 </figcaption>
 </figure>
 </div>
@@ -1308,7 +1381,7 @@ Bernoulli, Poisson, Exponential, Binomial, Geometric, Negative Binomial 分布�
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/queue-ex1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-queue-ex1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20: <img src="https://latex.codecogs.com/png.latex?M%20/%20M%20/%201%20/%207%20/%20%5Cinfty%20/%20%5Ctext%7BFIFO%7D"> Queue
+Figure&nbsp;21: <img src="https://latex.codecogs.com/png.latex?M%20/%20M%20/%201%20/%207%20/%20%5Cinfty%20/%20%5Ctext%7BFIFO%7D"> Queue
 </figcaption>
 </figure>
 </div>
@@ -1320,7 +1393,7 @@ Figure&nbsp;20: <img src="https://latex.codecogs.com/png.latex?M%20/%20M%20/%201
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/queue-ex2.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-queue-ex2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21: <img src="https://latex.codecogs.com/png.latex?M%20/%20M%20/%203%20/%208%20/%20%5Cinfty%20/%20%5Ctext%7BFIFO%7D"> Queue
+Figure&nbsp;22: <img src="https://latex.codecogs.com/png.latex?M%20/%20M%20/%203%20/%208%20/%20%5Cinfty%20/%20%5Ctext%7BFIFO%7D"> Queue
 </figcaption>
 </figure>
 </div>
@@ -1390,7 +1463,7 @@ Geometric Distribution
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/geo-dis.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-geo-dis-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;22: 移动到原点的 <img src="https://latex.codecogs.com/png.latex?G(p)"> 的 p.m.f. 随 <img src="https://latex.codecogs.com/png.latex?p"> 的变化 <span class="citation" data-cites="a2020_geometric">[8]</span>.
+Figure&nbsp;23: 移动到原点的 <img src="https://latex.codecogs.com/png.latex?G(p)"> 的 p.m.f. 随 <img src="https://latex.codecogs.com/png.latex?p"> 的变化 <span class="citation" data-cites="a2020_geometric">[8]</span>.
 </figcaption>
 </figure>
 </div>
@@ -1442,14 +1515,14 @@ Figure&nbsp;22: 移动到原点的 <img src="https://latex.codecogs.com/png.late
 </div>
 <div class="callout-body-container callout-body">
 <div id="thm-es" class="theorem">
-<p><span class="theorem-title"><strong>Theorem 2</strong></span> 由 Figure&nbsp;23:</p>
+<p><span class="theorem-title"><strong>Theorem 2</strong></span> 由 Figure&nbsp;24:</p>
 <div id="fig-es" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-es-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="https://marcobisky.github.io/posts/wsn-crash-course/es.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-es-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;23: 生灭过程的 ES.
+Figure&nbsp;24: 生灭过程的 ES.
 </figcaption>
 </figure>
 </div>
