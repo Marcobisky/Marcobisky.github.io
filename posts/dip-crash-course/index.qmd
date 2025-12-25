@@ -1,8 +1,8 @@
 ---
 author: Marcobisky
 title: DIP Crash Course 数字图像处理速成笔记
-description: 更新中...
-date: 2025-12-20
+description: 2025-12-25 13:52 已完更.
+date: 2025-12-25
 image: cover.png
 categories:
     - Crash-Course
@@ -16,11 +16,14 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 
 > 将所有的开放问题的 solution 当作一个普通的解决方法来看待, 它们绝不是最优或者唯一的解决方案.
 
+> 每个变换背后尽可能想象一个图像的画面变化.
+
 ## Basic Conventions 基本约定
 
 - Image 默认为 **sampling** 和 **quantization** 之后的数字图像
     - **Spacial resolution 空间分辨率**: 长宽方向的采样点数的乘积.
-    - **Intensity resolution 强度分辨率**: 量化的精度, 一般用每个像素的 bit 数表示. **默认为 $8$ bit ($[0, 255]$)**.
+        - 规定图片的左上角像素坐标为 $(0,0)$.
+    - **Intensity resolution 强度分辨率**: 量化的精度, 一般用每个像素的 bit 数表示. **默认为 $8$ bit ($\mathbb{Z}_{256}$, 或者不严格地, $[0, 255]$)**.
 
 - **Color space 颜色空间**: 单色可见光的波长在 $[380, 780] \text{ nm}$, 每一束光都可以有任意强度的单色光分量 (即「光谱」), 因此所有光构成一个**不可数无穷维拓扑向量空间**.
     - 但是人眼有三种类型的视锥细胞 (L, M, S) 对不同的频率成分有 (不会变化的) 不同的敏感度, 它们自动将所有光**线性映射**到一个三维子空间 $\Omega$ 中 (想想为什么是线性的, 因为是积分). 即使两个光的光谱不同, 但它们在这个三维子空间的投影相同, 人眼也无法区分它们.
@@ -37,6 +40,11 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 
 - **Binary Image 二值图像 $f$**: $0$ 表示 background, $1$ 表示 foreground.
 
+### Notations
+
+- **图像空间 $\text{Img}$**: 所有不同大小的灰度图像构成的 Vector Space.
+    - 这是最大的图像空间, 只要是图像都在里面.
+    - 彩色图像空间记为 $\text{\textcolor{red}{I}\textcolor{green}{m}\textcolor{blue}{g}}$.
 
 
 ## Kernel-based processing 基于核的处理
@@ -65,55 +73,298 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 
 ### Intensity Transformation
 
-> 强度变换仅仅是**单灰度像素**的操作, 即用一个函数 $s = T(r)$ 来**独立地**映射所有像素值.
+> 强度变换仅仅是**单灰度像素**的操作, 即用一个函数 $s = T(r)$ 来**独立地**映射所有像素值, 一般情况下
 
-- **Linear transformation**
-    - **Image Negatives 图像反相**: $s = L - 1 - r$.
-    - **Contrast stretching 对比度拉伸**
+- **Monoid $\mathcal{T}$**: 一张图片 $r$ 上的所有 Intensity Transformation 构成幺半群 $\mathcal{T}$.
+    - **Group $\mathcal{T}_{\text{bij}}$**: 从 $\mathcal{T}$ 中取出所有 bijective 映射, 它构成一个群. 其中包括:
+        - **Image Negatives 图像反相**: $s = L - 1 - r$.
+    - **Group $\mathcal{T}_\uparrow$**: $\mathbb{Z}_{256}$ 的保序同胚群 (所有保序映射 (严格单增) 的 $T$), 是 $\mathcal{T}_{\text{bij}}$ 的子群. 引入此的意义是一般图像处理都**只希望深颜色的像素在处理后还是比较深的颜色**, 而不会变白了, 所以实际上几乎只会考虑 $\mathcal{T}_\uparrow$ 中的变换. 常用的有:
+        - **Contrast stretching 对比度拉伸**
+        - **Log transformation 对数变换**: $s = c \cdot \log(1 + r)$.
+        - **Exponential transformation 指数变换**
+        - **Power-Law (Gamma) transformation 幂律变换**: $s = c \cdot r^{\gamma}$.
 
-- **Log transformation 对数变换**: $s = c \cdot \log(1 + r)$.
 
-- **Power-Law (Gamma) transformation 幂律变换**: $s = c \cdot r^{\gamma}$.
+![强度变换的分类, 单位元记为 $\text{id}$.](intensity-trans-class.png){#fig-intensity-trans-class width=80%}
+
 
 ### Histogram Processing 直方图处理
 
-- **Histogram 图像直方图**
-    - **Normalized histogram 归一化直方图**: 纵坐标要除以图像总像素数, 可表达概率.
+> 直接想出一个 Intensity Transformation 比较难, 我们引入分析灰度图像的另一种方法: 直方图 (Histogram). 注意这只是辅助我们设计 $T$ 的中间步骤, 我们会看到用 Histogram 可以快速、有根据地帮我们得出一个 $T$.
 
-- **Histogram processing 方法**
-    - **Histogram equalization 直方图均衡化**
-    - **Histogram matching (specification) 直方图匹配**: 「我想让这张暗图看起来像那张亮图」.
+- **Histogram 图像直方图**: 每个图像以 @fig-histogram 的方式给 $\mathbb{Z}_{256}$ 数轴引入了权重, 即 measure $\#$. Histogram 定义为测度空间 $(\mathbb{Z}_{256}, \mathcal{P}(\mathbb{Z}_{256}), \#)$.
+    - 可以引入 $\text{cdf}(\#)$.
+
+为后文表达方便我们引入这些冗余概念:
+
+- **$y$ 归一化直方图 $(\mathbb{Z}_{256}, \mathcal{P}(\mathbb{Z}_{256}), \mathbb{P})$**: 纵坐标除以了像素总数 (@fig-histogram-normalized), 相当于概率.
+    - 可以引入 $\text{cdf}(\mathbb{P})$.
+
+- **$x$ 归一化直方图 $([0,1], \mathcal{B}([0,1]), \#')$**: 在归一化直方图的基础上横坐标也归一化到 $[0,1]$ 上 (见 @fig-histogram).
+    - 可以引入 $\text{cdf}(\#')$.
+
+- **$x,y$ 归一化直方图 $([0,1], \mathcal{B}([0,1]), \mu)$**: 横纵坐标都归一化到 $[0,1]$ 上 (见 @fig-histogram-normalized).
+    - 可以引入 $\text{cdf}(\mu)$.
+
+::: {layout = "[50,50]"}
+![Histogram 就是收集每个灰度级别的像素个数 @wilson_2023_histogram (这里展示的是**$x$ 归一化直方图**的构造方法).](histogram.gif){#fig-histogram}
+
+![$x$ 归一化直方图转成 $x,y$ 归一化直方图 @@wilson_2023_histogram.](histogram-normalized.gif){#fig-histogram-normalized}
+:::
+
+![$4$ 种 Histogram 的 Notation 说明.](histogram-notation.png){#fig-histogram-notation width=90%}
+
+> 下文都默认在 $x,y$ 归一化直方图的测度空间 $([0,1], \mathcal{B}([0,1]), \mu)$ 上讨论! 以防到处出现恶心的 $255$.[^disgusting]
+
+[^disgusting]: PPT 上就没有用 $x,y$ 归一化的方式表达, 非常 annoying!
+
+#### Histogram Equalization 直方图均衡化
+
+> **Motivation**: 如果图像整体看起来比较一致, 对比度不高, 我们希望不同深浅的像素都要有一些 (尽量均匀一点), 这样图像看起来更清晰.
+
+- **目标**: 设计一个 $T$ 使得输出图像的 histogram **均匀**分布在 $[0,1]$ 上.
+    - 即: Find $T: [0,1] \to [0,1]$ s.t., $\mathbb{\mu}$ 的 pushforward 测度 $T_* \mu$ 是 uniform 的 (Lebesgue 测度), i.e., $$T_* \mu = \lambda.$$
+
+- **Solution**: Surprisingly!!! 这个 $T$ 就是 $\mu$ 的累积分布函数 (c.d.f.)! (见 @lem-equalization) 仔细想想看, 这正是导数的定义!!
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=false}
+## $T$ is exactly the c.d.f. of $\mathbb{P}$!
+::: {#lem-equalization}
+我们要找的 $T$ 将灰度值为 $\alpha$ 的像素映射到 $T(\alpha)$:
+    $$
+    \boxed{
+    T(\alpha) = \int_0^{\alpha} \mathrm{d} \mu, \quad \text{ for } \alpha \in [0,1]
+    }
+    $${#eq-equalization}
+
+如果你习惯在 $\mathbb{Z}_{256}$ 上操作, 设 $\alpha$ 的归一化前的像素值为 $k$:
+$$
+T(k) = 255 \cdot \int_{\mathbb{Z}_k} \mathrm{d} \mathbb{P} = 255 \cdot \sum_{i=0}^{k} \mathbb{P}(i), \quad \text{ for } k \in \mathbb{Z}_{256}
+$$
+
+![其逆过程是: 在均匀分布上取点, 然后用 c.d.f. (的反函数) 映射回去得到原分布, 这个原分布恰好这个 c.d.f. 的导数 (即 p.d.f.)](equalization.gif){#fig-equalization width=70%}
+:::
+:::
+<!-- ----------------------------------------- -->
+
+#### Histogram Matching 直方图匹配
+
+> **Motivation**: 我想让这张图的整体明暗感觉看起来像那张图, 请设计一个 $T$ 来达到这个目的.
+
+- **目标**: 刚好是 Histogram Equalization 的 generalization, 即设计一个 $T$ 使得输出图像的 histogram 是一个**指定的**分布 $\nu$.
+    - 即: Find $T: [0,1] \to [0,1]$ s.t., $\mu$ 的 pushforward 测度 $T_* \mu = \nu.$
+
+- **Solution**: 很显然, 我们可以得到一个均匀分布 $\lambda$, 再用这个均匀分布 #lem-equalization 得到我们想要的分布 $\nu$.
+
+::: {.callout-tip icon=false}
+## Histogram Matching: Two-step Mapping
+::: {#lem-matching}
+我们要找的 $T$ 将灰度值为 $\alpha$ 的像素映射到 $T(\alpha)$:
+$$
+T = \left(\text{cdf}_{\nu}\right)^{-1} \circ \text{cdf}_{\mu}
+$${#eq-matching}
+
+![利用 @lem-equalization 将 $\mu$ 分布映射到均匀分布, 再映射到 target $\nu$ 分布.](matching.png){#fig-matching width=60%}
+:::
+:::
+<!-- ----------------------------------------- -->
+
+## Image Restoration 图像复原
+
+> 图像就是在**已知**图像是**如何损坏 (Degradation model)**的情况下, 修复图像的过程.
+
+### Degradation/Restoration Model 损坏/复原模型
+
+![就是两个二维 LTI 系统外加一个 additive noise @_2017_image.](dr-model.png){#fig-dr-model}
+
+
+显然有:
+
+$$
+\begin{aligned}
+r &= f * h + n, &\hat{f} = r * k \\
+R &= F \cdot H + N, &\hat{F} = R \cdot K
+\end{aligned}
+$$
+
+#### 只有噪声 $n(x,y)$
+
+- **Noise Models 噪声模型**
+    - **Gaussian noise 高斯噪声**
+    - **Rayleigh noise 瑞利噪声**: 一般出现在雷达图像中.
+    - **Uniform noise 均匀噪声**
+    - **Salt-and-pepper (impulse) noise 椒盐噪声**
+    - **Periodic noise 周期噪声**: 一般是收到了电磁干扰 (比如宇宙图像).
+
+#### 只有模糊 $h(x,y)$
+
+> 或者噪声非常小可以忽略.
+
+- **Inverse filtering 逆滤波**: 直接用 $$K=\frac{1}{H}$$ 来复原图像.
+    - **Limitation 局限性**: 当 $H$ 在某些频率上接近 $0$ 时, 逆滤波会极大地放大噪声, 导致复原效果很差! 比如下面的 EXAMPLE:
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## EXAMPLE: Motion blur 运动模糊
+
+![Motion blur 的 $h(x,y)$ 是一条与相机运动方向相同的线段 @berrios_2023_how.](motion-blur.png){#fig-motion-blur}
+
+由 @fig-motion-blur 知: Motion blur 的 $H$ 在垂直于运动方向上有很多零点, 不能用 Inverse filtering 来复原图像.
+:::
+<!-- ----------------------------------------- -->
+
+
+#### 同时有模糊 $H$ 和噪声 $n$
+
+
 
 ## Image Segmentation 图像分割
 
-> 一个非常自然的需求是把一张图像分割成若干个有意义的区域. 由于「有意义」无法准确定义, 因此图像分割非常开放.
+> 一个非常自然的需求是把一张图像分割成若干个有意义的区域. 由于「有意义」无法准确定义, 因此图像分割问题甚至没有标准答案.
 
-- **Neighbors of a pixel 二值图像像素的邻域**: 有不同的定义! 4-neighbors (上下左右), 8-neighbors, diagonal-neighbors (对角线).
+- **Neighbors of a pixel 二值图像像素的邻域**: 有不同的定义! **4-neighbors** (上下左右), **8-neighbors**, **diagonal-neighbors** (对角线).
     - 领域不一定是等价关系!
     - **Path 路径**: 一个像素的有序序列, 后一个像素都是前一个像素的 neighbor.
     - **Connected set 连通集**: 当邻域是等价关系 $\sim$ 时, 二值图像 $b/\sim$ 中的每个等价类就是一个连通集.
         - **Boundary 边界**: 跟拓扑学里的定义一样, 边界点的邻域包含区域外的像素.
 
-- **Edge detection 边缘检测**
-    - **Gradient + Thresholding**
-    - **LPF + Laplacian**: 比如 LoG (Laplacian of Gaussian).
-    - **Edge linking 边缘连接**: 边缘可能不连续, 可以利用梯度方向等信息把边缘连接起来.
-    - **Hough Transform 霍夫变换**
+### Edge Detection 边缘检测
 
-- **Edge-based object detection 基于边缘的目标检测**
-    - **Distance Transform (DT) 距离变换**: 计算每个像素到最近边界像素的 $\mathcal{L}^2$ 距离.
+![可分为 Gradient-based (空间一阶导) 和 Guassian-based (空间二阶导) @geeksforgeeks_2020_image.](edge-detection.png){#fig-edge-detection width=45%}
 
-- **Region-based segmentation 基于区域的分割**
+#### 空间一阶导
+
+- 梯度大的地方很可能就是「边缘」, 因此很自然的想法是计算图片每个点处的**梯度** (先各算 $x,y$ 方向, 然后用平方加起来根号), 然后把梯度大于某个阈值的点标记为边缘. 而对于离散图像, 梯度有 **Central difference ($\delta(x,y)$)**, **Forward difference $\Delta(x,y)$**, **Backward difference $\nabla(x,y)$** @a2021_finite. 由于它们都是线性运算, 因此可以被**等价为与一个 derivative kernel 做相关** ("[ ]" 表示相关出来的结果填在该位置):
+
+    | | Central | Forward | Backward |
+    | -------- | ---------- | ------- | -------- |
+    | $x$ direction kernel | $\begin{pmatrix}-1 & [0] & 1\end{pmatrix}$ | $\begin{pmatrix}[-1] & 1\end{pmatrix}$ | $\begin{pmatrix}-1 & [1]\end{pmatrix}$ |
+    | $y$ direction kernel | $\begin{pmatrix}-1 \\ [0] \\ 1\end{pmatrix}$ | $\begin{pmatrix}[-1] \\ 1\end{pmatrix}$ | $\begin{pmatrix}-1 \\ [1]\end{pmatrix}$ |
+
+- 当然「用梯度来检测」是一个拍脑袋的想法, 在这个基础上我们可以**将梯度算子一般化**, 只要能检测出两侧的差异就行呗, 于是我们得到了 (当然完全不限于这些, 你可以自己设计):
+
+    | | Sobel | Prewitt | Roberts |
+    | -------- | ---------- | ------- | -------- |
+    | $x$ direction kernel | $\begin{pmatrix}-1 & 0 & 1 \\ -2 & [0] & 2 \\ -1 & 0 & 1\end{pmatrix}$ | $\begin{pmatrix}-1 & 0 & 1 \\ -1 & [0] & 1 \\ -1 & 0 & 1\end{pmatrix}$ | $\begin{pmatrix}[0] & 1 \\ -1 & 0\end{pmatrix}$ ($\nearrow$ direction) |
+    | $y$ direction kernel | $\begin{pmatrix}-1 & -2 & -1 \\ 0 & [0] & 0 \\ 1 & 2 & 1\end{pmatrix}$ | $\begin{pmatrix}-1 & -1 & -1 \\ 0 & [0] & 0 \\ 1 & 1 & 1\end{pmatrix}$ | $\begin{pmatrix}[1] & 0 \\ 0 & -1\end{pmatrix}$ ($\nwarrow$ direction) |
+
+- 最后我们设一个阈值, 得到一个二值图像:
+
+    ![以 Roberts operator 为例, 设置不同阈值后的效果 @girod_2019_ee368cs232.](robert-thres.png){#fig-robert-thres width=80%}
+
+#### 空间二阶导
+
+> 上面的各种算子已经够 generalized 的了, 但是它们的本质还是 "first-order-like", 也许空间的二阶导也会给我们一些关于边缘的信息? 我们将会设计一些 "second-order-like" 的 kernel.
+
+::: {.column-margin}
+![空间二阶导如何给我们 edge 的信息: 看一阶导最值的过程就是找二阶导零点的过程! @girod_2019_ee368cs232](second-order-edge-info.png){#fig-second-order-edge-info}
+:::
+
+- 空间二阶导就是 Laplacian operator $$\nabla^2 f = \frac{\partial^2 f}{\partial x^2} + \frac{\partial^2 f}{\partial y^2}.$$ 这些偏导数也有 Central, Forward, Backward difference 的离散形式, 而且两次偏导数用的还可以不一样 (比如 Central + Forward), 但是下面只考虑两次用的都一样. 由于是直接将 $x,y$ 方向上的数值相加, 只需要一个 kernel 就行了 (实际情况一般就用 Central, 因为另外两个边缘的位置会偏):
+
+    | | Central | Forward | Backward |
+    | -------- | ---------- | ------- | -------- |
+    | Laplacian kernel | $\begin{pmatrix}0 & -1 & 0 \\ -1 & [4] & -1 \\ 0 & -1 & 0\end{pmatrix}$ | $\begin{pmatrix}[2] & -2 & 1 \\ -2 & 0 & 0 \\ 1 & 0 & 0\end{pmatrix}$ | $\begin{pmatrix}0 & 0 & 1 \\ 0 & 0 & -2 \\ 1 & -2 & [2]\end{pmatrix}$ |
+
+    ![直接用 Laplacian $=0$ 会发现全是 edge. 于是我们先用一个低通滤波器 (比如对原图进行高斯模糊), 再用 Laplacian (Laplacian of Gaussian, LoG) @girod_2019_ee368cs232.](log.png){#fig-log width=80%}
+
+#### Canny Edge Detector
+
+> Canny edge detector 是一个在 CV 中广泛使用的方法, 他综合了前面两者的优点. 当然它也很拍脑袋, 你可以想象成是你一个很聪明的同学想出来的.
+
+- Canny 的步骤很简单: 
+    - **Gaussian**: 首先高斯滤波.
+    - **Compute Gradient**: 然后计算**每个**像素处梯度大小和其**方向**. 
+    - **Thresholding**: 选出梯度大小在一个预设的范围内的像素点. 假设 @fig-canny 中的蓝色像素被选出了.
+    - **Directional second-derivative**: 在所有被选出的像素上**沿着梯度方向**做一个一维的二阶导数, 找到其零点并在原图上标记出来. 比如 @fig-canny 中蓝色像素的梯度方向是右上方, 橙色像素的二阶导值最接近 $0$, 保留橙色像素, 丢弃蓝色像素 (想一想, 这样会让边缘**更细、更精确**). 对所有蓝色的像素都做这个操作, 最终得到 @fig-canny 中的所有橙色像素, 这些就是 Canny 检测到的边缘.
+
+    ![Canny 步骤 @firstprinciplesofcomputervision_2021_canny.](canny.png){#fig-canny width=90%}
+
+- **Edge linking 边缘连接**: 边缘可能不连续, 可以利用梯度方向等信息把边缘连接起来.
+
+### Edge-based object detection 基于边缘的目标检测
+
+#### Hough Transform
+
+> Hough Transform 目标不再仅仅是找到边缘, 而是基于 Edge Detector 的二值边缘图像标记出**特定形状 (比如直线, 圆)** 的**位置**以及它们的**数量**[^hough].
+
+[^hough]: 我觉得 Hough Transform 的思想非常优美, 我在想如果直接用机器学习的方法训练一个网络来找直线位置以及数量, 是否在神经网络的某个角落里就隐藏着 Hough Transform 这个算法呢? 怎么找到呢? 或者更一般地, 如何提取神经网络学到的东西?
+
+看一遍 [This video](https://www.youtube.com/watch?v=XRBc_xkZREg) 就懂了.
+
+
+
+#### Distance Transform (DT) 距离变换
+
+> DT 的目标也是基于 Edge Detector 的二值边缘图像, 再给定一个模版的二值边缘图像, 目标是在原图中找到与模版边缘最相似的区域. 一个很自然的想法是直接计算二值模版图像在原二值图像上的**归一化内积 (NCC)**, 然后找到最大的位置. 但是模版可能会有缩放, 导致匹配的结果很差. 因此我们引入 DT.
+
+- **操作步骤**:
+    - **Distance Transform**: 先不管模版图像, 在原二值图像中计算每个白色像素到最近黑色像素的某种距离 (比如 $\mathcal{L}^2$, $\mathcal{L}^1$, random walk distance, etc.) 如果本来就是黑色像素, 则距离为 $0$. 这样我们得到了一张与原图大小一样的全是距离数值的图像 (@fig-dt), 称为原二值图像的 Distance Transform (DT).
+    - 将模版放在 DT 图像上滑动, 计算**该模版下的所有像素的 DT 值的和**. 这个和**越小**说明该位置的模版与原图的这个区域越相似 (@fig-dt-match).
+
+::: {layout = "[52,48]"}
+![对 Binary image 的 DT ($\mathcal{L}^2$ 距离) @bankhead_image.](dt.png){#fig-dt}
+
+![红色模版与蓝色原二值图像的最佳匹配](dt-match.png){#fig-dt-match}
+:::
+
+
+### Non-edge-based segmentation 非基于边缘的分割
+
+> 这种分割图像的方法不从「变化」来先找边界, 而是从「相似性」出发直接找区域 (Region-based segmentation).
+
+#### Thresholding
+
+> 根据阈值是否随**空间**变化可分为 **Global thresholding** 和 **Variable thresholding**. 注意这两种方法都可以涉及**阈值迭代**的过程, 即有一种机制不断更新 threshold 直到收敛.
+
+- **Global thresholding**: 
+    - 对光照变化大的图像效果不好.
+
+- **Variable thresholding**:
+    - 可以自动适应光照变化.
+
+#### Region Growing
+
+- 给定待分割的灰度图像 $r$, 给定一个 seed binary mask $m$, 计算 $r$ 在 $m$ 覆盖的区域的均值 $\mu$, 然后设置一个 threshold $T$, 把 $r$ 中所有在 $[\mu - T, \mu + T]$ 范围内且与 $m$ 相邻的像素点加入 $m$, 重复这个过程即可.
+    - 当然算均值 + threshold 也可以换成别的**相似性度量方法 (similarity criteria)**.
+
+#### K-Means Clustering
+
+- 假设我们想对一张图片进行基于颜色的 segmentation, 我们可以把每个像素的颜色 (比如 RGB) 看作一个三维空间中的点, 然后在 RGB 空间中进行 K-Means Clustering 来把这些点分成 $K$ 类:
+    - 随机选择 $K$ 个初始中心点 (centroids).
+    - 将每个点分配给距离它最近的中心点所属的类. (注意每个点都会被分配而不是留到以后再分).
+    - 重新计算每个类的中心点 (centroids).
+    - 重复上面两步直到收敛 (中心点不再变化, 或其变化小于某个阈值 $\varepsilon$).
+
+- K-means 也可以用在别的 feature space 上! 比如它甚至可以用于将图像本身分类. 假设我们有很多图像, 每张图像在某个 feature space 中都是一个点. 我们可以在这个 feature space 上用 K-means 将这些图像分成 $K$ 类.
+
+::: {layout = "[50,50]"}
+![K-means Clustering 的迭代 @boriharnk_2023_creating.](kmeans-clustering.webp){#fig-kmeans-clustering}
+
+![选取不一样的 feature space 可以得到不同的 segmentation results @nayar_2021_kmeans.](kmeans-feature-space.png){#fig-kmeans-feature-space}
+:::
 
 
 ## Morphological 形态学图像处理
 
 > 这里主要涉及 PS 软件中的各种基础操作的原理.
 
-- **Binary erosion / dilation 二值图像腐蚀/膨胀**: 想象一个 binary image $f$ 的前景是凹下去的模具, 想象 SE (Structuring Element) 像俄罗斯方块一样掉落在 $f$ 上, 记录下:
-    - SE 能**整体**掉进去的地方, 这些就是腐蚀 $f \ominus se$ 的结果. 腐蚀过的前景 ($f \ominus se$) 只会比 $f$ 一样大或者更小.
-    - 任何**一个** SE 方块能掉进去的地方, 这些就是膨胀 $f \oplus se$ 的结果. 膨胀过的前景 ($f \oplus se$) 只会比 $f$ 一样大或者更大.
-    - **Erosion 和 Dilation 互为 dual**
+### Binary erosion / dilation 二值图像腐蚀/膨胀
+
+> 我们希望 foreground binary image 里面的小点消失 (**Dilation**)、快连上的线能连上 (**Erosion**).
+
+- 想象一个 binary image $f$ 的前景是凹下去的模具, 想象 SE (Structuring Element) 像俄罗斯方块一样掉落在 $f$ 上, 记录下:
+    - **Erosion**: SE 能**整体**掉进去的地方, 这些就是**腐蚀 $f \ominus se$** 的结果. 腐蚀过的前景 ($f \ominus se$) 只会比 $f$ 一样大或者更小.
+    - **Dilation**: 任何**一个** SE 方块能掉进去的地方, 这些就是膨胀 $f \oplus se$ 的结果. 膨胀过的前景 ($f \oplus se$) 只会比 $f$ 一样大或者更大.
+
+- **Erosion 和 Dilation 互为 dual**.
+- 我们可以通过给原二值图像的 **DT 图像加 threshold** 来计算腐蚀和膨胀 (见 @fig-erosion-dilation-by-dt).
+
+::: {.column-margin}
+![给原二值图像的 **DT 图像加 threshold** 来计算腐蚀和膨胀 @bankhead_image.](erosion-dilation-by-dt.png){#fig-erosion-dilation-by-dt}
+:::
+
 
 ::: {layout = "[50,50]"}
 ![Binary Erosion @Mardiris2016ACD](erosion.png){#fig-erosion}
@@ -121,12 +372,21 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 ![Binary Dilation @Mardiris2016ACD](dilation.png){#fig-dilation}
 :::
 
+### Opening / Closing 开运算/闭运算
 
+> Erosion / Dilation 虽然比较有效, 但是有一个副作用就是前景的粗细都会顺带一起被改变: 小点消失的同时整体的线都变细了, 即将要连上的线连起来了但整体的线也变粗了. 为了解决这个问题, 我们引入 Opening / Closing.
 
+::: {layout = "[50,50]"}
+![Erosion / Dilation 的副作用 @bankhead_image.](erosion-dilation.png){#fig-erosion-dilation}
+
+![Opening / Closing 缓解了 @fig-erosion-dilation 中的副作用 @bankhead_image.](opening-closing.png){#fig-opening-closing}
+:::
 
 - **Opening 开运算**: 先腐蚀后膨胀, $b \circ se \equiv (b \ominus se) \oplus se$.
+    - 消失的小点不会因为膨胀而再出现.
 
 - **Closing 闭运算**: 先膨胀后腐蚀, $b \bullet se \equiv (b \oplus se) \ominus se$.
+    - 连上的线一般不会因为腐蚀而再断开.
 
 
 ## PCA 主成分分析
@@ -147,6 +407,8 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 ### Lossless Compression 无损压缩
 
 - **Huffman coding 霍夫曼编码**
+    - **Huffman Tree 的构建**: 将所有符号的频次 (或概率) 从小到达排序, 选两个频次最小的创建他们的公共父节点, 频次为两者之和, 然后将这个新节点插回列表中重复步骤, 直到只剩一个节点为止.
+
 - **Arithmetic coding 算术编码**
 - **LZW 编码**
 

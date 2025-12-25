@@ -10,7 +10,866 @@
 <atom:link href="https://marcobisky.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Getting better every second!</description>
 <generator>quarto-1.7.32</generator>
-<lastBuildDate>Mon, 22 Dec 2025 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Wed, 24 Dec 2025 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>DIP Crash Course 数字图像处理速成笔记</title>
+  <dc:creator>Marcobisky </dc:creator>
+  <link>https://marcobisky.github.io/posts/dip-crash-course/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<blockquote class="blockquote">
+<p>将所有的开放问题的 solution 当作一个普通的解决方法来看待, 它们绝不是最优或者唯一的解决方案.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>每个变换背后尽可能想象一个图像的画面变化.</p>
+</blockquote>
+<section id="basic-conventions-基本约定" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="basic-conventions-基本约定"><span class="header-section-number">1</span> Basic Conventions 基本约定</h2>
+<ul>
+<li><p>Image 默认为 <strong>sampling</strong> 和 <strong>quantization</strong> 之后的数字图像</p>
+<ul>
+<li><strong>Spacial resolution 空间分辨率</strong>: 长宽方向的采样点数的乘积.
+<ul>
+<li>规定图片的左上角像素坐标为 <img src="https://latex.codecogs.com/png.latex?(0,0)">.</li>
+</ul></li>
+<li><strong>Intensity resolution 强度分辨率</strong>: 量化的精度, 一般用每个像素的 bit 数表示. <strong>默认为 <img src="https://latex.codecogs.com/png.latex?8"> bit (<img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BZ%7D_%7B256%7D">, 或者不严格地, <img src="https://latex.codecogs.com/png.latex?%5B0,%20255%5D">)</strong>.</li>
+</ul></li>
+<li><p><strong>Color space 颜色空间</strong>: 单色可见光的波长在 <img src="https://latex.codecogs.com/png.latex?%5B380,%20780%5D%20%5Ctext%7B%20nm%7D">, 每一束光都可以有任意强度的单色光分量 (即「光谱」), 因此所有光构成一个<strong>不可数无穷维拓扑向量空间</strong>.</p>
+<ul>
+<li>但是人眼有三种类型的视锥细胞 (L, M, S) 对不同的频率成分有 (不会变化的) 不同的敏感度, 它们自动将所有光<strong>线性映射</strong>到一个三维子空间 <img src="https://latex.codecogs.com/png.latex?%5COmega"> 中 (想想为什么是线性的, 因为是积分). 即使两个光的光谱不同, 但它们在这个三维子空间的投影相同, 人眼也无法区分它们.</li>
+<li>不同的应用场景在 <img src="https://latex.codecogs.com/png.latex?%5COmega"> 中选择不同的基底:
+<ul>
+<li><strong>RGB</strong> (Red, Green, Blue): 显示器, 图像储存.</li>
+<li><strong>CMY/CMYK</strong> (Cyan, Magenta, Yellow, K: Black ink): 打印机, K 成分是多余的, 就当作是为了节省墨水 lol.</li>
+<li><strong>HSI/HSV</strong> (Hue, Saturation, Intensity/Value): 图像编辑软件.</li>
+</ul></li>
+</ul></li>
+<li><p>默认情况下图片丢失拓扑结构 <code>view()</code> 成一个 vector. <img src="https://latex.codecogs.com/png.latex?r"> 代表处理前的图像 vector, <img src="https://latex.codecogs.com/png.latex?s"> 代表处理后的图像 vector.</p></li>
+<li><p><strong>RGB2Gray 转换方法</strong>: 可以任选一通道 / 取最大 / 平均值 / 加权平均.</p></li>
+<li><p><strong>Contrast 对比度</strong>: 灰度图像中像素值最大值与最小值之差 (去掉 outlier).</p></li>
+<li><p><strong>Binary Image 二值图像 <img src="https://latex.codecogs.com/png.latex?f"></strong>: <img src="https://latex.codecogs.com/png.latex?0"> 表示 background, <img src="https://latex.codecogs.com/png.latex?1"> 表示 foreground.</p></li>
+</ul>
+<section id="notations" class="level3" data-number="1.1">
+<h3 data-number="1.1" class="anchored" data-anchor-id="notations"><span class="header-section-number">1.1</span> Notations</h3>
+<ul>
+<li><strong>图像空间 <img src="https://latex.codecogs.com/png.latex?%5Ctext%7BImg%7D"></strong>: 所有不同大小的灰度图像构成的 Vector Space.
+<ul>
+<li>这是最大的图像空间, 只要是图像都在里面.</li>
+<li>彩色图像空间记为 <img src="https://latex.codecogs.com/png.latex?%5Ctext%7B%5Ctextcolor%7Bred%7D%7BI%7D%5Ctextcolor%7Bgreen%7D%7Bm%7D%5Ctextcolor%7Bblue%7D%7Bg%7D%7D">.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="kernel-based-processing-基于核的处理" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="kernel-based-processing-基于核的处理"><span class="header-section-number">2</span> Kernel-based processing 基于核的处理</h2>
+<blockquote class="blockquote">
+<p>本人没有按照 Spatial domain 和 Frequency domain 来划分, 因为他们本质上是等价的, 无法将二者严格区分.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Kernel-based method 就是将原图片与一个 kernel 做滑动内积 (纠结是内积还是卷积毫无意义). 重点在于 kernel 的设计, 我们通过 kernel 设计的<strong>思维路径</strong>将其划分为 Spatial filtering 和 Frequency filtering 两大类.</p>
+</blockquote>
+<section id="spatial-filtering-空间滤波" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="spatial-filtering-空间滤波"><span class="header-section-number">2.1</span> Spatial Filtering 空间滤波</h3>
+<blockquote class="blockquote">
+<p>Spatial filtering 指 kernel 的设计过程没有经过频域分析.</p>
+</blockquote>
+<ul>
+<li><p><strong>Padding 填充</strong></p></li>
+<li><p><strong>NCC (Normalized Cross-Correlation)</strong>: 图像 vector 之间的夹角余弦值.</p></li>
+<li><p><strong>Common filters 常用滤波器</strong></p>
+<ul>
+<li><strong>Smoothing filters 平滑滤波器 (低通滤波器)</strong></li>
+<li><strong>Order-statistic filters 次序统计滤波器</strong>: 将某框内的像素排序后取中位数, 一般可去除 salt-and-pepper (impulse) noise.</li>
+<li><strong>Sharpening (derivative) filters 锐化滤波器 (高通滤波器)</strong>: 将梯度、Laplacian 算子移植到图片上; 由于这些算子是线性的, 可等价于与一个 kernel 做卷积; 这些 kernel 也可以在形式上被强化来达到更强的锐化效果.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="non-kernel-based-processing-非基于核的处理" class="level2 page-columns page-full" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="non-kernel-based-processing-非基于核的处理"><span class="header-section-number">3</span> Non-kernel-based processing 非基于核的处理</h2>
+<blockquote class="blockquote">
+<p>Non-kernel-based method 指处理过程无法被等价为与一个确定的 kernel 做内积的过程.</p>
+</blockquote>
+<section id="intensity-transformation" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="intensity-transformation"><span class="header-section-number">3.1</span> Intensity Transformation</h3>
+<blockquote class="blockquote">
+<p>强度变换仅仅是<strong>单灰度像素</strong>的操作, 即用一个函数 <img src="https://latex.codecogs.com/png.latex?s%20=%20T(r)"> 来<strong>独立地</strong>映射所有像素值, 一般情况下</p>
+</blockquote>
+<ul>
+<li><strong>Monoid <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BT%7D"></strong>: 一张图片 <img src="https://latex.codecogs.com/png.latex?r"> 上的所有 Intensity Transformation 构成幺半群 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BT%7D">.
+<ul>
+<li><strong>Group <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BT%7D_%7B%5Ctext%7Bbij%7D%7D"></strong>: 从 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BT%7D"> 中取出所有 bijective 映射, 它构成一个群. 其中包括:
+<ul>
+<li><strong>Image Negatives 图像反相</strong>: <img src="https://latex.codecogs.com/png.latex?s%20=%20L%20-%201%20-%20r">.</li>
+</ul></li>
+<li><strong>Group <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BT%7D_%5Cuparrow"></strong>: <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BZ%7D_%7B256%7D"> 的保序同胚群 (所有保序映射 (严格单增) 的 <img src="https://latex.codecogs.com/png.latex?T">), 是 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BT%7D_%7B%5Ctext%7Bbij%7D%7D"> 的子群. 引入此的意义是一般图像处理都<strong>只希望深颜色的像素在处理后还是比较深的颜色</strong>, 而不会变白了, 所以实际上几乎只会考虑 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BT%7D_%5Cuparrow"> 中的变换. 常用的有:
+<ul>
+<li><strong>Contrast stretching 对比度拉伸</strong></li>
+<li><strong>Log transformation 对数变换</strong>: <img src="https://latex.codecogs.com/png.latex?s%20=%20c%20%5Ccdot%20%5Clog(1%20+%20r)">.</li>
+<li><strong>Exponential transformation 指数变换</strong></li>
+<li><strong>Power-Law (Gamma) transformation 幂律变换</strong>: <img src="https://latex.codecogs.com/png.latex?s%20=%20c%20%5Ccdot%20r%5E%7B%5Cgamma%7D">.</li>
+</ul></li>
+</ul></li>
+</ul>
+<div id="fig-intensity-trans-class" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-intensity-trans-class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/intensity-trans-class.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-intensity-trans-class-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 强度变换的分类, 单位元记为 <img src="https://latex.codecogs.com/png.latex?%5Ctext%7Bid%7D">.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="histogram-processing-直方图处理" class="level3 page-columns page-full" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="histogram-processing-直方图处理"><span class="header-section-number">3.2</span> Histogram Processing 直方图处理</h3>
+<blockquote class="blockquote">
+<p>直接想出一个 Intensity Transformation 比较难, 我们引入分析灰度图像的另一种方法: 直方图 (Histogram). 注意这只是辅助我们设计 <img src="https://latex.codecogs.com/png.latex?T"> 的中间步骤, 我们会看到用 Histogram 可以快速、有根据地帮我们得出一个 <img src="https://latex.codecogs.com/png.latex?T">.</p>
+</blockquote>
+<ul>
+<li><strong>Histogram 图像直方图</strong>: 每个图像以 Figure&nbsp;2 的方式给 <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BZ%7D_%7B256%7D"> 数轴引入了权重, 即 measure <img src="https://latex.codecogs.com/png.latex?%5C#">. Histogram 定义为测度空间 <img src="https://latex.codecogs.com/png.latex?(%5Cmathbb%7BZ%7D_%7B256%7D,%20%5Cmathcal%7BP%7D(%5Cmathbb%7BZ%7D_%7B256%7D),%20%5C#)">.
+<ul>
+<li>可以引入 <img src="https://latex.codecogs.com/png.latex?%5Ctext%7Bcdf%7D(%5C#)">.</li>
+</ul></li>
+</ul>
+<p>为后文表达方便我们引入这些冗余概念:</p>
+<ul>
+<li><strong><img src="https://latex.codecogs.com/png.latex?y"> 归一化直方图 <img src="https://latex.codecogs.com/png.latex?(%5Cmathbb%7BZ%7D_%7B256%7D,%20%5Cmathcal%7BP%7D(%5Cmathbb%7BZ%7D_%7B256%7D),%20%5Cmathbb%7BP%7D)"></strong>: 纵坐标除以了像素总数 (Figure&nbsp;3), 相当于概率.
+<ul>
+<li>可以引入 <img src="https://latex.codecogs.com/png.latex?%5Ctext%7Bcdf%7D(%5Cmathbb%7BP%7D)">.</li>
+</ul></li>
+<li><strong><img src="https://latex.codecogs.com/png.latex?x"> 归一化直方图 <img src="https://latex.codecogs.com/png.latex?(%5B0,1%5D,%20%5Cmathcal%7BB%7D(%5B0,1%5D),%20%5C#')"></strong>: 在归一化直方图的基础上横坐标也归一化到 <img src="https://latex.codecogs.com/png.latex?%5B0,1%5D"> 上 (见 Figure&nbsp;2).
+<ul>
+<li>可以引入 <img src="https://latex.codecogs.com/png.latex?%5Ctext%7Bcdf%7D(%5C#')">.</li>
+</ul></li>
+<li><strong><img src="https://latex.codecogs.com/png.latex?x,y"> 归一化直方图 <img src="https://latex.codecogs.com/png.latex?(%5B0,1%5D,%20%5Cmathcal%7BB%7D(%5B0,1%5D),%20%5Cmu)"></strong>: 横纵坐标都归一化到 <img src="https://latex.codecogs.com/png.latex?%5B0,1%5D"> 上 (见 Figure&nbsp;3).
+<ul>
+<li>可以引入 <img src="https://latex.codecogs.com/png.latex?%5Ctext%7Bcdf%7D(%5Cmu)">.</li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-histogram" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-histogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/histogram.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogram-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Histogram 就是收集每个灰度级别的像素个数 <span class="citation" data-cites="wilson_2023_histogram">[1]</span> (这里展示的是<strong><img src="https://latex.codecogs.com/png.latex?x"> 归一化直方图</strong>的构造方法).
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-histogram-normalized" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-histogram-normalized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/histogram-normalized.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogram-normalized-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: <img src="https://latex.codecogs.com/png.latex?x"> 归一化直方图转成 <img src="https://latex.codecogs.com/png.latex?x,y"> 归一化直方图 @<span class="citation" data-cites="wilson_2023_histogram">[1]</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="fig-histogram-notation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-histogram-notation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/histogram-notation.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogram-notation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: <img src="https://latex.codecogs.com/png.latex?4"> 种 Histogram 的 Notation 说明.
+</figcaption>
+</figure>
+</div>
+<div class="page-columns page-full"><blockquote class="blockquote">
+<p>下文都默认在 <img src="https://latex.codecogs.com/png.latex?x,y"> 归一化直方图的测度空间 <img src="https://latex.codecogs.com/png.latex?(%5B0,1%5D,%20%5Cmathcal%7BB%7D(%5B0,1%5D),%20%5Cmu)"> 上讨论! 以防到处出现恶心的 <img src="https://latex.codecogs.com/png.latex?255">.<sup>1</sup></p>
+</blockquote><div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;PPT 上就没有用 <img src="https://latex.codecogs.com/png.latex?x,y"> 归一化的方式表达, 非常 annoying!</p></div></div></div>
+<section id="histogram-equalization-直方图均衡化" class="level4" data-number="3.2.1">
+<h4 data-number="3.2.1" class="anchored" data-anchor-id="histogram-equalization-直方图均衡化"><span class="header-section-number">3.2.1</span> Histogram Equalization 直方图均衡化</h4>
+<blockquote class="blockquote">
+<p><strong>Motivation</strong>: 如果图像整体看起来比较一致, 对比度不高, 我们希望不同深浅的像素都要有一些 (尽量均匀一点), 这样图像看起来更清晰.</p>
+</blockquote>
+<ul>
+<li><strong>目标</strong>: 设计一个 <img src="https://latex.codecogs.com/png.latex?T"> 使得输出图像的 histogram <strong>均匀</strong>分布在 <img src="https://latex.codecogs.com/png.latex?%5B0,1%5D"> 上.
+<ul>
+<li>即: Find <img src="https://latex.codecogs.com/png.latex?T:%20%5B0,1%5D%20%5Cto%20%5B0,1%5D"> s.t., <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7B%5Cmu%7D"> 的 pushforward 测度 <img src="https://latex.codecogs.com/png.latex?T_*%20%5Cmu"> 是 uniform 的 (Lebesgue 测度), i.e., <img src="https://latex.codecogs.com/png.latex?T_*%20%5Cmu%20=%20%5Clambda."></li>
+</ul></li>
+<li><strong>Solution</strong>: Surprisingly!!! 这个 <img src="https://latex.codecogs.com/png.latex?T"> 就是 <img src="https://latex.codecogs.com/png.latex?%5Cmu"> 的累积分布函数 (c.d.f.)! (见 Lemma&nbsp;1) 仔细想想看, 这正是导数的定义!!</li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<img src="https://latex.codecogs.com/png.latex?T"> is exactly the c.d.f. of <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BP%7D">!
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div id="lem-equalization" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 1</strong></span> 我们要找的 <img src="https://latex.codecogs.com/png.latex?T"> 将灰度值为 <img src="https://latex.codecogs.com/png.latex?%5Calpha"> 的像素映射到 <img src="https://latex.codecogs.com/png.latex?T(%5Calpha)">: <span id="eq-equalization"><img src="https://latex.codecogs.com/png.latex?%0A%20%20%20%20%5Cboxed%7B%0A%20%20%20%20T(%5Calpha)%20=%20%5Cint_0%5E%7B%5Calpha%7D%20%5Cmathrm%7Bd%7D%20%5Cmu,%20%5Cquad%20%5Ctext%7B%20for%20%7D%20%5Calpha%20%5Cin%20%5B0,1%5D%0A%20%20%20%20%7D%0A%20%20%20%20%20%5Ctag%7B1%7D"></span></p>
+<p>如果你习惯在 <img src="https://latex.codecogs.com/png.latex?%5Cmathbb%7BZ%7D_%7B256%7D"> 上操作, 设 <img src="https://latex.codecogs.com/png.latex?%5Calpha"> 的归一化前的像素值为 <img src="https://latex.codecogs.com/png.latex?k">: <img src="https://latex.codecogs.com/png.latex?%0AT(k)%20=%20255%20%5Ccdot%20%5Cint_%7B%5Cmathbb%7BZ%7D_k%7D%20%5Cmathrm%7Bd%7D%20%5Cmathbb%7BP%7D%20=%20255%20%5Ccdot%20%5Csum_%7Bi=0%7D%5E%7Bk%7D%20%5Cmathbb%7BP%7D(i),%20%5Cquad%20%5Ctext%7B%20for%20%7D%20k%20%5Cin%20%5Cmathbb%7BZ%7D_%7B256%7D%0A"></p>
+<div id="fig-equalization" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-equalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/equalization.gif" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-equalization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: 其逆过程是: 在均匀分布上取点, 然后用 c.d.f. (的反函数) 映射回去得到原分布, 这个原分布恰好这个 c.d.f. 的导数 (即 p.d.f.)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+<section id="histogram-matching-直方图匹配" class="level4" data-number="3.2.2">
+<h4 data-number="3.2.2" class="anchored" data-anchor-id="histogram-matching-直方图匹配"><span class="header-section-number">3.2.2</span> Histogram Matching 直方图匹配</h4>
+<blockquote class="blockquote">
+<p><strong>Motivation</strong>: 我想让这张图的整体明暗感觉看起来像那张图, 请设计一个 <img src="https://latex.codecogs.com/png.latex?T"> 来达到这个目的.</p>
+</blockquote>
+<ul>
+<li><strong>目标</strong>: 刚好是 Histogram Equalization 的 generalization, 即设计一个 <img src="https://latex.codecogs.com/png.latex?T"> 使得输出图像的 histogram 是一个<strong>指定的</strong>分布 <img src="https://latex.codecogs.com/png.latex?%5Cnu">.
+<ul>
+<li>即: Find <img src="https://latex.codecogs.com/png.latex?T:%20%5B0,1%5D%20%5Cto%20%5B0,1%5D"> s.t., <img src="https://latex.codecogs.com/png.latex?%5Cmu"> 的 pushforward 测度 <img src="https://latex.codecogs.com/png.latex?T_*%20%5Cmu%20=%20%5Cnu."></li>
+</ul></li>
+<li><strong>Solution</strong>: 很显然, 我们可以得到一个均匀分布 <img src="https://latex.codecogs.com/png.latex?%5Clambda">, 再用这个均匀分布 #lem-equalization 得到我们想要的分布 <img src="https://latex.codecogs.com/png.latex?%5Cnu">.</li>
+</ul>
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Histogram Matching: Two-step Mapping
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<div id="lem-matching" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 2</strong></span> 我们要找的 <img src="https://latex.codecogs.com/png.latex?T"> 将灰度值为 <img src="https://latex.codecogs.com/png.latex?%5Calpha"> 的像素映射到 <img src="https://latex.codecogs.com/png.latex?T(%5Calpha)">: <span id="eq-matching"><img src="https://latex.codecogs.com/png.latex?%0AT%20=%20%5Cleft(%5Ctext%7Bcdf%7D_%7B%5Cnu%7D%5Cright)%5E%7B-1%7D%20%5Ccirc%20%5Ctext%7Bcdf%7D_%7B%5Cmu%7D%0A%5Ctag%7B2%7D"></span></p>
+<div id="fig-matching" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-matching-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/matching.png" class="img-fluid figure-img" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-matching-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: 利用 Lemma&nbsp;1 将 <img src="https://latex.codecogs.com/png.latex?%5Cmu"> 分布映射到均匀分布, 再映射到 target <img src="https://latex.codecogs.com/png.latex?%5Cnu"> 分布.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+</section>
+</section>
+<section id="image-restoration-图像复原" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="image-restoration-图像复原"><span class="header-section-number">4</span> Image Restoration 图像复原</h2>
+<blockquote class="blockquote">
+<p>图像就是在<strong>已知</strong>图像是<strong>如何损坏 (Degradation model)</strong>的情况下, 修复图像的过程.</p>
+</blockquote>
+<section id="degradationrestoration-model-损坏复原模型" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="degradationrestoration-model-损坏复原模型"><span class="header-section-number">4.1</span> Degradation/Restoration Model 损坏/复原模型</h3>
+<div id="fig-dr-model" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dr-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/dr-model.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dr-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: 就是两个二维 LTI 系统外加一个 additive noise <span class="citation" data-cites="_2017_image">[2]</span>.
+</figcaption>
+</figure>
+</div>
+<p>显然有:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Ar%20&amp;=%20f%20*%20h%20+%20n,%20&amp;%5Chat%7Bf%7D%20=%20r%20*%20k%20%5C%5C%0AR%20&amp;=%20F%20%5Ccdot%20H%20+%20N,%20&amp;%5Chat%7BF%7D%20=%20R%20%5Ccdot%20K%0A%5Cend%7Baligned%7D%0A"></p>
+<section id="只有噪声-nxy" class="level4" data-number="4.1.1">
+<h4 data-number="4.1.1" class="anchored" data-anchor-id="只有噪声-nxy"><span class="header-section-number">4.1.1</span> 只有噪声 <img src="https://latex.codecogs.com/png.latex?n(x,y)"></h4>
+<ul>
+<li><strong>Noise Models 噪声模型</strong>
+<ul>
+<li><strong>Gaussian noise 高斯噪声</strong></li>
+<li><strong>Rayleigh noise 瑞利噪声</strong>: 一般出现在雷达图像中.</li>
+<li><strong>Uniform noise 均匀噪声</strong></li>
+<li><strong>Salt-and-pepper (impulse) noise 椒盐噪声</strong></li>
+<li><strong>Periodic noise 周期噪声</strong>: 一般是收到了电磁干扰 (比如宇宙图像).</li>
+</ul></li>
+</ul>
+</section>
+<section id="只有模糊-hxy" class="level4" data-number="4.1.2">
+<h4 data-number="4.1.2" class="anchored" data-anchor-id="只有模糊-hxy"><span class="header-section-number">4.1.2</span> 只有模糊 <img src="https://latex.codecogs.com/png.latex?h(x,y)"></h4>
+<blockquote class="blockquote">
+<p>或者噪声非常小可以忽略.</p>
+</blockquote>
+<ul>
+<li><strong>Inverse filtering 逆滤波</strong>: 直接用 <img src="https://latex.codecogs.com/png.latex?K=%5Cfrac%7B1%7D%7BH%7D"> 来复原图像.
+<ul>
+<li><strong>Limitation 局限性</strong>: 当 <img src="https://latex.codecogs.com/png.latex?H"> 在某些频率上接近 <img src="https://latex.codecogs.com/png.latex?0"> 时, 逆滤波会极大地放大噪声, 导致复原效果很差! 比如下面的 EXAMPLE:</li>
+</ul></li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+EXAMPLE: Motion blur 运动模糊
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="fig-motion-blur" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-motion-blur-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/motion-blur.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-motion-blur-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Motion blur 的 <img src="https://latex.codecogs.com/png.latex?h(x,y)"> 是一条与相机运动方向相同的线段 <span class="citation" data-cites="berrios_2023_how">[3]</span>.
+</figcaption>
+</figure>
+</div>
+<p>由 Figure&nbsp;8 知: Motion blur 的 <img src="https://latex.codecogs.com/png.latex?H"> 在垂直于运动方向上有很多零点, 不能用 Inverse filtering 来复原图像.</p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+<section id="同时有模糊-h-和噪声-n" class="level4" data-number="4.1.3">
+<h4 data-number="4.1.3" class="anchored" data-anchor-id="同时有模糊-h-和噪声-n"><span class="header-section-number">4.1.3</span> 同时有模糊 <img src="https://latex.codecogs.com/png.latex?H"> 和噪声 <img src="https://latex.codecogs.com/png.latex?n"></h4>
+</section>
+</section>
+</section>
+<section id="image-segmentation-图像分割" class="level2 page-columns page-full" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="image-segmentation-图像分割"><span class="header-section-number">5</span> Image Segmentation 图像分割</h2>
+<blockquote class="blockquote">
+<p>一个非常自然的需求是把一张图像分割成若干个有意义的区域. 由于「有意义」无法准确定义, 因此图像分割问题甚至没有标准答案.</p>
+</blockquote>
+<ul>
+<li><strong>Neighbors of a pixel 二值图像像素的邻域</strong>: 有不同的定义! <strong>4-neighbors</strong> (上下左右), <strong>8-neighbors</strong>, <strong>diagonal-neighbors</strong> (对角线).
+<ul>
+<li>领域不一定是等价关系!</li>
+<li><strong>Path 路径</strong>: 一个像素的有序序列, 后一个像素都是前一个像素的 neighbor.</li>
+<li><strong>Connected set 连通集</strong>: 当邻域是等价关系 <img src="https://latex.codecogs.com/png.latex?%5Csim"> 时, 二值图像 <img src="https://latex.codecogs.com/png.latex?b/%5Csim"> 中的每个等价类就是一个连通集.
+<ul>
+<li><strong>Boundary 边界</strong>: 跟拓扑学里的定义一样, 边界点的邻域包含区域外的像素.</li>
+</ul></li>
+</ul></li>
+</ul>
+<section id="edge-detection-边缘检测" class="level3 page-columns page-full" data-number="5.1">
+<h3 data-number="5.1" class="anchored" data-anchor-id="edge-detection-边缘检测"><span class="header-section-number">5.1</span> Edge Detection 边缘检测</h3>
+<div id="fig-edge-detection" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-edge-detection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/edge-detection.png" class="img-fluid figure-img" style="width:45.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-edge-detection-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: 可分为 Gradient-based (空间一阶导) 和 Guassian-based (空间二阶导) <span class="citation" data-cites="geeksforgeeks_2020_image">[4]</span>.
+</figcaption>
+</figure>
+</div>
+<section id="空间一阶导" class="level4" data-number="5.1.1">
+<h4 data-number="5.1.1" class="anchored" data-anchor-id="空间一阶导"><span class="header-section-number">5.1.1</span> 空间一阶导</h4>
+<ul>
+<li><p>梯度大的地方很可能就是「边缘」, 因此很自然的想法是计算图片每个点处的<strong>梯度</strong> (先各算 <img src="https://latex.codecogs.com/png.latex?x,y"> 方向, 然后用平方加起来根号), 然后把梯度大于某个阈值的点标记为边缘. 而对于离散图像, 梯度有 <strong>Central difference (<img src="https://latex.codecogs.com/png.latex?%5Cdelta(x,y)">)</strong>, <strong>Forward difference <img src="https://latex.codecogs.com/png.latex?%5CDelta(x,y)"></strong>, <strong>Backward difference <img src="https://latex.codecogs.com/png.latex?%5Cnabla(x,y)"></strong> <span class="citation" data-cites="a2021_finite">[5]</span>. 由于它们都是线性运算, 因此可以被<strong>等价为与一个 derivative kernel 做相关</strong> (“[ ]” 表示相关出来的结果填在该位置):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 30%">
+<col style="width: 21%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Central</th>
+<th>Forward</th>
+<th>Backward</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><img src="https://latex.codecogs.com/png.latex?x"> direction kernel</td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D-1%20&amp;%20%5B0%5D%20&amp;%201%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D%5B-1%5D%20&amp;%201%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D-1%20&amp;%20%5B1%5D%5Cend%7Bpmatrix%7D"></td>
+</tr>
+<tr class="even">
+<td><img src="https://latex.codecogs.com/png.latex?y"> direction kernel</td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D-1%20%5C%5C%20%5B0%5D%20%5C%5C%201%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D%5B-1%5D%20%5C%5C%201%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D-1%20%5C%5C%20%5B1%5D%5Cend%7Bpmatrix%7D"></td>
+</tr>
+</tbody>
+</table></li>
+<li><p>当然「用梯度来检测」是一个拍脑袋的想法, 在这个基础上我们可以<strong>将梯度算子一般化</strong>, 只要能检测出两侧的差异就行呗, 于是我们得到了 (当然完全不限于这些, 你可以自己设计):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 30%">
+<col style="width: 21%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Sobel</th>
+<th>Prewitt</th>
+<th>Roberts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><img src="https://latex.codecogs.com/png.latex?x"> direction kernel</td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D-1%20&amp;%200%20&amp;%201%20%5C%5C%20-2%20&amp;%20%5B0%5D%20&amp;%202%20%5C%5C%20-1%20&amp;%200%20&amp;%201%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D-1%20&amp;%200%20&amp;%201%20%5C%5C%20-1%20&amp;%20%5B0%5D%20&amp;%201%20%5C%5C%20-1%20&amp;%200%20&amp;%201%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D%5B0%5D%20&amp;%201%20%5C%5C%20-1%20&amp;%200%5Cend%7Bpmatrix%7D"> (<img src="https://latex.codecogs.com/png.latex?%5Cnearrow"> direction)</td>
+</tr>
+<tr class="even">
+<td><img src="https://latex.codecogs.com/png.latex?y"> direction kernel</td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D-1%20&amp;%20-2%20&amp;%20-1%20%5C%5C%200%20&amp;%20%5B0%5D%20&amp;%200%20%5C%5C%201%20&amp;%202%20&amp;%201%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D-1%20&amp;%20-1%20&amp;%20-1%20%5C%5C%200%20&amp;%20%5B0%5D%20&amp;%200%20%5C%5C%201%20&amp;%201%20&amp;%201%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D%5B1%5D%20&amp;%200%20%5C%5C%200%20&amp;%20-1%5Cend%7Bpmatrix%7D"> (<img src="https://latex.codecogs.com/png.latex?%5Cnwarrow"> direction)</td>
+</tr>
+</tbody>
+</table></li>
+<li><p>最后我们设一个阈值, 得到一个二值图像:</p>
+<div id="fig-robert-thres" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-robert-thres-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/robert-thres.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-robert-thres-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: 以 Roberts operator 为例, 设置不同阈值后的效果 <span class="citation" data-cites="girod_2019_ee368cs232">[6]</span>.
+</figcaption>
+</figure>
+</div></li>
+</ul>
+</section>
+<section id="空间二阶导" class="level4 page-columns page-full" data-number="5.1.2">
+<h4 data-number="5.1.2" class="anchored" data-anchor-id="空间二阶导"><span class="header-section-number">5.1.2</span> 空间二阶导</h4>
+<blockquote class="blockquote">
+<p>上面的各种算子已经够 generalized 的了, 但是它们的本质还是 “first-order-like”, 也许空间的二阶导也会给我们一些关于边缘的信息? 我们将会设计一些 “second-order-like” 的 kernel.</p>
+</blockquote>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-second-order-edge-info" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-second-order-edge-info-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/second-order-edge-info.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-second-order-edge-info-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: 空间二阶导如何给我们 edge 的信息: 看一阶导最值的过程就是找二阶导零点的过程! <span class="citation" data-cites="girod_2019_ee368cs232">[6]</span>
+</figcaption>
+</figure>
+</div>
+</div></div><ul>
+<li><p>空间二阶导就是 Laplacian operator <img src="https://latex.codecogs.com/png.latex?%5Cnabla%5E2%20f%20=%20%5Cfrac%7B%5Cpartial%5E2%20f%7D%7B%5Cpartial%20x%5E2%7D%20+%20%5Cfrac%7B%5Cpartial%5E2%20f%7D%7B%5Cpartial%20y%5E2%7D."> 这些偏导数也有 Central, Forward, Backward difference 的离散形式, 而且两次偏导数用的还可以不一样 (比如 Central + Forward), 但是下面只考虑两次用的都一样. 由于是直接将 <img src="https://latex.codecogs.com/png.latex?x,y"> 方向上的数值相加, 只需要一个 kernel 就行了 (实际情况一般就用 Central, 因为另外两个边缘的位置会偏):</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 24%">
+<col style="width: 30%">
+<col style="width: 21%">
+<col style="width: 24%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Central</th>
+<th>Forward</th>
+<th>Backward</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Laplacian kernel</td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D0%20&amp;%20-1%20&amp;%200%20%5C%5C%20-1%20&amp;%20%5B4%5D%20&amp;%20-1%20%5C%5C%200%20&amp;%20-1%20&amp;%200%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D%5B2%5D%20&amp;%20-2%20&amp;%201%20%5C%5C%20-2%20&amp;%200%20&amp;%200%20%5C%5C%201%20&amp;%200%20&amp;%200%5Cend%7Bpmatrix%7D"></td>
+<td><img src="https://latex.codecogs.com/png.latex?%5Cbegin%7Bpmatrix%7D0%20&amp;%200%20&amp;%201%20%5C%5C%200%20&amp;%200%20&amp;%20-2%20%5C%5C%201%20&amp;%20-2%20&amp;%20%5B2%5D%5Cend%7Bpmatrix%7D"></td>
+</tr>
+</tbody>
+</table>
+<div id="fig-log" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/log.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: 直接用 Laplacian <img src="https://latex.codecogs.com/png.latex?=0"> 会发现全是 edge. 于是我们先用一个低通滤波器 (比如对原图进行高斯模糊), 再用 Laplacian (Laplacian of Gaussian, LoG) <span class="citation" data-cites="girod_2019_ee368cs232">[6]</span>.
+</figcaption>
+</figure>
+</div></li>
+</ul>
+</section>
+<section id="canny-edge-detector" class="level4" data-number="5.1.3">
+<h4 data-number="5.1.3" class="anchored" data-anchor-id="canny-edge-detector"><span class="header-section-number">5.1.3</span> Canny Edge Detector</h4>
+<blockquote class="blockquote">
+<p>Canny edge detector 是一个在 CV 中广泛使用的方法, 他综合了前面两者的优点. 当然它也很拍脑袋, 你可以想象成是你一个很聪明的同学想出来的.</p>
+</blockquote>
+<ul>
+<li>Canny 的步骤很简单:
+<ul>
+<li><strong>Gaussian</strong>: 首先高斯滤波.</li>
+<li><strong>Compute Gradient</strong>: 然后计算<strong>每个</strong>像素处梯度大小和其<strong>方向</strong>.</li>
+<li><strong>Thresholding</strong>: 选出梯度大小在一个预设的范围内的像素点. 假设 Figure&nbsp;13 中的蓝色像素被选出了.</li>
+<li><strong>Directional second-derivative</strong>: 在所有被选出的像素上<strong>沿着梯度方向</strong>做一个一维的二阶导数, 找到其零点并在原图上标记出来. 比如 Figure&nbsp;13 中蓝色像素的梯度方向是右上方, 橙色像素的二阶导值最接近 <img src="https://latex.codecogs.com/png.latex?0">, 保留橙色像素, 丢弃蓝色像素 (想一想, 这样会让边缘<strong>更细、更精确</strong>). 对所有蓝色的像素都做这个操作, 最终得到 Figure&nbsp;13 中的所有橙色像素, 这些就是 Canny 检测到的边缘.</li>
+</ul>
+<div id="fig-canny" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-canny-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/canny.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-canny-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Canny 步骤 <span class="citation" data-cites="firstprinciplesofcomputervision_2021_canny">[7]</span>.
+</figcaption>
+</figure>
+</div></li>
+<li><strong>Edge linking 边缘连接</strong>: 边缘可能不连续, 可以利用梯度方向等信息把边缘连接起来.</li>
+</ul>
+</section>
+</section>
+<section id="edge-based-object-detection-基于边缘的目标检测" class="level3 page-columns page-full" data-number="5.2">
+<h3 data-number="5.2" class="anchored" data-anchor-id="edge-based-object-detection-基于边缘的目标检测"><span class="header-section-number">5.2</span> Edge-based object detection 基于边缘的目标检测</h3>
+<section id="hough-transform" class="level4 page-columns page-full" data-number="5.2.1">
+<h4 data-number="5.2.1" class="anchored" data-anchor-id="hough-transform"><span class="header-section-number">5.2.1</span> Hough Transform</h4>
+<div class="page-columns page-full"><blockquote class="blockquote">
+<p>Hough Transform 目标不再仅仅是找到边缘, 而是基于 Edge Detector 的二值边缘图像标记出<strong>特定形状 (比如直线, 圆)</strong> 的<strong>位置</strong>以及它们的<strong>数量</strong><sup>2</sup>.</p>
+</blockquote><div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;我觉得 Hough Transform 的思想非常优美, 我在想如果直接用机器学习的方法训练一个网络来找直线位置以及数量, 是否在神经网络的某个角落里就隐藏着 Hough Transform 这个算法呢? 怎么找到呢? 或者更一般地, 如何提取神经网络学到的东西?</p></div></div></div>
+<p>看一遍 <a href="https://www.youtube.com/watch?v=XRBc_xkZREg">This video</a> 就懂了.</p>
+</section>
+<section id="distance-transform-dt-距离变换" class="level4" data-number="5.2.2">
+<h4 data-number="5.2.2" class="anchored" data-anchor-id="distance-transform-dt-距离变换"><span class="header-section-number">5.2.2</span> Distance Transform (DT) 距离变换</h4>
+<blockquote class="blockquote">
+<p>DT 的目标也是基于 Edge Detector 的二值边缘图像, 再给定一个模版的二值边缘图像, 目标是在原图中找到与模版边缘最相似的区域. 一个很自然的想法是直接计算二值模版图像在原二值图像上的<strong>归一化内积 (NCC)</strong>, 然后找到最大的位置. 但是模版可能会有缩放, 导致匹配的结果很差. 因此我们引入 DT.</p>
+</blockquote>
+<ul>
+<li><strong>操作步骤</strong>:
+<ul>
+<li><strong>Distance Transform</strong>: 先不管模版图像, 在原二值图像中计算每个白色像素到最近黑色像素的某种距离 (比如 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D%5E2">, <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D%5E1">, random walk distance, etc.) 如果本来就是黑色像素, 则距离为 <img src="https://latex.codecogs.com/png.latex?0">. 这样我们得到了一张与原图大小一样的全是距离数值的图像 (Figure&nbsp;14), 称为原二值图像的 Distance Transform (DT).</li>
+<li>将模版放在 DT 图像上滑动, 计算<strong>该模版下的所有像素的 DT 值的和</strong>. 这个和<strong>越小</strong>说明该位置的模版与原图的这个区域越相似 (Figure&nbsp;15).</li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[52,48]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 52.0%;justify-content: flex-start;">
+<div id="fig-dt" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/dt.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: 对 Binary image 的 DT (<img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D%5E2"> 距离) <span class="citation" data-cites="bankhead_image">[8]</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 48.0%;justify-content: flex-start;">
+<div id="fig-dt-match" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dt-match-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/dt-match.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dt-match-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: 红色模版与蓝色原二值图像的最佳匹配
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="non-edge-based-segmentation-非基于边缘的分割" class="level3" data-number="5.3">
+<h3 data-number="5.3" class="anchored" data-anchor-id="non-edge-based-segmentation-非基于边缘的分割"><span class="header-section-number">5.3</span> Non-edge-based segmentation 非基于边缘的分割</h3>
+<blockquote class="blockquote">
+<p>这种分割图像的方法不从「变化」来先找边界, 而是从「相似性」出发直接找区域 (Region-based segmentation).</p>
+</blockquote>
+<section id="thresholding" class="level4" data-number="5.3.1">
+<h4 data-number="5.3.1" class="anchored" data-anchor-id="thresholding"><span class="header-section-number">5.3.1</span> Thresholding</h4>
+<blockquote class="blockquote">
+<p>根据阈值是否随<strong>空间</strong>变化可分为 <strong>Global thresholding</strong> 和 <strong>Variable thresholding</strong>. 注意这两种方法都可以涉及<strong>阈值迭代</strong>的过程, 即有一种机制不断更新 threshold 直到收敛.</p>
+</blockquote>
+<ul>
+<li><strong>Global thresholding</strong>:
+<ul>
+<li>对光照变化大的图像效果不好.</li>
+</ul></li>
+<li><strong>Variable thresholding</strong>:
+<ul>
+<li>可以自动适应光照变化.</li>
+</ul></li>
+</ul>
+</section>
+<section id="region-growing" class="level4" data-number="5.3.2">
+<h4 data-number="5.3.2" class="anchored" data-anchor-id="region-growing"><span class="header-section-number">5.3.2</span> Region Growing</h4>
+<ul>
+<li>给定待分割的灰度图像 <img src="https://latex.codecogs.com/png.latex?r">, 给定一个 seed binary mask <img src="https://latex.codecogs.com/png.latex?m">, 计算 <img src="https://latex.codecogs.com/png.latex?r"> 在 <img src="https://latex.codecogs.com/png.latex?m"> 覆盖的区域的均值 <img src="https://latex.codecogs.com/png.latex?%5Cmu">, 然后设置一个 threshold <img src="https://latex.codecogs.com/png.latex?T">, 把 <img src="https://latex.codecogs.com/png.latex?r"> 中所有在 <img src="https://latex.codecogs.com/png.latex?%5B%5Cmu%20-%20T,%20%5Cmu%20+%20T%5D"> 范围内且与 <img src="https://latex.codecogs.com/png.latex?m"> 相邻的像素点加入 <img src="https://latex.codecogs.com/png.latex?m">, 重复这个过程即可.
+<ul>
+<li>当然算均值 + threshold 也可以换成别的<strong>相似性度量方法 (similarity criteria)</strong>.</li>
+</ul></li>
+</ul>
+</section>
+<section id="k-means-clustering" class="level4" data-number="5.3.3">
+<h4 data-number="5.3.3" class="anchored" data-anchor-id="k-means-clustering"><span class="header-section-number">5.3.3</span> K-Means Clustering</h4>
+<ul>
+<li>假设我们想对一张图片进行基于颜色的 segmentation, 我们可以把每个像素的颜色 (比如 RGB) 看作一个三维空间中的点, 然后在 RGB 空间中进行 K-Means Clustering 来把这些点分成 <img src="https://latex.codecogs.com/png.latex?K"> 类:
+<ul>
+<li>随机选择 <img src="https://latex.codecogs.com/png.latex?K"> 个初始中心点 (centroids).</li>
+<li>将每个点分配给距离它最近的中心点所属的类. (注意每个点都会被分配而不是留到以后再分).</li>
+<li>重新计算每个类的中心点 (centroids).</li>
+<li>重复上面两步直到收敛 (中心点不再变化, 或其变化小于某个阈值 <img src="https://latex.codecogs.com/png.latex?%5Cvarepsilon">).</li>
+</ul></li>
+<li>K-means 也可以用在别的 feature space 上! 比如它甚至可以用于将图像本身分类. 假设我们有很多图像, 每张图像在某个 feature space 中都是一个点. 我们可以在这个 feature space 上用 K-means 将这些图像分成 <img src="https://latex.codecogs.com/png.latex?K"> 类.</li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-kmeans-clustering" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kmeans-clustering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/kmeans-clustering.webp" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kmeans-clustering-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16: K-means Clustering 的迭代 <span class="citation" data-cites="boriharnk_2023_creating">[9]</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-kmeans-feature-space" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-kmeans-feature-space-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/kmeans-feature-space.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-kmeans-feature-space-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17: 选取不一样的 feature space 可以得到不同的 segmentation results <span class="citation" data-cites="nayar_2021_kmeans">[10]</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="morphological-形态学图像处理" class="level2 page-columns page-full" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="morphological-形态学图像处理"><span class="header-section-number">6</span> Morphological 形态学图像处理</h2>
+<blockquote class="blockquote">
+<p>这里主要涉及 PS 软件中的各种基础操作的原理.</p>
+</blockquote>
+<section id="binary-erosion-dilation-二值图像腐蚀膨胀" class="level3 page-columns page-full" data-number="6.1">
+<h3 data-number="6.1" class="anchored" data-anchor-id="binary-erosion-dilation-二值图像腐蚀膨胀"><span class="header-section-number">6.1</span> Binary erosion / dilation 二值图像腐蚀/膨胀</h3>
+<blockquote class="blockquote">
+<p>我们希望 foreground binary image 里面的小点消失 (<strong>Dilation</strong>)、快连上的线能连上 (<strong>Erosion</strong>).</p>
+</blockquote>
+<ul>
+<li>想象一个 binary image <img src="https://latex.codecogs.com/png.latex?f"> 的前景是凹下去的模具, 想象 SE (Structuring Element) 像俄罗斯方块一样掉落在 <img src="https://latex.codecogs.com/png.latex?f"> 上, 记录下:
+<ul>
+<li><strong>Erosion</strong>: SE 能<strong>整体</strong>掉进去的地方, 这些就是<strong>腐蚀 <img src="https://latex.codecogs.com/png.latex?f%20%5Cominus%20se"></strong> 的结果. 腐蚀过的前景 (<img src="https://latex.codecogs.com/png.latex?f%20%5Cominus%20se">) 只会比 <img src="https://latex.codecogs.com/png.latex?f"> 一样大或者更小.</li>
+<li><strong>Dilation</strong>: 任何<strong>一个</strong> SE 方块能掉进去的地方, 这些就是膨胀 <img src="https://latex.codecogs.com/png.latex?f%20%5Coplus%20se"> 的结果. 膨胀过的前景 (<img src="https://latex.codecogs.com/png.latex?f%20%5Coplus%20se">) 只会比 <img src="https://latex.codecogs.com/png.latex?f"> 一样大或者更大.</li>
+</ul></li>
+<li><strong>Erosion 和 Dilation 互为 dual</strong>.</li>
+<li>我们可以通过给原二值图像的 <strong>DT 图像加 threshold</strong> 来计算腐蚀和膨胀 (见 Figure&nbsp;18).</li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-erosion-dilation-by-dt" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-erosion-dilation-by-dt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/erosion-dilation-by-dt.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-erosion-dilation-by-dt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18: 给原二值图像的 <strong>DT 图像加 threshold</strong> 来计算腐蚀和膨胀 <span class="citation" data-cites="bankhead_image">[8]</span>.
+</figcaption>
+</figure>
+</div>
+</div></div><div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-erosion" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-erosion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/erosion.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-erosion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19: Binary Erosion <span class="citation" data-cites="Mardiris2016ACD">[11]</span>
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-dilation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/dilation.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20: Binary Dilation <span class="citation" data-cites="Mardiris2016ACD">[11]</span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="opening-closing-开运算闭运算" class="level3" data-number="6.2">
+<h3 data-number="6.2" class="anchored" data-anchor-id="opening-closing-开运算闭运算"><span class="header-section-number">6.2</span> Opening / Closing 开运算/闭运算</h3>
+<blockquote class="blockquote">
+<p>Erosion / Dilation 虽然比较有效, 但是有一个副作用就是前景的粗细都会顺带一起被改变: 小点消失的同时整体的线都变细了, 即将要连上的线连起来了但整体的线也变粗了. 为了解决这个问题, 我们引入 Opening / Closing.</p>
+</blockquote>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-erosion-dilation" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-erosion-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/erosion-dilation.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-erosion-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21: Erosion / Dilation 的副作用 <span class="citation" data-cites="bankhead_image">[8]</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-opening-closing" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-opening-closing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/dip-crash-course/opening-closing.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-opening-closing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22: Opening / Closing 缓解了 Figure&nbsp;21 中的副作用 <span class="citation" data-cites="bankhead_image">[8]</span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Opening 开运算</strong>: 先腐蚀后膨胀, <img src="https://latex.codecogs.com/png.latex?b%20%5Ccirc%20se%20%5Cequiv%20(b%20%5Cominus%20se)%20%5Coplus%20se">.
+<ul>
+<li>消失的小点不会因为膨胀而再出现.</li>
+</ul></li>
+<li><strong>Closing 闭运算</strong>: 先膨胀后腐蚀, <img src="https://latex.codecogs.com/png.latex?b%20%5Cbullet%20se%20%5Cequiv%20(b%20%5Coplus%20se)%20%5Cominus%20se">.
+<ul>
+<li>连上的线一般不会因为腐蚀而再断开.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+<section id="pca-主成分分析" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="pca-主成分分析"><span class="header-section-number">7</span> PCA 主成分分析</h2>
+</section>
+<section id="image-compression-图像压缩" class="level2" data-number="8">
+<h2 data-number="8" class="anchored" data-anchor-id="image-compression-图像压缩"><span class="header-section-number">8</span> Image Compression 图像压缩</h2>
+<blockquote class="blockquote">
+<p>信息永远<strong>不能</strong>被压缩, 只是被压缩的部分变成编解码规则了.</p>
+</blockquote>
+<section id="basic-concepts-基本概念" class="level3" data-number="8.1">
+<h3 data-number="8.1" class="anchored" data-anchor-id="basic-concepts-基本概念"><span class="header-section-number">8.1</span> Basic Concepts 基本概念</h3>
+<ul>
+<li>若图片 <img src="https://latex.codecogs.com/png.latex?f"> 压缩前可以被 <img src="https://latex.codecogs.com/png.latex?100"> bit 表示, 压缩后可以被 <img src="https://latex.codecogs.com/png.latex?75"> bit 表示, 则:
+<ul>
+<li><strong>Compression ratio 压缩比</strong> <img src="https://latex.codecogs.com/png.latex?C%20=%20100/75">.</li>
+<li><strong>Relative data redundancy 相对数据冗余</strong> <img src="https://latex.codecogs.com/png.latex?R%20=%201-0.75">.</li>
+</ul></li>
+</ul>
+</section>
+<section id="lossless-compression-无损压缩" class="level3" data-number="8.2">
+<h3 data-number="8.2" class="anchored" data-anchor-id="lossless-compression-无损压缩"><span class="header-section-number">8.2</span> Lossless Compression 无损压缩</h3>
+<ul>
+<li><strong>Huffman coding 霍夫曼编码</strong>
+<ul>
+<li><strong>Huffman Tree 的构建</strong>: 将所有符号的频次 (或概率) 从小到达排序, 选两个频次最小的创建他们的公共父节点, 频次为两者之和, 然后将这个新节点插回列表中重复步骤, 直到只剩一个节点为止.</li>
+</ul></li>
+<li><strong>Arithmetic coding 算术编码</strong></li>
+<li><strong>LZW 编码</strong></li>
+</ul>
+</section>
+<section id="lossy-compression-有损压缩" class="level3" data-number="8.3">
+<h3 data-number="8.3" class="anchored" data-anchor-id="lossy-compression-有损压缩"><span class="header-section-number">8.3</span> Lossy Compression 有损压缩</h3>
+<ul>
+<li><strong>JPEG</strong>:
+<ul>
+<li>颜色空间变换 (RGB <img src="https://latex.codecogs.com/png.latex?%5Cto"> YCbCr): 利用人眼对亮度更敏感的特点.</li>
+<li>分块 (<img src="https://latex.codecogs.com/png.latex?8%5Ctimes%208"> blocks): 计算较快.</li>
+<li>DCT (离散余弦变换): 就是 DFT.</li>
+<li>Quantization (量化，唯一真正「有损」的一步): 在频域被选择性地 mask 掉一些系数.</li>
+<li>Zig-zag 扫描</li>
+<li>Entropy coding (Huffman / Arithmetic)</li>
+</ul></li>
+</ul>
+</section>
+<section id="watermarking-数字水印" class="level3" data-number="8.4">
+<h3 data-number="8.4" class="anchored" data-anchor-id="watermarking-数字水印"><span class="header-section-number">8.4</span> Watermarking 数字水印</h3>
+<ul>
+<li><p><strong>Visible watermark 可见水印</strong>: 直接把水印叠加在图片上.</p></li>
+<li><p><strong>Invisible watermark 隐形水印</strong></p>
+<ul>
+<li>Robustness 水印必须能抵抗以下操作: 压缩, 缩小/放大, 裁剪, 加噪声, 滤波, 镜像, etc.</li>
+<li>简单来说, 可以将水印直接叠加在<strong>频域</strong>系数上, 再反变换得到水印图像.</li>
+</ul></li>
+</ul>
+
+
+
+</section>
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0">
+<div id="ref-wilson_2023_histogram" class="csl-entry">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">B. Wilson, <span>“Histogram equalization - part 1 - theory.”</span> Artstation.com; Artstation, Sep. 2023. Available: <a href="https://www.artstation.com/blogs/benwilson/R8Vz/histogram-equalization-part-1-theory">https://www.artstation.com/blogs/benwilson/R8Vz/histogram-equalization-part-1-theory</a>. [Accessed: Dec. 24, 2025]</div>
+</div>
+<div id="ref-_2017_image" class="csl-entry">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">Buzztech, <span>“Image restoration and image degradation model.”</span> Buzztech, Dec. 2017. Available: <a href="https://buzztech.in/image-restoration-and-image-degradation-model/">https://buzztech.in/image-restoration-and-image-degradation-model/</a>. [Accessed: Dec. 24, 2025]</div>
+</div>
+<div id="ref-berrios_2023_how" class="csl-entry">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">I. Berrios, <span>“How to apply motion blur to images | medium.”</span> Medium, Dec. 2023. Available: <a href="https://medium.com/@itberrios6/how-to-apply-motion-blur-to-images-75b745e3ef17">https://medium.com/@itberrios6/how-to-apply-motion-blur-to-images-75b745e3ef17</a>. [Accessed: Dec. 24, 2025]</div>
+</div>
+<div id="ref-geeksforgeeks_2020_image" class="csl-entry">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">GeeksforGeeks, <span>“Image edge detection operators in digital image processing.”</span> GeeksforGeeks, May 2020. Available: <a href="https://www.geeksforgeeks.org/digital-logic/image-edge-detection-operators-in-digital-image-processing/">https://www.geeksforgeeks.org/digital-logic/image-edge-detection-operators-in-digital-image-processing/</a>. [Accessed: Dec. 24, 2025]</div>
+</div>
+<div id="ref-a2021_finite" class="csl-entry">
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline"><span>“Finite difference.”</span> Wikipedia, Mar. 2021. Available: <a href="https://en.wikipedia.org/wiki/Finite_difference">https://en.wikipedia.org/wiki/Finite_difference</a>. [Accessed: Dec. 24, 2025]</div>
+</div>
+<div id="ref-girod_2019_ee368cs232" class="csl-entry">
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">B. Girod, <span>“EE368/CS232: Digital image processing.”</span> Stanford.edu, Nov. 2019. Available: <a href="https://web.stanford.edu/class/ee368/">https://web.stanford.edu/class/ee368/</a>. [Accessed: Dec. 24, 2025]</div>
+</div>
+<div id="ref-firstprinciplesofcomputervision_2021_canny" class="csl-entry">
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">F. P. of Computer Vision, <span>“Canny edge detector | edge detection.”</span> YouTube, Mar. 2021. Available: <a href="https://www.youtube.com/watch?v=hUC1uoigH6s">https://www.youtube.com/watch?v=hUC1uoigH6s</a>. [Accessed: Sep. 28, 2025]</div>
+</div>
+<div id="ref-bankhead_image" class="csl-entry">
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">P. Bankhead, <span>“Image transforms: Introduction to bioimage analysis.”</span> bioimagebook.github.io. Available: <a href="https://bioimagebook.github.io/">https://bioimagebook.github.io/</a>. [Accessed: Dec. 25, 2025]</div>
+</div>
+<div id="ref-boriharnk_2023_creating" class="csl-entry">
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">B. K, <span>“Creating animation to show 4 centroid-based clustering algorithms using python and sklearn | towards data science.”</span> Towards Data Science, Aug. 2023. Available: <a href="https://towardsdatascience.com/creating-animation-to-show-4-centroid-based-clustering-algorithms-using-python-and-sklearn-d397ade89cb3/">https://towardsdatascience.com/creating-animation-to-show-4-centroid-based-clustering-algorithms-using-python-and-sklearn-d397ade89cb3/</a>. [Accessed: Dec. 25, 2025]</div>
+</div>
+<div id="ref-nayar_2021_kmeans" class="csl-entry">
+<div class="csl-left-margin">[10] </div><div class="csl-right-inline">S. Nayar, <span>“K-means segmentation | image segmentation.”</span> www.youtube.com, May 2021. Available: <a href="https://www.youtube.com/watch?v=22mpExWh1LY">https://www.youtube.com/watch?v=22mpExWh1LY</a>. [Accessed: Dec. 25, 2025]</div>
+</div>
+<div id="ref-Mardiris2016ACD" class="csl-entry">
+<div class="csl-left-margin">[11] </div><div class="csl-right-inline">V. A. Mardiris and V. Chatzis, <span>“A configurable design for morphological erosion and dilation operations in image processing using quantum-dot cellular automata,”</span> <em>Journal of Engineering Science and Technology Review</em>, vol. 9, pp. 25–30, 2016, Available: <a href="https://api.semanticscholar.org/CorpusID:117395774">https://api.semanticscholar.org/CorpusID:117395774</a></div>
+</div>
+</div></section></div> ]]></description>
+  <category>Crash-Course</category>
+  <category>CN-blogs</category>
+  <guid>https://marcobisky.github.io/posts/dip-crash-course/</guid>
+  <pubDate>Wed, 24 Dec 2025 16:00:00 GMT</pubDate>
+  <media:content url="https://marcobisky.github.io/posts/dip-crash-course/cover.png" medium="image" type="image/png" height="60" width="144"/>
+</item>
 <item>
   <title>WSN Crash Course 无线传感器网络速成笔记</title>
   <dc:creator>Marcobisky </dc:creator>
@@ -1140,245 +1999,6 @@ Figure&nbsp;29: 生灭过程的 ES.
   <guid>https://marcobisky.github.io/posts/wsn-crash-course/</guid>
   <pubDate>Mon, 22 Dec 2025 16:00:00 GMT</pubDate>
   <media:content url="https://marcobisky.github.io/posts/wsn-crash-course/cover.png" medium="image" type="image/png" height="48" width="144"/>
-</item>
-<item>
-  <title>DIP Crash Course 数字图像处理速成笔记</title>
-  <dc:creator>Marcobisky </dc:creator>
-  <link>https://marcobisky.github.io/posts/dip-crash-course/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<blockquote class="blockquote">
-<p>将所有的开放问题的 solution 当作一个普通的解决方法来看待, 它们绝不是最优或者唯一的解决方案.</p>
-</blockquote>
-<section id="basic-conventions-基本约定" class="level2" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="basic-conventions-基本约定"><span class="header-section-number">1</span> Basic Conventions 基本约定</h2>
-<ul>
-<li><p>Image 默认为 <strong>sampling</strong> 和 <strong>quantization</strong> 之后的数字图像</p>
-<ul>
-<li><strong>Spacial resolution 空间分辨率</strong>: 长宽方向的采样点数的乘积.</li>
-<li><strong>Intensity resolution 强度分辨率</strong>: 量化的精度, 一般用每个像素的 bit 数表示. <strong>默认为 <img src="https://latex.codecogs.com/png.latex?8"> bit (<img src="https://latex.codecogs.com/png.latex?%5B0,%20255%5D">)</strong>.</li>
-</ul></li>
-<li><p><strong>Color space 颜色空间</strong>: 单色可见光的波长在 <img src="https://latex.codecogs.com/png.latex?%5B380,%20780%5D%20%5Ctext%7B%20nm%7D">, 每一束光都可以有任意强度的单色光分量 (即「光谱」), 因此所有光构成一个<strong>不可数无穷维拓扑向量空间</strong>.</p>
-<ul>
-<li>但是人眼有三种类型的视锥细胞 (L, M, S) 对不同的频率成分有 (不会变化的) 不同的敏感度, 它们自动将所有光<strong>线性映射</strong>到一个三维子空间 <img src="https://latex.codecogs.com/png.latex?%5COmega"> 中 (想想为什么是线性的, 因为是积分). 即使两个光的光谱不同, 但它们在这个三维子空间的投影相同, 人眼也无法区分它们.</li>
-<li>不同的应用场景在 <img src="https://latex.codecogs.com/png.latex?%5COmega"> 中选择不同的基底:
-<ul>
-<li><strong>RGB</strong> (Red, Green, Blue): 显示器, 图像储存.</li>
-<li><strong>CMY/CMYK</strong> (Cyan, Magenta, Yellow, K: Black ink): 打印机, K 成分是多余的, 就当作是为了节省墨水 lol.</li>
-<li><strong>HSI/HSV</strong> (Hue, Saturation, Intensity/Value): 图像编辑软件.</li>
-</ul></li>
-</ul></li>
-<li><p>默认情况下图片丢失拓扑结构 <code>view()</code> 成一个 vector. <img src="https://latex.codecogs.com/png.latex?r"> 代表处理前的图像 vector, <img src="https://latex.codecogs.com/png.latex?s"> 代表处理后的图像 vector.</p></li>
-<li><p><strong>RGB2Gray 转换方法</strong>: 可以任选一通道 / 取最大 / 平均值 / 加权平均.</p></li>
-<li><p><strong>Contrast 对比度</strong>: 灰度图像中像素值最大值与最小值之差 (去掉 outlier).</p></li>
-<li><p><strong>Binary Image 二值图像 <img src="https://latex.codecogs.com/png.latex?f"></strong>: <img src="https://latex.codecogs.com/png.latex?0"> 表示 background, <img src="https://latex.codecogs.com/png.latex?1"> 表示 foreground.</p></li>
-</ul>
-</section>
-<section id="kernel-based-processing-基于核的处理" class="level2" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="kernel-based-processing-基于核的处理"><span class="header-section-number">2</span> Kernel-based processing 基于核的处理</h2>
-<blockquote class="blockquote">
-<p>本人没有按照 Spatial domain 和 Frequency domain 来划分, 因为他们本质上是等价的, 无法将二者严格区分.</p>
-</blockquote>
-<blockquote class="blockquote">
-<p>Kernel-based method 就是将原图片与一个 kernel 做滑动内积 (纠结是内积还是卷积毫无意义). 重点在于 kernel 的设计, 我们通过 kernel 设计的<strong>思维路径</strong>将其划分为 Spatial filtering 和 Frequency filtering 两大类.</p>
-</blockquote>
-<section id="spatial-filtering-空间滤波" class="level3" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="spatial-filtering-空间滤波"><span class="header-section-number">2.1</span> Spatial Filtering 空间滤波</h3>
-<blockquote class="blockquote">
-<p>Spatial filtering 指 kernel 的设计过程没有经过频域分析.</p>
-</blockquote>
-<ul>
-<li><p><strong>Padding 填充</strong></p></li>
-<li><p><strong>NCC (Normalized Cross-Correlation)</strong>: 图像 vector 之间的夹角余弦值.</p></li>
-<li><p><strong>Common filters 常用滤波器</strong></p>
-<ul>
-<li><strong>Smoothing filters 平滑滤波器 (低通滤波器)</strong></li>
-<li><strong>Order-statistic filters 次序统计滤波器</strong>: 将某框内的像素排序后取中位数, 一般可去除 salt-and-pepper (impulse) noise.</li>
-<li><strong>Sharpening (derivative) filters 锐化滤波器 (高通滤波器)</strong>: 将梯度、Laplacian 算子移植到图片上; 由于这些算子是线性的, 可等价于与一个 kernel 做卷积; 这些 kernel 也可以在形式上被强化来达到更强的锐化效果.</li>
-</ul></li>
-</ul>
-</section>
-</section>
-<section id="non-kernel-based-processing-非基于核的处理" class="level2" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="non-kernel-based-processing-非基于核的处理"><span class="header-section-number">3</span> Non-kernel-based processing 非基于核的处理</h2>
-<blockquote class="blockquote">
-<p>Non-kernel-based method 指处理过程无法被等价为与一个确定的 kernel 做内积的过程.</p>
-</blockquote>
-<section id="intensity-transformation" class="level3" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="intensity-transformation"><span class="header-section-number">3.1</span> Intensity Transformation</h3>
-<blockquote class="blockquote">
-<p>强度变换仅仅是<strong>单灰度像素</strong>的操作, 即用一个函数 <img src="https://latex.codecogs.com/png.latex?s%20=%20T(r)"> 来<strong>独立地</strong>映射所有像素值.</p>
-</blockquote>
-<ul>
-<li><p><strong>Linear transformation</strong></p>
-<ul>
-<li><strong>Image Negatives 图像反相</strong>: <img src="https://latex.codecogs.com/png.latex?s%20=%20L%20-%201%20-%20r">.</li>
-<li><strong>Contrast stretching 对比度拉伸</strong></li>
-</ul></li>
-<li><p><strong>Log transformation 对数变换</strong>: <img src="https://latex.codecogs.com/png.latex?s%20=%20c%20%5Ccdot%20%5Clog(1%20+%20r)">.</p></li>
-<li><p><strong>Power-Law (Gamma) transformation 幂律变换</strong>: <img src="https://latex.codecogs.com/png.latex?s%20=%20c%20%5Ccdot%20r%5E%7B%5Cgamma%7D">.</p></li>
-</ul>
-</section>
-<section id="histogram-processing-直方图处理" class="level3" data-number="3.2">
-<h3 data-number="3.2" class="anchored" data-anchor-id="histogram-processing-直方图处理"><span class="header-section-number">3.2</span> Histogram Processing 直方图处理</h3>
-<ul>
-<li><strong>Histogram 图像直方图</strong>
-<ul>
-<li><strong>Normalized histogram 归一化直方图</strong>: 纵坐标要除以图像总像素数, 可表达概率.</li>
-</ul></li>
-<li><strong>Histogram processing 方法</strong>
-<ul>
-<li><strong>Histogram equalization 直方图均衡化</strong></li>
-<li><strong>Histogram matching (specification) 直方图匹配</strong>: 「我想让这张暗图看起来像那张亮图」.</li>
-</ul></li>
-</ul>
-</section>
-</section>
-<section id="image-segmentation-图像分割" class="level2" data-number="4">
-<h2 data-number="4" class="anchored" data-anchor-id="image-segmentation-图像分割"><span class="header-section-number">4</span> Image Segmentation 图像分割</h2>
-<blockquote class="blockquote">
-<p>一个非常自然的需求是把一张图像分割成若干个有意义的区域. 由于「有意义」无法准确定义, 因此图像分割非常开放.</p>
-</blockquote>
-<ul>
-<li><strong>Neighbors of a pixel 二值图像像素的邻域</strong>: 有不同的定义! 4-neighbors (上下左右), 8-neighbors, diagonal-neighbors (对角线).
-<ul>
-<li>领域不一定是等价关系!</li>
-<li><strong>Path 路径</strong>: 一个像素的有序序列, 后一个像素都是前一个像素的 neighbor.</li>
-<li><strong>Connected set 连通集</strong>: 当邻域是等价关系 <img src="https://latex.codecogs.com/png.latex?%5Csim"> 时, 二值图像 <img src="https://latex.codecogs.com/png.latex?b/%5Csim"> 中的每个等价类就是一个连通集.
-<ul>
-<li><strong>Boundary 边界</strong>: 跟拓扑学里的定义一样, 边界点的邻域包含区域外的像素.</li>
-</ul></li>
-</ul></li>
-<li><strong>Edge detection 边缘检测</strong>
-<ul>
-<li><strong>Gradient + Thresholding</strong></li>
-<li><strong>LPF + Laplacian</strong>: 比如 LoG (Laplacian of Gaussian).</li>
-<li><strong>Edge linking 边缘连接</strong>: 边缘可能不连续, 可以利用梯度方向等信息把边缘连接起来.</li>
-<li><strong>Hough Transform 霍夫变换</strong></li>
-</ul></li>
-<li><strong>Edge-based object detection 基于边缘的目标检测</strong>
-<ul>
-<li><strong>Distance Transform (DT) 距离变换</strong>: 计算每个像素到最近边界像素的 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BL%7D%5E2"> 距离.</li>
-</ul></li>
-<li><strong>Region-based segmentation 基于区域的分割</strong></li>
-</ul>
-</section>
-<section id="morphological-形态学图像处理" class="level2" data-number="5">
-<h2 data-number="5" class="anchored" data-anchor-id="morphological-形态学图像处理"><span class="header-section-number">5</span> Morphological 形态学图像处理</h2>
-<blockquote class="blockquote">
-<p>这里主要涉及 PS 软件中的各种基础操作的原理.</p>
-</blockquote>
-<ul>
-<li><strong>Binary erosion / dilation 二值图像腐蚀/膨胀</strong>: 想象一个 binary image <img src="https://latex.codecogs.com/png.latex?f"> 的前景是凹下去的模具, 想象 SE (Structuring Element) 像俄罗斯方块一样掉落在 <img src="https://latex.codecogs.com/png.latex?f"> 上, 记录下:
-<ul>
-<li>SE 能<strong>整体</strong>掉进去的地方, 这些就是腐蚀 <img src="https://latex.codecogs.com/png.latex?f%20%5Cominus%20se"> 的结果. 腐蚀过的前景 (<img src="https://latex.codecogs.com/png.latex?f%20%5Cominus%20se">) 只会比 <img src="https://latex.codecogs.com/png.latex?f"> 一样大或者更小.</li>
-<li>任何<strong>一个</strong> SE 方块能掉进去的地方, 这些就是膨胀 <img src="https://latex.codecogs.com/png.latex?f%20%5Coplus%20se"> 的结果. 膨胀过的前景 (<img src="https://latex.codecogs.com/png.latex?f%20%5Coplus%20se">) 只会比 <img src="https://latex.codecogs.com/png.latex?f"> 一样大或者更大.</li>
-<li><strong>Erosion 和 Dilation 互为 dual</strong></li>
-</ul></li>
-</ul>
-<div class="quarto-layout-panel" data-layout="[50,50]">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-erosion" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-erosion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/dip-crash-course/erosion.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-erosion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Binary Erosion <span class="citation" data-cites="Mardiris2016ACD">[1]</span>
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-dilation" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/dip-crash-course/dilation.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dilation-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Binary Dilation <span class="citation" data-cites="Mardiris2016ACD">[1]</span>
-</figcaption>
-</figure>
-</div>
-</div>
-</div>
-</div>
-<ul>
-<li><p><strong>Opening 开运算</strong>: 先腐蚀后膨胀, <img src="https://latex.codecogs.com/png.latex?b%20%5Ccirc%20se%20%5Cequiv%20(b%20%5Cominus%20se)%20%5Coplus%20se">.</p></li>
-<li><p><strong>Closing 闭运算</strong>: 先膨胀后腐蚀, <img src="https://latex.codecogs.com/png.latex?b%20%5Cbullet%20se%20%5Cequiv%20(b%20%5Coplus%20se)%20%5Cominus%20se">.</p></li>
-</ul>
-</section>
-<section id="pca-主成分分析" class="level2" data-number="6">
-<h2 data-number="6" class="anchored" data-anchor-id="pca-主成分分析"><span class="header-section-number">6</span> PCA 主成分分析</h2>
-</section>
-<section id="image-compression-图像压缩" class="level2" data-number="7">
-<h2 data-number="7" class="anchored" data-anchor-id="image-compression-图像压缩"><span class="header-section-number">7</span> Image Compression 图像压缩</h2>
-<blockquote class="blockquote">
-<p>信息永远<strong>不能</strong>被压缩, 只是被压缩的部分变成编解码规则了.</p>
-</blockquote>
-<section id="basic-concepts-基本概念" class="level3" data-number="7.1">
-<h3 data-number="7.1" class="anchored" data-anchor-id="basic-concepts-基本概念"><span class="header-section-number">7.1</span> Basic Concepts 基本概念</h3>
-<ul>
-<li>若图片 <img src="https://latex.codecogs.com/png.latex?f"> 压缩前可以被 <img src="https://latex.codecogs.com/png.latex?100"> bit 表示, 压缩后可以被 <img src="https://latex.codecogs.com/png.latex?75"> bit 表示, 则:
-<ul>
-<li><strong>Compression ratio 压缩比</strong> <img src="https://latex.codecogs.com/png.latex?C%20=%20100/75">.</li>
-<li><strong>Relative data redundancy 相对数据冗余</strong> <img src="https://latex.codecogs.com/png.latex?R%20=%201-0.75">.</li>
-</ul></li>
-</ul>
-</section>
-<section id="lossless-compression-无损压缩" class="level3" data-number="7.2">
-<h3 data-number="7.2" class="anchored" data-anchor-id="lossless-compression-无损压缩"><span class="header-section-number">7.2</span> Lossless Compression 无损压缩</h3>
-<ul>
-<li><strong>Huffman coding 霍夫曼编码</strong></li>
-<li><strong>Arithmetic coding 算术编码</strong></li>
-<li><strong>LZW 编码</strong></li>
-</ul>
-</section>
-<section id="lossy-compression-有损压缩" class="level3" data-number="7.3">
-<h3 data-number="7.3" class="anchored" data-anchor-id="lossy-compression-有损压缩"><span class="header-section-number">7.3</span> Lossy Compression 有损压缩</h3>
-<ul>
-<li><strong>JPEG</strong>:
-<ul>
-<li>颜色空间变换 (RGB <img src="https://latex.codecogs.com/png.latex?%5Cto"> YCbCr): 利用人眼对亮度更敏感的特点.</li>
-<li>分块 (<img src="https://latex.codecogs.com/png.latex?8%5Ctimes%208"> blocks): 计算较快.</li>
-<li>DCT (离散余弦变换): 就是 DFT.</li>
-<li>Quantization (量化，唯一真正「有损」的一步): 在频域被选择性地 mask 掉一些系数.</li>
-<li>Zig-zag 扫描</li>
-<li>Entropy coding (Huffman / Arithmetic)</li>
-</ul></li>
-</ul>
-</section>
-<section id="watermarking-数字水印" class="level3" data-number="7.4">
-<h3 data-number="7.4" class="anchored" data-anchor-id="watermarking-数字水印"><span class="header-section-number">7.4</span> Watermarking 数字水印</h3>
-<ul>
-<li><p><strong>Visible watermark 可见水印</strong>: 直接把水印叠加在图片上.</p></li>
-<li><p><strong>Invisible watermark 隐形水印</strong></p>
-<ul>
-<li>Robustness 水印必须能抵抗以下操作: 压缩, 缩小/放大, 裁剪, 加噪声, 滤波, 镜像, etc.</li>
-<li>简单来说, 可以将水印直接叠加在<strong>频域</strong>系数上, 再反变换得到水印图像.</li>
-</ul></li>
-</ul>
-
-
-
-</section>
-</section>
-
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" data-entry-spacing="0">
-<div id="ref-Mardiris2016ACD" class="csl-entry">
-<div class="csl-left-margin">[1] </div><div class="csl-right-inline">V. A. Mardiris and V. Chatzis, <span>“A configurable design for morphological erosion and dilation operations in image processing using quantum-dot cellular automata,”</span> <em>Journal of Engineering Science and Technology Review</em>, vol. 9, pp. 25–30, 2016, Available: <a href="https://api.semanticscholar.org/CorpusID:117395774">https://api.semanticscholar.org/CorpusID:117395774</a></div>
-</div>
-</div></section></div> ]]></description>
-  <category>Crash-Course</category>
-  <category>CN-blogs</category>
-  <guid>https://marcobisky.github.io/posts/dip-crash-course/</guid>
-  <pubDate>Fri, 19 Dec 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://marcobisky.github.io/posts/dip-crash-course/cover.png" medium="image" type="image/png" height="60" width="144"/>
 </item>
 <item>
   <title>Information Security Crash Course 信息安全速成笔记</title>
