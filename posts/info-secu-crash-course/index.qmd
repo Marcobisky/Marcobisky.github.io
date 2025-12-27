@@ -1,8 +1,8 @@
 ---
 author: Marcobisky
 title: Information Security Crash Course 信息安全速成笔记
-description: 更新中...
-date: 2025-12-20
+description: 2025-12-27 08:36 已完更.
+date: 2025-12-27
 image: cover.png
 categories:
     - Crash-Course
@@ -81,7 +81,9 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
     - bitcoin 只记录比特币的交易.
 
 - 为什么最初会有人自发来用这个系统记账?
-     - **Incentives for minors**: **transaction fee** (手续费, 转账的人要多付出一点点给打包区块的人 (比银行低多了)) + **凭空送** (中本聪设计 PoW 使得全世界一起算的话平均每 10 分钟能产生一个新区块, 第一个包奖励 $50$ BTC (in 2009), $4$ 年之内都是如此, 第二个 $4$ 年挖出一个区块奖励减半 ($25$ BTC) @a2023_introduction, etc.[^btc-number])
+     - **Incentives for minors 两种对挖矿者的奖励机制**: 
+        - **Transaction fee 手续费**: 转账的人要多付出一点点给打包区块的人 (比银行低多了)
+        - **凭空送**: 中本聪设计 PoW 使得全世界一起算的话平均每 10 分钟能产生一个新区块, 第一个包奖励 $50$ BTC (in 2009), $4$ 年之内都是如此, 第二个 $4$ 年挖出一个区块奖励减半 ($25$ BTC) @a2023_introduction, etc.[^btc-number]
      - Follow-up: 如果他获得的奖励不是现实世界中的物品而也只是这个虚拟世界的货币, 一开始的驱动力是哪来的?
         - 可以有很多因素: 意识形态动机 (比如对银行的不信任, 冻结与审查的反感), 有限下行风险 + 极大上行空间 (Option-like payoff).
 
@@ -102,7 +104,7 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 
 ### Consenus Algorithm 共识算法
 
-> 用来让分布式网络中的节点就某个数据达成一致的算法. (不是区块链特有的概念!)
+> 用来让分布式网络中的节点**就某个数据达成一致的算法**. (不是区块链特有的概念!)
 
 - **Basic concepts**
     - **节点类型**: **Legitimate/honest nodes** (诚实节点), **Malicious nodes** (恶意节点).
@@ -110,7 +112,7 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 
 - **PoW (Proof of Work 工作量证明)**: 通过尝试 nonce 的值来找到一个 hash 值满足某个条件 (比如前面有 $n$ 个 $0$). Hash rate 越高, 挖矿越快. 安全性非常高, 但验证时间较长、挖矿能耗很高.
     - **Winning probability**: 设有 $N$ 个 miners, 第 $i$ 个 miner 的 hash rate 是 $\varphi_i$, 则它的 winning probability $$\mathbb{P}_i = \frac{\varphi_i}{\sum_{j=1}^N \varphi_j}.$$
-    - **$51\%$ attack**: 如果某个恶意矿工控制了超过 $50\%$ 的算力, 它就可以随意篡改区块链数据.
+    - **$51\%$ attack**: 如果某个恶意矿工控制了超过 $50\%$ 的算力, 它就可以随意篡改区块链数据 (由于 LCP 原则).
 
 - **PoS (Proof of Stake 权益证明)**: 交 stake (押金), 用押金的多少做权重随机选择下一个打包区块的节点. 节点如果作恶, 会被没收押金. 验证时间较短, 能耗低, 但安全性不如 PoW (有钱就行).
 
@@ -122,16 +124,16 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
 ::: {layout = "[60,40]"}
 ![绿色的节点是 client, 右边有 $1$ 个 proposer, $3$ 个 acceptor, $2$ 个 learner. @_2025_paxos](paxos.gif){#fig-paxos width=80%}
 
-![Basic Paxos without failures @wikipediacontributors_2025_paxos. 注意这里是 acceptor 通知 learner, 而 @fig-paxos 是 proposer 通知 learner, 以此图为准.](paxos-flow-chart.png)
+![Basic Paxos without failures @wikipediacontributors_2025_paxos. 注意这里是 acceptor 通知 learner, 而 @fig-paxos 是 proposer 通知 learner, 以此图为准.](paxos-flow-chart.png){#fig-paxos-flow-chart}
 :::
 
 - **RAFT** (Replicated And Fault Tolerant, 比 sb PAXOS 好理解多了 lol)
     - RAFT 也不处理 Byzantine fault!
     - 每个节点在任意时刻只处于三种状态之一: **Leader, Follower, Candidate**, leader 是唯一的.
     - 两个 phase: **Leader Election, Log Replication**.
-    - 所有节点初始状态都是 follower, 每个 follower 有一个随机的 election timeout ($150$ 到 $300$ ms 之间), 如果在这个时间内没有收到 leader 的 heartbeat (如果存在 leader 的话, 按协议它会向所有 follower 定期发送 heartbeat 证明自己还活着别选别人当 leader), 就变成 candidate 并向所有 follower 发起支持自己的 leader election. 当这个 candidate 收到**超过半数** follower 的投票后, 就变成 leader (总共有多少 node 大家事先都知道)
+    - 所有节点初始状态都是 follower, 每个 follower 有一个随机的 election timeout ($150$ 到 $300$ ms 之间, 见 @fig-raft-election), 如果在这个时间内没有收到 leader 的 heartbeat (如果存在 leader 的话, 按协议它会向所有 follower 定期发送 heartbeat 证明自己还活着别选别人当 leader), 就变成 candidate 并向所有 follower 发起支持自己的 leader election. 当这个 candidate 收到**超过半数** follower 的投票后, 就变成 leader (总共有多少 node 大家事先都知道)
 
-        ![Leader election 过程, 你可以自行在 @_2025_raft 进行其它挂机或者 leader request 实验, omitted here.](raft-election.gif){#fig-raft-election width=80%}
+        ![Leader election 过程, 你可以自行在 @_2025_raft 进行挂机实验或者 leader request 实验, omitted here.](raft-election.gif){#fig-raft-election width=80%}
 
 - **PBFT** (Practical Byzantine Fault Tolerance)
     - 由名字知道它能处理 Byzantine fault.
@@ -165,12 +167,50 @@ csl: ../../ieee-with-url.csl #https://github.com/citation-style-language/styles
     - 按目的:
         - **Passive 被动攻击**: 监听和窃取信息, 不改变系统状态.
         - **Active 主动攻击**: 篡改、伪造或破坏信息, 改变系统状态.
-    - 按手段:
+    - 按程序:
         - **Virus 病毒**: 自我复制, 不单独存在而是嵌入进宿主程序.
         - **Worm 蠕虫**: 自我复制, 独立存在.
         - **Trojan 木马**: 不自我复制 (usu.), 伪装成合法程序诱骗用户安装.
+    - 按手段:
+        - **Cryptanalysis 密码分析**: 通过分析加密算法来尝试分析密钥.
+        - **Brute-force attack 暴力破解**: 通过尝试所有可能的密钥来解密信息.
+
+- **Threat vector**
+
+> 「敌人了解系统」 --- Shannon.
+
+- **Kerckhoffs's principle 凯尔霍夫原则**: 假设编解码规则 (Algorithm) 是公开的. 而只有密钥是保密的.
+
+- 加密方法的安全程度:
+    - **Unconditionally secure 无条件安全**: 即使敌人有无限计算资源也无法破解 (比如 **OTP (One-time pad)**, 例如用真随机数来 XOR 原文, 并且密钥只使用一次), 而且安全是绝对的, 与时间、技术进步无关.
+    - **Computationally secure 计算安全**: 在敌人有限计算资源下无法破解 (比如 AES, RSA), 安全是时代性的 (所以要不断升级).
+
+### Traditional Cipher Model 传统加密模型
+
+> 这些算法全部都过时了.
+
+- **Substitution cipher 替换密码**: 用一个不变的映射表 (**bijective**) 来替换原文中的每个字符.
+    - **Caesar cipher 凯撒密码**: 每个字母向后移动固定的位数 (shift).
+    - **DES (Data Encryption Standard)**
+
+- 替换的方法可以通过统计频率分析来破解.
 
 ### Symmetric Cipher Model 对称加密模型
+
+#### Block Cipher 块加密
+
+> 将原文切成固定长度的块 (block), 对每个块分别加密.
+
+- **Block size**: 即每次输入多少位**原文**, 一般是 $2$ 的幂次方 (比如 $128$ bit).
+
+::: {.column-margin}
+![Block Cipher 框图](block-cipher.png){#fig-block-cipher}
+:::
+
+
+##### Feistel Structure 费斯特尔结构
+
+- Feistel 适用于 block size 较大的情况.
 
 ### Asymmetric Cipher Model 非对称加密模型
 
