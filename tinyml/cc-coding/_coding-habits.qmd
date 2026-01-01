@@ -3,6 +3,10 @@
 - 能引用尽量引用不要用指针!
 - 函数的参数尽量少.
 
+### 命名习惯
+
+- `k`: 用于常量变量 (constant variable), 例如 `const int kBufferSize = 1024;`.
+
 ### getters 和 Setters
 
 为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 `public`, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 `private` + getter/setter 的方式来控制对成员变量的访问和修改.
@@ -54,3 +58,14 @@
     ```
 
     这种写法类似 @lst-account_private, `const double&` 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 `const` 表示 getter 方法本身不会修改这个类的**所有**成员变量 (`balance_` in this case). 用户可以通过 `obj.balance()` 来获取余额, 也可以通过 `obj.balance() = 100.0;` 来修改余额.
+
+
+- `const` 和 `constexpr` 区别:
+    - `constexpr` 变量在编译时就算出来了, 且不可修改. 一般用于**性能优化**或用作**编译时才能决定声明的数组大小**.
+
+    ```cpp
+    const int x = some_runtime_function(); // 合法
+    constexpr int y = some_runtime_function(); // 不合法, 因为 some_runtime_function() 不是常量表达式
+    constexpr int kTensorSize = 256 * 1024; // 合法
+    uint8_t tensor[kTensorSize]; // 编译时决定的数组大小
+    ```
