@@ -1116,23 +1116,24 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 </figure>
 </div>
 <ul>
-<li><strong>FM (Foundation Model)</strong>: 基础模型. 一般为了解决一个问题往往会训练一个专门的模型 (task-specific model). 但 FM 是一种通用的模型, 在大规模、广泛、多样的数据 (多模态的, 文字/图像/音频) 上进行预训练 (训练成本极高 <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[15]</a></span>); 然后可以通过微调 (fine-tuning) 来适应各种下游任务 (如文本生成、图像识别、语音识别等). 比如 Meta 的 Llama 模型.
+<li><p><strong>FM (Foundation Model)</strong>: 基础模型. 一般为了解决一个问题往往会训练一个专门的模型 (task-specific model). 但 FM 是一种通用的模型, 在大规模、广泛、多样的数据 (多模态的, 文字/图像/音频) 上进行预训练 (训练成本极高 <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[15]</a></span>); 然后可以通过微调 (fine-tuning) 来适应各种下游任务 (如文本生成、图像识别、语音识别等). 比如 Meta 的 Llama 模型.</p>
 <ul>
 <li><strong>Edge-native foundation models</strong>: 边缘化的 FM, 涉及到对大模型的 knowledge distillation, pruning, quantization 等技术, 以适应边缘设备的计算和存储限制 <span class="citation" data-cites="somvanshi2025tinymachinelearningtiny"><a href="#ref-somvanshi2025tinymachinelearningtiny" role="doc-biblioref">[14]</a></span>.</li>
 </ul></li>
-<li><strong>Pretraining 预训练</strong>: 用维基百科、书籍等未标注的大规模数据集对模型进行训练 (自监督的), 方法包括:
+<li><p><strong>Pretraining 预训练</strong>: 用维基百科、书籍等未标注的大规模数据集对模型进行训练 (自监督的), 方法包括:</p>
 <ul>
 <li><strong>Masked Language Modeling (MLM)</strong>: 随机挖空, 然后预测挖空的词语.</li>
 <li><strong>Next Sentence Prediction (NSP)</strong>: 以句子为单位的 MLM.</li>
 </ul></li>
-<li><strong>Post-training/Fine-tuning 后训练/微调</strong>: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论-&gt;情感标签).
+<li><p><strong>Post-training/Fine-tuning 后训练/微调</strong>: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论-&gt;情感标签).</p>
 <ul>
 <li><strong>Full fine-tuning 全参数微调</strong>: 会更新模型的<strong>所有</strong>参数. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).</li>
 <li><strong>Parameter-efficient fine-tuning (PEFT) 参数高效微调</strong>: 主流, 冻结 <span class="math inline">\(99\%\)</span> 以上的模型参数, 只更新少量参数 (E.g., LoRA).</li>
 <li><strong>Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)</strong>: 用<strong>指令-回答对</strong>微调 <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[15]</a></span>, 如 “翻译成中文: How are you?” -&gt; “你好吗?”, 让模型会回答而只是文本补全.</li>
 <li><strong>Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习</strong>: SFT 微调后的模型不是最有帮助的/有害的/不符合价值观的, RLHF 不是喂给模型更多数据, 而是让模型给出多个回答, 然后让<strong>人类</strong>打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[15]</a></span>.</li>
 </ul></li>
-<li><strong>VLA (Vision Language Action)</strong>: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.</li>
+<li><p><strong>VLA (Vision Language Action)</strong>: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.</p></li>
+<li><p><strong>AIGC (AI-Generated Content)</strong>: 生成式 AI.</p></li>
 </ul>
 <section id="computing-in-ml" class="level3">
 <h3 class="anchored" data-anchor-id="computing-in-ml">Computing in ML</h3>
@@ -1234,7 +1235,10 @@ Figure&nbsp;16: Adagrad 给梯度平缓方向对应的参数 (<span class="math 
 <li>RISCV 上有 TfLM (TensorFlow Lite for Microcontrollers),</li>
 <li><strong>ONNX (Open Neural Network Exchange)</strong>: 一种统一的描述神经网络结构的格式, 以上三种框架都支持导出为 ONNX 格式.</li>
 </ul></li>
-<li><p><strong>TVM, XLA (Accelerated Linear Algebra)</strong>: 机器学习编译器 <a href="#fig-mlsys" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-mlsys</span></a>, 在以上三个框架内都有 python 的接口函数.</p></li>
+<li><p><strong>TVM, XLA (Accelerated Linear Algebra)</strong>: 机器学习编译器 <a href="#fig-mlsys" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-mlsys</span></a>, 在以上三个框架内都有 python 的接口函数.</p>
+<ul>
+<li><strong>OpenXLA</strong>: 中间表示 <strong>StableHLO (Stable High-Level Optimizer)</strong>, <strong>XLA</strong>, <strong>PJRT</strong> 的实现工程.</li>
+</ul></li>
 </ul>
 <div id="fig-mlsys" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1346,6 +1350,7 @@ Figure&nbsp;18: AMD GPU 2015 采用 2.5D 封装
 <li><strong>LLVM IR</strong>: clang 生成的中间表示</li>
 </ul></li>
 <li><p><strong>MLIR (Multi-level IR)</strong>: 机器学习模型训练的中间表示.</p></li>
+<li><p><strong>StableHLO (Stable High-Level Optimizer)</strong>: 也是机器学习的中间表示.</p></li>
 <li><p><strong>GDB (GNU Debugger)</strong>: GNU 调试器. 支持 Assembly, C/C++, Go, Rust 等.</p></li>
 <li><p><strong>elf (Executable Linkable Format)</strong>: 可执行链接格式. 包含 <code>.o</code>, <code>a.out</code>, <code>.so</code> 等文件.</p>
 <ul>
@@ -1382,7 +1387,11 @@ Figure&nbsp;18: AMD GPU 2015 采用 2.5D 封装
 <figcaption>交叉编译</figcaption>
 </figure>
 </div>
-</div></div></section>
+</div></div><ul>
+<li><p><strong>Intrinsic 内联</strong>: 将汇编代码嵌入到 <code>C/C++</code> 代码中. 比如在想在 <code>C++</code> 中嵌入 RVV 汇编代码, 可以先 <code>#include &lt;riscv_vector.h&gt;</code> 头文件, 然后就可以这样用:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+</section>
 <section id="operating-system-terms" class="level2">
 <h2 class="anchored" data-anchor-id="operating-system-terms">Operating System Terms</h2>
 <ul>

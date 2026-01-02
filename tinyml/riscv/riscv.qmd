@@ -353,20 +353,18 @@ sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)
     - `VLEN` (Vector LENgth): RVV GPR 的位宽. RVV GPR 跟 普通的 GPR 类似, 一共 $32$ 个向量寄存器 (`v0-v31`). 但由于以后要同时装很多数, 不像 GPRs 那样每个寄存器才 $32$ 位宽, RVV 的 GPR 位宽比较大, 比如 $512$ bits.
     - `ELEN` (Element LENgth): 一个向量寄存器中会存多个数 (Elements, 个数为 `vl`), 这些数的长度都相等 (都等于 `sew`), 毕竟以后这些数都要在一条指令的作用下同时被运算 (SIMD). 这些 Element 的数量有一个最小值, 取到这个最小值时每个 Element 的长度取到最大值 (`ELEN`).
 
-- 开发者可配置的量:
+- 开发者可配置的量 (通过 @sec-vector-csrs 中的指令配置):
     - `lmul` (Length multiplier): 允许使用几个 RVV GPR.
         - `lmul=2` 记为 `m2`.
         - `lmul` $>1$ 表示使用了一个 **Vector Group**.
     - `sew` (Selected Element Width): 实际使用中的 Element 的位宽 (`sew` $\le$ `ELEN`).
         - `sew=16` 记为 `e16`.
-    - `vl` (Vector Length): 实际使用了每个向量寄存器中的几个 Element. 可以有尾巴 (**"tail elements"**) 不使用 (见 @fig-lmul-sew-vl 的灰色 element), 对尾巴的处理可以有两种 tail policy (`tP`):
+    - `vl` ((Application) Vector Length, **AVL**): 实际使用了每个向量寄存器中的几个 Element. 可以有尾巴 (**"tail elements"**) 不使用 (见 @fig-lmul-sew-vl 的灰色 element), 对尾巴的处理可以有两种 tail policy (`tP`):
         - **Tail Undisturbed (`tu`)**: 目标寄存器的 tail elements 保持原值.
         - **Tail Agnostic (`ta`)**: 所有目标寄存器的 tail elements 被设置成了全 `1`.
         - `vlmax` := (`VLEN` / `sew`) * `lmul` 表示总共最多能使用多少个 Element.
 
     ![开发者可配置的量的说明. `lmul` 和 `sew` 统称为 `vtype` @ferreribez_2022_introduction.](lmul-sew-vl.png){#fig-lmul-sew-vl}
-
-- 配置指令:
 
 
 ### Vector Operations
@@ -375,10 +373,46 @@ sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)
     - **Mask Undisturbed (`mu`)**: 被 mask 掉的目标寄存器中的 element 保持原值.
     - **Mask Agnostic (`ma`)**: 被 mask 掉的目标寄存器中的 element 被设置成了全 `1`.
 
-![带 Mask 的向量加指令 @ferreribez_2022_introduction.](vadd-masked.png){#fig-vadd-masked}
+    ![带 Mask 的向量加指令 @ferreribez_2022_introduction.](vadd-masked.png){#fig-vadd-masked}
 
-### Vector CSRs
+- **Move Instructions**: 
+    - **Scalar Move**: 
+
+- **Load/Store**: 内存和向量寄存器之间的数据转移.
+
+    ```assembly
+    # Configure first
+    vsetvli t0, t1, e8, m4, ta, mu
+    li x10, 0x1000
+    # Unit-stride
+    vle8.v v1, (x10)    # 从内存基地址 0x1000 开始, 依次加载 4 个 8-bit 元素到 v1
+    # TODO 太多了, 以后用到再补充
+    ```
+
+### Vector CSRs {#sec-vector-csrs}
+
+- **RVV 配置指令** @riscvarchive_2023_github
+
+    ```assembly
+    vsetvli rd, rs1, vtypei     # rd = new vl, rs1 = AVL, vtypei = new vtype setting
+    vsetivli rd, uimm, vtypei   # rd = new vl, uimm = AVL, vtypei = new vtype setting
+    vsetvl rd, rs1, rs2         # rd = new vl, rs1 = AVL, rs2 = new vtype value
+    ```
+
+    ![RVV 配置指令的结构 @riscvarchive_2023_github.](rvv-config.png){#fig-rvv-config}
+
+    - `vtypei` 可以展开写成比如 `e16, m2, ta, ma`.
+    - 指令命名:
+        - 开头的 `v` 代表这是一条向量指令 (`vadd` 也是一样).
+        - `vsetvli`: **Set V**ector **L**ength, and `vtype` using **I**mmediate value.
+        - `vsetivli`: **Set V**ector **L**ength using **I**mmediate value, and `vtype` also using **I**mmediate value.
+        - `vsetvl`: **Set V**ector **L**ength (not by Immediate value).
 
 - RVV 添加了 $7$ 个新的 CSR 寄存器:
 
     ![RVV 新增的 CSR 寄存器 @riscvarchive_2023_github.](rvv-csr.png){#fig-rvv-csr}
+
+    - 详细介绍可以看 @riscvarchive_2023_github 或[**这篇博客**](https://www.cnblogs.com/sureZ-learning/category/2453794.html)的第三讲. 我们主要关注 @fig-rvv-csr 中的 `vtype`:
+
+        ![`vtype` 寄存器只有低 $8$ 位有用 @riscvarchive_2023_github. 且直接对应 @fig-rvv-config 中 `vsetvl` 的 `rs2` 的所有 $32$ 位、`vsetvli` 和 `vsetivli` 指令的 `zimm` 低 $8$ 位字段 (高位其实没有用).](vtype.png){#fig-vtype}
+

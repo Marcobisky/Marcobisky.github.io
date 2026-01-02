@@ -56,3 +56,19 @@ TODO
 
 - **安装依赖方便**
     - Bazel 有很多第三方库. 比如硬件开发要用的 `verilator`, 引用库后 `bazel build` 会自动下载这个工具链的可执行文件到当前目录下的比如 `./bazel-bin/external/verilator` 位置! 极其方便!
+
+#### Usage
+
+- **规则复用**:
+    - `rules/` 下面放很多类似 Python 语言的 `.bzl` 规则函数库, 定义了如何从指定的输入生成目标文件, 可以在 `BUILD` 文件中引用 (`load()`) 这些函数, 然后调用它们.
+    - 用比如 `load("@rules_hdl//verilator:defs.bzl", "verilator_cc_library")` 来引用第三方规则库 (rules_hdl github 仓库位置需要先声明).
+    - `genrule`: 如果要在 `BUILD` 里面直接用命令行生成文件 (而不是引用 `rules/` 中的规则), 可以用 `genrule`:
+
+        ```bazel
+        genrule(
+            name = "generate_file",
+            srcs = ["input.txt"],
+            outs = ["output.txt"],
+            cmd = "cp $(SRCS) $(OUTS)",
+        )
+        ```

@@ -543,7 +543,7 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#vector-gprs" id="toc-vector-gprs" class="nav-link" data-scroll-target="#vector-gprs">Vector GPRs</a></li>
   <li><a href="#vector-operations" id="toc-vector-operations" class="nav-link" data-scroll-target="#vector-operations">Vector Operations</a></li>
-  <li><a href="#vector-csrs" id="toc-vector-csrs" class="nav-link" data-scroll-target="#vector-csrs">Vector CSRs</a></li>
+  <li><a href="#sec-vector-csrs" id="toc-sec-vector-csrs" class="nav-link" data-scroll-target="#sec-vector-csrs">Vector CSRs</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -1058,7 +1058,7 @@ sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)</code></pre>
 <li><code>VLEN</code> (Vector LENgth): RVV GPR 的位宽. RVV GPR 跟 普通的 GPR 类似, 一共 <span class="math inline">\(32\)</span> 个向量寄存器 (<code>v0-v31</code>). 但由于以后要同时装很多数, 不像 GPRs 那样每个寄存器才 <span class="math inline">\(32\)</span> 位宽, RVV 的 GPR 位宽比较大, 比如 <span class="math inline">\(512\)</span> bits.</li>
 <li><code>ELEN</code> (Element LENgth): 一个向量寄存器中会存多个数 (Elements, 个数为 <code>vl</code>), 这些数的长度都相等 (都等于 <code>sew</code>), 毕竟以后这些数都要在一条指令的作用下同时被运算 (SIMD). 这些 Element 的数量有一个最小值, 取到这个最小值时每个 Element 的长度取到最大值 (<code>ELEN</code>).</li>
 </ul></li>
-<li>开发者可配置的量:
+<li>开发者可配置的量 (通过 <a href="#sec-vector-csrs" class="quarto-xref"><span class="quarto-unresolved-ref">sec-vector-csrs</span></a> 中的指令配置):
 <ul>
 <li><code>lmul</code> (Length multiplier): 允许使用几个 RVV GPR.
 <ul>
@@ -1069,7 +1069,7 @@ sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)</code></pre>
 <ul>
 <li><code>sew=16</code> 记为 <code>e16</code>.</li>
 </ul></li>
-<li><code>vl</code> (Vector Length): 实际使用了每个向量寄存器中的几个 Element. 可以有尾巴 (<strong>“tail elements”</strong>) 不使用 (见 <a href="#fig-lmul-sew-vl" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-lmul-sew-vl</span></a> 的灰色 element), 对尾巴的处理可以有两种 tail policy (<code>tP</code>):
+<li><code>vl</code> ((Application) Vector Length, <strong>AVL</strong>): 实际使用了每个向量寄存器中的几个 Element. 可以有尾巴 (<strong>“tail elements”</strong>) 不使用 (见 <a href="#fig-lmul-sew-vl" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-lmul-sew-vl</span></a> 的灰色 element), 对尾巴的处理可以有两种 tail policy (<code>tP</code>):
 <ul>
 <li><strong>Tail Undisturbed (<code>tu</code>)</strong>: 目标寄存器的 tail elements 保持原值.</li>
 <li><strong>Tail Agnostic (<code>ta</code>)</strong>: 所有目标寄存器的 tail elements 被设置成了全 <code>1</code>.</li>
@@ -1086,17 +1086,15 @@ Figure&nbsp;1: 开发者可配置的量的说明. <code>lmul</code> 和 <code>se
 </figcaption>
 </figure>
 </div></li>
-<li>配置指令:</li>
 </ul>
 </section>
 <section id="vector-operations" class="level3">
 <h3 class="anchored" data-anchor-id="vector-operations">Vector Operations</h3>
 <ul>
-<li><strong>Masking</strong>: 由 <code>v0</code> (vector mask, <code>vm</code>) 来决定哪些 element 的运算结果要写回目标寄存器.
+<li><p><strong>Masking</strong>: 由 <code>v0</code> (vector mask, <code>vm</code>) 来决定哪些 element 的运算结果要写回目标寄存器.</p>
 <ul>
 <li><strong>Mask Undisturbed (<code>mu</code>)</strong>: 被 mask 掉的目标寄存器中的 element 保持原值.</li>
 <li><strong>Mask Agnostic (<code>ma</code>)</strong>: 被 mask 掉的目标寄存器中的 element 被设置成了全 <code>1</code>.</li>
-</ul></li>
 </ul>
 <div id="fig-vadd-masked" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1107,11 +1105,47 @@ Figure&nbsp;1: 开发者可配置的量的说明. <code>lmul</code> 和 <code>se
 Figure&nbsp;2: 带 Mask 的向量加指令 <span class="citation" data-cites="ferreribez_2022_introduction"><a href="#ref-ferreribez_2022_introduction" role="doc-biblioref">[1]</a></span>.
 </figcaption>
 </figure>
-</div>
-</section>
-<section id="vector-csrs" class="level3">
-<h3 class="anchored" data-anchor-id="vector-csrs">Vector CSRs</h3>
+</div></li>
+<li><p><strong>Move Instructions</strong>:</p>
 <ul>
+<li><strong>Scalar Move</strong>:</li>
+</ul></li>
+<li><p><strong>Load/Store</strong>: 内存和向量寄存器之间的数据转移.</p>
+<pre class="assembly"><code># Configure first
+vsetvli t0, t1, e8, m4, ta, mu
+li x10, 0x1000
+# Unit-stride
+vle8.v v1, (x10)    # 从内存基地址 0x1000 开始, 依次加载 4 个 8-bit 元素到 v1
+# TODO 太多了, 以后用到再补充</code></pre></li>
+</ul>
+</section>
+<section id="sec-vector-csrs" class="level3">
+<h3 class="anchored" data-anchor-id="sec-vector-csrs">Vector CSRs</h3>
+<ul>
+<li><p><strong>RVV 配置指令</strong> <span class="citation" data-cites="riscvarchive_2023_github"><a href="#ref-riscvarchive_2023_github" role="doc-biblioref">[2]</a></span></p>
+<pre class="assembly"><code>vsetvli rd, rs1, vtypei     # rd = new vl, rs1 = AVL, vtypei = new vtype setting
+vsetivli rd, uimm, vtypei   # rd = new vl, uimm = AVL, vtypei = new vtype setting
+vsetvl rd, rs1, rs2         # rd = new vl, rs1 = AVL, rs2 = new vtype value</code></pre>
+<div id="fig-rvv-config" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rvv-config-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="rvv-config.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rvv-config-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: RVV 配置指令的结构 <span class="citation" data-cites="riscvarchive_2023_github"><a href="#ref-riscvarchive_2023_github" role="doc-biblioref">[2]</a></span>.
+</figcaption>
+</figure>
+</div>
+<ul>
+<li><code>vtypei</code> 可以展开写成比如 <code>e16, m2, ta, ma</code>.</li>
+<li>指令命名:
+<ul>
+<li>开头的 <code>v</code> 代表这是一条向量指令 (<code>vadd</code> 也是一样).</li>
+<li><code>vsetvli</code>: <strong>Set V</strong>ector <strong>L</strong>ength, and <code>vtype</code> using <strong>I</strong>mmediate value.</li>
+<li><code>vsetivli</code>: <strong>Set V</strong>ector <strong>L</strong>ength using <strong>I</strong>mmediate value, and <code>vtype</code> also using <strong>I</strong>mmediate value.</li>
+<li><code>vsetvl</code>: <strong>Set V</strong>ector <strong>L</strong>ength (not by Immediate value).</li>
+</ul></li>
+</ul></li>
 <li><p>RVV 添加了 <span class="math inline">\(7\)</span> 个新的 CSR 寄存器:</p>
 <div id="fig-rvv-csr" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1119,10 +1153,23 @@ Figure&nbsp;2: 带 Mask 的向量加指令 <span class="citation" data-cites="fe
 <img src="rvv-csr.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rvv-csr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: RVV 新增的 CSR 寄存器 <span class="citation" data-cites="riscvarchive_2023_github"><a href="#ref-riscvarchive_2023_github" role="doc-biblioref">[2]</a></span>.
+Figure&nbsp;4: RVV 新增的 CSR 寄存器 <span class="citation" data-cites="riscvarchive_2023_github"><a href="#ref-riscvarchive_2023_github" role="doc-biblioref">[2]</a></span>.
+</figcaption>
+</figure>
+</div>
+<ul>
+<li><p>详细介绍可以看 <span class="citation" data-cites="riscvarchive_2023_github"><a href="#ref-riscvarchive_2023_github" role="doc-biblioref">[2]</a></span> 或<a href="https://www.cnblogs.com/sureZ-learning/category/2453794.html"><strong>这篇博客</strong></a>的第三讲. 我们主要关注 <a href="#fig-rvv-csr" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-rvv-csr</span></a> 中的 <code>vtype</code>:</p>
+<div id="fig-vtype" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vtype-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vtype.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vtype-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: <code>vtype</code> 寄存器只有低 <span class="math inline">\(8\)</span> 位有用 <span class="citation" data-cites="riscvarchive_2023_github"><a href="#ref-riscvarchive_2023_github" role="doc-biblioref">[2]</a></span>. 且直接对应 <a href="#fig-rvv-config" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-rvv-config</span></a> 中 <code>vsetvl</code> 的 <code>rs2</code> 的所有 <span class="math inline">\(32\)</span> 位、<code>vsetvli</code> 和 <code>vsetivli</code> 指令的 <code>zimm</code> 低 <span class="math inline">\(8\)</span> 位字段 (高位其实没有用).
 </figcaption>
 </figure>
 </div></li>
+</ul></li>
 </ul>
 
 
