@@ -1,15 +1,11 @@
----
-title: "YOLO Object Detection 目标检测"
----
+> 本章基本上是 [**YOLO V1 Bilibili 讲解**](https://www.bilibili.com/video/BV1gKwAeWEo4?spm_id_from=333.788.videopod.episodes&vd_source=42579e22289b6144ba0b2bdcf99834e3) 的笔记, 可以直接看视频学习.
 
-> 本文基本上是 [**YOLO V1 Bilibili 讲解**](https://www.bilibili.com/video/BV1gKwAeWEo4?spm_id_from=333.788.videopod.episodes&vd_source=42579e22289b6144ba0b2bdcf99834e3) 的笔记, 可以直接看视频学习.
-
-## Task Objective 任务目标
+### Task Objective 任务目标
 
 - 识别东西是什么
 - 将东西的位置框起来
 
-### 两类方法
+#### 两类方法
 
 解决这个问题的方法有两类:
 
@@ -19,35 +15,33 @@ title: "YOLO Object Detection 目标检测"
     - Region Proposal 候选区: 先从图片中提取出可能包含目标的 1000-2000 个区域, 然后对每个候选区进行目标对象识别操作.
     - E.g., Faster R-CNN, Mask R-CNN, Cascade R-CNN
 
-![One stage 和 Two stage 流程框图对比](yolo-one-two-stage.png)
+![One stage 和 Two stage 流程框图对比](yolo-one-two-stage.png){#fig-yolo-one-two-stage width=80%}
 
 :::{.column-margin}
-![MSCOCO 数据集有物体名字和位置标注](mscoco.png)
+![MSCOCO 数据集有物体名字和位置标注](yolo-mscoco.png){#fig-yolo-mscoco}
 :::
 
-### 损失函数
+#### 损失函数
 
-![交并比用来衡量预测地好不好](IoU.png){width=70%}
+![交并比用来衡量预测地好不好](yolo-IoU.png){#fig-yolo-IoU width=50%}
 
+### YOLO V1
 
-## YOLO V1
-
-### Network Structure 网络结构
+#### Network Structure 网络结构
 
 ![YOLO V1 的网络结构 @Er_2025_bilibili](yolo-v1.png){#fig-yolo-v1}
 
-![@fig-yolo-v1 的 Back-Bone 网络其实是若干的卷积网络 @redmon2016lookonceunifiedrealtime](back-bone.png){#fig-back-bone}
+![@fig-yolo-v1 的 Back-Bone 网络其实是若干的卷积网络 @redmon2016lookonceunifiedrealtime](yolov1-back-bone.png){#fig-yolov1-back-bone}
 
 说明:
 
-- @fig-back-bone: `-s-2` 表示 stride 步长为 2.
+- @fig-yolov1-back-bone: `-s-2` 表示 stride 步长为 2.
 
 - 输入输出:
     - 输入是一张正方形的图片 (长宽像素各为 $448$, 有 3 个通道: RGB).
-
     - 输出的 tensor 大小为 $7 \times 7 \times 30$
 
-### Label Tensor 标签张量
+#### Label Tensor 标签张量
 
 - MSCOCO 数据集需要先转换成另外一种形式 (@fig-yolo-v1-data-labeling) 再喂给 TOLO V1 神经网络 (即换一种形式打标签而已).
 
@@ -55,11 +49,10 @@ title: "YOLO Object Detection 目标检测"
 
 - 每张图片都有 $S \times S = 49$ 个 grid cell, **每一个 grid cell** 都被一个 $30 \times 1$ 的向量描述, 相当于一张图片都对应了一个 $7 \times 7 \times 30$ 的 label tensor.
 
-    - @fig-back-bone 中网络的输出也是一个 $7 \times 7 \times 30$ 的 tensor, 但这是 **Prediction Tensor 预测张量** (@sec-prediction-tensor), 不能混为一谈.
+    - @fig-yolov1-back-bone 中网络的输出也是一个 $7 \times 7 \times 30$ 的 tensor, 但这是 **Prediction Tensor 预测张量** (@sec-prediction-tensor), 不能混为一谈.
 
 - 如果有两个物体的中心点都落在同一个 grid cell 中, YOLO V1 只会保留其中一个.
 
-### Prediction Tensor 预测张量 {#sec-prediction-tensor}
+#### Prediction Tensor 预测张量 {#sec-prediction-tensor}
 
-## References {.unnumbered}
-
+TODO
