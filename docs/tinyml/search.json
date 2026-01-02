@@ -191,7 +191,7 @@
     "href": "glossary/glossary.html#fpga-terms",
     "title": "Glossary 名词解释",
     "section": "FPGA Terms",
-    "text": "FPGA Terms\n\nGeneral\n\nTfLM: TensorFlow Lite for Microcontrollers.\n\nPDTI8: Person DeTection Int 8\n\nGateware: 用软件编写的硬件电路. (既不是 Software, 也不是 Hardware).\nHPS: High Performance System.\n\nPLATFORMS=common_soc sim hps, 三个平台. common_soc 指标准的 FPGA 开发平台; sim 指用 Verilator 进行软件仿真.\n\nSoC (System on Chip) FPGA 片上系统: 比如 ZYNQ 有 PL 和 PS, 一块硅芯片 就可以实现整个系统的功能 (而不是要组合多个芯片 (Chiplet)). 有时 Chiplets 组成的系统也叫 SoC, 但严格来说 SoC 是指单芯片系统.\nACAP (Adaptive Compute Acceleration Platform): 集成了专用 AI 引擎／DSP阵列、Network-on-chip (NoC)、高带宽存储接口 (如 HBM) 等异构硬件资源 [1], 如 Xilinx Versal 系列.\nIP Core: Intellectual Property Core. 由一方 (开发者或公司) 设计，并通过许可授权给其他设计者使用。常见的 IP 核包括 CPU 内核、以太网控制器、内存控制器等.\n\nSoft IP: 软核\nHard IP: 硬核\n\n.vcd, fst: 波形文件格式, 后者占空间更小, 但只受 GTKWave 支持 [2].\n\n\n\nInterface\n\nPMOD (Peripheral Module) 接口: 一组 2*6 排针的引脚 PMOD. 定义了电源、地线、以及最多 8 条可用于通信的信号线. PMOD模块通常通过 SPI、I2C 或 GPIO (通用数字输入输出) 与主控通信. 你可以买到很多支持 PMOD 的模块, 如传感器、显示屏、存储器等.\nJTAG 接口: 一种用于调试和编程的标准接口.\nAXI (Advanced eXtensible Interface) 接口: CPU 与外设 (内存控制器, DMA, CFU, IP 核) 之间的通信协议.\n\n比如 ZYNQ 的 PS (Processing System) 和 PL (Programmable Logic) 之间的通信就是通过 AXI 接口 (见 FPGA 原理速成).\n\n\n\n\nZYNQ\n\n核心商业模式:\n\nIP 提供商: 设计 IP 核并授权给芯片设计制造商使用. E.g., ARM (CPU 内核设计)\n芯片设计制造商: 购买 IP 核并设计和生产关键芯片. E.g., Xilinx (被 AMD 收购), ST (STM32 核心芯片的制造商).\n开发板制造商: 从芯片设计制造商处采购芯片, 并设计供电电路、时钟电路、将方形黑色的芯片底部的引脚引出接入各种物理接口、设计 PCB 等, 最终生产出开发板. E.g., Alinx, 正点原子, Digilent.\n\n命名规则\n\nE.g., ZYNQ XC7Z010 CLG400ABX2021 D6168711A, XC7: 7 系列 (Xilinx Corporation), Z: ZYNQ, 010: 逻辑资源规模 (越小越少), CLG: 封装类型 (Chip-Scale Lead-Free BGA (Ball Grid Array)), 400: 引脚数, ABX: 温度、性能等级, 2021: 生产年份, D6168711A: 可理解为序列号.\nZYNQ 7010 SoCs 包括 XC7Z010 等很多型号.\n\n\n\n\n\n\n\nZYNQ 7010 实物图: Xilinx 与 Alinx 公司分别负责的部分.\n\n\n\nAPU (Application Processing Unit): ZYNQ PS 内部的一个双核 ARM Cortex-A9 CPU. (就是 CPU, 见 FPGA 原理速成)\nMIO (Multiplexed I/O): ZYNQ PS 黑色芯片里面有多种外设: SPI, IIC, CAN, UART, etc. 比如 UART 主要涉及 TX 和 RX 两类信号, 这两类信号需要通过 MIO 与用户交互. 但是 BGA 封装出来的引脚很少 (XC7 只有 54 根), 需要进行复用.\n\nEMIO (Extended MIO): 先要通过 PL 再与用户交互.\n\nGIC (Generic Interrupt Controller): 通用中断控制器, 收集外设、PL 发来的中断请求, 按优先级分配给 APU 中的两个核. 相当于 STM32 里面的 NVIC (Nested Vectored Interrupt Controller), 只不过 NVIC 只需要给到一个核.\n\n\n\nFile formats\n\n.pcf 文件: Physical Constraints File. .pcf 文件告诉工具：Verilog 中的某个逻辑信号，物理上应该接到 FPGA 的哪个 pin. 比如:\nset_io D1 B5\n表示把 D1 (在 .v 文件中定义的) 信号连接到 FPGA 的 B5 引脚.\n\n.xdc 文件: Xilinx Design Constraints File (Vivado 工具使用的约束文件, a.k.a., Master Constraints File 主约束文件). Arty 35T xdc 文件\n\n\n\n\nHDL\n\nHLS: High-Level Synthesis. 用 C/C++ 等高级语言来写硬件电路设计.\n\nScala (Scalable language): 一种专门生成其它 DSL (Domain Specific Language) 的语言. 生成的语言包括:\n\nSpinalHDL: 一种 Hardware Description Language (HDL). 可用来生成更底层的 Verilog 代码.\n\nVexRiscv Soft CPU: 用 SpinalHDL 写的一个 高度可配置的 RISC-V soft CPU 内核 (soft 的意思就是 CPU 不是硬件焊死的 (“hard CPU”) , 而是部署在 FPGA 上可以改变结构的).\n\nChisel: 另一种 HDL.\nScalac: Scala 编译器.\nsbt: Scala Build导出 Tool. 配置依赖、插件和调用 scalac. 会在指定目录下面生成 .v 或 .sv 文件.\n\n.fir: FIRRTL (Flexible Intermediate Representation for RTL) 文件, 一种用于硬件设计的中间表示 (加上 --dump-fir 选项即可, dump 一般表示「导出」).\n\nMill: 跟 sbt 类似, 但更轻量.\n\nAmaranth: 一个 Python 库, 也是用于硬件描述和设计. 可生成 Verilog 代码.\n\nRTL (Register Transfer Level): 通俗说就是 verilog 代码. 可视为芯片设计的前端.\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nFPGA Principles\n\nPAR： Place and Route. 布局布线.\n\n\n\nFPGA Structure 结构\n\nBLE, CLB (Slice, LAB, ALM), SB: 见 FPGA 原理速成.\nLUT (Look-Up Table): 查找表. 所有写 Verilog 的行为一般都会被综合成 LUT + FF 的结构.\nDSP (Digital Signal Processing) Block: FPGA 上专门进行数值运算 (乘加) 的硬件模块 (是卷积、矩阵乘法核心).\n\nLUT-based DSP: 与 DSP Block 有本质的区别, 综合器会把它看成 LUT + FF 结构, 而不是调用板子上的 DSP Block 硬件资源.\n\n\n\n\nVerification 验证\n\n验证是芯片设计很重要的一环, 下面将简要介绍 Verification 的一些概念, 遵循认识论原则.\n\n\nDUT: Device Under Test. 被测试的模块.\nTB (Testbench): 狭义来说就是用 verilog 写的测试代码 (initial begin 之类的). 但写过都知道有以下缺点:\n\n基本上只能验证模块的功能正确性.\n输入什么信号都要自己写, 很费时, 而且缺乏随机性.\n\nUVM (Universal Verification Methodology): 验证方法学.",
+    "text": "FPGA Terms\n\nGeneral\n\nTfLM: TensorFlow Lite for Microcontrollers.\n\nPDTI8: Person DeTection Int 8\n\nGateware: 用软件编写的硬件电路. (既不是 Software, 也不是 Hardware).\nHPS: High Performance System.\n\nPLATFORMS=common_soc sim hps, 三个平台. common_soc 指标准的 FPGA 开发平台; sim 指用 Verilator 进行软件仿真.\n\nSoC (System on Chip) FPGA 片上系统: 比如 ZYNQ 有 PL 和 PS, 一块硅芯片 就可以实现整个系统的功能 (而不是要组合多个芯片 (Chiplet)). 有时 Chiplets 组成的系统也叫 SoC, 但严格来说 SoC 是指单芯片系统.\nACAP (Adaptive Compute Acceleration Platform): 集成了专用 AI 引擎／DSP阵列、Network-on-chip (NoC)、高带宽存储接口 (如 HBM) 等异构硬件资源 [1], 如 Xilinx Versal 系列.\nIP Core: Intellectual Property Core. 由一方 (开发者或公司) 设计，并通过许可授权给其他设计者使用。常见的 IP 核包括 CPU 内核、以太网控制器、内存控制器等.\n\nSoft IP: 软核\nHard IP: 硬核\n\n.vcd, fst: 波形文件格式, 后者占空间更小, 但只受 GTKWave 支持 [2].\n\n\n\nInterface\n\nPMOD (Peripheral Module) 接口: 一组 2*6 排针的引脚 PMOD. 定义了电源、地线、以及最多 8 条可用于通信的信号线. PMOD模块通常通过 SPI、I2C 或 GPIO (通用数字输入输出) 与主控通信. 你可以买到很多支持 PMOD 的模块, 如传感器、显示屏、存储器等.\nJTAG 接口: 一种用于调试和编程的标准接口.\nAXI (Advanced eXtensible Interface) 接口: CPU 与外设 (内存控制器, DMA, CFU, IP 核) 之间的通信协议.\n\n比如 ZYNQ 的 PS (Processing System) 和 PL (Programmable Logic) 之间的通信就是通过 AXI 接口 (见 FPGA 原理速成).\n\n\n\n\nZYNQ\n\n核心商业模式:\n\nIP 提供商: 设计 IP 核并授权给芯片设计制造商使用. E.g., ARM (CPU 内核设计)\n芯片设计制造商: 购买 IP 核并设计和生产关键芯片. E.g., Xilinx (被 AMD 收购), ST (STM32 核心芯片的制造商).\n开发板制造商: 从芯片设计制造商处采购芯片, 并设计供电电路、时钟电路、将方形黑色的芯片底部的引脚引出接入各种物理接口、设计 PCB 等, 最终生产出开发板. E.g., Alinx, 正点原子, Digilent.\n\n命名规则\n\nE.g., ZYNQ XC7Z010 CLG400ABX2021 D6168711A, XC7: 7 系列 (Xilinx Corporation), Z: ZYNQ, 010: 逻辑资源规模 (越小越少), CLG: 封装类型 (Chip-Scale Lead-Free BGA (Ball Grid Array)), 400: 引脚数, ABX: 温度、性能等级, 2021: 生产年份, D6168711A: 可理解为序列号.\nZYNQ 7010 SoCs 包括 XC7Z010 等很多型号.\n\n\n\n\n\n\n\nZYNQ 7010 实物图: Xilinx 与 Alinx 公司分别负责的部分.\n\n\n\nAPU (Application Processing Unit): ZYNQ PS 内部的一个双核 ARM Cortex-A9 CPU. (就是 CPU, 见 FPGA 原理速成)\nMIO (Multiplexed I/O): ZYNQ PS 黑色芯片里面有多种外设: SPI, IIC, CAN, UART, etc. 比如 UART 主要涉及 TX 和 RX 两类信号, 这两类信号需要通过 MIO 与用户交互. 但是 BGA 封装出来的引脚很少 (XC7 只有 54 根), 需要进行复用.\n\nEMIO (Extended MIO): 先要通过 PL 再与用户交互.\n\nGIC (Generic Interrupt Controller): 通用中断控制器, 收集外设、PL 发来的中断请求, 按优先级分配给 APU 中的两个核. 相当于 STM32 里面的 NVIC (Nested Vectored Interrupt Controller), 只不过 NVIC 只需要给到一个核.\n\n\n\nFile formats\n\n.pcf 文件: Physical Constraints File. .pcf 文件告诉工具：Verilog 中的某个逻辑信号，物理上应该接到 FPGA 的哪个 pin. 比如:\nset_io D1 B5\n表示把 D1 (在 .v 文件中定义的) 信号连接到 FPGA 的 B5 引脚.\n\n.xdc 文件: Xilinx Design Constraints File (Vivado 工具使用的约束文件, a.k.a., Master Constraints File 主约束文件). Arty 35T xdc 文件\n\n\n\n\nHDL\n\nHLS: High-Level Synthesis. 用 C/C++ 等高级语言来写硬件电路设计.\n\nScala (Scalable language): 一种专门生成其它 DSL (Domain Specific Language) 的语言. 生成的语言包括:\n\nSpinalHDL: 一种 Hardware Description Language (HDL). 可用来生成更底层的 Verilog 代码.\n\nVexRiscv Soft CPU: 用 SpinalHDL 写的一个 高度可配置的 RISC-V soft CPU 内核 (soft 的意思就是 CPU 不是硬件焊死的 (“hard CPU”) , 而是部署在 FPGA 上可以改变结构的).\n\nChisel: 另一种 HDL.\nScalac: Scala 编译器.\nsbt: Scala Build导出 Tool. 配置依赖、插件和调用 scalac. 会在指定目录下面生成 .v 或 .sv 文件.\n\n.fir: FIRRTL (Flexible Intermediate Representation for RTL) 文件, 一种用于硬件设计的中间表示 (加上 --dump-fir 选项即可, dump 一般表示「导出」).\n\nMill: 跟 sbt 类似, 但更轻量.\n\nAmaranth: 一个 Python 库, 也是用于硬件描述和设计. 可生成 Verilog 代码.\n\nFIRRTL (Flexible Intermediate Representation for RTL, .fir): 一种用于硬件设计的中间表示. 可由 Chisel 生成, 然后再转换为 Verilog.\n\nChiselStage: Chisel 的一个组件, 将 Chisel 转换为 FIRRTL.\nFirtool: 将 FIRRTL 转换为 Verilog.\n\nRTL (Register Transfer Level): 通俗说就是 verilog 代码. 可视为芯片设计的前端.\n\n\n\n\n\n\nFigure 1\n\n\n\n\n\n\nFPGA Principles\n\nPAR： Place and Route. 布局布线.\n\n\n\nFPGA Structure 结构\n\nBLE, CLB (Slice, LAB, ALM), SB: 见 FPGA 原理速成.\nLUT (Look-Up Table): 查找表. 所有写 Verilog 的行为一般都会被综合成 LUT + FF 的结构.\nDSP (Digital Signal Processing) Block: FPGA 上专门进行数值运算 (乘加) 的硬件模块 (是卷积、矩阵乘法核心).\n\nLUT-based DSP: 与 DSP Block 有本质的区别, 综合器会把它看成 LUT + FF 结构, 而不是调用板子上的 DSP Block 硬件资源.\n\n\n\n\nVerification 验证\n\n验证是芯片设计很重要的一环, 下面将简要介绍 Verification 的一些概念, 遵循认识论原则.\n\n\nDUT: Device Under Test. 被测试的模块.\nTB (Testbench): 狭义来说就是用 verilog 写的测试代码 (initial begin 之类的). 但写过都知道有以下缺点:\n\n基本上只能验证模块的功能正确性.\n输入什么信号都要自己写, 很费时, 而且缺乏随机性.\n\nUVM (Universal Verification Methodology): 验证方法学.",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
@@ -202,7 +202,7 @@
     "href": "glossary/glossary.html#open-source-tools",
     "title": "Glossary 名词解释",
     "section": "Open Source Tools",
-    "text": "Open Source Tools\n\n该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!\n\n\nverilator: 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行仿真, 模拟出时钟、寄存器逻辑、外设交互等行为.\nverilator -cc blink.v # 生成 obj_dir/ 其中含有转换好的 C++ 代码\niverilog (Icarus Verilog): 也是仿真 (但不输出 C 代码):\niverilog -o blink.vvp blink.v blink_tb.v\n# 生成 vcd 文件可配合 GTKWave 查看波形\nvvp blink.vvp\nCocotb: 与 verilator 和 icarus 不同, Cocotb 在它们之上, 用于方便地写测试逻辑而不是模拟硬件.\nopenFPGALoader: 用于将比特流烧录到 FPGA (但不能调试).\n# 示例：\nopenFPGALoader -b arty arty_bitstream.bit      # SRAM 加载\nopenFPGALoader -b arty -f arty_bitstream.bit   # 写入 flash\nopenocd: Open On-Chip Debugger. 用于调试 FPGA 的工具. 支持 JTAG 接口.\n三个端到端的工具链:\n\nVivado: IDE, 闭源.\nyosysHQ (Yosys Open SYnthesis Suite Headquarters): yyds!! 一个开源的 EDA 工具链. 子项目包括:\n\nicestorm: 用于针对 Lattice iCE40 FPGA 实现完全的端到端开源流程, 从 Verilog 到 bitstream, 再烧写到 FPGA 板卡上. 以下每一个命令都是一个单独的 repo!!\n# yosys 综合 (将 verilog 转换为网表 .json)\nyosys -p 'synth_ice40 -top blink -json blink.json' blink.v\n# nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)\nnextpnr-ice40 --up5k --json blink.json --pcf blink.pcf --asc blink.asc\n# icepack 打包 (生成 bitstream .bin)\nicepack blink.asc blink.bin\n# icesprog 烧写 (将 bitstream 写入 FPGA)\nsudo icesprog blink.bin\n\nF4PGA: 以前叫 Symbiflow, 旨在为多家 FPGA 供应商 (Xilinx 7 系列、Lattice iCE40/ECP5、QuickLogic EOS S3 等) 提供统一、功能完备、可扩展且无需专有软件的端到端开发流程.\n\n里面大量使用了 YosysHQ 的工具.\n\n\nSpinalHDL: 一个基于 Scala 的硬件描述语言 (HDL), 用于生成 Verilog 代码. SpinalHDL 提供了更高级的抽象和更强大的功能, 使得硬件设计更加灵活和可扩展.\n\nVexRiscv:\n\nLitex: 支持用 Python 脚本拼装出完整的 SoC.\nSRecord: 一套命令行工具, 简单理解为将 .elf 文件转换为 .hex 或 .bin 文件的工具. 比如:\nsrec_cat input.elf -o output.hex -intel",
+    "text": "Open Source Tools\n\n该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!\n\n\nverilator: 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行仿真, 模拟出时钟、寄存器逻辑、外设交互等行为.\nverilator -cc blink.v # 生成 obj_dir/ 其中含有转换好的 C++ 代码\niverilog (Icarus Verilog): 也是仿真 (但不输出 C 代码):\niverilog -o blink.vvp blink.v blink_tb.v\n# 生成 vcd 文件可配合 GTKWave 查看波形\nvvp blink.vvp\nCocotb: 与 verilator 和 icarus 不同, Cocotb 在它们之上, 用于方便地写测试逻辑而不是模拟硬件.\nopenFPGALoader: 用于将比特流烧录到 FPGA (但不能调试).\n# 示例：\nopenFPGALoader -b arty arty_bitstream.bit      # SRAM 加载\nopenFPGALoader -b arty -f arty_bitstream.bit   # 写入 flash\nopenocd: Open On-Chip Debugger. 用于调试 FPGA 的工具. 支持 JTAG 接口.\n三个端到端的工具链:\n\nVivado: IDE, 闭源.\nyosysHQ (Yosys Open SYnthesis Suite Headquarters): yyds!! 一个开源的 EDA 工具链. 子项目包括:\n\nicestorm: 用于针对 Lattice iCE40 FPGA 实现完全的端到端开源流程, 从 Verilog 到 bitstream, 再烧写到 FPGA 板卡上. 以下每一个命令都是一个单独的 repo!!\n# yosys 综合 (将 verilog 转换为网表 .json)\nyosys -p 'synth_ice40 -top blink -json blink.json' blink.v\n# nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)\nnextpnr-ice40 --up5k --json blink.json --pcf blink.pcf --asc blink.asc\n# icepack 打包 (生成 bitstream .bin)\nicepack blink.asc blink.bin\n# icesprog 烧写 (将 bitstream 写入 FPGA)\nsudo icesprog blink.bin\n\nF4PGA: 以前叫 Symbiflow, 旨在为多家 FPGA 供应商 (Xilinx 7 系列、Lattice iCE40/ECP5、QuickLogic EOS S3 等) 提供统一、功能完备、可扩展且无需专有软件的端到端开发流程.\n\n里面大量使用了 YosysHQ 的工具.\n\n\nSpinalHDL: 一个基于 Scala 的硬件描述语言 (HDL), 用于生成 Verilog 代码. SpinalHDL 提供了更高级的抽象和更强大的功能, 使得硬件设计更加灵活和可扩展.\n\nVexRiscv:\n\nLitex: 支持用 Python 脚本拼装出完整的 SoC.\nFuseSoC: 用来描述和管理 IP 的工具.\nSRecord: 一套命令行工具, 简单理解为将 .elf 文件转换为 .hex 或 .bin 文件的工具. 比如:\nsrec_cat input.elf -o output.hex -intel",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
@@ -268,7 +268,7 @@
     "href": "glossary/glossary.html#c-compile-terms",
     "title": "Glossary 名词解释",
     "section": "C Compile Terms",
-    "text": "C Compile Terms\n\ngcc (GNU Compiler Collection): GNU 编译器集合, 包括 C、C++、Go 等编程语言的编译器.\n\ngcc = clang (前端) + LLVM (后端) (在功能上)\n\nIR (Intermediate Representation): 编译器在编译过程中形成的中间代码 (不一定只有一层, 可以有多层), 用于编译器优化和代码生成.\n\nGIMPLE: gcc 生成的中间表示\nLLVM IR: clang 生成的中间表示\n\nMLIR: 机器学习模型训练的中间表示.\nGDB (GNU Debugger): GNU 调试器. 支持 Assembly, C/C++, Go, Rust 等.\nelf (Executable Linkable Format): 可执行链接格式. 包含 .o, a.out, .so 等文件.\n\nBinutils (Binary Utilities): elf 文件处理相关工具, 包括:\n\nobjdump: 反汇编工具.\nobjcopy: 执行文件格式转换. elf 中还包含了很多运行时不需要的信息, objcopy 可将这些信息去掉生成 bin 文件.\nreadelf: 显示更多 elf 格式文件的信息.\nar: tar, 将多个文件打包成一个大文件.\n\n\n\n\n\n\n\n\nELF 文件格式 [23]\n\n\n\nCross Compilation: 交叉编译, 即在另一台机器上面开发手里面的这台机器 (嵌入式开发, 或在 MacOS 编写 RISCV 的操作系统).\n\n构建 (build) 系统: 生成可执行程序的计算机.\n主机 (host) 系统: 运行可执行程序的计算机.\n目标 (target) 系统: 可执行程序运行的计算机架构\n\n\n\n\n\n\n\n交叉编译",
+    "text": "C Compile Terms\n\ngcc (GNU Compiler Collection): GNU 编译器集合, 包括 C、C++、Go 等编程语言的编译器.\n\ngcc = clang (前端) + LLVM (后端) (在功能上)\n\nIR (Intermediate Representation): 编译器在编译过程中形成的中间代码 (不一定只有一层, 可以有多层), 用于编译器优化和代码生成.\n\nGIMPLE: gcc 生成的中间表示\nLLVM IR: clang 生成的中间表示\n\nMLIR (Multi-level IR): 机器学习模型训练的中间表示.\nGDB (GNU Debugger): GNU 调试器. 支持 Assembly, C/C++, Go, Rust 等.\nelf (Executable Linkable Format): 可执行链接格式. 包含 .o, a.out, .so 等文件.\n\nBinutils (Binary Utilities): elf 文件处理相关工具, 包括:\n\nobjdump: 反汇编工具.\nobjcopy: 执行文件格式转换. elf 中还包含了很多运行时不需要的信息, objcopy 可将这些信息去掉生成 bin 文件.\nreadelf: 显示更多 elf 格式文件的信息.\nar: tar, 将多个文件打包成一个大文件.\n\n\n\n\n\n\n\n\nELF 文件格式 [23]\n\n\n\nCross Compilation: 交叉编译, 即在另一台机器上面开发手里面的这台机器 (嵌入式开发, 或在 MacOS 编写 RISCV 的操作系统).\n\n构建 (build) 系统: 生成可执行程序的计算机.\n主机 (host) 系统: 运行可执行程序的计算机.\n目标 (target) 系统: 可执行程序运行的计算机架构\n\n\n\n\n\n\n\n交叉编译",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
@@ -987,6 +987,105 @@
     "crumbs": [
       "CFU Playground",
       "<span class='chapter-number'>17</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
+    ]
+  },
+  {
+    "objectID": "riscv/riscv.html#rvv-向量扩展",
+    "href": "riscv/riscv.html#rvv-向量扩展",
+    "title": "RISCV ISA",
+    "section": "RVV 向量扩展",
+    "text": "RVV 向量扩展\n\nVector GPRs\n\n焊死的常量 (不能更改):\n\nVLEN (Vector LENgth): RVV GPR 的位宽. RVV GPR 跟 普通的 GPR 类似, 一共 \\(32\\) 个向量寄存器 (v0-v31). 但由于以后要同时装很多数, 不像 GPRs 那样每个寄存器才 \\(32\\) 位宽, RVV 的 GPR 位宽比较大, 比如 \\(512\\) bits.\nELEN (Element LENgth): 一个向量寄存器中会存多个数 (Elements, 个数为 vl), 这些数的长度都相等 (都等于 sew), 毕竟以后这些数都要在一条指令的作用下同时被运算 (SIMD). 这些 Element 的数量有一个最小值, 取到这个最小值时每个 Element 的长度取到最大值 (ELEN).\n\n开发者可配置的量:\n\nlmul (Length multiplier): 允许使用几个 RVV GPR.\n\nlmul=2 记为 m2.\nlmul \\(&gt;1\\) 表示使用了一个 Vector Group.\n\nsew (Selected Element Width): 实际使用中的 Element 的位宽 (sew \\(\\le\\) ELEN).\n\nsew=16 记为 e16.\n\nvl (Vector Length): 实际使用了每个向量寄存器中的几个 Element. 可以有尾巴 (“tail elements”) 不使用 (见 Figure fig-lmul-sew-vl 的灰色 element), 对尾巴的处理可以有两种 tail policy (tP):\n\nTail Undisturbed (tu): 目标寄存器的 tail elements 保持原值.\nTail Agnostic (ta): 所有目标寄存器的 tail elements 被设置成了全 1.\nvlmax := (VLEN / sew) * lmul 表示总共最多能使用多少个 Element.\n\n\n\n\n\n\n\n\nFigure 1: 开发者可配置的量的说明. lmul 和 sew 统称为 vtype [1].\n\n\n\n配置指令:\n\n\n\nVector Operations\n\nMasking: 由 v0 (vector mask, vm) 来决定哪些 element 的运算结果要写回目标寄存器.\n\nMask Undisturbed (mu): 被 mask 掉的目标寄存器中的 element 保持原值.\nMask Agnostic (ma): 被 mask 掉的目标寄存器中的 element 被设置成了全 1.\n\n\n\n\n\n\n\n\nFigure 2: 带 Mask 的向量加指令 [1].\n\n\n\n\n\nVector CSRs\n\nRVV 添加了 \\(7\\) 个新的 CSR 寄存器:\n\n\n\n\n\n\nFigure 3: RVV 新增的 CSR 寄存器 [2].\n\n\n\n\n\n\n\n\n[1] R. Ferrer Ibáñez, “Introduction to the RISC-v vector extension.” 2022. Available: https://eupilot.eu/wp-content/uploads/2022/11/RISC-V-VectorExtension-1-1.pdf. [Accessed: Jan. 01, 2026]\n\n\n[2] riscvarchive, “GitHub - riscvarchive/riscv-v-spec: Working draft of the proposed RISC-v v vector extension.” GitHub, May 2023. Available: https://github.com/riscvarchive/riscv-v-spec/tree/master. [Accessed: Jan. 01, 2026]",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>8</span>  <span class='chapter-title'>RISCV ISA</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cli/cc-cli.html",
+    "href": "cc-cli/cc-cli.html",
+    "title": "Basic Linux CLI",
+    "section": "",
+    "text": "命令的基本组成",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Basic Linux CLI</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cli/cc-cli.html#命令的基本组成",
+    "href": "cc-cli/cc-cli.html#命令的基本组成",
+    "title": "Basic Linux CLI",
+    "section": "",
+    "text": "命令 子命令 [选项] [参数] [重定向] [控制符或管道]\nCommand Subcommand [Options] [Arguments] [Redirection] [Control Characters or Pipes]\n\n这里面除了命令是必须的, 其它的都是可选的 (就像 Python 的函数参数一样, 不写的话会有默认值!).\n\n\n重要例子\ngit submodule update --init\n\nsubmodule 和 update 是子命令\n--init 是选项, 参数默认是更新所有模块. (也可以加参数: git submodule update --init --recursive third_party/python/pythondata_cpu_serv.)\n\n# 如果系统中找不到 wget 命令，就把 wget 加入 missing 数组\nmissing=()\n\nif ! which wget &gt;/dev/null; then\n    missing+=(wget)\nfi\n\n&gt;: 重定向, 表示把标准输出 (即命令正常的输出) 写到某个地方.\n/dev/null: 黑洞设备, 任何写入它的数据都会被系统丢弃.\n如果 which wget &gt;/dev/null 没成功, 则执行 then 后面的语句 (即只关心是否存在 wget 命令, 不关心它的输出).\n\ngrep \"apt\" ./scripts/setup\n\n在 ./scripts/setup 文件中查找包含 \"apt\" 字符串.\n\nin_ci=0\nif [ $# -gt 0 ] ; then\n  if [ $1 == \"-ci\" ] ; then\n    in_ci=1\n  fi\nfi\n\n$#: 表示传递给脚本的参数个数.\ngt: 表示大于 (greater than).\n$1: 表示第一个参数.\n\ncat file.txt # 打印文件内容\ncat a.txt b.txt &gt; merged.txt # 合并多个文件内容到一个新文件\nmkdir -p /path/to/directory # 创建目录, 如果上级目录不存在则创建\n# 假设 env.sh 有这个内容: MY_VAR=\"hello\"\nbash env.sh\necho \"$MY_VAR\"   # 空的\nsource env.sh    # 会在当前 shell 里保留变量\necho \"$MY_VAR\"   # 输出 hello\n\n\n常见选项\n\n-C: Change, 切换到指定目录.\n-h 或 --help: 显示帮助信息\n-v 或 --version: 显示版本信息\n-l 或 --long: 显示详细信息\n-a 或 --all: 显示所有内容，包括隐藏文件\n-r 或 --recursive: 递归操作\n-d 或 --directory: 仅显示目录 / 是否存在目录\n-f:\n\n--force, 强制执行操作\nfilename, 文件名\n\nset -e: 如果有错误就退出 (exit) 脚本\n-p 或 --parents: 创建目录时如果不存在则会创建.",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Basic Linux CLI</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cli/cc-cli.html#io-模型",
+    "href": "cc-cli/cc-cli.html#io-模型",
+    "title": "Basic Linux CLI",
+    "section": "I/O 模型",
+    "text": "I/O 模型\n\n输出/输出/错误\n每个命令启动时, 系统会为它创建 3 个文件描述符 (file descriptor, FD):\nFD 0  → 标准输入  (stdin)   默认为键盘\nFD 1  → 标准输出  (stdout)  默认为终端\nFD 2  → 标准错误  (stderr)  默认为终端\n\n\n重定向 (Redirection)\n\n1&gt;: 重定向 FD1, 将指令成功执行的结果输出到指定文件 (覆盖原文件).\n\n可以省略 1, 直接用 &gt;.\n错误信息不会被写进文件, 仍然显示在终端.\n\necho hello &gt; out1.txt\n\n\nout1.txt\n\nhello\n\n2&gt;: 重定向 FD2, 将指令执行时的错误信息输出到指定文件 (覆盖原文件).\nls nonexistent_file 2&gt; err1.txt\n\n\nerr1.txt\n\nls: cannot access 'nonexistent_file': No such file or directory\n\n\nFD1, FD2 分开存:\nls nonexistent_file &gt; out2.txt 2&gt; err2.txt\n\n\nout2.txt\n\n\n\n\n\nerr2.txt\n\nls: cannot access 'nonexistent_file': No such file or directory\n\nFD2 当作 FD1 存:\nls nonexistent_file &gt; all.txt 2&gt;&1\n\n\nall.txt\n\nls: cannot access 'nonexistent_file': No such file or directory\n\n\n&gt;&gt;: 追加 FD1\necho hello &gt;&gt; out3.txt\necho world &gt;&gt; out3.txt\n\n\nout3.txt\n\nhello\nworld\n\n\n\n\n管道 (Pipes)",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Basic Linux CLI</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cli/cc-cli.html#shell-预处理",
+    "href": "cc-cli/cc-cli.html#shell-预处理",
+    "title": "Basic Linux CLI",
+    "section": "Shell 预处理",
+    "text": "Shell 预处理\n\n正则表达式 (Regular Expressions, regex)\n\n*: 匹配零个或多个字符\n?: 匹配单个字符\n[abc]: 匹配方括号内的任意一个字符 (a, b, 或 c)\n[a-z]: 匹配指定范围内的任意一个字符 (小写字母 a 到 z)\n[^abc]: 匹配不在方括号内的任意一个字符 (不是 a, b, 或 c)\n^: 匹配行的开头\n$: 匹配行的结尾\n\\: 转义字符, 用于匹配特殊字符本身 (如 \\*, \\?, \\\\)\n\n\n\n重定向\n\n不改变命令本身, 而是改变命令默认的输入输出方式.",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Basic Linux CLI</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cli/cc-cli.html#shell-脚本",
+    "href": "cc-cli/cc-cli.html#shell-脚本",
+    "title": "Basic Linux CLI",
+    "section": "Shell 脚本",
+    "text": "Shell 脚本\nTODO",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Basic Linux CLI</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cli/cc-cli.html#其它",
+    "href": "cc-cli/cc-cli.html#其它",
+    "title": "Basic Linux CLI",
+    "section": "其它",
+    "text": "其它\n\nCommand Substitution 命令替换\necho \"Today is $(date)\"\n\ndate 本身就是命令! 执行的时候将它输出的结果作为字符串替换掉 (placeholder 的感觉).\n还有一些经常用在命令替换的命令:\n\n# dirname 纯纯基于字符串 (不管路径是否存在)\ndirname /home/user/file.txt   → /home/user\ndirname /home/user/           → /home\ndirname foo/bar               → foo\ndirname foo                   → .\ndirname this/path/not/exist   → this/path/not\npwd # 当前工作目录\nrealpath # 显示当前绝对路径",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Basic Linux CLI</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cli/cc-cli.html#常用命令",
+    "href": "cc-cli/cc-cli.html#常用命令",
+    "title": "Basic Linux CLI",
+    "section": "常用命令",
+    "text": "常用命令\ndf -h # 查看磁盘使用情况\npoweroff # 关机\nls -a # 列出当前目录下的所有文件和目录 (包括隐藏文件)\n\napt 和 apt-get: 前者面向日常用户, 更简洁; 后者是更底层的传统工具, 适合脚本和精确控制.\n查看 manual:\n# -A 3: 显示匹配行之后的 3 行\n# -B 1: 显示匹配行之前的 1 行\nman cc | grep -A 3 -B 1 \" -g \"",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Basic Linux CLI</span>"
+    ]
+  },
+  {
+    "objectID": "cc-cli/cc-cli.html#vim-cheatsheet",
+    "href": "cc-cli/cc-cli.html#vim-cheatsheet",
+    "title": "Basic Linux CLI",
+    "section": "Vim Cheatsheet",
+    "text": "Vim Cheatsheet\n\n\n\n光标移动",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>11</span>  <span class='chapter-title'>Basic Linux CLI</span>"
     ]
   }
 ]

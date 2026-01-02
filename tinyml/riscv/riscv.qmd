@@ -344,3 +344,41 @@ sb t0, 1(a0)    ;mem[a0 + 1] = t0 (store byte)
 sh t0, 2(a0)    ;mem[a0 + 2] = t0 (store half word)
 sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)
 ```
+
+## RVV 向量扩展
+
+### Vector GPRs
+
+- 焊死的常量 (不能更改):
+    - `VLEN` (Vector LENgth): RVV GPR 的位宽. RVV GPR 跟 普通的 GPR 类似, 一共 $32$ 个向量寄存器 (`v0-v31`). 但由于以后要同时装很多数, 不像 GPRs 那样每个寄存器才 $32$ 位宽, RVV 的 GPR 位宽比较大, 比如 $512$ bits.
+    - `ELEN` (Element LENgth): 一个向量寄存器中会存多个数 (Elements, 个数为 `vl`), 这些数的长度都相等 (都等于 `sew`), 毕竟以后这些数都要在一条指令的作用下同时被运算 (SIMD). 这些 Element 的数量有一个最小值, 取到这个最小值时每个 Element 的长度取到最大值 (`ELEN`).
+
+- 开发者可配置的量:
+    - `lmul` (Length multiplier): 允许使用几个 RVV GPR.
+        - `lmul=2` 记为 `m2`.
+        - `lmul` $>1$ 表示使用了一个 **Vector Group**.
+    - `sew` (Selected Element Width): 实际使用中的 Element 的位宽 (`sew` $\le$ `ELEN`).
+        - `sew=16` 记为 `e16`.
+    - `vl` (Vector Length): 实际使用了每个向量寄存器中的几个 Element. 可以有尾巴 (**"tail elements"**) 不使用 (见 @fig-lmul-sew-vl 的灰色 element), 对尾巴的处理可以有两种 tail policy (`tP`):
+        - **Tail Undisturbed (`tu`)**: 目标寄存器的 tail elements 保持原值.
+        - **Tail Agnostic (`ta`)**: 所有目标寄存器的 tail elements 被设置成了全 `1`.
+        - `vlmax` := (`VLEN` / `sew`) * `lmul` 表示总共最多能使用多少个 Element.
+
+    ![开发者可配置的量的说明. `lmul` 和 `sew` 统称为 `vtype` @ferreribez_2022_introduction.](lmul-sew-vl.png){#fig-lmul-sew-vl}
+
+- 配置指令:
+
+
+### Vector Operations
+
+- **Masking**: 由 `v0` (vector mask, `vm`) 来决定哪些 element 的运算结果要写回目标寄存器.
+    - **Mask Undisturbed (`mu`)**: 被 mask 掉的目标寄存器中的 element 保持原值.
+    - **Mask Agnostic (`ma`)**: 被 mask 掉的目标寄存器中的 element 被设置成了全 `1`.
+
+![带 Mask 的向量加指令 @ferreribez_2022_introduction.](vadd-masked.png){#fig-vadd-masked}
+
+### Vector CSRs
+
+- RVV 添加了 $7$ 个新的 CSR 寄存器:
+
+    ![RVV 新增的 CSR 寄存器 @riscvarchive_2023_github.](rvv-csr.png){#fig-rvv-csr}
