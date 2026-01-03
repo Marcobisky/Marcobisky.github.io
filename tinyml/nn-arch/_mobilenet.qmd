@@ -47,9 +47,14 @@
         - Pointwise 部分 $= 8 \times 392 = 3136$.
         - 总共 $3528 + 3136 = 6664$ (比常规卷积小了 $4$ 倍多!).
         - **FLOPs** = MAC $\times 2 = 13328$.
+    - DSC 相当于将 channel 之间和 spatial 之间的信息混合方式分开训练, 
 
 ::: {layout = "[50,50]"}
 ![常规卷积操作 (加 bias 的操作没有展示出来), 参数量 $584$, MAC $=28224$ @ai_2023_fundamental.](https://animatedai.github.io/media/convolution-animation-3x3-kernel-same-padding.gif){#fig-normal-conv}
 
-![DSC (加 bias 的操作没有展示出来), 参数量 $152$, MAC $=6664$ @ai_2023_fundamental.](https://animatedai.github.io/media/depthwise-separable-convolution-animation-3x3-kernel.gif){#fig-dsc}
+![DSC (分为 Depthwise 和 Pointwise 两部分, 加 bias 的操作没有展示出来), 参数量 $152$, MAC $=6664$ @ai_2023_fundamental.](https://animatedai.github.io/media/depthwise-separable-convolution-animation-3x3-kernel.gif){#fig-dsc}
+:::
+
+::: {.column-margin}
+![也可以不用将 channel 和 spatial 的信息完全分开训练, 可以引入 **Group** 的概念, 比如这里将 Input 拆成了 $2$ 个 group. @fig-normal-conv ($1$ 个 group) 和 @fig-dsc ($8$ 个 group) 是两个极端 @ai_2023_fundamental.](https://animatedai.github.io/media/convolution-animation-3x3-kernel-2-groups.gif){#fig-dsc-group}
 :::

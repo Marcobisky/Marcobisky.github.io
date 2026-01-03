@@ -529,7 +529,7 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#mobilenet" id="toc-mobilenet" class="nav-link active" data-scroll-target="#mobilenet">MobileNet</a>
+  <li><a href="#sec-mobilenet" id="toc-sec-mobilenet" class="nav-link active" data-scroll-target="#sec-mobilenet">MobileNet</a>
   <ul class="collapse">
   <li><a href="#task-objective-任务目标" id="toc-task-objective-任务目标" class="nav-link" data-scroll-target="#task-objective-任务目标">Task Objective 任务目标</a></li>
   <li><a href="#mobilenetv1" id="toc-mobilenetv1" class="nav-link" data-scroll-target="#mobilenetv1">MobileNetv1</a></li>
@@ -566,8 +566,8 @@ window.Quarto = {
 </header>
 
 
-<section id="mobilenet" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="mobilenet">MobileNet</h2>
+<section id="sec-mobilenet" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="sec-mobilenet">MobileNet</h2>
 <section id="task-objective-任务目标" class="level3">
 <h3 class="anchored" data-anchor-id="task-objective-任务目标">Task Objective 任务目标</h3>
 <ul>
@@ -639,6 +639,7 @@ window.Quarto = {
 <li>总共 <span class="math inline">\(3528 + 3136 = 6664\)</span> (比常规卷积小了 <span class="math inline">\(4\)</span> 倍多!).</li>
 <li><strong>FLOPs</strong> = MAC <span class="math inline">\(\times 2 = 13328\)</span>.</li>
 </ul></li>
+<li>DSC 相当于将 channel 之间和 spatial 之间的信息混合方式分开训练,</li>
 </ul></li>
 </ul>
 <div class="quarto-layout-panel" data-layout="[50,50]">
@@ -662,14 +663,26 @@ Figure&nbsp;1: 常规卷积操作 (加 bias 的操作没有展示出来), 参数
 <img src="https://animatedai.github.io/media/depthwise-separable-convolution-animation-3x3-kernel.gif" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dsc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: DSC (加 bias 的操作没有展示出来), 参数量 <span class="math inline">\(152\)</span>, MAC <span class="math inline">\(=6664\)</span> <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[1]</a></span>.
+Figure&nbsp;2: DSC (分为 Depthwise 和 Pointwise 两部分, 加 bias 的操作没有展示出来), 参数量 <span class="math inline">\(152\)</span>, MAC <span class="math inline">\(=6664\)</span> <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[1]</a></span>.
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
-</section>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-dsc-group" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dsc-group-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://animatedai.github.io/media/convolution-animation-3x3-kernel-2-groups.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dsc-group-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: 也可以不用将 channel 和 spatial 的信息完全分开训练, 可以引入 <strong>Group</strong> 的概念, 比如这里将 Input 拆成了 <span class="math inline">\(2\)</span> 个 group. <a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> (<span class="math inline">\(1\)</span> 个 group) 和 <a href="#fig-dsc" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-dsc</span></a> (<span class="math inline">\(8\)</span> 个 group) 是两个极端 <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[1]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div></div></section>
 </section>
 </section>
 <section id="yolo" class="level2 page-columns page-full">
@@ -703,7 +716,7 @@ Figure&nbsp;2: DSC (加 bias 的操作没有展示出来), 参数量 <span class
 <img src="yolo-one-two-stage.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-one-two-stage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: One stage 和 Two stage 流程框图对比
+Figure&nbsp;4: One stage 和 Two stage 流程框图对比
 </figcaption>
 </figure>
 </div>
@@ -715,7 +728,7 @@ Figure&nbsp;3: One stage 和 Two stage 流程框图对比
 <img src="yolo-mscoco.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-mscoco-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: MSCOCO 数据集有物体名字和位置标注
+Figure&nbsp;5: MSCOCO 数据集有物体名字和位置标注
 </figcaption>
 </figure>
 </div>
@@ -728,7 +741,7 @@ Figure&nbsp;4: MSCOCO 数据集有物体名字和位置标注
 <img src="yolo-IoU.png" class="img-fluid figure-img" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-IoU-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: 交并比用来衡量预测地好不好
+Figure&nbsp;6: 交并比用来衡量预测地好不好
 </figcaption>
 </figure>
 </div>
@@ -744,7 +757,7 @@ Figure&nbsp;5: 交并比用来衡量预测地好不好
 <img src="yolo-v1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-v1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: YOLO V1 的网络结构 <span class="citation" data-cites="Er_2025_bilibili"><a href="#ref-Er_2025_bilibili" role="doc-biblioref">[2]</a></span>
+Figure&nbsp;7: YOLO V1 的网络结构 <span class="citation" data-cites="Er_2025_bilibili"><a href="#ref-Er_2025_bilibili" role="doc-biblioref">[2]</a></span>
 </figcaption>
 </figure>
 </div>
@@ -754,7 +767,7 @@ Figure&nbsp;6: YOLO V1 的网络结构 <span class="citation" data-cites="Er_202
 <img src="yolov1-back-bone.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolov1-back-bone-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: <a href="#fig-yolo-v1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-yolo-v1</span></a> 的 Back-Bone 网络其实是若干的卷积网络 <span class="citation" data-cites="redmon2016lookonceunifiedrealtime"><a href="#ref-redmon2016lookonceunifiedrealtime" role="doc-biblioref">[3]</a></span>
+Figure&nbsp;8: <a href="#fig-yolo-v1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-yolo-v1</span></a> 的 Back-Bone 网络其实是若干的卷积网络 <span class="citation" data-cites="redmon2016lookonceunifiedrealtime"><a href="#ref-redmon2016lookonceunifiedrealtime" role="doc-biblioref">[3]</a></span>
 </figcaption>
 </figure>
 </div>
@@ -778,7 +791,7 @@ Figure&nbsp;7: <a href="#fig-yolo-v1" class="quarto-xref">Figure&nbsp;<span clas
 <img src="yolo-v1-data-labeling.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-v1-data-labeling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8: YOLO V1: <span class="math inline">\(S = 7\)</span>, 总共
+Figure&nbsp;9: YOLO V1: <span class="math inline">\(S = 7\)</span>, 总共
 </figcaption>
 </figure>
 </div></li>
