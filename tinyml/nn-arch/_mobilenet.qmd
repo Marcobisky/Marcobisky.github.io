@@ -16,19 +16,17 @@
 我们直接举例说明 DSC (Depthwise Separable Convolution) 如何减少计算量:
 
 - 参数:
-    - 已知:
-        - Input 输入信息: $(7\times 7) \times 8 = 392$ ($8$ 是通道数量).
-        - Filter 卷积核: $3\times 3 = 9$ (**平面大小**).
-            - **立体大小**: $(3\times 3) \times 8 = 72$.
-            - @fig-normal-conv 中每个「立体核」都会对 Input 进行扫描, 姑且将「闪」一下称为一次「快照」.
-    - 要求:
-        - Stride = 1.
-        - Output 输出信息: 跟输入信息一样大小 $(392)$.
-    - 可求出:
-        - Padding = 1 (@fig-normal-conv 的灰色部分).
-        - 卷积核个数 = 8 (= 输出通道数).
+    - Input 输入信息: $(7\times 7) \times 8 = 392$ ($8$ 个 channel).
+    - Output 输出信息: 同上.
+    - Filter 卷积核:
+        - **平面 (2D) 大小**: $3 \times 3 = 9$.
+        - **立体 (3D) 大小**: $(3\times 3) \times 8 = 72$.
+        - **张量 (4D) 大小**[^tensor]: $(3\times 3) \times 8 \times 8 = 576$. (最后的 $8$ 是卷积核个数 (= 输出通道数), 注意 [HWDN 规范](../glossary/glossary.qmd#sec-cv-terms)).
+        - @fig-normal-conv 中每个「立体核」都会对 Input 进行扫描, 姑且将「闪」一下称为一次「快照」.
+    - Stride = 1 (`s1`).
+    - Padding = 1 (@fig-normal-conv 的灰色部分).
 
-
+[^tensor]: 注意这里的规范: Height × Width × Depth (Channel) × Num_Filters (H × W × D × N).
 
 - **常规卷积层** (见 @fig-normal-conv):
     - **参数量** = 一个立体核参数量 + 有几个立体核 $= (72+1) \times 8 = 584$ (别忘了每个卷积核还有有一个 bias 参数).
@@ -52,7 +50,7 @@
 ::: {layout = "[50,50]"}
 ![常规卷积操作 (加 bias 的操作没有展示出来), 参数量 $584$, MAC $=28224$ @ai_2023_fundamental.](https://animatedai.github.io/media/convolution-animation-3x3-kernel-same-padding.gif){#fig-normal-conv}
 
-![DSC (分为 Depthwise 和 Pointwise 两部分, 加 bias 的操作没有展示出来), 参数量 $152$, MAC $=6664$ @ai_2023_fundamental.](https://animatedai.github.io/media/depthwise-separable-convolution-animation-3x3-kernel.gif){#fig-dsc}
+![DSC (分为 **Depthwise (`dw`) 逐通道** 和 **Pointwise 逐点** 两部分, 加 bias 的操作没有展示出来), 参数量 $152$, MAC $=6664$ @ai_2023_fundamental.](https://animatedai.github.io/media/depthwise-separable-convolution-animation-3x3-kernel.gif){#fig-dsc}
 :::
 
 ::: {.column-margin}

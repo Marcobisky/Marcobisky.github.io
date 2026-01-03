@@ -1,13 +1,16 @@
+### General Terms
+
+- 描述一个神经网络:
+    - **参数量**: 模型中所有可训练参数的数量, 包括 weight 和 bias.
+        - DeepSeek-R1 有 $671\text{ B}$ 可训练参数 ($6710$ 亿).
+    - **Activation 激活值**: 神经网络各个层神经元上的数值 (注意与参数区分开!).
+    - **Hyperparameter 超参数**: 模型训练前需要设置的参数, 如学习率、batch size、层数, etc.
+
 - **ANN (Artificial Neural Network)**: 就是传统意义上的神经网络.
 
 - **MSE (Mean Squared Error)**: 可用作 Loss function.
 
-- **Hyperparameter 超参数**: 模型训练前需要设置的参数, 如学习率、batch size、层数, etc.
-
 - **AI 幻觉**: AI 编造事实的现象.
-
-- **FP32**: 32 位浮点数, 1 位符号位, 8 位指数位, 23 位尾数位, 精度高, 计算速度慢.
-- **BF16**: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位, 精度低, 计算速度快.
 
 - **DAG (Directed Acyclic Graph) 计算图**: 有向无环图, 用来可视化一次计算过程 (哪些数据先算, 后面的数据依赖哪些数据), 由张量和算子组成.
 
@@ -39,6 +42,38 @@
 
 - **AIGC (AI-Generated Content)**: 生成式 AI.
 
+### CV 计算机视觉相关 {#sec-cv-terms}
+
+- **Tensor**: 多维数组.
+    - 名字来源: 由于数学里 $(0,k)$-tensor $T: V^k \to \mathbb{F}$ 在选取一组 basis $\{\mathbf{e}_i\}_{i=1}^k$ 后的 representation 刚好是一个 $k$ 维数组 $T_{i_1i_2 \cdots i_k}$ (正如 linear functional 可以被一个 covector 描述, bilinear functional 可以被一个 matrix 描述).
+    - 机器学习里 **training data**, **kernel**, **feature map** 等都用 tensor 来描述, 而不会用 `python` 自带的 list 和 `np.array()`, 统统都要转化为 `torch.tensor`:
+
+        ```python
+        import torch
+        import numpy as np
+        # python list to tensor
+        data_list = [[1, 2, 3], [4, 5, 6]]
+        list2tensor = torch.tensor(data_list)
+        # numpy array to tensor
+        data_array = np.array([[1, 2, 3], [4, 5, 6]])
+        array2tensor = torch.from_numpy(data_array)
+        ```
+    - Tensor 大小的描述有一定顺序, 默认是 **HWCN (HWDN): Height × Width × Channel (Depth) × Num_Filters (Batch)**.
+
+
+- **Data Layout Formats 张量在内存中的布局**
+    - **NCHW**: `pytorch`
+    - **NHWC**: `numpy`
+    - TODO
+
+    ![三种 Data Layout Formats @a2023_understanding.](data-layout.png){#fig-data-layout width=80%}
+
+- **Feature Map 特征图**: CNN 中间层的一个 channel, 代表机器学习到的一种特征.
+    - 注意不是 kernel! 
+    - *Abuse of Terms:* 有时 Input 的每个 channel 也叫 feature map.
+
+    ![每个 kernel (filter) 可以产生一张 Feature map @anello_2022_visualizing.](feature-map.png){#fig-feature-map width=70%}
+
 
 
 ### Computing in ML
@@ -51,11 +86,16 @@
 
         ![分布式训练: The Third Epoch of AI @_2025_chakra.](third-epoch.png){#fig-third-epoch}
 
-- **参数量**: 模型中所有可训练参数的数量, 比如 7B 指模型有 70 亿个可训练参数.
+- **数据类型**:
+    - **FP32**: 32 位浮点数, 1 位符号位, 8 位指数位, 23 位尾数位, 精度高, 计算速度慢.
+    - **BF16**: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位, 精度低, 计算速度快.
+
 
 - **FLOP (Floating-Point OPeration)**: 一次浮点运算包括一次加/减/乘/除.
     - **FLOPs (Floating-point Operations)**: 用来表达**计算量**.
-    - **FLOPS (Floating-point Operations Per Second)**: 用来表达**算力**.
+    - **FLOPS (Floating-point Operations Per Second)**: 用来表达**算力**
+        - **OPS (Operations Per Second)**: 一般是整数运算的算力单位.
+        - 比如 NVIDIA A10 FP32: $31.2$ TF (TeraFLOPS), INT8 有 $250$ TOPS | 500 TOPS* (稀疏模式下).
 
 - **MAC (Multiply‑ACcumulate)**: $a \leftarrow a + (b \times c)$ 这种运算, 神经网络中有大量的 MAC 运算. 1 MAC = 2 FLOPs.
     - `torchprofile` 库可以统计模型中的 FLOPs 和 MACs.
@@ -70,36 +110,55 @@
         - **Structured Pruning**: 结构化剪枝, 移除整个通道/滤波器/神经元等 @sabih2025hardwaresoftwarecodesignriscvextensions, 更适合硬件加速. (比如 @fig-sparsity (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).
         - **Semi-structured Pruning**: 半结构化剪枝, 介于上述两者之间.
 
+- **Quantization 量化**: 跟模数转换一样, 将模拟 (高分辨率, 如 FP32) 的数据转换为低分辨率 (如 INT8) 的过程.
+    - **量化方法** (注意下面的概念不是严格并列的, 比如 Adaptive 量化可以是 Uniform 也可以是 Non-uniform) @skki_2025_quantization:
+        - **Uniform 量化**
+        - **Non-uniform 量化**
+        - **Weight Clustering 权重聚类量化**
+        - **Integer-only 纯整数量化**: 将所有参数全部转化为整数 (而不是短的浮点如 DeepSeek 的 UE8M0 FP8), 如果有专门针对整数运算优化的硬件加速器就很适合.
+        - **Hybrid 混合量化**
+        - **Adaptive 自适应量化**
+    - **量化范式** @skki_2025_quantization:
+        - **PTQ (PQ, Post-Training Quantization) 训练后量化**: 先完全不管量化将神经网络训练完成 (比如在 FP32 下训练), 然后在将其参数量化为低精度格式 (比如 INT8), 后续也不再训练了. 常见方法:
+            - **ADPQ (ADaptive PQ)**: 通过自适应 LASSO 回归识别敏感权重, 无需 Caliberation Dataset.
+            - **GPTQ (GPT Quantization)**: 给 GPT 量化的, 基于 Hessian 矩阵优化量化误差来压缩模型.
+            - **SmoothQuant**: 通过平滑激活值分布来减少量化误差.
+        - **QAT (Quantization-Aware Training) 量化感知训练**: 在模型训练阶段就加入量化的训练让它学习到如何避免将来量化后精度损失 (比如前向传播时加入 fake quantization nodes 伪量化节点来模拟低精度的量化误差), 显然他肯定会比 PTQ 好, 但是训练成本很高. 常见方法:
+            - **QLoRA**: 结合了 $4$-bit 量化和 LoRA 微调.
+            - **AWQ (Activation-aware Weight Quantization)**: 关注低精度量化 (INT4/INT3) 分析激活值分布, 优先保护对模型输出影响较大的权重, 适合边缘设备.
+
 - **GEMM (GEneral Matrix-Matrix Multiplication)**: 通用矩阵乘法.
 
 - **CIM (Compute In Memory)**: 存内计算.
 
-- **tiling 分块/瓦片**: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.
+- **Tiling 分块/瓦片**: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.
 
 ### Optimizer in ML
-
-- **Optimizer 优化器**: 更新模型参数的算法.
 
 - **Gradient Descent (GD) 梯度下降[^gd]**: 所有优化方法都从这个基础方法改进而来.
     - **Batch Gradient Descent (BGD) 全批量梯度下降**: 用整个训练集计算梯度并更新参数.
     - **Stochastic Gradient Descent (SGD) 随机梯度下降**: 每次用一个样本计算梯度并更新参数.
-    - **Mini-batch Gradient Descent 小批量梯度下降**: 每次用一个 mini-batch (如 32 个样本) 计算梯度并更新参数.
+    - **Mini-batch Gradient Descent 小批量梯度下降**: 每次用一批样本 (mini-batch, 如 $32$ 个样本) 前向传播然后算这批样本的平均 Loss 来进行反向传播更新参数.
+        - 前两个太极端了, BGD 计算量太大, SGD 不稳定, 基本不会用!
+    - **Batch**: 每次用多少样本进行一次参数更新.
+        - *Abuse of Terms:* 有时候卷积核的个数也称为 batch (这是因为 image batch 和 kernel 在内存中的布局方法可以一样, 但真是离大谱!)
 
-[^gd]: *Abuse of Terms* 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!
+[^gd]: *Abuse of Terms:* 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!
 
-- **Momentum-based 动量优化器**: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可**加速**和**平滑**收敛、避免**陷入局部最优**[^momentum]. 也有一些基于次改良的版本:
-    - **Nesterov Accelerated Gradient (NAG)**: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 `torch` 为例:
+- **Optimizer 优化器**: 更新模型参数的算法.
+    - **Momentum-based 动量优化器**: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可**加速**和**平滑**收敛、避免**陷入局部最优**[^momentum]. 也有一些基于次改良的版本:
+        - **Nesterov Accelerated Gradient (NAG)**: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 `torch` 为例:
 
-        ```python
-        optimizer_nag = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, nesterov=True)
-        ```
+            ```python
+            optimizer_nag = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, nesterov=True)
+            ```
 
-[^momentum]: "SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast." @maciejbalawejder_2022_optimizers
-
-- **Adaptive Gradient (Adagrad) 自适应梯度优化器**: 有利于 Sparse Features 的学习 (通过给每个参数分配不同的学习率! 或者理解为对参数进行归一化):
+    - **Adaptive Gradient (Adagrad) 自适应梯度优化器**: 有利于 Sparse Features 的学习 (通过给每个参数分配不同的学习率! 或者理解为对参数进行归一化):
 
     ![Adagrad 给梯度平缓方向对应的参数 ($Y$) 更大的学习率 ($\alpha_Y = 0.05$) 来加快这个方向的下降 @tg_2020_why. 也可以用 "Normalize" 的角度理解.](adagrad.png){#fig-adagrad}
 
+
+[^momentum]: "SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast." @maciejbalawejder_2022_optimizers
 
 
 ### ML Frameworks
@@ -136,6 +195,11 @@
         ![](F-score.png)
 
 - **A/B Test**: 类似双盲实验, 比如研究修改按钮颜色能否提升点击率? 新模型是否真的比旧模型好? 可以用这种方法进行对比实验.
+
+- **QE (Quantization Error) 量化误差**
+    - **AQE (Average Quantization Error) 平均量化误差**
+    - **MQE (Maximum Quantization Error) 最大量化误差**
+    - **OQE (Output Quantization Error) 输出层量化误差**
 
 ### Related Philosophy
 

@@ -594,36 +594,30 @@ window.Quarto = {
 <ul>
 <li>参数:
 <ul>
-<li>已知:
+<li>Input 输入信息: <span class="math inline">\((7\times 7) \times 8 = 392\)</span> (<span class="math inline">\(8\)</span> 个 channel).</li>
+<li>Output 输出信息: 同上.</li>
+<li>Filter 卷积核:
 <ul>
-<li>Input 输入信息: <span class="math inline">\((7\times 7) \times 8 = 392\)</span> (<span class="math inline">\(8\)</span> 是通道数量).</li>
-<li>Filter 卷积核: <span class="math inline">\(3\times 3 = 9\)</span> (<strong>平面大小</strong>).
-<ul>
-<li><strong>立体大小</strong>: <span class="math inline">\((3\times 3) \times 8 = 72\)</span>.</li>
+<li><strong>平面 (2D) 大小</strong>: <span class="math inline">\(3 \times 3 = 9\)</span>.</li>
+<li><strong>立体 (3D) 大小</strong>: <span class="math inline">\((3\times 3) \times 8 = 72\)</span>.</li>
+<li><strong>张量 (4D) 大小</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>: <span class="math inline">\((3\times 3) \times 8 \times 8 = 576\)</span>. (最后的 <span class="math inline">\(8\)</span> 是卷积核个数 (= 输出通道数), 注意 <a href="../glossary/glossary.html#sec-cv-terms">HWDN 规范</a>).</li>
 <li><a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> 中每个「立体核」都会对 Input 进行扫描, 姑且将「闪」一下称为一次「快照」.</li>
 </ul></li>
-</ul></li>
-<li>要求:
-<ul>
-<li>Stride = 1.</li>
-<li>Output 输出信息: 跟输入信息一样大小 <span class="math inline">\((392)\)</span>.</li>
-</ul></li>
-<li>可求出:
-<ul>
+<li>Stride = 1 (<code>s1</code>).</li>
 <li>Padding = 1 (<a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> 的灰色部分).</li>
-<li>卷积核个数 = 8 (= 输出通道数).</li>
 </ul></li>
-</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;注意这里的规范: Height × Width × Depth (Channel) × Num_Filters (H × W × D × N).</p></div></div><ul>
 <li><strong>常规卷积层</strong> (见 <a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a>):
 <ul>
 <li><strong>参数量</strong> = 一个立体核参数量 + 有几个立体核 <span class="math inline">\(= (72+1) \times 8 = 584\)</span> (别忘了每个卷积核还有有一个 bias 参数).</li>
-<li><strong>MAC</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> = 「闪」一次的 MAC <span class="math inline">\(\times\)</span>「闪」的总次数 <span class="math inline">\(= 72 \times 392 = 28224\)</span>.
+<li><strong>MAC</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> = 「闪」一次的 MAC <span class="math inline">\(\times\)</span>「闪」的总次数 <span class="math inline">\(= 72 \times 392 = 28224\)</span>.
 <ul>
 <li><strong>FLOPs</strong> = MAC <span class="math inline">\(\times 2 = 56448\)</span>.</li>
 </ul></li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;算 MAC 的时候这样思考: 每「闪」一下都算了 <span class="math inline">\(72\)</span> 次乘法和 <span class="math inline">\(71\)</span> 次加法, 哦不对! <strong>最后还要加 bias</strong>, 所以加法也是 <span class="math inline">\(72\)</span> 次 (即 MAC=72); 而输出的每个「小方块」都对应一次「快照」! 这两个数乘一下就是总 MAC 数了.</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;算 MAC 的时候这样思考: 每「闪」一下都算了 <span class="math inline">\(72\)</span> 次乘法和 <span class="math inline">\(71\)</span> 次加法, 哦不对! <strong>最后还要加 bias</strong>, 所以加法也是 <span class="math inline">\(72\)</span> 次 (即 MAC=72); 而输出的每个「小方块」都对应一次「快照」! 这两个数乘一下就是总 MAC 数了.</p></div></div><ul>
 <li><strong>DSC</strong> (见 <a href="#fig-dsc" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-dsc</span></a>):
 <ul>
 <li><strong>参数量</strong>
@@ -663,7 +657,7 @@ Figure&nbsp;1: 常规卷积操作 (加 bias 的操作没有展示出来), 参数
 <img src="https://animatedai.github.io/media/depthwise-separable-convolution-animation-3x3-kernel.gif" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dsc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: DSC (分为 Depthwise 和 Pointwise 两部分, 加 bias 的操作没有展示出来), 参数量 <span class="math inline">\(152\)</span>, MAC <span class="math inline">\(=6664\)</span> <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[1]</a></span>.
+Figure&nbsp;2: DSC (分为 <strong>Depthwise (<code>dw</code>) 逐通道</strong> 和 <strong>Pointwise 逐点</strong> 两部分, 加 bias 的操作没有展示出来), 参数量 <span class="math inline">\(152\)</span>, MAC <span class="math inline">\(=6664\)</span> <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[1]</a></span>.
 </figcaption>
 </figure>
 </div>
