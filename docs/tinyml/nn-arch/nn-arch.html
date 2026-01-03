@@ -529,9 +529,14 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#yolo" id="toc-yolo" class="nav-link active" data-scroll-target="#yolo">YOLO</a>
+  <li><a href="#mobilenet" id="toc-mobilenet" class="nav-link active" data-scroll-target="#mobilenet">MobileNet</a>
   <ul class="collapse">
   <li><a href="#task-objective-任务目标" id="toc-task-objective-任务目标" class="nav-link" data-scroll-target="#task-objective-任务目标">Task Objective 任务目标</a></li>
+  <li><a href="#mobilenetv1" id="toc-mobilenetv1" class="nav-link" data-scroll-target="#mobilenetv1">MobileNetv1</a></li>
+  </ul></li>
+  <li><a href="#yolo" id="toc-yolo" class="nav-link" data-scroll-target="#yolo">YOLO</a>
+  <ul class="collapse">
+  <li><a href="#task-objective-任务目标-1" id="toc-task-objective-任务目标-1" class="nav-link" data-scroll-target="#task-objective-任务目标-1">Task Objective 任务目标</a></li>
   <li><a href="#yolo-v1" id="toc-yolo-v1" class="nav-link" data-scroll-target="#yolo-v1">YOLO V1</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
@@ -561,13 +566,119 @@ window.Quarto = {
 </header>
 
 
+<section id="mobilenet" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="mobilenet">MobileNet</h2>
+<section id="task-objective-任务目标" class="level3">
+<h3 class="anchored" data-anchor-id="task-objective-任务目标">Task Objective 任务目标</h3>
+<ul>
+<li>识别东西是什么</li>
+<li>将东西的位置框起来</li>
+<li><strong>模型需要轻量和简洁以便在 edge 设备上运行</strong>
+<ul>
+<li>在保持模型准确度的前提下降低模型参数量的方法有两种:
+<ul>
+<li>Quantization 量化</li>
+<li>直接设计小模型训练 (MobileNetv1 采用这种方法)</li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="mobilenetv1" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="mobilenetv1">MobileNetv1</h3>
+<blockquote class="blockquote">
+<p>其实就是一个 CNN, 只不过对卷积操作做了改进, 用 Depthwise Separable Convolution 代替了普通的卷积操作.</p>
+</blockquote>
+<section id="dsc-深度可分离卷积" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="dsc-深度可分离卷积">DSC 深度可分离卷积</h4>
+<p>我们直接举例说明 DSC (Depthwise Separable Convolution) 如何减少计算量:</p>
+<ul>
+<li>参数:
+<ul>
+<li>已知:
+<ul>
+<li>Input 输入信息: <span class="math inline">\((7\times 7) \times 8 = 392\)</span> (<span class="math inline">\(8\)</span> 是通道数量).</li>
+<li>Filter 卷积核: <span class="math inline">\(3\times 3 = 9\)</span> (<strong>平面大小</strong>).
+<ul>
+<li><strong>立体大小</strong>: <span class="math inline">\((3\times 3) \times 8 = 72\)</span>.</li>
+<li><a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> 中每个「立体核」都会对 Input 进行扫描, 姑且将「闪」一下称为一次「快照」.</li>
+</ul></li>
+</ul></li>
+<li>要求:
+<ul>
+<li>Stride = 1.</li>
+<li>Output 输出信息: 跟输入信息一样大小 <span class="math inline">\((392)\)</span>.</li>
+</ul></li>
+<li>可求出:
+<ul>
+<li>Padding = 1 (<a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> 的灰色部分).</li>
+<li>卷积核个数 = 8 (= 输出通道数).</li>
+</ul></li>
+</ul></li>
+<li><strong>常规卷积层</strong> (见 <a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a>):
+<ul>
+<li><strong>参数量</strong> = 一个立体核参数量 + 有几个立体核 <span class="math inline">\(= (72+1) \times 8 = 584\)</span> (别忘了每个卷积核还有有一个 bias 参数).</li>
+<li><strong>MAC</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> = 「闪」一次的 MAC <span class="math inline">\(\times\)</span>「闪」的总次数 <span class="math inline">\(= 72 \times 392 = 28224\)</span>.
+<ul>
+<li><strong>FLOPs</strong> = MAC <span class="math inline">\(\times 2 = 56448\)</span>.</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;算 MAC 的时候这样思考: 每「闪」一下都算了 <span class="math inline">\(72\)</span> 次乘法和 <span class="math inline">\(71\)</span> 次加法, 哦不对! <strong>最后还要加 bias</strong>, 所以加法也是 <span class="math inline">\(72\)</span> 次 (即 MAC=72); 而输出的每个「小方块」都对应一次「快照」! 这两个数乘一下就是总 MAC 数了.</p></div></div><ul>
+<li><strong>DSC</strong> (见 <a href="#fig-dsc" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-dsc</span></a>):
+<ul>
+<li><strong>参数量</strong>
+<ul>
+<li>Depthwise 部分 <span class="math inline">\(= (9+1) \times 8 = 80\)</span>.</li>
+<li>Pointwise 部分 <span class="math inline">\(= (8+1) \times 8 = 72\)</span>.</li>
+<li>总共 <span class="math inline">\(80 + 72 = 152\)</span>.</li>
+</ul></li>
+<li><strong>MAC</strong>
+<ul>
+<li>Depthwise 部分 <span class="math inline">\(= 9 \times 392 = 3528\)</span>.</li>
+<li>Pointwise 部分 <span class="math inline">\(= 8 \times 392 = 3136\)</span>.</li>
+<li>总共 <span class="math inline">\(3528 + 3136 = 6664\)</span> (比常规卷积小了 <span class="math inline">\(4\)</span> 倍多!).</li>
+<li><strong>FLOPs</strong> = MAC <span class="math inline">\(\times 2 = 13328\)</span>.</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-normal-conv" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-normal-conv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://animatedai.github.io/media/convolution-animation-3x3-kernel-same-padding.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-normal-conv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 常规卷积操作 (加 bias 的操作没有展示出来), 参数量 <span class="math inline">\(584\)</span>, MAC <span class="math inline">\(=28224\)</span> <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[1]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-dsc" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dsc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://animatedai.github.io/media/depthwise-separable-convolution-animation-3x3-kernel.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dsc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: DSC (加 bias 的操作没有展示出来), 参数量 <span class="math inline">\(152\)</span>, MAC <span class="math inline">\(=6664\)</span> <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[1]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
 <section id="yolo" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="yolo">YOLO</h2>
 <blockquote class="blockquote">
 <p>本章基本上是 <a href="https://www.bilibili.com/video/BV1gKwAeWEo4?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3"><strong>YOLO V1 Bilibili 讲解</strong></a> 的笔记, 可以直接看视频学习.</p>
 </blockquote>
-<section id="task-objective-任务目标" class="level3 page-columns page-full">
-<h3 class="anchored" data-anchor-id="task-objective-任务目标">Task Objective 任务目标</h3>
+<section id="task-objective-任务目标-1" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="task-objective-任务目标-1">Task Objective 任务目标</h3>
 <ul>
 <li>识别东西是什么</li>
 <li>将东西的位置框起来</li>
@@ -592,7 +703,7 @@ window.Quarto = {
 <img src="yolo-one-two-stage.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-one-two-stage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: One stage 和 Two stage 流程框图对比
+Figure&nbsp;3: One stage 和 Two stage 流程框图对比
 </figcaption>
 </figure>
 </div>
@@ -604,7 +715,7 @@ Figure&nbsp;1: One stage 和 Two stage 流程框图对比
 <img src="yolo-mscoco.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-mscoco-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: MSCOCO 数据集有物体名字和位置标注
+Figure&nbsp;4: MSCOCO 数据集有物体名字和位置标注
 </figcaption>
 </figure>
 </div>
@@ -617,7 +728,7 @@ Figure&nbsp;2: MSCOCO 数据集有物体名字和位置标注
 <img src="yolo-IoU.png" class="img-fluid figure-img" style="width:50.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-IoU-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: 交并比用来衡量预测地好不好
+Figure&nbsp;5: 交并比用来衡量预测地好不好
 </figcaption>
 </figure>
 </div>
@@ -633,7 +744,7 @@ Figure&nbsp;3: 交并比用来衡量预测地好不好
 <img src="yolo-v1.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-v1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: YOLO V1 的网络结构 <span class="citation" data-cites="Er_2025_bilibili"><a href="#ref-Er_2025_bilibili" role="doc-biblioref">[1]</a></span>
+Figure&nbsp;6: YOLO V1 的网络结构 <span class="citation" data-cites="Er_2025_bilibili"><a href="#ref-Er_2025_bilibili" role="doc-biblioref">[2]</a></span>
 </figcaption>
 </figure>
 </div>
@@ -643,7 +754,7 @@ Figure&nbsp;4: YOLO V1 的网络结构 <span class="citation" data-cites="Er_202
 <img src="yolov1-back-bone.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolov1-back-bone-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: <a href="#fig-yolo-v1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-yolo-v1</span></a> 的 Back-Bone 网络其实是若干的卷积网络 <span class="citation" data-cites="redmon2016lookonceunifiedrealtime"><a href="#ref-redmon2016lookonceunifiedrealtime" role="doc-biblioref">[2]</a></span>
+Figure&nbsp;7: <a href="#fig-yolo-v1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-yolo-v1</span></a> 的 Back-Bone 网络其实是若干的卷积网络 <span class="citation" data-cites="redmon2016lookonceunifiedrealtime"><a href="#ref-redmon2016lookonceunifiedrealtime" role="doc-biblioref">[3]</a></span>
 </figcaption>
 </figure>
 </div>
@@ -667,7 +778,7 @@ Figure&nbsp;5: <a href="#fig-yolo-v1" class="quarto-xref">Figure&nbsp;<span clas
 <img src="yolo-v1-data-labeling.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-v1-data-labeling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: YOLO V1: <span class="math inline">\(S = 7\)</span>, 总共
+Figure&nbsp;8: YOLO V1: <span class="math inline">\(S = 7\)</span>, 总共
 </figcaption>
 </figure>
 </div></li>
@@ -689,14 +800,18 @@ Figure&nbsp;6: YOLO V1: <span class="math inline">\(S = 7\)</span>, 总共
 
 
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-ai_2023_fundamental" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">A. AI, <span>“Fundamental algorithm of convolution in neural networks.”</span> Github.io, Feb. 2023. Available: <a href="https://animatedai.github.io">https://animatedai.github.io</a>. [Accessed: Jan. 03, 2026]</div>
+</div>
 <div id="ref-Er_2025_bilibili" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[1] </div><div class="csl-right-inline">上下求索电子Er, <span>“[YOLO V1] 数据标注和输出张量_哔哩哔哩_bilibili,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1gKwAeWEo4/?spm_id_from=333.788.player.switch&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=3">https://www.bilibili.com/video/BV1gKwAeWEo4/?spm_id_from=333.788.player.switch&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=3</a></div>
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">上下求索电子Er, <span>“[YOLO V1] 数据标注和输出张量_哔哩哔哩_bilibili,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1gKwAeWEo4/?spm_id_from=333.788.player.switch&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=3">https://www.bilibili.com/video/BV1gKwAeWEo4/?spm_id_from=333.788.player.switch&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=3</a></div>
 </div>
 <div id="ref-redmon2016lookonceunifiedrealtime" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[2] </div><div class="csl-right-inline">J. Redmon, S. Divvala, R. Girshick, and A. Farhadi, <span>“You only look once: Unified, real-time object detection.”</span> 2016. Available: <a href="https://arxiv.org/abs/1506.02640">https://arxiv.org/abs/1506.02640</a></div>
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">J. Redmon, S. Divvala, R. Girshick, and A. Farhadi, <span>“You only look once: Unified, real-time object detection.”</span> 2016. Available: <a href="https://arxiv.org/abs/1506.02640">https://arxiv.org/abs/1506.02640</a></div>
 </div>
 </div>
 </section>
+
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">

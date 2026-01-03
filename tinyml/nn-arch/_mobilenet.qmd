@@ -1,0 +1,55 @@
+### Task Objective 任务目标
+
+- 识别东西是什么
+- 将东西的位置框起来
+- **模型需要轻量和简洁以便在 edge 设备上运行**
+    - 在保持模型准确度的前提下降低模型参数量的方法有两种:
+        - Quantization 量化
+        - 直接设计小模型训练 (MobileNetv1 采用这种方法)
+
+### MobileNetv1
+
+> 其实就是一个 CNN, 只不过对卷积操作做了改进, 用 Depthwise Separable Convolution 代替了普通的卷积操作.
+
+#### DSC 深度可分离卷积
+
+我们直接举例说明 DSC (Depthwise Separable Convolution) 如何减少计算量:
+
+- 参数:
+    - 已知:
+        - Input 输入信息: $(7\times 7) \times 8 = 392$ ($8$ 是通道数量).
+        - Filter 卷积核: $3\times 3 = 9$ (**平面大小**).
+            - **立体大小**: $(3\times 3) \times 8 = 72$.
+            - @fig-normal-conv 中每个「立体核」都会对 Input 进行扫描, 姑且将「闪」一下称为一次「快照」.
+    - 要求:
+        - Stride = 1.
+        - Output 输出信息: 跟输入信息一样大小 $(392)$.
+    - 可求出:
+        - Padding = 1 (@fig-normal-conv 的灰色部分).
+        - 卷积核个数 = 8 (= 输出通道数).
+
+
+
+- **常规卷积层** (见 @fig-normal-conv):
+    - **参数量** = 一个立体核参数量 + 有几个立体核 $= (72+1) \times 8 = 584$ (别忘了每个卷积核还有有一个 bias 参数).
+    - **MAC**[^mac] = 「闪」一次的 MAC $\times$「闪」的总次数 $= 72 \times 392 = 28224$.
+        - **FLOPs** = MAC $\times 2 = 56448$.
+
+[^mac]: 算 MAC 的时候这样思考: 每「闪」一下都算了 $72$ 次乘法和 $71$ 次加法, 哦不对! **最后还要加 bias**, 所以加法也是 $72$ 次 (即 MAC=72); 而输出的每个「小方块」都对应一次「快照」! 这两个数乘一下就是总 MAC 数了.
+
+- **DSC** (见 @fig-dsc):
+    - **参数量** 
+        - Depthwise 部分 $= (9+1) \times 8 = 80$.
+        - Pointwise 部分 $= (8+1) \times 8 = 72$.
+        - 总共 $80 + 72 = 152$.
+    - **MAC** 
+        - Depthwise 部分 $= 9 \times 392 = 3528$.
+        - Pointwise 部分 $= 8 \times 392 = 3136$.
+        - 总共 $3528 + 3136 = 6664$ (比常规卷积小了 $4$ 倍多!).
+        - **FLOPs** = MAC $\times 2 = 13328$.
+
+::: {layout = "[50,50]"}
+![常规卷积操作 (加 bias 的操作没有展示出来), 参数量 $584$, MAC $=28224$ @ai_2023_fundamental.](https://animatedai.github.io/media/convolution-animation-3x3-kernel-same-padding.gif){#fig-normal-conv}
+
+![DSC (加 bias 的操作没有展示出来), 参数量 $152$, MAC $=6664$ @ai_2023_fundamental.](https://animatedai.github.io/media/depthwise-separable-convolution-animation-3x3-kernel.gif){#fig-dsc}
+:::
