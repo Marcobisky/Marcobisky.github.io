@@ -93,6 +93,17 @@ title: "Glossary 名词解释"
 
     - **`.xdc` 文件**: Xilinx Design Constraints File (Vivado 工具使用的约束文件, a.k.a., Master Constraints File 主约束文件). [Arty 35T xdc 文件](https://raw.githubusercontent.com/Digilent/digilent-xdc/master/Arty-A7-35-Master.xdc)
 
+- **`.vmem` 文件**: Verilog Memory File. 存放测试时 FPGA RAM/ROM 中的初始数据, 然后 testbench 文件会读取这个文件并将数据加载到 FPGA 内存中. 格式如下:
+
+    ```verilog
+    @00000000  // 32位地址：0x00000000
+    00010203   // 地址0x00000000 的内容：0x00010203
+    04050607   // 地址0x00000004 的内容：0x04050607
+    08090A0B   // 地址0x00000008 的内容：0x08090A0B
+    @00000010  // 跳转到地址0x00000010
+    FFFFFFFF   // 地址0x00000010 的内容：0xFFFFFFFF
+    ```
+
 ### HDL
 
 - **HLS**: High-Level Synthesis. 用 C/C++ 等高级语言来写硬件电路设计.
@@ -102,14 +113,12 @@ title: "Glossary 名词解释"
         - **Chisel**: 另一种 HDL. 
         - **Scalac**: Scala 编译器.
         - **sbt**: Scala Build导出 Tool. 配置依赖、插件和调用 scalac. 会在指定目录下面生成 `.v` 或 `.sv` 文件.
-            - **.fir**: FIRRTL (Flexible Intermediate Representation for RTL) 文件, 一种用于硬件设计的中间表示 (加上 `--dump-fir` 选项即可, `dump` 一般表示「导出」).
+            - **FIRRTL (Flexible Intermediate Representation for RTL, `.fir`)**: 一种用于硬件设计的中间表示 (加上 `--dump-fir` 选项即可, `dump` 一般表示「导出」). 可由 Chisel 生成, 然后再转换为 Verilog.
+                - **ChiselStage**: Chisel 的一个组件, 将 Chisel 转换为 FIRRTL.
+                - **Firtool**: 将 FIRRTL 转换为 Verilog.
         - **Mill**: 跟 sbt 类似, 但更轻量.
 
     - **Amaranth**: 一个 Python 库, 也是用于硬件描述和设计. 可生成 Verilog 代码.
-
-- **FIRRTL (Flexible Intermediate Representation for RTL, `.fir`)**: 一种用于硬件设计的中间表示. 可由 Chisel 生成, 然后再转换为 Verilog.
-    - **ChiselStage**: Chisel 的一个组件, 将 Chisel 转换为 FIRRTL.
-    - **Firtool**: 将 FIRRTL 转换为 Verilog.
 
 
 - **RTL (Register Transfer Level)**: 通俗说就是 verilog 代码. 可视为芯片设计的前端.
@@ -144,25 +153,33 @@ title: "Glossary 名词解释"
 
 - **UVM (Universal Verification Methodology)**: 验证方法学.
 
+- **Smoke Test 冒烟测试**: 最基础耗时最短的测试, 软件的话就是能跑就行, 硬件比如神经网络能传播就行 (不要有 size 不匹配这种低级错误), 而不管软件、神经网络输出结果对不对.
+
 ## Open Source Tools
 
 > 该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!
 
-- [**verilator**](https://github.com/verilator/verilator): 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行**仿真**, 模拟出时钟、寄存器逻辑、外设交互等行为.
+- [**verilator**](https://github.com/verilator/verilator): 允许你用 C++ 写 testbench (比用 `.v` 写方便太多), 然后将 verilog RTL 连同 testbench 一起转化为 C++ 代码, 在 CPU 上编译运行这个代码就相当于进行了仿真, 可模拟出时钟、寄存器逻辑、外设交互等行为 (注意 `verilator` 不同于 `Modelsim`, 并没有内置仿真器, 只是转为 C++, 实际仿真还是 gcc 跑的), 用法:
 
     ```bash
-    verilator -cc blink.v # 生成 obj_dir/ 其中含有转换好的 C++ 代码
+    ls # 确保有 blink.v 和 tb_blink.cpp
+    verilator -Wall --trace -cc blink.v --exe tb_blink.cpp # 会生成 ./obj_dir/, 其中含有转换好的很多 C++ 文件和 Vblink.mk
+    make -C obj_dir -f Vblink.mk Vblink # -C 指 make 工作目录, 会生成 ./obj_dir/Vblink 可执行文件
+    ./obj_dir/Vblink # 运行仿真, 会生成波形文件 ./waveform.vcd
+    gtkwave waveform.vcd # 用 GTKWave 查看波形
     ```
+    
+    - **VCS (Verilog Compiler Simulator)**: 功能和用法跟 `verilator` 一模一样, 只不过是闭源的 (Synopsys 公司的商业仿真器).
 
-- [**iverilog (Icarus Verilog)**](https://github.com/steveicarus/iverilog): 也是仿真 (但不输出 C 代码):
+- [**Cocotb**](https://www.cocotb.org): 一个 Python 库, 允许你用 Python 来写 testbench! 注意与 `verilator` 和 `icarus` 不同, `Cocotb` 在它们之上调用它们, 用于方便地写测试逻辑而不是模拟硬件.
+
+- [**iverilog (Icarus Verilog)**](https://github.com/steveicarus/iverilog): 可直接输出波形的真正的仿真器 (不输出 C 代码). 由于是解释型的, 速度比 `verilator` 慢很多. 用法:
 
     ```bash
     iverilog -o blink.vvp blink.v blink_tb.v
     # 生成 vcd 文件可配合 GTKWave 查看波形
     vvp blink.vvp
     ```
-
-- [**Cocotb**](https://www.cocotb.org): 与 `verilator` 和 `icarus` 不同, `Cocotb` 在它们之上, 用于方便地写测试逻辑而不是模拟硬件.
 
 - [**openFPGALoader**](https://github.com/trabucayre/openFPGALoader): 用于将比特流烧录到 FPGA (但不能调试).
 
@@ -326,7 +343,9 @@ title: "Glossary 名词解释"
 
 {{< include _ml-terms.qmd >}}
 
-## CPU Terms
+## PU Terms
+
+### CPU Terms
 
 - **PSR (Program Status Register)**: 程序状态寄存器. 有 NZVC (Negative, Zero, Overflow, Carry) 四个标志位. 
 
@@ -343,26 +362,61 @@ title: "Glossary 名词解释"
 
 [^endian]: 记忆: 小端是自然的, 因为大部分人喜欢洗小头 (
 
-- **MMU (Memory Management Unit)**: 内存管理单元, 负责虚拟内存和物理内存之间的映射.
+- **MMU (Memory Management Unit)**: 内存管理单元, 负责虚拟内存和物理内存之间的映射. 结合 UEFI+PCIe, 使得虽然地址总线宽度固定, 但 CPU 能访问的 ROM 和 RAM 却可以自由扩展!
     - **TLB (Translation Lookaside Buffer)**: 很像 CPU 的 Cache, 用于加速虚拟地址到物理地址的转换. 也有 TLB miss, TLB hit, spacial locality, temporal locality, etc. 这些概念.
 
 - **PPA (Power, Performance, Area)**: 三个重要的设计指标.
 
 - **DSA (Domain Specific Architecture)**
 
-- **DDR (Double Data Rate)**: 一种 (双倍数据率) RAM, 在上升沿和下降沿各传输一次数据. **SDR** 是早期内存技术, 只在时钟上升沿传输数据.
-
-## GPU Terms
-
-- **GDDR (Graphics DDR)**: 显存 (每颗 GDDR6X 带宽 $80$ GB/s.)
-
-- **HBM (High Bandwidth Memory)**: 高带宽内存 (每颗 HBM2E 带宽 $460$ GB/s.)
+### GPU Terms
 
 :::{.column-margin}
-![AMD GPU 2015 采用 2.5D 封装](amd-gpu-2015.png){#fig-amd-gpu-2015}
+![AMD GPU 2015 采用 2.5D 封装.](amd-gpu-2015.png){#fig-amd-gpu-2015}
 :::
 
 - **Kernel**: 在 GPU 上运行的函数. 
+
+### Memory 存储器 Terms
+
+> 以下从高速到低速介绍 (近 CPU 到远 CPU, GPU 几乎是一样的).
+
+- **Register 寄存器**
+    - **GPRs (General Purpose Registers)**: GPR 有专门的名字访问指令, 不是通过 memory map 来访问的!
+    - **CSRs (Control and Status Registers)**: 控制状态寄存器, 也有专门的名字访问指令, 也不是通过 memory map 来访问的!
+
+- **TCM (Tightly Coupled Memory)**: 由于 Cache 访问时间是**无法控制**的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来**不可预测**的延迟. 如果有经常访问的数据 比如 `sensor_data`, TCM 允许程序员显式地将其放在 TCM 中 (这样访问时间是**可预测**的):
+
+    ```c
+    __attribute__((section(".tcm_data"))) int sensor_data[1024];
+    ```
+    - TCM 会被分配固定独立的地址空间 (通过 linker file `.ld` 定义, 后续通过 memory map 访问!), 而且会有模块检测访存的地址是否在 TCM 范围内, 如果是则会通过专用的 TCM 总线访问!
+    - **DTCM, ITCM (Data TCM)**: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 @googlecoral_2025_github:
+
+        ```{.c filename="coralnpu_tcm.ld" #lst-coralnpu-tcm-ld}
+        MEMORY {
+            ITCM(rx): ORIGIN = 0x00000000, LENGTH = 8K
+            DTCM(rx): ORIGIN = 0x00010000, LENGTH = 32K
+        }
+        ```
+
+- **Cache 缓存**: 因与 "cash" 同音, 常记为 "\$".
+    - 注意 Cache 没有分配独立的地址空间, 在 CPU 和 RAM 间是「透明」的!
+    - **L1D\$, L1I\$**: 一级数据缓存和一级指令缓存[^cache].
+
+[^cache]: 区分 D\$/DTCM, I\$/ITCM: 有没有独立地址空间 (是否「透明」)、访问是否可预测. 但有的地方会混用这两个概念!
+
+- RAM-like:
+    - **DDR (Double Data Rate)**: 一种 (双倍数据率) CPU RAM, 在上升沿和下降沿各传输一次数据. **SDR** 是早期内存技术, 只在时钟上升沿传输数据.
+    - **GDDR (Graphics DDR)**: 显存 (每颗 GDDR6X 带宽 $80$ GB/s.)
+    - **HBM (High Bandwidth Memory)**: 高带宽内存 (每颗 HBM2E 带宽 $460$ GB/s.)
+
+- ROM:
+    - 会被分配固定的地址空间.
+    - **Boot ROM**: 存放启动代码的 ROM (固定独立地址空间, memory map 访问), 上电后 CPU 会把这里的代码加载到 RAM 并 jump 过去开机.
+
+- **物理存储介质**: 上面说的都是逻辑上的存储器, 下面讲实际上存储数据的物理介质.
+    - **SRAM (Static RAM)**
 
 ## RISCV
 
@@ -433,10 +487,6 @@ title: "Glossary 名词解释"
 - **VLSI (Very Large Scale Integration)**: 超大规模集成电路.
 - **RGCN (Relational Graph Convolutional Network)**: 关系图卷积网络.
 
-## Integrated Circuit Terms
-
-- **VLSI (Very Large Scale Integration)**: 超大规模集成电路.
-
 ## Optimization
 
 - **TSP (Travelling Salesman Problem)**: 旅行商问题. 给定若干城市与它们之间的距离, 目标是找出一条路径, 使旅行者每个城市恰好访问一次, 最终回到起点, 并且总旅行距离最短.
@@ -445,7 +495,7 @@ title: "Glossary 名词解释"
 
 - **FFSP (Flexible Flow Shop Problem)**: 灵活流水车间调度问题.
 
-    ![FFSP](ffsp.png)
+    ![FFSP](ffsp.png){#fig-ffsp}
 
 
 

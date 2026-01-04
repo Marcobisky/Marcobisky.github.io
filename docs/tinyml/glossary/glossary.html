@@ -593,14 +593,17 @@ window.Quarto = {
   <li><a href="#benchmarks-in-ml" id="toc-benchmarks-in-ml" class="nav-link" data-scroll-target="#benchmarks-in-ml">Benchmarks in ML</a></li>
   <li><a href="#related-philosophy" id="toc-related-philosophy" class="nav-link" data-scroll-target="#related-philosophy">Related Philosophy</a></li>
   </ul></li>
+  <li><a href="#pu-terms" id="toc-pu-terms" class="nav-link" data-scroll-target="#pu-terms">PU Terms</a>
+  <ul class="collapse">
   <li><a href="#cpu-terms" id="toc-cpu-terms" class="nav-link" data-scroll-target="#cpu-terms">CPU Terms</a></li>
   <li><a href="#gpu-terms" id="toc-gpu-terms" class="nav-link" data-scroll-target="#gpu-terms">GPU Terms</a></li>
+  <li><a href="#memory-存储器-terms" id="toc-memory-存储器-terms" class="nav-link" data-scroll-target="#memory-存储器-terms">Memory 存储器 Terms</a></li>
+  </ul></li>
   <li><a href="#riscv" id="toc-riscv" class="nav-link" data-scroll-target="#riscv">RISCV</a></li>
   <li><a href="#c-compile-terms" id="toc-c-compile-terms" class="nav-link" data-scroll-target="#c-compile-terms">C Compile Terms</a></li>
   <li><a href="#operating-system-terms" id="toc-operating-system-terms" class="nav-link" data-scroll-target="#operating-system-terms">Operating System Terms</a></li>
   <li><a href="#ysyx-terms" id="toc-ysyx-terms" class="nav-link" data-scroll-target="#ysyx-terms">YSYX Terms</a></li>
   <li><a href="#integrated-circuit-terms" id="toc-integrated-circuit-terms" class="nav-link" data-scroll-target="#integrated-circuit-terms">Integrated Circuit Terms</a></li>
-  <li><a href="#integrated-circuit-terms-1" id="toc-integrated-circuit-terms-1" class="nav-link" data-scroll-target="#integrated-circuit-terms-1">Integrated Circuit Terms</a></li>
   <li><a href="#optimization" id="toc-optimization" class="nav-link" data-scroll-target="#optimization">Optimization</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
@@ -727,6 +730,13 @@ window.Quarto = {
 <ul>
 <li><strong><code>.xdc</code> 文件</strong>: Xilinx Design Constraints File (Vivado 工具使用的约束文件, a.k.a., Master Constraints File 主约束文件). <a href="https://raw.githubusercontent.com/Digilent/digilent-xdc/master/Arty-A7-35-Master.xdc">Arty 35T xdc 文件</a></li>
 </ul></li>
+<li><p><strong><code>.vmem</code> 文件</strong>: Verilog Memory File. 存放测试时 FPGA RAM/ROM 中的初始数据, 然后 testbench 文件会读取这个文件并将数据加载到 FPGA 内存中. 格式如下:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">@</span><span class="dv">00000000</span>  <span class="co">// 32位地址：0x00000000</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dv">00010203</span>   <span class="co">// 地址0x00000000 的内容：0x00010203</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="dv">04050607</span>   <span class="co">// 地址0x00000004 的内容：0x04050607</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="dv">08090</span>A0B   <span class="co">// 地址0x00000008 的内容：0x08090A0B</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="op">@</span><span class="dv">00000010</span>  <span class="co">// 跳转到地址0x00000010</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>FFFFFFFF   <span class="co">// 地址0x00000010 的内容：0xFFFFFFFF</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="hdl" class="level3">
@@ -744,16 +754,15 @@ window.Quarto = {
 <li><strong>Scalac</strong>: Scala 编译器.</li>
 <li><strong>sbt</strong>: Scala Build导出 Tool. 配置依赖、插件和调用 scalac. 会在指定目录下面生成 <code>.v</code> 或 <code>.sv</code> 文件.
 <ul>
-<li><strong>.fir</strong>: FIRRTL (Flexible Intermediate Representation for RTL) 文件, 一种用于硬件设计的中间表示 (加上 <code>--dump-fir</code> 选项即可, <code>dump</code> 一般表示「导出」).</li>
+<li><strong>FIRRTL (Flexible Intermediate Representation for RTL, <code>.fir</code>)</strong>: 一种用于硬件设计的中间表示 (加上 <code>--dump-fir</code> 选项即可, <code>dump</code> 一般表示「导出」). 可由 Chisel 生成, 然后再转换为 Verilog.
+<ul>
+<li><strong>ChiselStage</strong>: Chisel 的一个组件, 将 Chisel 转换为 FIRRTL.</li>
+<li><strong>Firtool</strong>: 将 FIRRTL 转换为 Verilog.</li>
+</ul></li>
 </ul></li>
 <li><strong>Mill</strong>: 跟 sbt 类似, 但更轻量.</li>
 </ul></li>
 <li><strong>Amaranth</strong>: 一个 Python 库, 也是用于硬件描述和设计. 可生成 Verilog 代码.</li>
-</ul></li>
-<li><p><strong>FIRRTL (Flexible Intermediate Representation for RTL, <code>.fir</code>)</strong>: 一种用于硬件设计的中间表示. 可由 Chisel 生成, 然后再转换为 Verilog.</p>
-<ul>
-<li><strong>ChiselStage</strong>: Chisel 的一个组件, 将 Chisel 转换为 FIRRTL.</li>
-<li><strong>Firtool</strong>: 将 FIRRTL 转换为 Verilog.</li>
 </ul></li>
 <li><p><strong>RTL (Register Transfer Level)</strong>: 通俗说就是 verilog 代码. 可视为芯片设计的前端.</p>
 <div id="fig-design-level" class="quarto-float quarto-figure quarto-figure-center anchored" width="80%">
@@ -798,6 +807,7 @@ Figure&nbsp;1
 <li>输入什么信号都要自己写, 很费时, 而且缺乏随机性.</li>
 </ul></li>
 <li><p><strong>UVM (Universal Verification Methodology)</strong>: 验证方法学.</p></li>
+<li><p><strong>Smoke Test 冒烟测试</strong>: 最基础耗时最短的测试, 软件的话就是能跑就行, 硬件比如神经网络能传播就行 (不要有 size 不匹配这种低级错误), 而不管软件、神经网络输出结果对不对.</p></li>
 </ul>
 </section>
 </section>
@@ -807,17 +817,24 @@ Figure&nbsp;1
 <p>该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!</p>
 </blockquote>
 <ul>
-<li><p><a href="https://github.com/verilator/verilator"><strong>verilator</strong></a>: 将 verilog 代码变成 C++ 代码, 然后编译并运行在 CPU 上进行<strong>仿真</strong>, 模拟出时钟、寄存器逻辑、外设交互等行为.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">verilator</span> <span class="at">-cc</span> blink.v <span class="co"># 生成 obj_dir/ 其中含有转换好的 C++ 代码</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p><a href="https://github.com/steveicarus/iverilog"><strong>iverilog (Icarus Verilog)</strong></a>: 也是仿真 (但不输出 C 代码):</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">iverilog</span> <span class="at">-o</span> blink.vvp blink.v blink_tb.v</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 生成 vcd 文件可配合 GTKWave 查看波形</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">vvp</span> blink.vvp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p><a href="https://www.cocotb.org"><strong>Cocotb</strong></a>: 与 <code>verilator</code> 和 <code>icarus</code> 不同, <code>Cocotb</code> 在它们之上, 用于方便地写测试逻辑而不是模拟硬件.</p></li>
+<li><p><a href="https://github.com/verilator/verilator"><strong>verilator</strong></a>: 允许你用 C++ 写 testbench (比用 <code>.v</code> 写方便太多), 然后将 verilog RTL 连同 testbench 一起转化为 C++ 代码, 在 CPU 上编译运行这个代码就相当于进行了仿真, 可模拟出时钟、寄存器逻辑、外设交互等行为 (注意 <code>verilator</code> 不同于 <code>Modelsim</code>, 并没有内置仿真器, 只是转为 C++, 实际仿真还是 gcc 跑的), 用法:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="co"># 确保有 blink.v 和 tb_blink.cpp</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">verilator</span> <span class="at">-Wall</span> <span class="at">--trace</span> <span class="at">-cc</span> blink.v <span class="at">--exe</span> tb_blink.cpp <span class="co"># 会生成 ./obj_dir/, 其中含有转换好的很多 C++ 文件和 Vblink.mk</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">make</span> <span class="at">-C</span> obj_dir <span class="at">-f</span> Vblink.mk Vblink <span class="co"># -C 指 make 工作目录, 会生成 ./obj_dir/Vblink 可执行文件</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">./obj_dir/Vblink</span> <span class="co"># 运行仿真, 会生成波形文件 ./waveform.vcd</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="ex">gtkwave</span> waveform.vcd <span class="co"># 用 GTKWave 查看波形</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><strong>VCS (Verilog Compiler Simulator)</strong>: 功能和用法跟 <code>verilator</code> 一模一样, 只不过是闭源的 (Synopsys 公司的商业仿真器).</li>
+</ul></li>
+<li><p><a href="https://www.cocotb.org"><strong>Cocotb</strong></a>: 一个 Python 库, 允许你用 Python 来写 testbench! 注意与 <code>verilator</code> 和 <code>icarus</code> 不同, <code>Cocotb</code> 在它们之上调用它们, 用于方便地写测试逻辑而不是模拟硬件.</p></li>
+<li><p><a href="https://github.com/steveicarus/iverilog"><strong>iverilog (Icarus Verilog)</strong></a>: 可直接输出波形的真正的仿真器 (不输出 C 代码). 由于是解释型的, 速度比 <code>verilator</code> 慢很多. 用法:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">iverilog</span> <span class="at">-o</span> blink.vvp blink.v blink_tb.v</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 生成 vcd 文件可配合 GTKWave 查看波形</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">vvp</span> blink.vvp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><a href="https://github.com/trabucayre/openFPGALoader"><strong>openFPGALoader</strong></a>: 用于将比特流烧录到 FPGA (但不能调试).</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 示例：</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openFPGALoader</span> <span class="at">-b</span> arty arty_bitstream.bit      <span class="co"># SRAM 加载</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">openFPGALoader</span> <span class="at">-b</span> arty <span class="at">-f</span> arty_bitstream.bit   <span class="co"># 写入 flash</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 示例：</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openFPGALoader</span> <span class="at">-b</span> arty arty_bitstream.bit      <span class="co"># SRAM 加载</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">openFPGALoader</span> <span class="at">-b</span> arty <span class="at">-f</span> arty_bitstream.bit   <span class="co"># 写入 flash</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><a href="https://github.com/openocd-org/openocd"><strong>openocd</strong></a>: Open On-Chip Debugger. 用于调试 FPGA 的工具. 支持 JTAG 接口.</p></li>
 <li><p>三个端到端的工具链:</p>
 <ul>
@@ -825,14 +842,14 @@ Figure&nbsp;1
 <li><p><a href="https://github.com/YosysHQ"><strong>yosysHQ (Yosys Open SYnthesis Suite Headquarters)</strong></a>: yyds!! 一个开源的 EDA 工具链. 子项目包括:</p>
 <ul>
 <li><p><a href="https://github.com/YosysHQ/icestorm"><strong>icestorm</strong></a>: 用于针对 Lattice iCE40 FPGA 实现完全的端到端开源流程, 从 Verilog 到 bitstream, 再烧写到 FPGA 板卡上. 以下每一个命令都是一个单独的 repo!!</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># yosys 综合 (将 verilog 转换为网表 .json)</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">yosys</span> <span class="at">-p</span> <span class="st">'synth_ice40 -top blink -json blink.json'</span> blink.v</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="ex">nextpnr-ice40</span> <span class="at">--up5k</span> <span class="at">--json</span> blink.json <span class="at">--pcf</span> blink.pcf <span class="at">--asc</span> blink.asc</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># icepack 打包 (生成 bitstream .bin)</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="ex">icepack</span> blink.asc blink.bin</span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># icesprog 烧写 (将 bitstream 写入 FPGA)</span></span>
-<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> icesprog blink.bin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># yosys 综合 (将 verilog 转换为网表 .json)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">yosys</span> <span class="at">-p</span> <span class="st">'synth_ice40 -top blink -json blink.json'</span> blink.v</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># nextpnr 布局布线 (生成 bitstream 的中间文件 .asc)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="ex">nextpnr-ice40</span> <span class="at">--up5k</span> <span class="at">--json</span> blink.json <span class="at">--pcf</span> blink.pcf <span class="at">--asc</span> blink.asc</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># icepack 打包 (生成 bitstream .bin)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="ex">icepack</span> blink.asc blink.bin</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># icesprog 烧写 (将 bitstream 写入 FPGA)</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> icesprog blink.bin</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
 <li><p><a href="https://github.com/chipsalliance/f4pga"><strong>F4PGA</strong></a>: 以前叫 <code>Symbiflow</code>, 旨在为多家 FPGA 供应商 (Xilinx 7 系列、Lattice iCE40/ECP5、QuickLogic EOS S3 等) 提供统一、功能完备、可扩展且无需专有软件的端到端开发流程.</p>
 <ul>
@@ -846,7 +863,7 @@ Figure&nbsp;1
 <li><p><a href="https://github.com/enjoy-digital/litex"><strong>Litex</strong></a>: 支持用 Python 脚本拼装出完整的 SoC.</p></li>
 <li><p><a href="https://fusesoc.readthedocs.io/en/stable/user/overview.html"><strong>FuseSoC</strong></a>: 用来描述和管理 IP 的工具.</p></li>
 <li><p><a href="https://srecord.sourceforge.net/"><strong>SRecord</strong></a>: 一套命令行工具, 简单理解为将 <code>.elf</code> 文件转换为 <code>.hex</code> 或 <code>.bin</code> 文件的工具. 比如:</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">srec_cat</span> input.elf <span class="at">-o</span> output.hex <span class="at">-intel</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">srec_cat</span> input.elf <span class="at">-o</span> output.hex <span class="at">-intel</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="sec-eda-terms" class="level2 page-columns page-full">
@@ -1152,16 +1169,20 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <li><strong>Tensor</strong>: 多维数组.
 <ul>
 <li><p>名字来源: 由于数学里 <span class="math inline">\((0,k)\)</span>-tensor <span class="math inline">\(T: V^k \to \mathbb{F}\)</span> 在选取一组 basis <span class="math inline">\(\{\mathbf{e}_i\}_{i=1}^k\)</span> 后的 representation 刚好是一个 <span class="math inline">\(k\)</span> 维数组 <span class="math inline">\(T_{i_1i_2 \cdots i_k}\)</span> (正如 linear functional 可以被一个 covector 描述, bilinear functional 可以被一个 matrix 描述).</p></li>
-<li><p>机器学习里 <strong>training data</strong>, <strong>kernel</strong>, <strong>feature map</strong> 等都用 tensor 来描述, 而不会用 <code>python</code> 自带的 list 和 <code>np.array()</code>, 统统都要转化为 <code>torch.tensor</code>:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co"># python list to tensor</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>data_list <span class="op">=</span> [[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]]</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>list2tensor <span class="op">=</span> torch.tensor(data_list)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># numpy array to tensor</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>data_array <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]])</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>array2tensor <span class="op">=</span> torch.from_numpy(data_array)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p>Tensor 大小的描述有一定顺序, 默认是 <strong>HWCN (HWDN): Height × Width × Channel (Depth) × Num_Filters (Batch)</strong>.</p></li>
+<li><p>机器学习里 <strong>training data</strong>, <strong>kernel</strong>, <strong>feature map</strong> 等都用 tensor 来描述, Python 自带的 <code>list</code> 和 <code>np.array()</code>, 统统都要转化为 <code>torch.tensor</code>:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># python list to tensor</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>data_list <span class="op">=</span> [[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>list2tensor <span class="op">=</span> torch.tensor(data_list)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># numpy array to tensor</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>data_array <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]])</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>array2tensor <span class="op">=</span> torch.from_numpy(data_array)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>Tensor Shape H, W, C(D), N</strong>: Height, Width, Channel(Depth), Batch size, 含义见 <a href="#fig-data-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-data-layout</span></a>. 描述有一定顺序, 默认有两种:</p>
+<ul>
+<li><strong>Batch 在后</strong>: <u>HWC</u><strong>N</strong>.</li>
+<li><strong>Batch 在前</strong>: <strong>N</strong><u>HWC</u>.</li>
+</ul></li>
 </ul></li>
 <li><strong>Data Layout Formats 张量在内存中的布局</strong>
 <ul>
@@ -1310,7 +1331,7 @@ Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <li><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可<strong>加速</strong>和<strong>平滑</strong>收敛、避免<strong>陷入局部最优</strong><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. 也有一些基于次改良的版本:
 <ul>
 <li><p><strong>Nesterov Accelerated Gradient (NAG)</strong>: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 <code>torch</code> 为例:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>optimizer_nag <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>, momentum<span class="op">=</span><span class="fl">0.9</span>, nesterov<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>optimizer_nag <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>, momentum<span class="op">=</span><span class="fl">0.9</span>, nesterov<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
 <li><strong>Adaptive Gradient (Adagrad) 自适应梯度优化器</strong>: 有利于 Sparse Features 的学习 (通过给每个参数分配不同的学习率! 或者理解为对参数进行归一化):</li>
 </ul>
@@ -1330,9 +1351,9 @@ Figure&nbsp;18: Adagrad 给梯度平缓方向对应的参数 (<span class="math 
 <h3 class="anchored" data-anchor-id="ml-frameworks">ML Frameworks</h3>
 <ul>
 <li><p><strong>Tensorflow, JAX, PyTorch</strong>: 机器学习框架 <a href="#fig-mlsys" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-mlsys</span></a>. 其实就是一些 Python 库.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>RISCV 上有 TfLM (TensorFlow Lite for Microcontrollers),</li>
 <li><strong>ONNX (Open Neural Network Exchange)</strong>: 一种统一的描述神经网络结构的格式, 以上三种框架都支持导出为 ONNX 格式.</li>
@@ -1388,8 +1409,10 @@ Figure&nbsp;19: AI 编译栈和编程体系
 </ul>
 </section>
 </section>
-<section id="cpu-terms" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="cpu-terms">CPU Terms</h2>
+<section id="pu-terms" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="pu-terms">PU Terms</h2>
+<section id="cpu-terms" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="cpu-terms">CPU Terms</h3>
 <ul>
 <li><p><strong>PSR (Program Status Register)</strong>: 程序状态寄存器. 有 NZVC (Negative, Zero, Overflow, Carry) 四个标志位.</p></li>
 <li><p><strong>Hart (Hardware Thread)</strong>: 硬件线程, 指一个独立的处理器核心, 包括一套流水线, 寄存器, PC 等等 (今后将不提处理器核心这个概念, 只提 Hart).</p></li>
@@ -1405,21 +1428,16 @@ Figure&nbsp;19: AI 编译栈和编程体系
 </div></li>
 </ul>
 <div class="no-row-height column-margin column-container"><div id="fn5"><p><sup>5</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
-<li><p><strong>MMU (Memory Management Unit)</strong>: 内存管理单元, 负责虚拟内存和物理内存之间的映射.</p>
+<li><p><strong>MMU (Memory Management Unit)</strong>: 内存管理单元, 负责虚拟内存和物理内存之间的映射. 结合 UEFI+PCIe, 使得虽然地址总线宽度固定, 但 CPU 能访问的 ROM 和 RAM 却可以自由扩展!</p>
 <ul>
 <li><strong>TLB (Translation Lookaside Buffer)</strong>: 很像 CPU 的 Cache, 用于加速虚拟地址到物理地址的转换. 也有 TLB miss, TLB hit, spacial locality, temporal locality, etc. 这些概念.</li>
 </ul></li>
 <li><p><strong>PPA (Power, Performance, Area)</strong>: 三个重要的设计指标.</p></li>
 <li><p><strong>DSA (Domain Specific Architecture)</strong></p></li>
-<li><p><strong>DDR (Double Data Rate)</strong>: 一种 (双倍数据率) RAM, 在上升沿和下降沿各传输一次数据. <strong>SDR</strong> 是早期内存技术, 只在时钟上升沿传输数据.</p></li>
 </ul>
 </section>
-<section id="gpu-terms" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="gpu-terms">GPU Terms</h2>
-<ul>
-<li><p><strong>GDDR (Graphics DDR)</strong>: 显存 (每颗 GDDR6X 带宽 <span class="math inline">\(80\)</span> GB/s.)</p></li>
-<li><p><strong>HBM (High Bandwidth Memory)</strong>: 高带宽内存 (每颗 HBM2E 带宽 <span class="math inline">\(460\)</span> GB/s.)</p></li>
-</ul>
+<section id="gpu-terms" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="gpu-terms">GPU Terms</h3>
 
 <div class="no-row-height column-margin column-container"><div class="">
 <div id="fig-amd-gpu-2015" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1428,13 +1446,64 @@ Figure&nbsp;19: AI 编译栈和编程体系
 <img src="amd-gpu-2015.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-amd-gpu-2015-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装
+Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装.
 </figcaption>
 </figure>
 </div>
 </div></div><ul>
 <li><strong>Kernel</strong>: 在 GPU 上运行的函数.</li>
 </ul>
+</section>
+<section id="memory-存储器-terms" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="memory-存储器-terms">Memory 存储器 Terms</h3>
+<blockquote class="blockquote">
+<p>以下从高速到低速介绍 (近 CPU 到远 CPU, GPU 几乎是一样的).</p>
+</blockquote>
+<ul>
+<li><p><strong>Register 寄存器</strong></p>
+<ul>
+<li><strong>GPRs (General Purpose Registers)</strong>: GPR 有专门的名字访问指令, 不是通过 memory map 来访问的!</li>
+<li><strong>CSRs (Control and Status Registers)</strong>: 控制状态寄存器, 也有专门的名字访问指令, 也不是通过 memory map 来访问的!</li>
+</ul></li>
+<li><p><strong>TCM (Tightly Coupled Memory)</strong>: 由于 Cache 访问时间是<strong>无法控制</strong>的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来<strong>不可预测</strong>的延迟. 如果有经常访问的数据 比如 <code>sensor_data</code>, TCM 允许程序员显式地将其放在 TCM 中 (这样访问时间是<strong>可预测</strong>的):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>__attribute__<span class="op">((</span>section<span class="op">(</span><span class="st">".tcm_data"</span><span class="op">)))</span> <span class="dt">int</span> sensor_data<span class="op">[</span><span class="dv">1024</span><span class="op">];</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><p>TCM 会被分配固定独立的地址空间 (通过 linker file <code>.ld</code> 定义, 后续通过 memory map 访问!), 而且会有模块检测访存的地址是否在 TCM 范围内, 如果是则会通过专用的 TCM 总线访问!</p></li>
+<li><p><strong>DTCM, ITCM (Data TCM)</strong>: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 <span class="citation" data-cites="googlecoral_2025_github"><a href="#ref-googlecoral_2025_github" role="doc-biblioref">[27]</a></span>:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>coralnpu_tcm.ld</strong></pre>
+</div>
+<div class="sourceCode" id="lst-coralnpu-tcm-ld" data-filename="coralnpu_tcm.ld"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="lst-coralnpu-tcm-ld-1"><a href="#lst-coralnpu-tcm-ld-1" aria-hidden="true" tabindex="-1"></a>MEMORY <span class="op">{</span></span>
+<span id="lst-coralnpu-tcm-ld-2"><a href="#lst-coralnpu-tcm-ld-2" aria-hidden="true" tabindex="-1"></a>    ITCM<span class="op">(</span>rx<span class="op">):</span> ORIGIN <span class="op">=</span> <span class="bn">0x00000000</span><span class="op">,</span> LENGTH <span class="op">=</span> <span class="dv">8</span><span class="er">K</span></span>
+<span id="lst-coralnpu-tcm-ld-3"><a href="#lst-coralnpu-tcm-ld-3" aria-hidden="true" tabindex="-1"></a>    DTCM<span class="op">(</span>rx<span class="op">):</span> ORIGIN <span class="op">=</span> <span class="bn">0x00010000</span><span class="op">,</span> LENGTH <span class="op">=</span> <span class="dv">32</span><span class="er">K</span></span>
+<span id="lst-coralnpu-tcm-ld-4"><a href="#lst-coralnpu-tcm-ld-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div></li>
+</ul></li>
+<li><p><strong>Cache 缓存</strong>: 因与 “cash” 同音, 常记为 “$”.</p>
+<ul>
+<li>注意 Cache 没有分配独立的地址空间, 在 CPU 和 RAM 间是「透明」的!</li>
+<li><strong>L1D$, L1I$</strong>: 一级数据缓存和一级指令缓存<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn6"><p><sup>6</sup>&nbsp;区分 D$/DTCM, I$/ITCM: 有没有独立地址空间 (是否「透明」)、访问是否可预测. 但有的地方会混用这两个概念!</p></div></div><ul>
+<li>RAM-like:
+<ul>
+<li><strong>DDR (Double Data Rate)</strong>: 一种 (双倍数据率) CPU RAM, 在上升沿和下降沿各传输一次数据. <strong>SDR</strong> 是早期内存技术, 只在时钟上升沿传输数据.</li>
+<li><strong>GDDR (Graphics DDR)</strong>: 显存 (每颗 GDDR6X 带宽 <span class="math inline">\(80\)</span> GB/s.)</li>
+<li><strong>HBM (High Bandwidth Memory)</strong>: 高带宽内存 (每颗 HBM2E 带宽 <span class="math inline">\(460\)</span> GB/s.)</li>
+</ul></li>
+<li>ROM:
+<ul>
+<li>会被分配固定的地址空间.</li>
+<li><strong>Boot ROM</strong>: 存放启动代码的 ROM (固定独立地址空间, memory map 访问), 上电后 CPU 会把这里的代码加载到 RAM 并 jump 过去开机.</li>
+</ul></li>
+<li><strong>物理存储介质</strong>: 上面说的都是逻辑上的存储器, 下面讲实际上存储数据的物理介质.
+<ul>
+<li><strong>SRAM (Static RAM)</strong></li>
+</ul></li>
+</ul>
+</section>
 </section>
 <section id="riscv" class="level2">
 <h2 class="anchored" data-anchor-id="riscv">RISCV</h2>
@@ -1497,7 +1566,7 @@ Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装
 </div>
 </div></div><ul>
 <li><p><strong>Intrinsic 内联</strong>: 将汇编代码嵌入到 <code>C/C++</code> 代码中. 比如在想在 <code>C++</code> 中嵌入 RVV 汇编代码, 可以先 <code>#include &lt;riscv_vector.h&gt;</code> 头文件, 然后就可以这样用:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="operating-system-terms" class="level2">
@@ -1524,22 +1593,20 @@ Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装
 <li><strong>RGCN (Relational Graph Convolutional Network)</strong>: 关系图卷积网络.</li>
 </ul>
 </section>
-<section id="integrated-circuit-terms-1" class="level2">
-<h2 class="anchored" data-anchor-id="integrated-circuit-terms-1">Integrated Circuit Terms</h2>
-<ul>
-<li><strong>VLSI (Very Large Scale Integration)</strong>: 超大规模集成电路.</li>
-</ul>
-</section>
 <section id="optimization" class="level2">
 <h2 class="anchored" data-anchor-id="optimization">Optimization</h2>
 <ul>
 <li><p><strong>TSP (Travelling Salesman Problem)</strong>: 旅行商问题. 给定若干城市与它们之间的距离, 目标是找出一条路径, 使旅行者每个城市恰好访问一次, 最终回到起点, 并且总旅行距离最短.</p></li>
 <li><p><strong>CVRP (Capacitated Vehicle Routing Problem)</strong>: 带容量限制的车辆路径问题. 多辆车运送货物给多个城市, 每辆车只能装有限重量的货物, 目标是货物全送到并让运送距离最短.</p></li>
 <li><p><strong>FFSP (Flexible Flow Shop Problem)</strong>: 灵活流水车间调度问题.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="ffsp.png" class="img-fluid figure-img"></p>
-<figcaption>FFSP</figcaption>
+<div id="fig-ffsp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ffsp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ffsp.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ffsp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21: FFSP
+</figcaption>
 </figure>
 </div></li>
 </ul>
@@ -1646,6 +1713,9 @@ Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装
 </div>
 <div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[26] </div><div class="csl-right-inline">Lazyparser, <span>“Compilation and linker,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5</a></div>
+</div>
+<div id="ref-googlecoral_2025_github" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[27] </div><div class="csl-right-inline">google-coral, <span>“GitHub - google-coral/coralnpu: A machine learning accelerator core designed for energy-efficient AI at the edge.”</span> GitHub, Oct. 2025. Available: <a href="https://github.com/google-coral/coralnpu">https://github.com/google-coral/coralnpu</a>. [Accessed: Jan. 04, 2026]</div>
 </div>
 </div>
 </section>
