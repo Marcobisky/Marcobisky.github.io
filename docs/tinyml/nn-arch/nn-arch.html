@@ -534,6 +534,10 @@ window.Quarto = {
   <li><a href="#task-objective-任务目标" id="toc-task-objective-任务目标" class="nav-link" data-scroll-target="#task-objective-任务目标">Task Objective 任务目标</a></li>
   <li><a href="#mobilenetv1" id="toc-mobilenetv1" class="nav-link" data-scroll-target="#mobilenetv1">MobileNetv1</a></li>
   </ul></li>
+  <li><a href="#vision-transformer" id="toc-vision-transformer" class="nav-link" data-scroll-target="#vision-transformer">Vision Transformer</a>
+  <ul class="collapse">
+  <li><a href="#test" id="toc-test" class="nav-link" data-scroll-target="#test">test</a></li>
+  </ul></li>
   <li><a href="#yolo" id="toc-yolo" class="nav-link" data-scroll-target="#yolo">YOLO</a>
   <ul class="collapse">
   <li><a href="#task-objective-任务目标-1" id="toc-task-objective-任务目标-1" class="nav-link" data-scroll-target="#task-objective-任务目标-1">Task Objective 任务目标</a></li>
@@ -600,24 +604,22 @@ window.Quarto = {
 <ul>
 <li><strong>平面 (2D) 大小</strong>: <span class="math inline">\(3 \times 3 = 9\)</span>.</li>
 <li><strong>立体 (3D) 大小</strong>: <span class="math inline">\((3\times 3) \times 8 = 72\)</span>.</li>
-<li><strong>张量 (4D) 大小</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>: <span class="math inline">\((3\times 3) \times 8 \times 8 = 576\)</span>. (最后的 <span class="math inline">\(8\)</span> 是卷积核个数 (= 输出通道数), 注意 <a href="../glossary/glossary.html#sec-cv-terms">HWDN 规范</a>).</li>
+<li><strong>张量 (4D) 大小</strong>: <span class="math inline">\((3\times 3) \times 8 \times 8 = 576\)</span>. (最后的 <span class="math inline">\(8\)</span> 是卷积核个数 (= 输出通道数), 注意 <a href="../glossary/glossary.html#sec-cv-terms">HWCN 规范</a>).</li>
 <li><a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> 中每个「立体核」都会对 Input 进行扫描, 姑且将「闪」一下称为一次「快照」.</li>
 </ul></li>
 <li>Stride = 1 (<code>s1</code>).</li>
 <li>Padding = 1 (<a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> 的灰色部分).</li>
 </ul></li>
-</ul>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;注意这里的规范: Height × Width × Depth (Channel) × Num_Filters (H × W × D × N).</p></div></div><ul>
 <li><strong>常规卷积层</strong> (见 <a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a>):
 <ul>
 <li><strong>参数量</strong> = 一个立体核参数量 + 有几个立体核 <span class="math inline">\(= (72+1) \times 8 = 584\)</span> (别忘了每个卷积核还有有一个 bias 参数).</li>
-<li><strong>MAC</strong><a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> = 「闪」一次的 MAC <span class="math inline">\(\times\)</span>「闪」的总次数 <span class="math inline">\(= 72 \times 392 = 28224\)</span>.
+<li><strong>MAC</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> = 「闪」一次的 MAC <span class="math inline">\(\times\)</span>「闪」的总次数 <span class="math inline">\(= 72 \times 392 = 28224\)</span>.
 <ul>
 <li><strong>FLOPs</strong> = MAC <span class="math inline">\(\times 2 = 56448\)</span>.</li>
 </ul></li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;算 MAC 的时候这样思考: 每「闪」一下都算了 <span class="math inline">\(72\)</span> 次乘法和 <span class="math inline">\(71\)</span> 次加法, 哦不对! <strong>最后还要加 bias</strong>, 所以加法也是 <span class="math inline">\(72\)</span> 次 (即 MAC=72); 而输出的每个「小方块」都对应一次「快照」! 这两个数乘一下就是总 MAC 数了.</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;算 MAC 的时候这样思考: 每「闪」一下都算了 <span class="math inline">\(72\)</span> 次乘法和 <span class="math inline">\(71\)</span> 次加法, 哦不对! <strong>最后还要加 bias</strong>, 所以加法也是 <span class="math inline">\(72\)</span> 次 (即 MAC=72); 而输出的每个「小方块」都对应一次「快照」! 这两个数乘一下就是总 MAC 数了.</p></div></div><ul>
 <li><strong>DSC</strong> (见 <a href="#fig-dsc" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-dsc</span></a>):
 <ul>
 <li><strong>参数量</strong>
@@ -677,6 +679,13 @@ Figure&nbsp;3: 也可以不用将 channel 和 spatial 的信息完全分开训�
 </figure>
 </div>
 </div></div></section>
+</section>
+</section>
+<section id="vision-transformer" class="level2">
+<h2 class="anchored" data-anchor-id="vision-transformer">Vision Transformer</h2>
+<section id="test" class="level3">
+<h3 class="anchored" data-anchor-id="test">test</h3>
+<p>TBD</p>
 </section>
 </section>
 <section id="yolo" class="level2 page-columns page-full">

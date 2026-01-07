@@ -385,10 +385,10 @@ title: "Glossary 名词解释"
     - **GPRs (General Purpose Registers)**: GPR 有专门的名字访问指令, 不是通过 memory map 来访问的!
     - **CSRs (Control and Status Registers)**: 控制状态寄存器, 也有专门的名字访问指令, 也不是通过 memory map 来访问的!
 
-- **TCM (Tightly Coupled Memory)**: 由于 Cache 访问时间是**无法控制**的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来**不可预测**的延迟. 如果有经常访问的数据 比如 `sensor_data`, TCM 允许程序员显式地将其放在 TCM 中 (这样访问时间是**可预测**的):
+- **TCM (Tightly Coupled Memory)**: 由于 Cache 访问时间是**无法控制**的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来**不可预测**的延迟. 如果有经常访问的数据 比如 `sensor_data`, TCM 允许程序员显式地将其放在 TCM 中 (假设 `.dtcm` 在 linker script 里面定义过) (这样访问时间是**可预测**的):
 
     ```c
-    __attribute__((section(".tcm_data"))) int sensor_data[1024];
+    int sensor_data[1024] __attribute__((section(".dtcm")));
     ```
     - TCM 会被分配固定独立的地址空间 (通过 linker file `.ld` 定义, 后续通过 memory map 访问!), 而且会有模块检测访存的地址是否在 TCM 范围内, 如果是则会通过专用的 TCM 总线访问!
     - **DTCM, ITCM (Data TCM)**: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 @googlecoral_2025_github:

@@ -40,6 +40,10 @@
 
 - **VLA (Vision Language Action)**: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.
 
+- **VLM (Vision Language Model)**: 视觉语言模型, 可处理图片和自然语言两种模态进行理解和生成任务的模型.
+
+- **ViT (Vision Transformer)**: 一种基于 Transformer 架构的计算机视觉模型.
+
 - **AIGC (AI-Generated Content)**: 生成式 AI.
 
 ### CV 计算机视觉相关 {#sec-cv-terms}
@@ -76,6 +80,27 @@
 
     ![每个 kernel (filter) 可以产生一张 Feature map @anello_2022_visualizing.](feature-map.png){#fig-feature-map width=70%}
 
+- 一些图像处理工具:
+    - **Pillow (`from PIL import Image`)**: 一般用来对静态图像做基础操作 (裁剪、缩放、旋转、颜色变换等).
+    - **OpenCV (`import cv2`)**: 一般用来做视频流 (实时图像) 处理, 性能较高.
+    - **FFmpeg (`import ffmpeg`)**: 开源的命令行工具和 Python 库, 用来做音视频格式转换, 压缩等等还有很多, yyds.
+
+### Transformer 相关
+
+- **Causal Self-attention**: 给 attention 加上 mask (softmax 之前的 score 给 $-\infty$), 使得每个 token 只能 attend 它前面的 token (包括它自己).
+
+### Agent 相关
+
+- **Agent Framework**:
+    - **Agent 智能体**: 在 AI 模型和系统 Agent Tools (一些 API 比如 `read_files()`) 之间传话的程序.
+    - User-agent 端: User 给出自然语言要求, Agent 理解并产生调用 API 的指令.
+        - **User Prompt 用户提示词**: 你问的问题 (自然语言).
+        - **System Prompt 系统提示词**: 系统给模型的隐藏指令, 一般用来改变 AI 的「人设」, 比如 "You are my girlfriend.".
+            - **Function Calling**: 只是规范格式后的 System Prompt (比如用 `json`, 毕竟概率模型输出的指令可能不符合 API 要求).
+    - Agent-API 端: Agent 调用 API (比如查找文件路径或者调用搜索引擎), 然后把结果返回给 Agent.
+        - **MCP (Model Context Protocol)**: 在 Agent 和 Agent Tools (API) 之间的一层, 方便整理不同类型的 Agent Tools.
+
+    ![Agent Framework.](agent-arch.png){#fig-agent-arch width=80%}
 
 
 ### Computing in ML
@@ -208,3 +233,18 @@
 - **Symbol Grounded Problem**: 符号嵌入 (接地) 问题. 探讨的是符号 (或词语) 是如何在一个系统中获得意义的. 比如 "猫" 是一个符号, 但它不仅仅是一个符号, 它还与其它符号有所关联 (Grounded "嵌入"), 这种关联是 "猫" 的意义. 关于符号是如何嵌入的, 有以下几种观点:
     - **具身认知**: 意义必须通过一种感官、具身的方式与世界互动, 才能真正理解并嵌入符号. @The_Human_Developers_2025_cnblogs
     - **联结主义**: 符号的意义只取决于它与其它符号的关系 (有点范畴论的感觉哈哈). 符号可以通过网络中激活模式来进行嵌入. 这些模型并不明确地定义符号的意义, 而是通过训练大量数据, 学习感官输入与概念之间的关联. @The_Human_Developers_2025_cnblogs
+
+- **Inductive Bias (归纳偏见)**: 人类通过先验知识和经验 (归纳) 来引导学习过程, 这个过程体现在: 给神经网络设计特定的结构、将自由度更大的模型的某些参数置 $0$ (将函数空间/参数空间减小, 比如 CNN 可以看作 FCNN 的子集 @fig-cnn-fcnn), etc. 这样可以, 但是可能人为地丢弃了结构很好的函数空间 (bias) @battaglia2018relationalinductivebiasesdeep.
+    - Advantage: 如果归纳地合适, 可以让模型更快地收敛到合理的解. 比如 @fig-different-ib 中我们用 $5$ 个参数的神经网络拟合两个**斜抛运动**的数据点. 如果事先告诉模型这是一个斜抛运动 (by setting weights $w_1=w_2=w_5=0$), 而不是 exponential decay, 模型很容易就能拟合出很准确的结果 (棕色).
+    - Disadvantage: 如果归纳地不合适, 比如 @fig-different-ib 的红色和紫色, 显然离斜抛运动差得远.
+        - 再拿 CNN 举例, 由于 CNN 使用卷积核, 它隐含的 bias 就是: 一张图片的**语义可以由局部的信息层次化拼凑出来**、图片**元素的位置不影响图片的语义 (平移不变性)**. 这样训练出来的模型对于手写数字识别非常准确和高效, 但是会先入为主地重视局部纹理而不是全局特征 (@fig-colored-cat 是一个很经典的例子, 说明 ViT 很好地解决了 CNN 很难学习到全局信息的问题).
+
+::: {.column-margin}
+![Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “金刚鹦鹉”, 而 ViT 分类为 “埃及猫” @juliaturc_2025_why.](colored-cat.png){#fig-colored-cat}
+:::
+
+::: {layout = "[50,50]"}
+![CNN 是有归纳偏见的 FCNN (原本 $64$ 个参数减小到了 $4$ 个参数).](cnn-fcnn.png){#fig-cnn-fcnn}
+
+![不同的 Inductive Bias 带来完全不同的拟合效果 @gerstnerlab_2023_rl36.](different-ib.png){#fig-different-ib}
+:::

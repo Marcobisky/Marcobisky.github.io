@@ -587,6 +587,8 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#general-terms-1" id="toc-general-terms-1" class="nav-link" data-scroll-target="#general-terms-1">General Terms</a></li>
   <li><a href="#sec-cv-terms" id="toc-sec-cv-terms" class="nav-link" data-scroll-target="#sec-cv-terms">CV 计算机视觉相关</a></li>
+  <li><a href="#transformer-相关" id="toc-transformer-相关" class="nav-link" data-scroll-target="#transformer-相关">Transformer 相关</a></li>
+  <li><a href="#agent-相关" id="toc-agent-相关" class="nav-link" data-scroll-target="#agent-相关">Agent 相关</a></li>
   <li><a href="#computing-in-ml" id="toc-computing-in-ml" class="nav-link" data-scroll-target="#computing-in-ml">Computing in ML</a></li>
   <li><a href="#optimizer-in-ml" id="toc-optimizer-in-ml" class="nav-link" data-scroll-target="#optimizer-in-ml">Optimizer in ML</a></li>
   <li><a href="#ml-frameworks" id="toc-ml-frameworks" class="nav-link" data-scroll-target="#ml-frameworks">ML Frameworks</a></li>
@@ -1160,6 +1162,8 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <li><strong>Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习</strong>: SFT 微调后的模型不是最有帮助的/有害的/不符合价值观的, RLHF 不是喂给模型更多数据, 而是让模型给出多个回答, 然后让<strong>人类</strong>打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[15]</a></span>.</li>
 </ul></li>
 <li><p><strong>VLA (Vision Language Action)</strong>: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.</p></li>
+<li><p><strong>VLM (Vision Language Model)</strong>: 视觉语言模型, 可处理图片和自然语言两种模态进行理解和生成任务的模型.</p></li>
+<li><p><strong>ViT (Vision Transformer)</strong>: 一种基于 Transformer 架构的计算机视觉模型.</p></li>
 <li><p><strong>AIGC (AI-Generated Content)</strong>: 生成式 AI.</p></li>
 </ul>
 </section>
@@ -1215,6 +1219,49 @@ Figure&nbsp;15: 每个 kernel (filter) 可以产生一张 Feature map <span clas
 </figcaption>
 </figure>
 </div></li>
+<li>一些图像处理工具:
+<ul>
+<li><strong>Pillow (<code>from PIL import Image</code>)</strong>: 一般用来对静态图像做基础操作 (裁剪、缩放、旋转、颜色变换等).</li>
+<li><strong>OpenCV (<code>import cv2</code>)</strong>: 一般用来做视频流 (实时图像) 处理, 性能较高.</li>
+<li><strong>FFmpeg (<code>import ffmpeg</code>)</strong>: 开源的命令行工具和 Python 库, 用来做音视频格式转换, 压缩等等还有很多, yyds.</li>
+</ul></li>
+</ul>
+</section>
+<section id="transformer-相关" class="level3">
+<h3 class="anchored" data-anchor-id="transformer-相关">Transformer 相关</h3>
+<ul>
+<li><strong>Causal Self-attention</strong>: 给 attention 加上 mask (softmax 之前的 score 给 <span class="math inline">\(-\infty\)</span>), 使得每个 token 只能 attend 它前面的 token (包括它自己).</li>
+</ul>
+</section>
+<section id="agent-相关" class="level3">
+<h3 class="anchored" data-anchor-id="agent-相关">Agent 相关</h3>
+<ul>
+<li><strong>Agent Framework</strong>:
+<ul>
+<li><strong>Agent 智能体</strong>: 在 AI 模型和系统 Agent Tools (一些 API 比如 <code>read_files()</code>) 之间传话的程序.</li>
+<li>User-agent 端: User 给出自然语言要求, Agent 理解并产生调用 API 的指令.
+<ul>
+<li><strong>User Prompt 用户提示词</strong>: 你问的问题 (自然语言).</li>
+<li><strong>System Prompt 系统提示词</strong>: 系统给模型的隐藏指令, 一般用来改变 AI 的「人设」, 比如 “You are my girlfriend.”.
+<ul>
+<li><strong>Function Calling</strong>: 只是规范格式后的 System Prompt (比如用 <code>json</code>, 毕竟概率模型输出的指令可能不符合 API 要求).</li>
+</ul></li>
+</ul></li>
+<li>Agent-API 端: Agent 调用 API (比如查找文件路径或者调用搜索引擎), 然后把结果返回给 Agent.
+<ul>
+<li><strong>MCP (Model Context Protocol)</strong>: 在 Agent 和 Agent Tools (API) 之间的一层, 方便整理不同类型的 Agent Tools.</li>
+</ul></li>
+</ul>
+<div id="fig-agent-arch" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-agent-arch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="agent-arch.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-agent-arch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16: Agent Framework.
+</figcaption>
+</figure>
+</div></li>
 </ul>
 </section>
 <section id="computing-in-ml" class="level3">
@@ -1234,7 +1281,7 @@ Figure&nbsp;15: 每个 kernel (filter) 可以产生一张 Feature map <span clas
 <img src="third-epoch.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-third-epoch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16: 分布式训练: The Third Epoch of AI <span class="citation" data-cites="_2025_chakra"><a href="#ref-_2025_chakra" role="doc-biblioref">[20]</a></span>.
+Figure&nbsp;17: 分布式训练: The Third Epoch of AI <span class="citation" data-cites="_2025_chakra"><a href="#ref-_2025_chakra" role="doc-biblioref">[20]</a></span>.
 </figcaption>
 </figure>
 </div></li>
@@ -1266,7 +1313,7 @@ Figure&nbsp;16: 分布式训练: The Third Epoch of AI <span class="citation" da
 <img src="sparsity.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sparsity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[21]</a></span>, 蓝色的格子代表权重为 <span class="math inline">\(0\)</span>
+Figure&nbsp;18: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[21]</a></span>, 蓝色的格子代表权重为 <span class="math inline">\(0\)</span>
 </figcaption>
 </figure>
 </div></li>
@@ -1341,7 +1388,7 @@ Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <img src="adagrad.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adagrad-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;18: Adagrad 给梯度平缓方向对应的参数 (<span class="math inline">\(Y\)</span>) 更大的学习率 (<span class="math inline">\(\alpha_Y = 0.05\)</span>) 来加快这个方向的下降 <span class="citation" data-cites="tg_2020_why"><a href="#ref-tg_2020_why" role="doc-biblioref">[24]</a></span>. 也可以用 “Normalize” 的角度理解.
+Figure&nbsp;19: Adagrad 给梯度平缓方向对应的参数 (<span class="math inline">\(Y\)</span>) 更大的学习率 (<span class="math inline">\(\alpha_Y = 0.05\)</span>) 来加快这个方向的下降 <span class="citation" data-cites="tg_2020_why"><a href="#ref-tg_2020_why" role="doc-biblioref">[24]</a></span>. 也可以用 “Normalize” 的角度理解.
 </figcaption>
 </figure>
 </div></li>
@@ -1369,7 +1416,7 @@ Figure&nbsp;18: Adagrad 给梯度平缓方向对应的参数 (<span class="math 
 <img src="mlsys.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mlsys-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;19: AI 编译栈和编程体系
+Figure&nbsp;20: AI 编译栈和编程体系
 </figcaption>
 </figure>
 </div>
@@ -1398,7 +1445,7 @@ Figure&nbsp;19: AI 编译栈和编程体系
 </ul></li>
 </ul>
 </section>
-<section id="related-philosophy" class="level3">
+<section id="related-philosophy" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="related-philosophy">Related Philosophy</h3>
 <ul>
 <li><strong>Symbol Grounded Problem</strong>: 符号嵌入 (接地) 问题. 探讨的是符号 (或词语) 是如何在一个系统中获得意义的. 比如 “猫” 是一个符号, 但它不仅仅是一个符号, 它还与其它符号有所关联 (Grounded “嵌入”), 这种关联是 “猫” 的意义. 关于符号是如何嵌入的, 有以下几种观点:
@@ -1406,7 +1453,55 @@ Figure&nbsp;19: AI 编译栈和编程体系
 <li><strong>具身认知</strong>: 意义必须通过一种感官、具身的方式与世界互动, 才能真正理解并嵌入符号. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[25]</a></span></li>
 <li><strong>联结主义</strong>: 符号的意义只取决于它与其它符号的关系 (有点范畴论的感觉哈哈). 符号可以通过网络中激活模式来进行嵌入. 这些模型并不明确地定义符号的意义, 而是通过训练大量数据, 学习感官输入与概念之间的关联. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[25]</a></span></li>
 </ul></li>
+<li><strong>Inductive Bias (归纳偏见)</strong>: 人类通过先验知识和经验 (归纳) 来引导学习过程, 这个过程体现在: 给神经网络设计特定的结构、将自由度更大的模型的某些参数置 <span class="math inline">\(0\)</span> (将函数空间/参数空间减小, 比如 CNN 可以看作 FCNN 的子集 <a href="#fig-cnn-fcnn" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cnn-fcnn</span></a>), etc. 这样可以, 但是可能人为地丢弃了结构很好的函数空间 (bias) <span class="citation" data-cites="battaglia2018relationalinductivebiasesdeep"><a href="#ref-battaglia2018relationalinductivebiasesdeep" role="doc-biblioref">[26]</a></span>.
+<ul>
+<li>Advantage: 如果归纳地合适, 可以让模型更快地收敛到合理的解. 比如 <a href="#fig-different-ib" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-different-ib</span></a> 中我们用 <span class="math inline">\(5\)</span> 个参数的神经网络拟合两个<strong>斜抛运动</strong>的数据点. 如果事先告诉模型这是一个斜抛运动 (by setting weights <span class="math inline">\(w_1=w_2=w_5=0\)</span>), 而不是 exponential decay, 模型很容易就能拟合出很准确的结果 (棕色).</li>
+<li>Disadvantage: 如果归纳地不合适, 比如 <a href="#fig-different-ib" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-different-ib</span></a> 的红色和紫色, 显然离斜抛运动差得远.
+<ul>
+<li>再拿 CNN 举例, 由于 CNN 使用卷积核, 它隐含的 bias 就是: 一张图片的<strong>语义可以由局部的信息层次化拼凑出来</strong>、图片<strong>元素的位置不影响图片的语义 (平移不变性)</strong>. 这样训练出来的模型对于手写数字识别非常准确和高效, 但是会先入为主地重视局部纹理而不是全局特征 (<a href="#fig-colored-cat" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-colored-cat</span></a> 是一个很经典的例子, 说明 ViT 很好地解决了 CNN 很难学习到全局信息的问题).</li>
+</ul></li>
+</ul></li>
 </ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-colored-cat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-colored-cat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="colored-cat.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-colored-cat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “金刚鹦鹉”, 而 ViT 分类为 “埃及猫” <span class="citation" data-cites="juliaturc_2025_why"><a href="#ref-juliaturc_2025_why" role="doc-biblioref">[27]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div></div><div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-cnn-fcnn" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cnn-fcnn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="cnn-fcnn.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cnn-fcnn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline">\(64\)</span> 个参数减小到了 <span class="math inline">\(4\)</span> 个参数).
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-different-ib" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-different-ib-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="different-ib.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-different-ib-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23: 不同的 Inductive Bias 带来完全不同的拟合效果 <span class="citation" data-cites="gerstnerlab_2023_rl36"><a href="#ref-gerstnerlab_2023_rl36" role="doc-biblioref">[28]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="pu-terms" class="level2 page-columns page-full">
@@ -1423,7 +1518,7 @@ Figure&nbsp;19: AI 编译栈和编程体系
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="endianness.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[26]</a></span></figcaption>
+<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[29]</a></span></figcaption>
 </figure>
 </div></li>
 </ul>
@@ -1446,7 +1541,7 @@ Figure&nbsp;19: AI 编译栈和编程体系
 <img src="amd-gpu-2015.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-amd-gpu-2015-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装.
+Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 </figcaption>
 </figure>
 </div>
@@ -1465,11 +1560,11 @@ Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装.
 <li><strong>GPRs (General Purpose Registers)</strong>: GPR 有专门的名字访问指令, 不是通过 memory map 来访问的!</li>
 <li><strong>CSRs (Control and Status Registers)</strong>: 控制状态寄存器, 也有专门的名字访问指令, 也不是通过 memory map 来访问的!</li>
 </ul></li>
-<li><p><strong>TCM (Tightly Coupled Memory)</strong>: 由于 Cache 访问时间是<strong>无法控制</strong>的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来<strong>不可预测</strong>的延迟. 如果有经常访问的数据 比如 <code>sensor_data</code>, TCM 允许程序员显式地将其放在 TCM 中 (这样访问时间是<strong>可预测</strong>的):</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>__attribute__<span class="op">((</span>section<span class="op">(</span><span class="st">".tcm_data"</span><span class="op">)))</span> <span class="dt">int</span> sensor_data<span class="op">[</span><span class="dv">1024</span><span class="op">];</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<li><p><strong>TCM (Tightly Coupled Memory)</strong>: 由于 Cache 访问时间是<strong>无法控制</strong>的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来<strong>不可预测</strong>的延迟. 如果有经常访问的数据 比如 <code>sensor_data</code>, TCM 允许程序员显式地将其放在 TCM 中 (假设 <code>.dtcm</code> 在 linker script 里面定义过) (这样访问时间是<strong>可预测</strong>的):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sensor_data<span class="op">[</span><span class="dv">1024</span><span class="op">]</span> __attribute__<span class="op">((</span>section<span class="op">(</span><span class="st">".dtcm"</span><span class="op">)));</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><p>TCM 会被分配固定独立的地址空间 (通过 linker file <code>.ld</code> 定义, 后续通过 memory map 访问!), 而且会有模块检测访存的地址是否在 TCM 范围内, 如果是则会通过专用的 TCM 总线访问!</p></li>
-<li><p><strong>DTCM, ITCM (Data TCM)</strong>: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 <span class="citation" data-cites="googlecoral_2025_github"><a href="#ref-googlecoral_2025_github" role="doc-biblioref">[27]</a></span>:</p>
+<li><p><strong>DTCM, ITCM (Data TCM)</strong>: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 <span class="citation" data-cites="googlecoral_2025_github"><a href="#ref-googlecoral_2025_github" role="doc-biblioref">[30]</a></span>:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>coralnpu_tcm.ld</strong></pre>
@@ -1545,7 +1640,7 @@ Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装.
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="elf-format.png" class="img-fluid figure-img"></p>
-<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[26]</a></span></figcaption>
+<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[29]</a></span></figcaption>
 </figure>
 </div>
 </div></div><ul>
@@ -1574,7 +1669,7 @@ Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装.
 <ul>
 <li><strong>RTOS (Real-Time Operating System)</strong>: 实时操作系统, 用于嵌入式系统.
 <ul>
-<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[26]</a></span>.</li>
+<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[29]</a></span>.</li>
 <li><strong>RT-Thread</strong>: 也是一个 RTOS</li>
 </ul></li>
 </ul>
@@ -1605,7 +1700,7 @@ Figure&nbsp;20: AMD GPU 2015 采用 2.5D 封装.
 <img src="ffsp.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ffsp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21: FFSP
+Figure&nbsp;25: FFSP
 </figcaption>
 </figure>
 </div></li>
@@ -1711,11 +1806,20 @@ Figure&nbsp;21: FFSP
 <div id="ref-The_Human_Developers_2025_cnblogs" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[25] </div><div class="csl-right-inline">S. Dai, <span>“Symbol grounding problem in artificial intelligence,”</span> 2025, Available: <a href="https://www.cnblogs.com/sddai/p/18670953">https://www.cnblogs.com/sddai/p/18670953</a></div>
 </div>
+<div id="ref-battaglia2018relationalinductivebiasesdeep" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[26] </div><div class="csl-right-inline">P. W. Battaglia <em>et al.</em>, <span>“Relational inductive biases, deep learning, and graph networks.”</span> 2018. Available: <a href="https://arxiv.org/abs/1806.01261">https://arxiv.org/abs/1806.01261</a></div>
+</div>
+<div id="ref-juliaturc_2025_why" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[27] </div><div class="csl-right-inline">J. Turc, <span>“Why are transformers replacing CNNs?”</span> YouTube, Dec. 2025. Available: <a href="https://www.youtube.com/watch?v=KnCRTP11p5U">https://www.youtube.com/watch?v=KnCRTP11p5U</a>. [Accessed: Jan. 07, 2026]</div>
+</div>
+<div id="ref-gerstnerlab_2023_rl36" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[28] </div><div class="csl-right-inline">G. Lab, <span>“RL3.6 inductive bias in machine learning.”</span> YouTube, Mar. 2023. Available: <a href="https://www.youtube.com/watch?v=FhBMOqyMjYw">https://www.youtube.com/watch?v=FhBMOqyMjYw</a>. [Accessed: Jan. 07, 2026]</div>
+</div>
 <div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[26] </div><div class="csl-right-inline">Lazyparser, <span>“Compilation and linker,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5</a></div>
+<div class="csl-left-margin">[29] </div><div class="csl-right-inline">Lazyparser, <span>“Compilation and linker,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5</a></div>
 </div>
 <div id="ref-googlecoral_2025_github" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[27] </div><div class="csl-right-inline">google-coral, <span>“GitHub - google-coral/coralnpu: A machine learning accelerator core designed for energy-efficient AI at the edge.”</span> GitHub, Oct. 2025. Available: <a href="https://github.com/google-coral/coralnpu">https://github.com/google-coral/coralnpu</a>. [Accessed: Jan. 04, 2026]</div>
+<div class="csl-left-margin">[30] </div><div class="csl-right-inline">google-coral, <span>“GitHub - google-coral/coralnpu: A machine learning accelerator core designed for energy-efficient AI at the edge.”</span> GitHub, Oct. 2025. Available: <a href="https://github.com/google-coral/coralnpu">https://github.com/google-coral/coralnpu</a>. [Accessed: Jan. 04, 2026]</div>
 </div>
 </div>
 </section>
