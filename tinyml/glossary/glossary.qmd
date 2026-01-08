@@ -379,17 +379,20 @@ title: "Glossary 名词解释"
 
 ### Memory 存储器 Terms
 
+- **DMA (Direct Memory Access)**: 在不通过 CPU 的情况下, 外围设备直接和主内存进行数据传送.
+
+
 > 以下从高速到低速介绍 (近 CPU 到远 CPU, GPU 几乎是一样的).
 
-- **Register 寄存器**
+- **Register 寄存器** (物理介质: 高速 SRAM):
     - **GPRs (General Purpose Registers)**: GPR 有专门的名字访问指令, 不是通过 memory map 来访问的!
     - **CSRs (Control and Status Registers)**: 控制状态寄存器, 也有专门的名字访问指令, 也不是通过 memory map 来访问的!
 
-- **TCM (Tightly Coupled Memory)**: 由于 Cache 访问时间是**无法控制**的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来**不可预测**的延迟. 如果有经常访问的数据 比如 `sensor_data`, TCM 允许程序员显式地将其放在 TCM 中 (假设 `.dtcm` 在 linker script 里面定义过) (这样访问时间是**可预测**的):
-
-    ```c
-    int sensor_data[1024] __attribute__((section(".dtcm")));
-    ```
+- **TCM (Tightly Coupled Memory)** (物理介质: SRAM):
+    - 由于 Cache 访问时间是**无法控制**的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来**不可预测**的延迟. 如果有经常访问的数据 比如 `sensor_data`, TCM 允许程序员显式地将其放在 TCM 中 (假设 `.dtcm` 在 linker script 里面定义过) (这样访问时间是**可预测**的):
+        ```c
+        int sensor_data[1024] __attribute__((section(".dtcm")));
+        ```
     - TCM 会被分配固定独立的地址空间 (通过 linker file `.ld` 定义, 后续通过 memory map 访问!), 而且会有模块检测访存的地址是否在 TCM 范围内, 如果是则会通过专用的 TCM 总线访问!
     - **DTCM, ITCM (Data TCM)**: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 @googlecoral_2025_github:
 
@@ -400,23 +403,29 @@ title: "Glossary 名词解释"
         }
         ```
 
-- **Cache 缓存**: 因与 "cash" 同音, 常记为 "\$".
+- **Cache 缓存** (物理介质: SRAM):
+    - 因与 "cash" 同音, 常记为 "\$".
     - 注意 Cache 没有分配独立的地址空间, 在 CPU 和 RAM 间是「透明」的!
     - **L1D\$, L1I\$**: 一级数据缓存和一级指令缓存[^cache].
 
 [^cache]: 区分 D\$/DTCM, I\$/ITCM: 有没有独立地址空间 (是否「透明」)、访问是否可预测. 但有的地方会混用这两个概念!
 
-- RAM-like:
-    - **DDR (Double Data Rate)**: 一种 (双倍数据率) CPU RAM, 在上升沿和下降沿各传输一次数据. **SDR** 是早期内存技术, 只在时钟上升沿传输数据.
-    - **GDDR (Graphics DDR)**: 显存 (每颗 GDDR6X 带宽 $80$ GB/s.)
-    - **HBM (High Bandwidth Memory)**: 高带宽内存 (每颗 HBM2E 带宽 $460$ GB/s.)
+- RAM (物理介质: DRAM):
+    - CPU RAM, 具体的技术包括:
+        - **DDR (Double Data Rate)**: 一种 (双倍数据率) CPU RAM, 在上升沿和下降沿各传输一次数据. **SDR** 是早期内存技术, 只在时钟上升沿传输数据.
+    - GPU RAM (**VRAM** (Video)), 具体的技术包括:
+        - **GDDR (Graphics DDR)**: 显存 (每颗 GDDR6X 带宽 $80$ GB/s.)
+        - **HBM (High Bandwidth Memory)**: 高带宽内存 (每颗 HBM2E 带宽 $460$ GB/s.)
 
-- ROM:
+- ROM (物理介质: Flash):
     - 会被分配固定的地址空间.
+    - **SSD (Solid State Drive)**: 硬盘, 上面有很多 flash 芯片 + 接口协议 (SATA, M.2, etc.) 控制电路.
     - **Boot ROM**: 存放启动代码的 ROM (固定独立地址空间, memory map 访问), 上电后 CPU 会把这里的代码加载到 RAM 并 jump 过去开机.
 
 - **物理存储介质**: 上面说的都是逻辑上的存储器, 下面讲实际上存储数据的物理介质.
-    - **SRAM (Static RAM)**
+    - **SRAM (Static RAM)**: 寄存器、Cache、TCM.
+    - **DRAM (Dynamic RAM)**: 主内存.
+    - **Flash**: ROM
 
 ## RISCV
 

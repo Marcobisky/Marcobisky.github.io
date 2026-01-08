@@ -1402,6 +1402,8 @@ Figure&nbsp;19: Adagrad 给梯度平缓方向对应的参数 (<span class="math 
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
+<li>Pytorch 是最主流的, Tensorflow 快死了好像.</li>
+<li>如何看待公司面试要求手写 transformer? 首先会背 Pytorch 函数并不 cool, Pytorch 只是复刻了主流论文里的框架, 如果你能写一个架构并且顶替 transformer, 你的库函数不久后也会出现在 Pytorch 里.</li>
 <li>RISCV 上有 TfLM (TensorFlow Lite for Microcontrollers),</li>
 <li><strong>ONNX (Open Neural Network Exchange)</strong>: 一种统一的描述神经网络结构的格式, 以上三种框架都支持导出为 ONNX 格式.</li>
 </ul></li>
@@ -1455,10 +1457,12 @@ Figure&nbsp;20: AI 编译栈和编程体系
 </ul></li>
 <li><strong>Inductive Bias (归纳偏见)</strong>: 人类通过先验知识和经验 (归纳) 来引导学习过程, 这个过程体现在: 给神经网络设计特定的结构、将自由度更大的模型的某些参数置 <span class="math inline">\(0\)</span> (将函数空间/参数空间减小, 比如 CNN 可以看作 FCNN 的子集 <a href="#fig-cnn-fcnn" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cnn-fcnn</span></a>), etc. 这样可以, 但是可能人为地丢弃了结构很好的函数空间 (bias) <span class="citation" data-cites="battaglia2018relationalinductivebiasesdeep"><a href="#ref-battaglia2018relationalinductivebiasesdeep" role="doc-biblioref">[26]</a></span>.
 <ul>
+<li>Weak Inductive Bias 的网络 (比如 ViT, compared with CNN) 需要的训练数据更多 (data-hungry).</li>
 <li>Advantage: 如果归纳地合适, 可以让模型更快地收敛到合理的解. 比如 <a href="#fig-different-ib" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-different-ib</span></a> 中我们用 <span class="math inline">\(5\)</span> 个参数的神经网络拟合两个<strong>斜抛运动</strong>的数据点. 如果事先告诉模型这是一个斜抛运动 (by setting weights <span class="math inline">\(w_1=w_2=w_5=0\)</span>), 而不是 exponential decay, 模型很容易就能拟合出很准确的结果 (棕色).</li>
 <li>Disadvantage: 如果归纳地不合适, 比如 <a href="#fig-different-ib" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-different-ib</span></a> 的红色和紫色, 显然离斜抛运动差得远.
 <ul>
-<li>再拿 CNN 举例, 由于 CNN 使用卷积核, 它隐含的 bias 就是: 一张图片的<strong>语义可以由局部的信息层次化拼凑出来</strong>、图片<strong>元素的位置不影响图片的语义 (平移不变性)</strong>. 这样训练出来的模型对于手写数字识别非常准确和高效, 但是会先入为主地重视局部纹理而不是全局特征 (<a href="#fig-colored-cat" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-colored-cat</span></a> 是一个很经典的例子, 说明 ViT 很好地解决了 CNN 很难学习到全局信息的问题).</li>
+<li>再拿 CNN 举例, 由于 CNN 在<strong>几乎每一层</strong>使用卷积核, 它隐含的 bias 就是: 一张图片的<strong>语义可以由局部的信息层次化拼凑出来</strong>、图片<strong>元素的位置不影响图片的语义 (平移不变性)</strong>. 这样训练出来的模型对于手写数字识别非常准确和高效, 但是会先入为主地重视局部纹理而不是全局特征 (<a href="#fig-colored-cat" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-colored-cat</span></a> 是一个很经典的例子, 说明 ViT 很好地解决了 CNN 很难学习到全局信息的问题).</li>
+<li>但 ViT 也有自己的 bias: 比如<strong>切分成 patch 的时候引入了局部性</strong>、<strong>所有 patch 用同一个线性映射层 (shared embedding matrix) 也引入了平移不变性</strong>. 但是这只是在第一步编码时引入的, 后面位置编码和 transformer 就能很好地学习到全局信息了.</li>
 </ul></li>
 </ul></li>
 </ul>
@@ -1551,18 +1555,21 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 </section>
 <section id="memory-存储器-terms" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="memory-存储器-terms">Memory 存储器 Terms</h3>
+<ul>
+<li><strong>DMA (Direct Memory Access)</strong>: 在不通过 CPU 的情况下, 外围设备直接和主内存进行数据传送.</li>
+</ul>
 <blockquote class="blockquote">
 <p>以下从高速到低速介绍 (近 CPU 到远 CPU, GPU 几乎是一样的).</p>
 </blockquote>
 <ul>
-<li><p><strong>Register 寄存器</strong></p>
+<li><strong>Register 寄存器</strong> (物理介质: 高速 SRAM):
 <ul>
 <li><strong>GPRs (General Purpose Registers)</strong>: GPR 有专门的名字访问指令, 不是通过 memory map 来访问的!</li>
 <li><strong>CSRs (Control and Status Registers)</strong>: 控制状态寄存器, 也有专门的名字访问指令, 也不是通过 memory map 来访问的!</li>
 </ul></li>
-<li><p><strong>TCM (Tightly Coupled Memory)</strong>: 由于 Cache 访问时间是<strong>无法控制</strong>的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来<strong>不可预测</strong>的延迟. 如果有经常访问的数据 比如 <code>sensor_data</code>, TCM 允许程序员显式地将其放在 TCM 中 (假设 <code>.dtcm</code> 在 linker script 里面定义过) (这样访问时间是<strong>可预测</strong>的):</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sensor_data<span class="op">[</span><span class="dv">1024</span><span class="op">]</span> __attribute__<span class="op">((</span>section<span class="op">(</span><span class="st">".dtcm"</span><span class="op">)));</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<li><strong>TCM (Tightly Coupled Memory)</strong> (物理介质: SRAM):
 <ul>
+<li><p>由于 Cache 访问时间是<strong>无法控制</strong>的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来<strong>不可预测</strong>的延迟. 如果有经常访问的数据 比如 <code>sensor_data</code>, TCM 允许程序员显式地将其放在 TCM 中 (假设 <code>.dtcm</code> 在 linker script 里面定义过) (这样访问时间是<strong>可预测</strong>的): <code>c       int sensor_data[1024] __attribute__((section(".dtcm")));</code></p></li>
 <li><p>TCM 会被分配固定独立的地址空间 (通过 linker file <code>.ld</code> 定义, 后续通过 memory map 访问!), 而且会有模块检测访存的地址是否在 TCM 范围内, 如果是则会通过专用的 TCM 总线访问!</p></li>
 <li><p><strong>DTCM, ITCM (Data TCM)</strong>: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 <span class="citation" data-cites="googlecoral_2025_github"><a href="#ref-googlecoral_2025_github" role="doc-biblioref">[30]</a></span>:</p>
 <div class="code-with-filename">
@@ -1575,27 +1582,37 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 <span id="lst-coralnpu-tcm-ld-4"><a href="#lst-coralnpu-tcm-ld-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div></li>
 </ul></li>
-<li><p><strong>Cache 缓存</strong>: 因与 “cash” 同音, 常记为 “$”.</p>
+<li><strong>Cache 缓存</strong> (物理介质: SRAM):
 <ul>
+<li>因与 “cash” 同音, 常记为 “$”.</li>
 <li>注意 Cache 没有分配独立的地址空间, 在 CPU 和 RAM 间是「透明」的!</li>
 <li><strong>L1D$, L1I$</strong>: 一级数据缓存和一级指令缓存<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</li>
 </ul></li>
 </ul>
 <div class="no-row-height column-margin column-container"><div id="fn6"><p><sup>6</sup>&nbsp;区分 D$/DTCM, I$/ITCM: 有没有独立地址空间 (是否「透明」)、访问是否可预测. 但有的地方会混用这两个概念!</p></div></div><ul>
-<li>RAM-like:
+<li>RAM (物理介质: DRAM):
+<ul>
+<li>CPU RAM, 具体的技术包括:
 <ul>
 <li><strong>DDR (Double Data Rate)</strong>: 一种 (双倍数据率) CPU RAM, 在上升沿和下降沿各传输一次数据. <strong>SDR</strong> 是早期内存技术, 只在时钟上升沿传输数据.</li>
+</ul></li>
+<li>GPU RAM (<strong>VRAM</strong> (Video)), 具体的技术包括:
+<ul>
 <li><strong>GDDR (Graphics DDR)</strong>: 显存 (每颗 GDDR6X 带宽 <span class="math inline">\(80\)</span> GB/s.)</li>
 <li><strong>HBM (High Bandwidth Memory)</strong>: 高带宽内存 (每颗 HBM2E 带宽 <span class="math inline">\(460\)</span> GB/s.)</li>
 </ul></li>
-<li>ROM:
+</ul></li>
+<li>ROM (物理介质: Flash):
 <ul>
 <li>会被分配固定的地址空间.</li>
+<li><strong>SSD (Solid State Drive)</strong>: 硬盘, 上面有很多 flash 芯片 + 接口协议 (SATA, M.2, etc.) 控制电路.</li>
 <li><strong>Boot ROM</strong>: 存放启动代码的 ROM (固定独立地址空间, memory map 访问), 上电后 CPU 会把这里的代码加载到 RAM 并 jump 过去开机.</li>
 </ul></li>
 <li><strong>物理存储介质</strong>: 上面说的都是逻辑上的存储器, 下面讲实际上存储数据的物理介质.
 <ul>
-<li><strong>SRAM (Static RAM)</strong></li>
+<li><strong>SRAM (Static RAM)</strong>: 寄存器、Cache、TCM.</li>
+<li><strong>DRAM (Dynamic RAM)</strong>: 主内存.</li>
+<li><strong>Flash</strong>: ROM</li>
 </ul></li>
 </ul>
 </section>
@@ -1661,7 +1678,7 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 </div>
 </div></div><ul>
 <li><p><strong>Intrinsic 内联</strong>: 将汇编代码嵌入到 <code>C/C++</code> 代码中. 比如在想在 <code>C++</code> 中嵌入 RVV 汇编代码, 可以先 <code>#include &lt;riscv_vector.h&gt;</code> 头文件, 然后就可以这样用:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb13"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="operating-system-terms" class="level2">

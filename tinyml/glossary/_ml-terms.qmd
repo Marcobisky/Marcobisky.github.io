@@ -197,7 +197,8 @@
     import torch
     import jax.numpy as jnp
     ```
-
+    - Pytorch 是最主流的, Tensorflow 快死了好像.
+    - 如何看待公司面试要求手写 transformer? 首先会背 Pytorch 函数并不 cool, Pytorch 只是复刻了主流论文里的框架, 如果你能写一个架构并且顶替 transformer, 你的库函数不久后也会出现在 Pytorch 里.
     - RISCV 上有 TfLM (TensorFlow Lite for Microcontrollers), 
     - **ONNX (Open Neural Network Exchange)**: 一种统一的描述神经网络结构的格式, 以上三种框架都支持导出为 ONNX 格式.
 
@@ -235,9 +236,11 @@
     - **联结主义**: 符号的意义只取决于它与其它符号的关系 (有点范畴论的感觉哈哈). 符号可以通过网络中激活模式来进行嵌入. 这些模型并不明确地定义符号的意义, 而是通过训练大量数据, 学习感官输入与概念之间的关联. @The_Human_Developers_2025_cnblogs
 
 - **Inductive Bias (归纳偏见)**: 人类通过先验知识和经验 (归纳) 来引导学习过程, 这个过程体现在: 给神经网络设计特定的结构、将自由度更大的模型的某些参数置 $0$ (将函数空间/参数空间减小, 比如 CNN 可以看作 FCNN 的子集 @fig-cnn-fcnn), etc. 这样可以, 但是可能人为地丢弃了结构很好的函数空间 (bias) @battaglia2018relationalinductivebiasesdeep.
+    - Weak Inductive Bias 的网络 (比如 ViT, compared with CNN) 需要的训练数据更多 (data-hungry).
     - Advantage: 如果归纳地合适, 可以让模型更快地收敛到合理的解. 比如 @fig-different-ib 中我们用 $5$ 个参数的神经网络拟合两个**斜抛运动**的数据点. 如果事先告诉模型这是一个斜抛运动 (by setting weights $w_1=w_2=w_5=0$), 而不是 exponential decay, 模型很容易就能拟合出很准确的结果 (棕色).
     - Disadvantage: 如果归纳地不合适, 比如 @fig-different-ib 的红色和紫色, 显然离斜抛运动差得远.
-        - 再拿 CNN 举例, 由于 CNN 使用卷积核, 它隐含的 bias 就是: 一张图片的**语义可以由局部的信息层次化拼凑出来**、图片**元素的位置不影响图片的语义 (平移不变性)**. 这样训练出来的模型对于手写数字识别非常准确和高效, 但是会先入为主地重视局部纹理而不是全局特征 (@fig-colored-cat 是一个很经典的例子, 说明 ViT 很好地解决了 CNN 很难学习到全局信息的问题).
+        - 再拿 CNN 举例, 由于 CNN 在**几乎每一层**使用卷积核, 它隐含的 bias 就是: 一张图片的**语义可以由局部的信息层次化拼凑出来**、图片**元素的位置不影响图片的语义 (平移不变性)**. 这样训练出来的模型对于手写数字识别非常准确和高效, 但是会先入为主地重视局部纹理而不是全局特征 (@fig-colored-cat 是一个很经典的例子, 说明 ViT 很好地解决了 CNN 很难学习到全局信息的问题).
+        - 但 ViT 也有自己的 bias: 比如**切分成 patch 的时候引入了局部性**、**所有 patch 用同一个线性映射层 (shared embedding matrix) 也引入了平移不变性**. 但是这只是在第一步编码时引入的, 后面位置编码和 transformer 就能很好地学习到全局信息了.
 
 ::: {.column-margin}
 ![Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “金刚鹦鹉”, 而 ViT 分类为 “埃及猫” @juliaturc_2025_why.](colored-cat.png){#fig-colored-cat}
