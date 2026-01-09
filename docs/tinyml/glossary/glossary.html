@@ -1569,7 +1569,8 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 </ul></li>
 <li><strong>TCM (Tightly Coupled Memory)</strong> (物理介质: SRAM):
 <ul>
-<li><p>由于 Cache 访问时间是<strong>无法控制</strong>的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来<strong>不可预测</strong>的延迟. 如果有经常访问的数据 比如 <code>sensor_data</code>, TCM 允许程序员显式地将其放在 TCM 中 (假设 <code>.dtcm</code> 在 linker script 里面定义过) (这样访问时间是<strong>可预测</strong>的): <code>c       int sensor_data[1024] __attribute__((section(".dtcm")));</code></p></li>
+<li><p>由于 Cache 访问时间是<strong>无法控制</strong>的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来<strong>不可预测</strong>的延迟. 如果有经常访问的数据 比如 <code>sensor_data</code>, TCM 允许程序员显式地将其放在 TCM 中 (假设 <code>.dtcm</code> 在 linker script 里面定义过) (这样访问时间是<strong>可预测</strong>的):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sensor_data<span class="op">[</span><span class="dv">1024</span><span class="op">]</span> __attribute__<span class="op">((</span>section<span class="op">(</span><span class="st">".dtcm"</span><span class="op">)));</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>TCM 会被分配固定独立的地址空间 (通过 linker file <code>.ld</code> 定义, 后续通过 memory map 访问!), 而且会有模块检测访存的地址是否在 TCM 范围内, 如果是则会通过专用的 TCM 总线访问!</p></li>
 <li><p><strong>DTCM, ITCM (Data TCM)</strong>: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 <span class="citation" data-cites="googlecoral_2025_github"><a href="#ref-googlecoral_2025_github" role="doc-biblioref">[30]</a></span>:</p>
 <div class="code-with-filename">
@@ -1678,7 +1679,7 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 </div>
 </div></div><ul>
 <li><p><strong>Intrinsic 内联</strong>: 将汇编代码嵌入到 <code>C/C++</code> 代码中. 比如在想在 <code>C++</code> 中嵌入 RVV 汇编代码, 可以先 <code>#include &lt;riscv_vector.h&gt;</code> 头文件, 然后就可以这样用:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="operating-system-terms" class="level2">

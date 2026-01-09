@@ -545,6 +545,7 @@ window.Quarto = {
   <li><a href="#sec-vector-csrs" id="toc-sec-vector-csrs" class="nav-link" data-scroll-target="#sec-vector-csrs">Vector CSRs</a></li>
   <li><a href="#vector-operations" id="toc-vector-operations" class="nav-link" data-scroll-target="#vector-operations">Vector Operations</a></li>
   </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
     </div>
@@ -1115,10 +1116,10 @@ Figure&nbsp;3: 通过 <code>vsew</code> 改变 <code>sew</code> <span class="cit
 </div></div><ul>
 <li><code>vtype</code> (Vector Type): 用几个向量寄存器和一个元素占多少 bit:
 <ul>
-<li><code>lmul</code> (Length multiplier): 一条向量指令真正操作的 RVV GPR 的数量 (而不是几个 element!)
+<li><code>lmul</code> (Length MULtiplier): 一条向量指令真正操作的 RVV GPR 的数量 (而不是几个 element!)
 <ul>
 <li><code>lmul=2</code> 记为 <code>m2</code>.</li>
-<li><code>lmul</code> <span class="math inline">\(&gt;1\)</span> 表示使用了一个 <strong>Vector Group</strong>.</li>
+<li><code>lmul</code> <span class="math inline">\(&gt;1\)</span> 表示使用了一个 <strong>Register Group</strong>. 比如设 <code>lmul=4</code> 时, <code>v4</code> 这个名字在很多时候实际代表了 <code>v4, v5, v6, v7</code> 这四个寄存器的联合体.</li>
 </ul></li>
 <li><code>sew</code> (Selected Element Width): 实际使用中的 Element 的位宽 (<code>sew</code> <span class="math inline">\(\le\)</span> <code>ELEN</code>).
 <ul>
@@ -1181,13 +1182,73 @@ Figure&nbsp;5: RVV 配置指令的字段说明 <span class="citation" data-cites
 </section>
 <section id="vector-operations" class="level3">
 <h3 class="anchored" data-anchor-id="vector-operations">Vector Operations</h3>
+<section id="signzero-extension" class="level4">
+<h4 class="anchored" data-anchor-id="signzero-extension">Sign/Zero Extension</h4>
 <ul>
-<li><p><strong>Sign/Zero Extension</strong>: TODO <code>assembly     vzext.vf2</code></p></li>
-<li><p><strong>Move Instructions</strong>: TODO</p>
+<li><p>先引入两个概念: <code>emul</code> (Effective MULtiplier), <code>eew</code> (Effective Element Width). 前面的 <code>lmul</code> 和 <code>sew</code> 其实是当一条指令的所有操作数都是等宽时的配置, 但是 extension 这样的指令 source 和 dest 数据的位宽肯定会不一样, 这种情况一般 <strong>dest 的位宽</strong>会认为是 <code>sew</code>, 而 source 的位宽会认为是 <code>eew</code>.</p>
+<pre class="assembly"><code># Sign-extend elements in v1 (of length eew (=sew/4)) to elements v2 (of length sew)
+vsext.vf4 v2, v1</code></pre>
 <ul>
-<li><strong>Scalar Move</strong>: TODO</li>
+<li>也有 <code>.vf2</code>, <code>.vf8</code> (Vector scaling Factor).</li>
+<li>如果不是符号扩展, 零扩展的话就是 <code>vzext.vf4</code> 等等.</li>
 </ul></li>
-<li><p><strong>Load/Store</strong>: 内存和向量寄存器之间的数据转移.</p>
+</ul>
+</section>
+<section id="arithmetic-instructions" class="level4">
+<h4 class="anchored" data-anchor-id="arithmetic-instructions">Arithmetic Instructions</h4>
+<ul>
+<li><p><strong>Vector Integer Add</strong>-like</p>
+<pre class="assembly"><code>vadd.vv v3, v1, v2      # v3[i] = v1[i] + v2[i] (vector-vector)
+vadd.vx v3, v1, t0      # v3[i] = v1[i] + t0    (vector-scalar)
+vadd.vi v3, v1, imm     # v3[i] = v1[i] + imm   (vector-immediate)</code></pre>
+<ul>
+<li>类似的还有 (但不是每个都有 <code>vv</code>, <code>vx</code>, <code>vi</code> 三种形式):
+<ul>
+<li><p>减法: <code>vsub</code>, <code>vrsub</code> (reverse subtract, 后面的减前面的).</p></li>
+<li><p>取最大/最小: <code>vmin</code>, <code>vminu</code>, <code>vmax</code>, <code>vmaxu</code>.</p></li>
+<li><p>乘法: <code>vmul</code> (signed multiply, return low bits of product), <code>vmulh</code> (return high bits), <code>vmulhu</code> (unsigned, high), <code>vmulhsu</code> (signed * unsigned, high).</p></li>
+<li><p>乘加 (起名也够抽象的 lol):</p>
+<pre class="assembly"><code>vmacc.vv  v3, v1, v2     # v3[i] += v1[i] * v2[i]
+vnmsac.vv v3, v1, v2     # v3[i] -= v1[i] * v2[i]
+vmadd.vv  v3, v1, v2     # v3[i] =  v3[i] * v1[i] + v2[i]
+vnmsub.vv v3, v1, v2     # v3[i] = -v3[i] * v1[i] + v2[i]</code></pre></li>
+<li><p>除法和取余: <code>vdiv</code>, <code>vdivu</code>, <code>vrem</code> (signed remainder), <code>vremu</code> (unsigned remainder).</p></li>
+</ul></li>
+</ul></li>
+<li><p><strong>Vector Widening Integer Add</strong>-like</p>
+<pre class="assembly"><code>vwaddu.vv v3, v1, v2    # 2*sew = sew + sew (unsigned)
+vwadd.vv  v3, v1, v2    # 2*sew = sew + sew (signed)
+vwaddu.wv v3, v1, v2    # 2*sew = 2*sew + sew (unsigned)
+vwadd.wv  v3, v1, v2    # 2*sew = 2*sew + sew (signed)</code></pre>
+<ul>
+<li>类似的还有 (但不是每个都有 <code>vv</code>, <code>wv</code> 两种形式):
+<ul>
+<li><p>减法: <code>vwsubu</code>, <code>vwsub</code>.</p></li>
+<li><p>乘法: <code>vwmul</code>, <code>vwmulu</code>, <code>vwmulsu</code>.</p></li>
+<li><p>乘加:</p>
+<pre class="assembly"><code>vwmaccu.vv  v3, v1, v2     # 2*sew += sew * sew (unsigned)
+vwmacc.vv   v3, v1, v2     # 2*sew += sew * sew (signed)
+vwmaccsu.vv v3, v1, v2     # 2*sew += sew * sew (signed * unsigned)
+vwmaccus.vx v3, t0, v2     # 2*sew += sew * sew (unsigned * signed)</code></pre></li>
+</ul></li>
+</ul></li>
+</ul>
+</section>
+<section id="move-instructions" class="level4">
+<h4 class="anchored" data-anchor-id="move-instructions">Move Instructions</h4>
+<ul>
+<li><p><strong>Scalar Move</strong>: TODO</p></li>
+<li><p><strong>Register Group Move</strong>: 搬运一个 Register Group.</p>
+<pre class="assembly"><code>vmv1r.v v1, v2      # v1 &lt;- v2
+vmv2r.v v10, v12    # v10 &lt;- v12, v11 &lt;- v13
+vmv4r.v v4, v8      # v4 &lt;- v8, v5 &lt;- v9, v6 &lt;- v10, v7 &lt;- v11
+vmv8r.v v0, v8      # (Omitted)</code></pre></li>
+</ul>
+</section>
+<section id="loadstore" class="level4">
+<h4 class="anchored" data-anchor-id="loadstore">Load/Store</h4>
+<ul>
+<li><p>内存和向量寄存器之间的数据转移.</p>
 <pre class="assembly"><code># Configure first
 vsetvli t0, t1, e8, m4, ta, mu
 li x10, 0x1000
@@ -1195,6 +1256,7 @@ li x10, 0x1000
 vle8.v v1, (x10)    # 从内存基地址 0x1000 开始, 依次加载 4 个 8-bit 元素到 v1
 # TODO 太多了, 以后用到再补充</code></pre></li>
 </ul>
+</section>
 <section id="masking" class="level4">
 <h4 class="anchored" data-anchor-id="masking">Masking</h4>
 <ul>
@@ -1213,6 +1275,11 @@ Figure&nbsp;6: 在 <code>ma</code> 条件下 <code>vadd.vv v6, v4, v5, v0.t</cod
 </div></li>
 </ul></li>
 </ul>
+</section>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
 
 
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
@@ -1226,8 +1293,6 @@ Figure&nbsp;6: 在 <code>ma</code> 条件下 <code>vadd.vv v6, v4, v5, v0.t</cod
 <div class="csl-left-margin">[3] </div><div class="csl-right-inline">R. Ferrer Ibáñez, <span>“Introduction to the RISC-v vector extension.”</span> 2022. Available: <a href="https://eupilot.eu/wp-content/uploads/2022/11/RISC-V-VectorExtension-1-1.pdf">https://eupilot.eu/wp-content/uploads/2022/11/RISC-V-VectorExtension-1-1.pdf</a>. [Accessed: Jan. 01, 2026]</div>
 </div>
 </div>
-</section>
-</section>
 </section>
 
 </main> <!-- /main -->

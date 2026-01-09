@@ -377,9 +377,9 @@ sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)
 :::
 
 - `vtype` (Vector Type): 用几个向量寄存器和一个元素占多少 bit:
-    - `lmul` (Length multiplier): 一条向量指令真正操作的 RVV GPR 的数量 (而不是几个 element!)
+    - `lmul` (Length MULtiplier): 一条向量指令真正操作的 RVV GPR 的数量 (而不是几个 element!)
         - `lmul=2` 记为 `m2`.
-        - `lmul` $>1$ 表示使用了一个 **Vector Group**.
+        - `lmul` $>1$ 表示使用了一个 **Register Group**. 比如设 `lmul=4` 时, `v4` 这个名字在很多时候实际代表了 `v4, v5, v6, v7` 这四个寄存器的联合体.
     - `sew` (Selected Element Width): 实际使用中的 Element 的位宽 (`sew` $\le$ `ELEN`).
         - `sew=16` 记为 `e16`.
         - 可通过 `vtype` 寄存器的 `vsew` 字段改变 `sew` (见 @fig-vsew-sew).
@@ -415,15 +415,79 @@ sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)
 
 ### Vector Operations
 
-- **Sign/Zero Extension**: TODO
+#### Sign/Zero Extension
+
+- 先引入两个概念: `emul` (Effective MULtiplier), `eew` (Effective Element Width). 前面的 `lmul` 和 `sew` 其实是当一条指令的所有操作数都是等宽时的配置, 但是 extension 这样的指令 source 和 dest 数据的位宽肯定会不一样, 这种情况一般 **dest 的位宽**会认为是 `sew`, 而 source 的位宽会认为是 `eew`.
+    
     ```assembly
-    vzext.vf2 
+    # Sign-extend elements in v1 (of length eew (=sew/4)) to elements v2 (of length sew)
+    vsext.vf4 v2, v1
     ```
 
-- **Move Instructions**: TODO
-    - **Scalar Move**: TODO
+    - 也有 `.vf2`, `.vf8` (Vector scaling Factor).
+    - 如果不是符号扩展, 零扩展的话就是 `vzext.vf4` 等等.
 
-- **Load/Store**: 内存和向量寄存器之间的数据转移.
+#### Arithmetic Instructions
+
+- **Vector Integer Add**-like
+
+    ```assembly
+    vadd.vv v3, v1, v2      # v3[i] = v1[i] + v2[i] (vector-vector)
+    vadd.vx v3, v1, t0      # v3[i] = v1[i] + t0    (vector-scalar)
+    vadd.vi v3, v1, imm     # v3[i] = v1[i] + imm   (vector-immediate)
+    ```
+    - 类似的还有 (但不是每个都有 `vv`, `vx`, `vi` 三种形式):
+        - 减法: `vsub`, `vrsub` (reverse subtract, 后面的减前面的).
+        - 取最大/最小: `vmin`, `vminu`, `vmax`, `vmaxu`.
+        - 乘法: `vmul` (signed multiply, return low bits of product), `vmulh` (return high bits), `vmulhu` (unsigned, high), `vmulhsu` (signed * unsigned, high).
+        - 乘加 (起名也够抽象的 lol):
+        
+            ```assembly
+            vmacc.vv  v3, v1, v2     # v3[i] += v1[i] * v2[i]
+            vnmsac.vv v3, v1, v2     # v3[i] -= v1[i] * v2[i]
+            vmadd.vv  v3, v1, v2     # v3[i] =  v3[i] * v1[i] + v2[i]
+            vnmsub.vv v3, v1, v2     # v3[i] = -v3[i] * v1[i] + v2[i]
+            ```
+        - 除法和取余: `vdiv`, `vdivu`, `vrem` (signed remainder), `vremu` (unsigned remainder).
+
+- **Vector Widening Integer Add**-like
+
+    ```assembly
+    vwaddu.vv v3, v1, v2    # 2*sew = sew + sew (unsigned)
+    vwadd.vv  v3, v1, v2    # 2*sew = sew + sew (signed)
+    vwaddu.wv v3, v1, v2    # 2*sew = 2*sew + sew (unsigned)
+    vwadd.wv  v3, v1, v2    # 2*sew = 2*sew + sew (signed)
+    ```
+
+    - 类似的还有 (但不是每个都有 `vv`, `wv` 两种形式):
+        - 减法: `vwsubu`, `vwsub`.
+        - 乘法: `vwmul`, `vwmulu`, `vwmulsu`.
+        - 乘加:
+
+            ```assembly
+            vwmaccu.vv  v3, v1, v2     # 2*sew += sew * sew (unsigned)
+            vwmacc.vv   v3, v1, v2     # 2*sew += sew * sew (signed)
+            vwmaccsu.vv v3, v1, v2     # 2*sew += sew * sew (signed * unsigned)
+            vwmaccus.vx v3, t0, v2     # 2*sew += sew * sew (unsigned * signed)
+            ```
+
+
+#### Move Instructions
+
+- **Scalar Move**: TODO
+
+- **Register Group Move**: 搬运一个 Register Group.
+
+    ```assembly
+    vmv1r.v v1, v2      # v1 <- v2
+    vmv2r.v v10, v12    # v10 <- v12, v11 <- v13
+    vmv4r.v v4, v8      # v4 <- v8, v5 <- v9, v6 <- v10, v7 <- v11
+    vmv8r.v v0, v8      # (Omitted)
+    ```
+
+#### Load/Store
+
+- 内存和向量寄存器之间的数据转移.
 
     ```assembly
     # Configure first
@@ -440,3 +504,5 @@ sw t0, 4(a0)    ;mem[a0 + 4] = t0 (store word)
     - `v0.t`: "`.t`" 表示该指令在 `v0.mask[i]` 为 `1` (true) 时才对对应的元素进行操作. 以 `vadd.vv` 指令为例:
 
         ![在 `ma` 条件下 `vadd.vv v6, v4, v5, v0.t` 的执行 @_2025_riscv.](vaddvv-mask.png){#fig-vaddvv-mask width=80%}
+
+## References
