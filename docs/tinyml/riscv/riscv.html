@@ -496,8 +496,8 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../hls-design/HLS-design.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">HLS Design FPGA 并行编程</span></span></a>
+  <a href="../coral-npu/coral-npu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
   </div>
 </li>
       </ul>
@@ -1254,7 +1254,13 @@ vsetvli t0, t1, e8, m4, ta, mu
 li x10, 0x1000
 # Unit-stride
 vle8.v v1, (x10)    # 从内存基地址 0x1000 开始, 依次加载 4 个 8-bit 元素到 v1
-# TODO 太多了, 以后用到再补充</code></pre></li>
+vse8.v v1, (x10)    # 将 v1 中的 4 个 8-bit 元素依次存储到内存基地址 0x1000 开始的位置
+# Strided
+li x11, 16             # 设置步长为 16 bytes
+vle8.v v2, (x10), x11  # 从内存基地址 0x1000 开始, 每隔 16 bytes 加载一个 8-bit 元素到 v2, 共加载 4 个 8-bit 元素</code></pre>
+<ul>
+<li>注意 <code>e8</code> 情况下只能使用 <code>vle8</code> 这种, 不能用 <code>vle16</code> (是这样吗? TODO).</li>
+</ul></li>
 </ul>
 </section>
 <section id="masking" class="level4">

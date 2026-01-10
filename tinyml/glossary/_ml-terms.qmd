@@ -28,15 +28,16 @@
 - **FM (Foundation Model)**: 基础模型. 一般为了解决一个问题往往会训练一个专门的模型 (task-specific model). 但 FM 是一种通用的模型, 在大规模、广泛、多样的数据 (多模态的, 文字/图像/音频) 上进行预训练 (训练成本极高 @tcheyan_2025_decentralized); 然后可以通过微调 (fine-tuning) 来适应各种下游任务 (如文本生成、图像识别、语音识别等). 比如 Meta 的 Llama 模型.
     - **Edge-native foundation models**: 边缘化的 FM, 涉及到对大模型的 knowledge distillation, pruning, quantization 等技术, 以适应边缘设备的计算和存储限制 @somvanshi2025tinymachinelearningtiny.
 
-- **Pretraining 预训练**: 用维基百科、书籍等未标注的大规模数据集对模型进行训练 (自监督的), 方法包括:
+- **Pretraining 预训练**: 用维基百科、书籍等未标注的超大规模数据集对模型进行训练 (自监督的), 这将会占用大量计算资源和时间 (比如几个月). 方法包括:
     - **Masked Language Modeling (MLM)**: 随机挖空, 然后预测挖空的词语.
     - **Next Sentence Prediction (NSP)**: 以句子为单位的 MLM.
 
-- **Post-training/Fine-tuning 后训练/微调**: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论->情感标签).
+- **Post-training/Fine-tuning 后训练/微调**: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论->情感标签, 提问->回答 (而不是续写提问)).
     - **Full fine-tuning 全参数微调**: 会更新模型的**所有**参数. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).
     - **Parameter-efficient fine-tuning (PEFT) 参数高效微调**: 主流, 冻结 $99\%$ 以上的模型参数, 只更新少量参数 (E.g., LoRA).
     - **Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)**: 用**指令-回答对**微调 @tcheyan_2025_decentralized, 如 "翻译成中文: How are you?" -> "你好吗?", 让模型会回答而只是文本补全.
     - **Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习**: SFT 微调后的模型不是最有帮助的/有害的/不符合价值观的, RLHF 不是喂给模型更多数据, 而是让模型给出多个回答, 然后让**人类**打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward @tcheyan_2025_decentralized.
+    - **DPO (Direct Preference Optimization) 直接偏好优化**
 
 - **VLA (Vision Language Action)**: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.
 
@@ -67,12 +68,14 @@
         - **Batch 在前**: **N**<u>HWC</u>.
 
 
-- **Data Layout Formats 张量在内存中的布局**
+- **Data Layout Formats 张量在内存中的布局**[^data-layout]:
     - **NCHW**: `pytorch`
     - **NHWC**: `numpy`
     - TODO
 
     ![三种 Data Layout Formats @a2023_understanding.](data-layout.png){#fig-data-layout width=80%}
+
+[^data-layout]: *记忆方法*: 反过来看, 如 NHWC, 先沿着 C 方向将数据拉直, 结束后跳到下一个 W, 然后换 H, 最后换 N.
 
 - **Feature Map 特征图**: CNN 中间层的一个 channel, 代表机器学习到的一种特征.
     - 注意不是 kernel! 
@@ -157,6 +160,7 @@
 - **GEMM (GEneral Matrix-Matrix Multiplication)**: 通用矩阵乘法.
 
 - **CIM (Compute In Memory)**: 存内计算.
+    - 相关概念: **PIM/PNM (Processing In/Near Memory)**.
 
 - **Tiling 分块/瓦片**: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.
 
