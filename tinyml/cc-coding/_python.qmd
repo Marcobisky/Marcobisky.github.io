@@ -19,6 +19,78 @@ Task 1: Completed
 All tasks completed in 10.0 seconds
 ```
 
+#### `assert`
+
+- `assert` 用来 debug 很有用, 比如你要检查程序中间 `a` 是否等于 `1`:
+
+    ```python
+    a = 1
+    assert a == 1 # 如果 a 不等于 1, 程序会报错退出
+    print("Test passed!")
+    ```
+
+    - `assert` 后面接的就是一个布尔值, 所以:
+
+        ```python
+        assert True  # No error
+        assert False # Raises an AssertionError
+        ```
+    - 也可以加上错误信息:
+
+        ```python
+        assert a == 1, "a is not equal to 1!"
+        ```
+
+### Python Class 类
+
+#### 类属性和实例属性
+
+- **Class attribute 类属性**: 只不过是定义在类里面的常量而已, **所有实例共享**, 比如可用于 track 某个 class 的实例个数.
+    - 在类的内部和外部都可以用 `Car.wheels` 来访问和修改.
+
+- **Instance attribute 实例属性**: 放在 `__init__` 里面的属性, **只有创建了实例后才能访问, 不同的实例可以有不同的值 (独有)**!
+    - 在类的内部用 `self.color`、外部用 `car1.color` 来访问和修改.
+
+```python
+{{< include src/python/class-instance-attr.py >}}
+```
+
+#### 特殊方法 `@classmethod`、`@staticmethod`
+
+- `@classmethod` 仅仅是允许我们**不创建实例**就能调用该方法. 用途:
+    - 如果非要用 `car1.change_wheels(6)` 而不是 `Car.wheels = 6` 来修改类属性, 这个时候就可以用 `@classmethod`.
+        - 用 `Car.change_wheels(6)` 也行.    
+    - 由于该方法可以在创建实例前调用, 所以从某种角度看可以当作**替代构造函数**的方法 (比如下面从字典和 JSON 创建实例).
+
+- `@staticmethod` 仅仅是定义一个与类完全无关的函数, 函数里面不能访问任何类属性和实例属性, 写在类里面仅仅是因为**逻辑上与该类相关**, 一般就是 print 一些信息.
+    - 用实例名也可以调用该方法.
+
+```python
+{{< include src/python/class-static-method-demo.py >}}
+```
+
+<!-- ----------------------------------------- -->
+::: {.callout-tip icon=tip collapse=false}
+## 他俩其实就是 decorator!
+它们其实本质上是一个函数, 可以思考下可能是怎么实现的.
+:::
+<!-- ----------------------------------------- -->
+
+
+### Python 常用数据结构
+
+#### Dictionary 字典
+
+- 用 `get()` 来访问 key, 返回对应的 value
+    - 注意 key 不存在时不会报错, 而是返回 `None`!
+
+    ```python
+    a = {'x': 1, 'y': 2}
+    print(a.get('x'))  # 输出 1
+    print(a.get("x"))  # 也可以
+    print(a.get('z'))  # 输出 None
+    ```
+
 ### 可变参数
 
 - `*`: 表示任意数量的**单个**参数, 会自动打包成一个 tuple, 比如 `('a', 'b', 'c')`.

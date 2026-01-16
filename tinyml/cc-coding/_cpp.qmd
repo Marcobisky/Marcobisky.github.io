@@ -22,6 +22,34 @@
 
     (当然这个函数由于过于简单, 如果不用 `inline`, 编译器也会自动优化掉函数调用开销).
 
+#### `extern` 关键字
+
+- 告诉编译器这变量存在, 先不要急着报错, 链接的时候会找到它.
+
+    ```cpp
+    // var.cpp
+    int var = 2;
+
+    // main.cpp
+    #include <iostream>
+    extern int var;  // Tell compiler var exists somewhere
+    int main() {
+        std::cout << "var = " << var << std::endl;
+        return 0;
+    }
+    ```
+
+    ```bash
+    g++ main.cpp var.cpp -o main
+    ./main # Outputs: var = 2
+    ```
+
+- `extern "C"`: 当用 Cpp 写的函数名**要被 C 代码 (或汇编) 调用时**需要加上 `extern "C"` 来告诉编译器不要对函数名进行 Name mangling (名字修饰).
+    - **Name mangling**: 在 Cpp 中编译出来的 `.o` 文件中的函数名并不是源代码中写的名字 (但是 C 语言中是一样的)! 比如下面的例子:
+
+{{< include src/cpp/extern-c.md >}}
+
+
 #### 命令行参数
 
 - `argc`: Argument Count, 参数个数
@@ -108,6 +136,7 @@ Smart Pointers = `new` without `delete`. 即不需要担心内存泄漏问题.
 
 #### Arena 分配器
 
+TODO
 
 ### Class 类
 

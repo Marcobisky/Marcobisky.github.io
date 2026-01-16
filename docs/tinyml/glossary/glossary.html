@@ -531,8 +531,8 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../hls-design/HLS-design.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">HLS Design FPGA 并行编程</span></span></a>
+  <a href="../coral-npu/coral-npu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
   </div>
 </li>
       </ul>
@@ -1149,17 +1149,18 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <ul>
 <li><strong>Edge-native foundation models</strong>: 边缘化的 FM, 涉及到对大模型的 knowledge distillation, pruning, quantization 等技术, 以适应边缘设备的计算和存储限制 <span class="citation" data-cites="somvanshi2025tinymachinelearningtiny"><a href="#ref-somvanshi2025tinymachinelearningtiny" role="doc-biblioref">[14]</a></span>.</li>
 </ul></li>
-<li><p><strong>Pretraining 预训练</strong>: 用维基百科、书籍等未标注的大规模数据集对模型进行训练 (自监督的), 方法包括:</p>
+<li><p><strong>Pretraining 预训练</strong>: 用维基百科、书籍等未标注的超大规模数据集对模型进行训练 (自监督的), 这将会占用大量计算资源和时间 (比如几个月). 方法包括:</p>
 <ul>
 <li><strong>Masked Language Modeling (MLM)</strong>: 随机挖空, 然后预测挖空的词语.</li>
 <li><strong>Next Sentence Prediction (NSP)</strong>: 以句子为单位的 MLM.</li>
 </ul></li>
-<li><p><strong>Post-training/Fine-tuning 后训练/微调</strong>: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论-&gt;情感标签).</p>
+<li><p><strong>Post-training/Fine-tuning 后训练/微调</strong>: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论-&gt;情感标签, 提问-&gt;回答 (而不是续写提问)).</p>
 <ul>
 <li><strong>Full fine-tuning 全参数微调</strong>: 会更新模型的<strong>所有</strong>参数. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).</li>
 <li><strong>Parameter-efficient fine-tuning (PEFT) 参数高效微调</strong>: 主流, 冻结 <span class="math inline">\(99\%\)</span> 以上的模型参数, 只更新少量参数 (E.g., LoRA).</li>
 <li><strong>Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)</strong>: 用<strong>指令-回答对</strong>微调 <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[15]</a></span>, 如 “翻译成中文: How are you?” -&gt; “你好吗?”, 让模型会回答而只是文本补全.</li>
 <li><strong>Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习</strong>: SFT 微调后的模型不是最有帮助的/有害的/不符合价值观的, RLHF 不是喂给模型更多数据, 而是让模型给出多个回答, 然后让<strong>人类</strong>打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[15]</a></span>.</li>
+<li><strong>DPO (Direct Preference Optimization) 直接偏好优化</strong></li>
 </ul></li>
 <li><p><strong>VLA (Vision Language Action)</strong>: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.</p></li>
 <li><p><strong>VLM (Vision Language Model)</strong>: 视觉语言模型, 可处理图片和自然语言两种模态进行理解和生成任务的模型.</p></li>
@@ -1167,7 +1168,7 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <li><p><strong>AIGC (AI-Generated Content)</strong>: 生成式 AI.</p></li>
 </ul>
 </section>
-<section id="sec-cv-terms" class="level3">
+<section id="sec-cv-terms" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="sec-cv-terms">CV 计算机视觉相关</h3>
 <ul>
 <li><strong>Tensor</strong>: 多维数组.
@@ -1188,7 +1189,7 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <li><strong>Batch 在前</strong>: <strong>N</strong><u>HWC</u>.</li>
 </ul></li>
 </ul></li>
-<li><strong>Data Layout Formats 张量在内存中的布局</strong>
+<li><strong>Data Layout Formats 张量在内存中的布局</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>:
 <ul>
 <li><strong>NCHW</strong>: <code>pytorch</code></li>
 <li><strong>NHWC</strong>: <code>numpy</code></li>
@@ -1204,6 +1205,8 @@ Figure&nbsp;14: 三种 Data Layout Formats <span class="citation" data-cites="a2
 </figcaption>
 </figure>
 </div></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;<em>记忆方法</em>: 反过来看, 如 NHWC, 先沿着 C 方向将数据拉直, 结束后跳到下一个 W, 然后换 H, 最后换 N.</p></div></div><ul>
 <li><strong>Feature Map 特征图</strong>: CNN 中间层的一个 channel, 代表机器学习到的一种特征.
 <ul>
 <li>注意不是 kernel!</li>
@@ -1288,8 +1291,11 @@ Figure&nbsp;17: 分布式训练: The Third Epoch of AI <span class="citation" da
 </ul></li>
 <li><p><strong>数据类型</strong>:</p>
 <ul>
-<li><strong>FP32</strong>: 32 位浮点数, 1 位符号位, 8 位指数位, 23 位尾数位, 精度高, 计算速度慢.</li>
-<li><strong>BF16</strong>: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位, 精度低, 计算速度快.</li>
+<li><strong>FP32</strong>: 32 位浮点数, 1 位符号位, 8 位指数位, 23 位尾数位 (<strong>E8M23</strong>), 精度高, 计算速度慢.
+<ul>
+<li><strong>FP16</strong>: E5M10.</li>
+</ul></li>
+<li><strong>BF16</strong>: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位 (<strong>E8M7</strong>), 精度低, 计算速度快.</li>
 </ul></li>
 <li><p><strong>FLOP (Floating-Point OPeration)</strong>: 一次浮点运算包括一次加/减/乘/除.</p>
 <ul>
@@ -1351,14 +1357,17 @@ Figure&nbsp;18: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 </ul></li>
 </ul></li>
 <li><p><strong>GEMM (GEneral Matrix-Matrix Multiplication)</strong>: 通用矩阵乘法.</p></li>
-<li><p><strong>CIM (Compute In Memory)</strong>: 存内计算.</p></li>
+<li><p><strong>CIM (Compute In Memory)</strong>: 存内计算.</p>
+<ul>
+<li>相关概念: <strong>PIM/PNM (Processing In/Near Memory)</strong>.</li>
+</ul></li>
 <li><p><strong>Tiling 分块/瓦片</strong>: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.</p></li>
 </ul>
 </section>
 <section id="optimizer-in-ml" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="optimizer-in-ml">Optimizer in ML</h3>
 <ul>
-<li><strong>Gradient Descent (GD) 梯度下降<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></strong>: 所有优化方法都从这个基础方法改进而来.
+<li><strong>Gradient Descent (GD) 梯度下降<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></strong>: 所有优化方法都从这个基础方法改进而来.
 <ul>
 <li><strong>Batch Gradient Descent (BGD) 全批量梯度下降</strong>: 用整个训练集计算梯度并更新参数.</li>
 <li><strong>Stochastic Gradient Descent (SGD) 随机梯度下降</strong>: 每次用一个样本计算梯度并更新参数.</li>
@@ -1372,10 +1381,10 @@ Figure&nbsp;18: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 </ul></li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;<em>Abuse of Terms:</em> 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;<em>Abuse of Terms:</em> 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!</p></div></div><ul>
 <li><strong>Optimizer 优化器</strong>: 更新模型参数的算法.
 <ul>
-<li><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可<strong>加速</strong>和<strong>平滑</strong>收敛、避免<strong>陷入局部最优</strong><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. 也有一些基于次改良的版本:
+<li><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可<strong>加速</strong>和<strong>平滑</strong>收敛、避免<strong>陷入局部最优</strong><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. 也有一些基于次改良的版本:
 <ul>
 <li><p><strong>Nesterov Accelerated Gradient (NAG)</strong>: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 <code>torch</code> 为例:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>optimizer_nag <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>, momentum<span class="op">=</span><span class="fl">0.9</span>, nesterov<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
@@ -1393,7 +1402,7 @@ Figure&nbsp;19: Adagrad 给梯度平缓方向对应的参数 (<span class="math 
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;“SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast.” <span class="citation" data-cites="maciejbalawejder_2022_optimizers"><a href="#ref-maciejbalawejder_2022_optimizers" role="doc-biblioref">[23]</a></span></p></div></div></section>
+<div class="no-row-height column-margin column-container"><div id="fn5"><p><sup>5</sup>&nbsp;“SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast.” <span class="citation" data-cites="maciejbalawejder_2022_optimizers"><a href="#ref-maciejbalawejder_2022_optimizers" role="doc-biblioref">[23]</a></span></p></div></div></section>
 <section id="ml-frameworks" class="level3">
 <h3 class="anchored" data-anchor-id="ml-frameworks">ML Frameworks</h3>
 <ul>
@@ -1407,6 +1416,7 @@ Figure&nbsp;19: Adagrad 给梯度平缓方向对应的参数 (<span class="math 
 <li>RISCV 上有 TfLM (TensorFlow Lite for Microcontrollers),</li>
 <li><strong>ONNX (Open Neural Network Exchange)</strong>: 一种统一的描述神经网络结构的格式, 以上三种框架都支持导出为 ONNX 格式.</li>
 </ul></li>
+<li><p><strong>vLLM</strong>: 也是一个 Python 库, 专门用来加速大模型的 inference.</p></li>
 <li><p><strong>TVM, XLA (Accelerated Linear Algebra)</strong>: 机器学习编译器 <a href="#fig-mlsys" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-mlsys</span></a>, 在以上三个框架内都有 python 的接口函数.</p>
 <ul>
 <li><strong>OpenXLA</strong>: 中间表示 <strong>StableHLO (Stable High-Level Optimizer)</strong>, <strong>XLA</strong>, <strong>PJRT</strong> 的实现工程.</li>
@@ -1518,7 +1528,7 @@ Figure&nbsp;23: 不同的 Inductive Bias 带来完全不同的拟合效果 <span
 <li><p><strong>Benchmark</strong>: 基准测试. 用于测试系统或工具的功能/性能.</p></li>
 <li><p><strong>QEMU (Quick Emulator)</strong>: 开源的模拟器, 可模拟多种 CPU 架构 (如 ARM, x86, RISCV 等).</p></li>
 <li><p><strong>Renode</strong>: 开源的模拟器, 主要面向嵌入式系统.</p></li>
-<li><p><strong>Endianness</strong><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>:</p>
+<li><p><strong>Endianness</strong><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="endianness.png" class="img-fluid figure-img" style="width:80.0%"></p>
@@ -1526,7 +1536,7 @@ Figure&nbsp;23: 不同的 Inductive Bias 带来完全不同的拟合效果 <span
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn5"><p><sup>5</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn6"><p><sup>6</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
 <li><p><strong>MMU (Memory Management Unit)</strong>: 内存管理单元, 负责虚拟内存和物理内存之间的映射. 结合 UEFI+PCIe, 使得虽然地址总线宽度固定, 但 CPU 能访问的 ROM 和 RAM 却可以自由扩展!</p>
 <ul>
 <li><strong>TLB (Translation Lookaside Buffer)</strong>: 很像 CPU 的 Cache, 用于加速虚拟地址到物理地址的转换. 也有 TLB miss, TLB hit, spacial locality, temporal locality, etc. 这些概念.</li>
@@ -1587,10 +1597,10 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 <ul>
 <li>因与 “cash” 同音, 常记为 “$”.</li>
 <li>注意 Cache 没有分配独立的地址空间, 在 CPU 和 RAM 间是「透明」的!</li>
-<li><strong>L1D$, L1I$</strong>: 一级数据缓存和一级指令缓存<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</li>
+<li><strong>L1D$, L1I$</strong>: 一级数据缓存和一级指令缓存<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>.</li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn6"><p><sup>6</sup>&nbsp;区分 D$/DTCM, I$/ITCM: 有没有独立地址空间 (是否「透明」)、访问是否可预测. 但有的地方会混用这两个概念!</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn7"><p><sup>7</sup>&nbsp;区分 D$/DTCM, I$/ITCM: 有没有独立地址空间 (是否「透明」)、访问是否可预测. 但有的地方会混用这两个概念!</p></div></div><ul>
 <li>RAM (物理介质: DRAM):
 <ul>
 <li>CPU RAM, 具体的技术包括:
