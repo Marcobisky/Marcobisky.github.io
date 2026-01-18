@@ -45,6 +45,36 @@ title: "EDA Notes 笔记"
 ![Std cell height 可以是 row height 的整数倍 @phdthesisAlgorithms2019 (其实 Std cell width 也可以是 site width 的整数倍).](mutideck-std-cell.png){#fig-mutideck-std-cell}
 :::
 
+## Big Picture 从网表到版图!
+
+- **Synthesis 综合**
+
+- **Floorplanning 地板规划**
+
+- **Placement 布局**
+
+- **CTS (Clock Tree Synthesis) 时钟树综合**: 
+    - 为什么叫 “树” 呢? 因为时钟信号源 (clock source) 一般只有一个 (时钟引脚或锁相环的输出), 类比为树的根节点; 而时钟信号的接收端 (clock sink) 有很多, 类比为树的叶子节点 @ysyxvideos_2025_physical.
+    - 策略:
+        - **low latency**, **low skew** (时钟信号尽可能同时到达各个 sink), **low jitter** (低抖动, TODO), **high drive** (高驱动能力, 通过插入专用的时钟 buffer 来实现, 但是可能会影响 latency 和 skew).
+
+- **Routing 布线**
+
+- **Signoff 签核**: 确保 GDS 版图是可生产的, 比如检查 @ysyxvideos_2025_physical:
+    - **PPA**
+    - **STA** (检查能否满足用户指定的频率标准)
+    - **信号完整性** (比如分析相邻走线之间的 crosstalk)
+    - **PV (Physical Verification) 物理验证**
+        - **DRC (Design Rule Check) 设计规则检查**: 保证 GDS 版图满足晶圆厂的设计规则 (比如 pitch).
+        - **ERC (Electrical Rule Check) 电学规则检查**: 检查是否存在走线悬空、短路等.
+        - **LVS (Layout Versus Schematic) 版图与原理图比较**: 确认 GDS 版图与最初的网表一致.
+
+- **后续步骤**: 
+    - **晶圆厂**: 拿到 GDS 文件后, 按照文件内容制造出 **mask 掩膜**, 然后用 mask 批量生产出 wafer, 再把 wafer 切割成一颗颗 die. 
+    - **封装厂**: 晶圆厂将 die 交给封装厂进行封装测试, 得到芯片的成品.
+    - **开发板团队**: 设计 PCB 板, 并把芯片的成品焊接在上面, 得到最终的开发板.
+
+
 ## Placement 布局
 
 ### 三个阶段
@@ -57,8 +87,10 @@ title: "EDA Notes 笔记"
 ![Cell/macro 必须放在 row 上 @phdthesisAlgorithms2019.](rowdemo.png){#fig-rowdemo}
 :::
 
-- **Legalization 合法化**: 消除重叠和在**两个**方向对齐的过程 (见 @fig-legalization). Cell/macro 不能随便放置, 而要在两个方向对齐:
-    - **Row**: 见 @fig-layout, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供统一的供电. 自然的, 所有 cell/macro 要在水平方向成一条线, 使得 die 有“一层一层”的概念, **每一层称为一个 row**. Row height 等于 std cell height; Row 分隔线 (见 @fig-sitedemo 的蓝色条) VDD 和 GND 交替.
+- **Legalization 合法化**: 消除重叠和在**两个**方向对齐的过程 (见 @fig-legalization). Cell/macro 不能随便放置, 而要在 $x,y$ 方向对齐:
+    - **Row**: 见 @fig-layout, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供统一的供电. 自然的, 所有 cell/macro 要在水平方向成一条线, 使得 die 有“一层一层”的概念, **每一层称为一个 row**. 
+        - Row height 等于 std cell height.
+        - **Power strip 电源条线**: 相邻 Row 的分隔线 (见 @fig-sitedemo 的蓝色条), VDD 和 GND 交替.
     - **Site**: Row 引入了「层」, 而 site 给每一层也数字化引入了「门牌号」, 每个 cell/macro 必须对齐到 row 和 site 边界!
 
 
@@ -90,5 +122,11 @@ title: "EDA Notes 笔记"
         - 所有量都在 Log scale 下运算.
         - slack 还要先被 WNS normalized 到一个叫 Criticality 的量.
         - 作者还引入了两个超参数 $\alpha, \eta$ 来调节历史平滑的程度和「小球」的质量大小.
+
+### 其他优化措施
+
+- 对标准单元进行镜像对称: 例如某标准单元 A 左侧的端口 p 需要与 A 右侧的另一个标准单元 B 相连, 可以将 A 沿 y 轴进行镜像对称, 使得 p 位于 A 的右侧, 从而让 p 和 B 之间的距离更近. @ysyxvideos_2025_physical
+
+- 标准单元过分集中会使得后续布线工作困难, 尽量避免这种情况. @ysyxvideos_2025_physical
 
 ## References

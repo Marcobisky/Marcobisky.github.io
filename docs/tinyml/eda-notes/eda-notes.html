@@ -531,12 +531,14 @@ window.Quarto = {
   <ul>
   <li><a href="#sec-eda-takeaways" id="toc-sec-eda-takeaways" class="nav-link active" data-scroll-target="#sec-eda-takeaways">Takeaways</a></li>
   <li><a href="#sec-eda-terms" id="toc-sec-eda-terms" class="nav-link" data-scroll-target="#sec-eda-terms">Some Terms</a></li>
+  <li><a href="#big-picture-从网表到版图" id="toc-big-picture-从网表到版图" class="nav-link" data-scroll-target="#big-picture-从网表到版图">Big Picture 从网表到版图!</a></li>
   <li><a href="#placement-布局" id="toc-placement-布局" class="nav-link" data-scroll-target="#placement-布局">Placement 布局</a>
   <ul class="collapse">
   <li><a href="#三个阶段" id="toc-三个阶段" class="nav-link" data-scroll-target="#三个阶段">三个阶段</a></li>
   <li><a href="#wirelength-model" id="toc-wirelength-model" class="nav-link" data-scroll-target="#wirelength-model">Wirelength Model</a></li>
   <li><a href="#density-model" id="toc-density-model" class="nav-link" data-scroll-target="#density-model">Density Model</a></li>
   <li><a href="#timing-model" id="toc-timing-model" class="nav-link" data-scroll-target="#timing-model">Timing Model</a></li>
+  <li><a href="#其他优化措施" id="toc-其他优化措施" class="nav-link" data-scroll-target="#其他优化措施">其他优化措施</a></li>
   </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
@@ -645,6 +647,41 @@ Figure&nbsp;3: Std cell height 可以是 row height 的整数倍 <span class="ci
 </figure>
 </div>
 </div></div></section>
+<section id="big-picture-从网表到版图" class="level2">
+<h2 class="anchored" data-anchor-id="big-picture-从网表到版图">Big Picture 从网表到版图!</h2>
+<ul>
+<li><p><strong>Synthesis 综合</strong></p></li>
+<li><p><strong>Floorplanning 地板规划</strong></p></li>
+<li><p><strong>Placement 布局</strong></p></li>
+<li><p><strong>CTS (Clock Tree Synthesis) 时钟树综合</strong>:</p>
+<ul>
+<li>为什么叫 “树” 呢? 因为时钟信号源 (clock source) 一般只有一个 (时钟引脚或锁相环的输出), 类比为树的根节点; 而时钟信号的接收端 (clock sink) 有很多, 类比为树的叶子节点 <span class="citation" data-cites="ysyxvideos_2025_physical"><a href="#ref-ysyxvideos_2025_physical" role="doc-biblioref">[6]</a></span>.</li>
+<li>策略:
+<ul>
+<li><strong>low latency</strong>, <strong>low skew</strong> (时钟信号尽可能同时到达各个 sink), <strong>low jitter</strong> (低抖动, TODO), <strong>high drive</strong> (高驱动能力, 通过插入专用的时钟 buffer 来实现, 但是可能会影响 latency 和 skew).</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Routing 布线</strong></p></li>
+<li><p><strong>Signoff 签核</strong>: 确保 GDS 版图是可生产的, 比如检查 <span class="citation" data-cites="ysyxvideos_2025_physical"><a href="#ref-ysyxvideos_2025_physical" role="doc-biblioref">[6]</a></span>:</p>
+<ul>
+<li><strong>PPA</strong></li>
+<li><strong>STA</strong> (检查能否满足用户指定的频率标准)</li>
+<li><strong>信号完整性</strong> (比如分析相邻走线之间的 crosstalk)</li>
+<li><strong>PV (Physical Verification) 物理验证</strong>
+<ul>
+<li><strong>DRC (Design Rule Check) 设计规则检查</strong>: 保证 GDS 版图满足晶圆厂的设计规则 (比如 pitch).</li>
+<li><strong>ERC (Electrical Rule Check) 电学规则检查</strong>: 检查是否存在走线悬空、短路等.</li>
+<li><strong>LVS (Layout Versus Schematic) 版图与原理图比较</strong>: 确认 GDS 版图与最初的网表一致.</li>
+</ul></li>
+</ul></li>
+<li><p><strong>后续步骤</strong>:</p>
+<ul>
+<li><strong>晶圆厂</strong>: 拿到 GDS 文件后, 按照文件内容制造出 <strong>mask 掩膜</strong>, 然后用 mask 批量生产出 wafer, 再把 wafer 切割成一颗颗 die.</li>
+<li><strong>封装厂</strong>: 晶圆厂将 die 交给封装厂进行封装测试, 得到芯片的成品.</li>
+<li><strong>开发板团队</strong>: 设计 PCB 板, 并把芯片的成品焊接在上面, 得到最终的开发板.</li>
+</ul></li>
+</ul>
+</section>
 <section id="placement-布局" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="placement-布局">Placement 布局</h2>
 <section id="三个阶段" class="level3">
@@ -681,9 +718,13 @@ Figure&nbsp;5: Cell/macro 必须放在 row 上 <span class="citation" data-cites
 </div>
 </div>
 <ul>
-<li><strong>Legalization 合法化</strong>: 消除重叠和在<strong>两个</strong>方向对齐的过程 (见 <a href="#fig-legalization" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-legalization</span></a>). Cell/macro 不能随便放置, 而要在两个方向对齐:
+<li><strong>Legalization 合法化</strong>: 消除重叠和在<strong>两个</strong>方向对齐的过程 (见 <a href="#fig-legalization" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-legalization</span></a>). Cell/macro 不能随便放置, 而要在 <span class="math inline">\(x,y\)</span> 方向对齐:
 <ul>
-<li><strong>Row</strong>: 见 <a href="#fig-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-layout</span></a>, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供统一的供电. 自然的, 所有 cell/macro 要在水平方向成一条线, 使得 die 有“一层一层”的概念, <strong>每一层称为一个 row</strong>. Row height 等于 std cell height; Row 分隔线 (见 <a href="#fig-sitedemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sitedemo</span></a> 的蓝色条) VDD 和 GND 交替.</li>
+<li><strong>Row</strong>: 见 <a href="#fig-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-layout</span></a>, 每个 std cell 的上下为该 cell 的供电 metal (上 VDD 下 GND), 我们希望每个 std cell 的这两个 metal 共线, 这样才方便提供统一的供电. 自然的, 所有 cell/macro 要在水平方向成一条线, 使得 die 有“一层一层”的概念, <strong>每一层称为一个 row</strong>.
+<ul>
+<li>Row height 等于 std cell height.</li>
+<li><strong>Power strip 电源条线</strong>: 相邻 Row 的分隔线 (见 <a href="#fig-sitedemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sitedemo</span></a> 的蓝色条), VDD 和 GND 交替.</li>
+</ul></li>
 <li><strong>Site</strong>: Row 引入了「层」, 而 site 给每一层也数字化引入了「门牌号」, 每个 cell/macro 必须对齐到 row 和 site 边界!</li>
 </ul>
 <div id="fig-sitedemo" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -707,7 +748,7 @@ Figure&nbsp;6: Std cell 必须上下对齐 row, 左右对齐 site <span class="c
 <img src="wirelength-model.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-wirelength-model-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 <span class="citation" data-cites="_2024_a7vlsi"><a href="#ref-_2024_a7vlsi" role="doc-biblioref">[6]</a></span>.
+Figure&nbsp;7: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构建 RSMT 来计算 <span class="citation" data-cites="_2024_a7vlsi"><a href="#ref-_2024_a7vlsi" role="doc-biblioref">[7]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -715,7 +756,7 @@ Figure&nbsp;7: 两种估计后续布线时线长的模型: 1. HPWL; 2. 通过构
 <section id="density-model" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="density-model">Density Model</h3>
 <ul>
-<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[7]</a></span> (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[3]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
+<li><p><strong>Bin</strong>: 仅仅是为了<strong>方便计算</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>布局的密度 <span class="citation" data-cites="_2024_83"><a href="#ref-_2024_83" role="doc-biblioref">[8]</a></span> (即有限元方法), 整个 die 被划分为若干个小的矩形区域 (厚度跟 die 的厚度一样), 每个小区域称为一个 bin <span class="citation" data-cites="zhao2024analyticalheterogeneousdietodie3d"><a href="#ref-zhao2024analyticalheterogeneousdietodie3d" role="doc-biblioref">[3]</a></span> (见 <a href="#fig-bindemo" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-bindemo</span></a>). 所有的 bin 组成的集合记作 <span class="math inline">\(B\)</span>.</p>
 <div id="fig-bindemo" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-bindemo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -748,6 +789,13 @@ Figure&nbsp;8: 此图中 bin 的高度是 row height 的 <span class="math inlin
 </ul></li>
 </ul>
 </section>
+<section id="其他优化措施" class="level3">
+<h3 class="anchored" data-anchor-id="其他优化措施">其他优化措施</h3>
+<ul>
+<li><p>对标准单元进行镜像对称: 例如某标准单元 A 左侧的端口 p 需要与 A 右侧的另一个标准单元 B 相连, 可以将 A 沿 y 轴进行镜像对称, 使得 p 位于 A 的右侧, 从而让 p 和 B 之间的距离更近. <span class="citation" data-cites="ysyxvideos_2025_physical"><a href="#ref-ysyxvideos_2025_physical" role="doc-biblioref">[6]</a></span></p></li>
+<li><p>标准单元过分集中会使得后续布线工作困难, 尽量避免这种情况. <span class="citation" data-cites="ysyxvideos_2025_physical"><a href="#ref-ysyxvideos_2025_physical" role="doc-biblioref">[6]</a></span></p></li>
+</ul>
+</section>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
@@ -769,11 +817,14 @@ Figure&nbsp;8: 此图中 bin 的高度是 row height 的 <span class="math inlin
 <div id="ref-phdthesisAlgorithms2019" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[5] </div><div class="csl-right-inline">J. Monteiro, <span>“Algorithms to improve area density utilization, routability and timing during detailed placement and legalization of VLSI circuits,”</span> PhD thesis, 2019.</div>
 </div>
+<div id="ref-ysyxvideos_2025_physical" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">Y. videos, <span>“Physical design - from netlist to layout.”</span> Bilibili.com, Nov. 2025. Available: <a href="https://www.bilibili.com/video/BV15ZUzBoEf6/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">https://www.bilibili.com/video/BV15ZUzBoEf6/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3</a>. [Accessed: Jan. 16, 2026]</div>
+</div>
 <div id="ref-_2024_a7vlsi" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[6] </div><div class="csl-right-inline">iEDA, <span>“A7-VLSI auto placement for circuit cells.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/practice/algorithms/a7.html">https://ieda.oscc.cc/en/train/practice/algorithms/a7.html</a>. [Accessed: Dec. 05, 2025]</div>
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">iEDA, <span>“A7-VLSI auto placement for circuit cells.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/practice/algorithms/a7.html">https://ieda.oscc.cc/en/train/practice/algorithms/a7.html</a>. [Accessed: Dec. 05, 2025]</div>
 </div>
 <div id="ref-_2024_83" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[7] </div><div class="csl-right-inline">iEDA, <span>“8.3 layout problems and modeling.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html">https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html</a>. [Accessed: Dec. 05, 2025]</div>
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">iEDA, <span>“8.3 layout problems and modeling.”</span> Oscc.cc, Aug. 2024. Available: <a href="https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html">https://ieda.oscc.cc/en/train/eda/eda-model/8_3_palcement.html</a>. [Accessed: Dec. 05, 2025]</div>
 </div>
 </div>
 </section>

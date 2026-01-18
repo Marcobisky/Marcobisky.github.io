@@ -1,5 +1,9 @@
 > ***Change of Mind:*** Hardware does not "execute" the lines of code in sequence. 
 
+> 下文不严格区分 Verilog 和 SystemVerilog (你可以当作都是 SystemVerilog).
+
+### Verilog Basics
+
 - `assign`
     - 多个 `assign` 执行**没有顺序**, 同时进行.
     - `assign` 是 "continuous assignment", 右值变化时, 左值跟着变化.
@@ -42,19 +46,6 @@
                 shut_off_computer = 1;
         end
         ```
-
-- **Concatenation**: 
-
-    ```verilog
-    assign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100
-    ```
-
-- index 可以是负数:
-
-    ```verilog
-    reg [5:-1] my_reg; // index 可以是负数.
-    wire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!
-    ```
 
 - `input a` 默认为 `wire`.
 
@@ -99,7 +90,25 @@
 
 - **Inference** 和 **Instantiation**:
     - **Inference**: 通过 `always` 块的内容推断出一个模块的功能.
-    - **Instantiation**: 显式地实例化一个模块, 通过 `module_name instance_name (port_map)` 的方式.
+    - **Instantiation**: 显式地实例化一个模块, 通过 `module_name instance_name (port_map)` 的方式:
+
+        ```verilog
+        fetcher #(
+            .PROGRAM_MEM_ADDR_BITS(PROGRAM_MEM_ADDR_BITS),
+            .PROGRAM_MEM_DATA_BITS(PROGRAM_MEM_DATA_BITS)
+        ) fetcher_instance (
+            .clk(clk),
+            .reset(reset),
+            .core_state(core_state),
+            .current_pc(current_pc),
+            ...
+        );
+        ```
+        - 注意 `port_map` 左侧是模块内的端口名, 右侧是当前作用域内的信号名 (不一定要一样).
+        - `#(...)` 是 `systemverilog` 的语法, 用来**传递参数**. 同样, 右侧是当前作用域内的参数名.
+            - 所以也可以写成: `.PROGRAM_MEM_ADDR_BITS(8)`.
+
+
 
  - 循环群结构 (Torus, etc) 如果用 `%` 运算符来处理会消耗大量资源, **尽量用 `if` 语句**:
 
@@ -118,6 +127,106 @@
 - **Blocking 和 Non-blocking assignments**:
     - `=`: Blocking assignment, 若在 `always` 块中使用, 则必须按照顺序执行!
     - `<=`: Non-blocking assignment, 在 `always` 块中使用时, 会同时执行所有赋值. (一般 `always` 里面都用这个!)
+
+### Verilog 向量
+
+- 一个易错点
+
+    ```verilog
+    reg [7:0] foo;      // foo[i] 是 1 bit
+    reg [7:0] foo[3:0]; // foo[i] 是 8 bit
+    ```
+
+- index 可以是负数:
+
+    ```verilog
+    reg [5:-1] my_reg; // index 可以是负数.
+    wire [0:3] my_wire; // Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!
+    ```
+
+- **Concatenation**: 
+
+    ```verilog
+    assign out = {tmp, {3{3'b100}}}; // Concatenation, out = 0000011 100 100 100
+    ```
+
+### 硬件代码生成
+
+- `generate for` 块: 用于生成重复的硬件结构 (只是偷懒, 不用写重复的相似代码). (下文两个代码块是等价的, 其中 `gen_regs` 只是一个 label, 可以随便取名)
+
+::: {layout-ncol=2}
+```verilog
+genvar i;
+generate
+    for (i = 0; i < 4; i = i + 1) begin : gen_regs
+        always @(posedge clk) begin
+            q[i] <= d[i];
+        end
+    end
+endgenerate
+```
+
+```verilog
+always @(posedge clk) q[0] <= d[0];
+always @(posedge clk) q[1] <= d[1];
+always @(posedge clk) q[2] <= d[2];
+always @(posedge clk) q[3] <= d[3];
+```
+:::
+
+- `generate if` 块: 用于根据参数生成不同的硬件结构.
+
+::: {layout-ncol=2}
+```verilog
+module reg1 #(
+    parameter bit USE_RESET = 1
+)(
+    input  logic clk,
+    input  logic rstn,
+    input  logic d,
+    output logic q
+);
+generate
+    if (USE_RESET) begin
+        always @(posedge clk or negedge rstn) begin
+            if (!rstn)
+                q <= 1'b0;
+            else
+                q <= d;
+        end
+    end else begin
+        always @(posedge clk) begin
+            q <= d;
+        end
+    end
+endgenerate
+endmodule
+```
+
+```verilog
+module reg1 (
+    input  logic clk,
+    input  logic rstn,
+    input  logic d,
+    output logic q
+);
+always @(posedge clk or negedge rstn) begin
+    if (!rstn)
+        q <= 1'b0;
+    else
+        q <= d;
+end
+endmodule
+```
+:::
+
+### Systemverilog 函数
+
+- `$clog_2`: 向上取整的 $\log_2(\cdot)$, 比如:
+
+    ```verilog
+    input wire [$clog2(THREADS_PER_BLOCK):0] thread_count
+    ```
 
 ### Verilog Testbench
 
