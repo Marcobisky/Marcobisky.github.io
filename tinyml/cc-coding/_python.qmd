@@ -1,5 +1,28 @@
 ### Python Basics
 
+#### Import Libraries
+
+- 导入库就是让定义在别的文件中**所有 object** (**函数、类、实例、变量等**) 在本文件中可以被使用, 一般有下面几种使用方法:
+
+    ```python
+    # cocotb 是文件夹!
+    # 导入虚拟环境的 /site-packages/cocotb 文件夹下的所有 object (好像不是所有?? TODO)
+    # 之后要用的 object 必须用 cocotb.xxx 引出
+    import cocotb
+
+    # 这样做可以简化引出方式: np.xxx
+    import numpy as np
+
+    # 只导入 cocotb 文件夹下 triggers.py 的 RisingEdge() 函数
+    # 这样就可以直接用 RisingEdge() 而不用 cocotb.triggers.RisingEdge()
+    from cocotb.triggers import RisingEdge
+
+    # 导入当前目录 ./helpers/xxx.py 中的一些 object
+    from .helpers.memory import Memory          # class
+    from .helpers.format import format_cycle    # function
+    from .helpers.logger import logger          # instance
+    ```
+
 #### `async def` 和 `await`
 
 - `async def` 表示这个函数的执行过程中如果碰到 `await` 关键字, 会暂时跳出这个函数, 先去处理其它的函数, 比如:
@@ -76,6 +99,21 @@ All tasks completed in 10.0 seconds
 :::
 <!-- ----------------------------------------- -->
 
+#### 动态访问实例属性 `getattr()`
+
+- 如果你想访问的属性名在运行时才能决定, 比如:
+
+    ```python
+    class Order:
+        def __init__(self):
+            self.price = 100
+            self.qty = 5
+
+    order = Order()
+    attr_name = "price"
+    print(order.attr_name)              # 这样是不行的!
+    print(getattr(order, attr_name))    # 这样才行!
+    ```
 
 ### Python 常用数据结构
 
@@ -139,4 +177,22 @@ All tasks completed in 10.0 seconds
 
 ```{.python filename="decorator.py" #lst-decoratorpy}
 {{< include src/python/decorator.py >}}
+```
+
+### 链式调用
+
+返回 `*this` 的引用可以实现链式调用:
+
+```{.cpp filename="chaining.cpp" #lst-chaining}
+{{< include src/cpp/chaining.cpp >}}
+```
+
+### `cocotb` 库
+
+- 常用操作:
+
+```python
+import cocotb
+from cocotb.clock import Clock
+from cocotb.triggers import RisingEdge
 ```

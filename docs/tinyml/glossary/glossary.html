@@ -575,6 +575,7 @@ window.Quarto = {
   <li><a href="#fpga-principles" id="toc-fpga-principles" class="nav-link" data-scroll-target="#fpga-principles">FPGA Principles</a></li>
   <li><a href="#fpga-structure-结构" id="toc-fpga-structure-结构" class="nav-link" data-scroll-target="#fpga-structure-结构">FPGA Structure 结构</a></li>
   <li><a href="#verification-验证" id="toc-verification-验证" class="nav-link" data-scroll-target="#verification-验证">Verification 验证</a></li>
+  <li><a href="#benchmark-性能测试" id="toc-benchmark-性能测试" class="nav-link" data-scroll-target="#benchmark-性能测试">Benchmark 性能测试</a></li>
   </ul></li>
   <li><a href="#open-source-tools" id="toc-open-source-tools" class="nav-link" data-scroll-target="#open-source-tools">Open Source Tools</a></li>
   <li><a href="#sec-eda-terms" id="toc-sec-eda-terms" class="nav-link" data-scroll-target="#sec-eda-terms">EDA Terms</a>
@@ -607,6 +608,7 @@ window.Quarto = {
   <li><a href="#ysyx-terms" id="toc-ysyx-terms" class="nav-link" data-scroll-target="#ysyx-terms">YSYX Terms</a></li>
   <li><a href="#integrated-circuit-terms" id="toc-integrated-circuit-terms" class="nav-link" data-scroll-target="#integrated-circuit-terms">Integrated Circuit Terms</a></li>
   <li><a href="#optimization" id="toc-optimization" class="nav-link" data-scroll-target="#optimization">Optimization</a></li>
+  <li><a href="#工业与商业模式" id="toc-工业与商业模式" class="nav-link" data-scroll-target="#工业与商业模式">工业与商业模式</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -694,12 +696,6 @@ window.Quarto = {
 <section id="zynq" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="zynq">ZYNQ</h3>
 <ul>
-<li><strong>核心商业模式</strong>:
-<ul>
-<li><strong>IP 提供商</strong>: 设计 IP 核并授权给芯片设计制造商使用. E.g., ARM (CPU 内核设计)</li>
-<li><strong>芯片设计制造商</strong>: 购买 IP 核并设计和生产关键芯片. E.g., Xilinx (被 AMD 收购), ST (STM32 核心芯片的制造商).</li>
-<li><strong>开发板制造商</strong>: 从芯片设计制造商处采购芯片, 并设计供电电路、时钟电路、将方形黑色的芯片底部的引脚引出接入各种物理接口、设计 PCB 等, 最终生产出开发板. E.g., Alinx, 正点原子, Digilent.</li>
-</ul></li>
 <li><strong>命名规则</strong>
 <ul>
 <li>E.g., ZYNQ XC7Z010 CLG400ABX2021 D6168711A, XC7: 7 系列 (Xilinx Corporation), Z: ZYNQ, 010: 逻辑资源规模 (越小越少), CLG: 封装类型 (Chip-Scale Lead-Free BGA (Ball Grid Array)), 400: 引脚数, ABX: 温度、性能等级, 2021: 生产年份, D6168711A: 可理解为序列号.</li>
@@ -812,6 +808,12 @@ Figure&nbsp;1
 <li><p><strong>Smoke Test 冒烟测试</strong>: 最基础耗时最短的测试, 软件的话就是能跑就行, 硬件比如神经网络能传播就行 (不要有 size 不匹配这种低级错误), 而不管软件、神经网络输出结果对不对.</p></li>
 </ul>
 </section>
+<section id="benchmark-性能测试" class="level3">
+<h3 class="anchored" data-anchor-id="benchmark-性能测试">Benchmark 性能测试</h3>
+<ul>
+<li><strong>Cinebench</strong>: 一般是测试 CPU 的多线程、多核心能力, 通过渲染一个复杂的 3D 场景 来测量硬件执行浮点运算和并行任务的能力.</li>
+</ul>
+</section>
 </section>
 <section id="open-source-tools" class="level2">
 <h2 class="anchored" data-anchor-id="open-source-tools">Open Source Tools</h2>
@@ -830,9 +832,10 @@ Figure&nbsp;1
 </ul></li>
 <li><p><a href="https://www.cocotb.org"><strong>Cocotb</strong></a>: 一个 Python 库, 允许你用 Python 来写 testbench! 注意与 <code>verilator</code> 和 <code>icarus</code> 不同, <code>Cocotb</code> 在它们之上调用它们 (相当于 <code>verilator</code> 的前端), 用于方便地<strong>写测试逻辑</strong>而不是模拟硬件.</p></li>
 <li><p><a href="https://github.com/steveicarus/iverilog"><strong>iverilog (Icarus Verilog)</strong></a>: 可直接输出波形的真正的仿真器 (不输出 C 代码). 由于是解释型的, 速度比 <code>verilator</code> 慢很多. 用法:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">iverilog</span> <span class="at">-o</span> blink.vvp blink.v blink_tb.v</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 生成 vcd 文件可配合 GTKWave 查看波形</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="ex">vvp</span> blink.vvp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 生成可执行的临时仿真文件 blink.vvp, 顶层模块是 blink.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">iverilog</span> <span class="at">-o</span> blink.vvp <span class="at">-s</span> blink blink.v blink_tb.v</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 生成 vcd 文件 (可配合 GTKWave 查看波形)</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="ex">vvp</span> blink.vvp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><a href="https://github.com/trabucayre/openFPGALoader"><strong>openFPGALoader</strong></a>: 用于将比特流烧录到 FPGA (但不能调试).</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 示例：</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">openFPGALoader</span> <span class="at">-b</span> arty arty_bitstream.bit      <span class="co"># SRAM 加载</span></span>
@@ -979,7 +982,12 @@ Figure&nbsp;6: Transistor architecture 的后续发展 <span class="citation" da
 <ul>
 <li><strong>Power delivery network (PDN)</strong>: 电源分配网络.
 <ul>
-<li><strong>Backside power delivery (BSPD)</strong>: 通过芯片背面供电 (而不是跟信号线在同一侧)</li>
+<li><strong>Power rail 电源线</strong>: 给晶体管上电的金属线.</li>
+<li><strong>Backside power delivery (BSPD)</strong>: 通过芯片背面供电 (而不是跟信号线在同一侧), Intel 独占的技术 (截止 2025)
+<ul>
+<li><strong>Power via</strong>: 通过 TSV 伸到晶体管侧面供电 (比如 Intel Panther Lake <span class="citation" data-cites="11075006"><a href="#ref-11075006" role="doc-biblioref">[4]</a></span>).</li>
+<li><strong>Power direct</strong>: 直接插入晶体管供电.</li>
+</ul></li>
 </ul>
 <div id="fig-bspd" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1734,6 +1742,19 @@ Figure&nbsp;25: FFSP
 </figcaption>
 </figure>
 </div></li>
+</ul>
+</section>
+<section id="工业与商业模式" class="level2">
+<h2 class="anchored" data-anchor-id="工业与商业模式">工业与商业模式</h2>
+<ul>
+<li><strong>核心商业模式</strong>:
+<ul>
+<li><strong>IP 提供商</strong>: 设计 IP 核并授权给芯片设计制造商使用. E.g., ARM (CPU 内核设计)</li>
+<li><strong>芯片设计制造商</strong>: 购买 IP 核并设计和生产关键芯片. E.g., Xilinx (被 AMD 收购), ST (STM32 核心芯片的制造商).</li>
+<li><strong>开发板制造商</strong>: 从芯片设计制造商处采购芯片, 并设计供电电路、时钟电路、将方形黑色的芯片底部的引脚引出接入各种物理接口、设计 PCB 等, 最终生产出开发板. E.g., Alinx, 正点原子, Digilent.</li>
+</ul></li>
+<li><strong>OEM (Original Equipment Manufacturer)</strong>: 原始设备制造商 (代工厂或贴牌制造商).</li>
+<li><strong>ODM (Original Design Manufacturer)</strong>: 原始设计制造商.</li>
 </ul>
 <!-- ## AnalogGYM Terms
 

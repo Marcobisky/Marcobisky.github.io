@@ -61,11 +61,6 @@ title: "Glossary 名词解释"
 
 ### ZYNQ
 
-- **核心商业模式**: 
-    - **IP 提供商**: 设计 IP 核并授权给芯片设计制造商使用. E.g., ARM (CPU 内核设计)
-    - **芯片设计制造商**: 购买 IP 核并设计和生产关键芯片. E.g., Xilinx (被 AMD 收购), ST (STM32 核心芯片的制造商).
-    - **开发板制造商**: 从芯片设计制造商处采购芯片, 并设计供电电路、时钟电路、将方形黑色的芯片底部的引脚引出接入各种物理接口、设计 PCB 等, 最终生产出开发板. E.g., Alinx, 正点原子, Digilent.
-
 - **命名规则**
     - E.g., ZYNQ XC7Z010 CLG400ABX2021 D6168711A, XC7: 7 系列 (Xilinx Corporation), Z: ZYNQ, 010: 逻辑资源规模 (越小越少), CLG: 封装类型 (Chip-Scale Lead-Free BGA (Ball Grid Array)), 400: 引脚数, ABX: 温度、性能等级, 2021: 生产年份, D6168711A: 可理解为序列号.
     - ZYNQ 7010 SoCs 包括 XC7Z010 等很多型号.
@@ -155,6 +150,10 @@ title: "Glossary 名词解释"
 
 - **Smoke Test 冒烟测试**: 最基础耗时最短的测试, 软件的话就是能跑就行, 硬件比如神经网络能传播就行 (不要有 size 不匹配这种低级错误), 而不管软件、神经网络输出结果对不对.
 
+### Benchmark 性能测试
+
+- **Cinebench**: 一般是测试 CPU 的多线程、多核心能力, 通过渲染一个复杂的 3D 场景 来测量硬件执行浮点运算和并行任务的能力.
+
 ## Open Source Tools
 
 > 该项目重度使用了以下开源项目, FPGA 开源是一个很大的工程, 感谢所有开源者!
@@ -176,8 +175,9 @@ title: "Glossary 名词解释"
 - [**iverilog (Icarus Verilog)**](https://github.com/steveicarus/iverilog): 可直接输出波形的真正的仿真器 (不输出 C 代码). 由于是解释型的, 速度比 `verilator` 慢很多. 用法:
 
     ```bash
-    iverilog -o blink.vvp blink.v blink_tb.v
-    # 生成 vcd 文件可配合 GTKWave 查看波形
+    # 生成可执行的临时仿真文件 blink.vvp, 顶层模块是 blink.
+    iverilog -o blink.vvp -s blink blink.v blink_tb.v
+    # 生成 vcd 文件 (可配合 GTKWave 查看波形)
     vvp blink.vvp
     ```
 
@@ -275,7 +275,10 @@ title: "Glossary 名词解释"
 :::
 
 - **Power delivery network (PDN)**: 电源分配网络.
-    - **Backside power delivery (BSPD)**: 通过芯片背面供电 (而不是跟信号线在同一侧)
+    - **Power rail 电源线**: 给晶体管上电的金属线.
+    - **Backside power delivery (BSPD)**: 通过芯片背面供电 (而不是跟信号线在同一侧), Intel 独占的技术 (截止 2025)
+        - **Power via**: 通过 TSV 伸到晶体管侧面供电 (比如 Intel Panther Lake @11075006).
+        - **Power direct**: 直接插入晶体管供电.
 
     ![BSPD 示意图 @Hossen2020PowerDN.](bspd.png){#fig-bspd width=90%}
 
@@ -510,6 +513,15 @@ title: "Glossary 名词解释"
     ![FFSP](ffsp.png){#fig-ffsp}
 
 
+## 工业与商业模式
+
+- **核心商业模式**: 
+    - **IP 提供商**: 设计 IP 核并授权给芯片设计制造商使用. E.g., ARM (CPU 内核设计)
+    - **芯片设计制造商**: 购买 IP 核并设计和生产关键芯片. E.g., Xilinx (被 AMD 收购), ST (STM32 核心芯片的制造商).
+    - **开发板制造商**: 从芯片设计制造商处采购芯片, 并设计供电电路、时钟电路、将方形黑色的芯片底部的引脚引出接入各种物理接口、设计 PCB 等, 最终生产出开发板. E.g., Alinx, 正点原子, Digilent.
+
+- **OEM (Original Equipment Manufacturer)**: 原始设备制造商 (代工厂或贴牌制造商).
+- **ODM (Original Design Manufacturer)**: 原始设计制造商.
 
 <!-- ## AnalogGYM Terms
 

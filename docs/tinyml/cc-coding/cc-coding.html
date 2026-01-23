@@ -560,6 +560,8 @@ window.Quarto = {
   <li><a href="#python-常用数据结构" id="toc-python-常用数据结构" class="nav-link" data-scroll-target="#python-常用数据结构">Python 常用数据结构</a></li>
   <li><a href="#可变参数" id="toc-可变参数" class="nav-link" data-scroll-target="#可变参数">可变参数</a></li>
   <li><a href="#first-class-objects" id="toc-first-class-objects" class="nav-link" data-scroll-target="#first-class-objects">First-class Objects</a></li>
+  <li><a href="#链式调用" id="toc-链式调用" class="nav-link" data-scroll-target="#链式调用">链式调用</a></li>
+  <li><a href="#cocotb-库" id="toc-cocotb-库" class="nav-link" data-scroll-target="#cocotb-库"><code>cocotb</code> 库</a></li>
   </ul></li>
   <li><a href="#pybind11" id="toc-pybind11" class="nav-link" data-scroll-target="#pybind11">Pybind11</a></li>
   <li><a href="#build-tools-构建工具" id="toc-build-tools-构建工具" class="nav-link" data-scroll-target="#build-tools-构建工具">Build Tools 构建工具</a>
@@ -572,22 +574,18 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#python" id="toc-python" class="nav-link" data-scroll-target="#python">Python</a></li>
   </ul></li>
-  <li><a href="#coding-techniques" id="toc-coding-techniques" class="nav-link" data-scroll-target="#coding-techniques">Coding Techniques</a>
-  <ul class="collapse">
-  <li><a href="#正负无穷" id="toc-正负无穷" class="nav-link" data-scroll-target="#正负无穷">正负无穷</a></li>
-  <li><a href="#向上取整转为向下取整" id="toc-向上取整转为向下取整" class="nav-link" data-scroll-target="#向上取整转为向下取整">向上取整转为向下取整</a></li>
-  <li><a href="#链式调用" id="toc-链式调用" class="nav-link" data-scroll-target="#链式调用">链式调用</a></li>
-  </ul></li>
   <li><a href="#coding-habits" id="toc-coding-habits" class="nav-link" data-scroll-target="#coding-habits">Coding Habits</a>
   <ul class="collapse">
   <li><a href="#代码风格" id="toc-代码风格" class="nav-link" data-scroll-target="#代码风格">代码风格</a></li>
   <li><a href="#命名习惯" id="toc-命名习惯" class="nav-link" data-scroll-target="#命名习惯">命名习惯</a></li>
   <li><a href="#getters-和-setters" id="toc-getters-和-setters" class="nav-link" data-scroll-target="#getters-和-setters">getters 和 Setters</a></li>
   <li><a href="#常写-const" id="toc-常写-const" class="nav-link" data-scroll-target="#常写-const">常写 <code>const</code></a></li>
+  <li><a href="#for-循环的边界" id="toc-for-循环的边界" class="nav-link" data-scroll-target="#for-循环的边界"><code>for</code> 循环的边界</a></li>
   </ul></li>
-  <li><a href="#tips-on-code-reading" id="toc-tips-on-code-reading" class="nav-link" data-scroll-target="#tips-on-code-reading">Tips on Code Reading</a>
+  <li><a href="#code-reading-techniques" id="toc-code-reading-techniques" class="nav-link" data-scroll-target="#code-reading-techniques">Code Reading &amp; Techniques</a>
   <ul class="collapse">
   <li><a href="#first-encounter" id="toc-first-encounter" class="nav-link" data-scroll-target="#first-encounter">First Encounter</a></li>
+  <li><a href="#一些条件反射" id="toc-一些条件反射" class="nav-link" data-scroll-target="#一些条件反射">一些条件反射</a></li>
   </ul></li>
   <li><a href="#verilog" id="toc-verilog" class="nav-link" data-scroll-target="#verilog">Verilog</a>
   <ul class="collapse">
@@ -1261,6 +1259,28 @@ Figure&nbsp;1: 循环引用问题
 <h2 class="anchored" data-anchor-id="some-python">Some Python</h2>
 <section id="python-basics" class="level3">
 <h3 class="anchored" data-anchor-id="python-basics">Python Basics</h3>
+<section id="import-libraries" class="level4">
+<h4 class="anchored" data-anchor-id="import-libraries">Import Libraries</h4>
+<ul>
+<li><p>导入库就是让定义在别的文件中<strong>所有 object</strong> (<strong>函数、类、实例、变量等</strong>) 在本文件中可以被使用, 一般有下面几种使用方法:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co"># cocotb 是文件夹!</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 导入虚拟环境的 /site-packages/cocotb 文件夹下的所有 object (好像不是所有?? </span><span class="al">TODO</span><span class="co">)</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 之后要用的 object 必须用 cocotb.xxx 引出</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cocotb</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 这样做可以简化引出方式: np.xxx</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 只导入 cocotb 文件夹下 triggers.py 的 RisingEdge() 函数</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 这样就可以直接用 RisingEdge() 而不用 cocotb.triggers.RisingEdge()</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cocotb.triggers <span class="im">import</span> RisingEdge</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 导入当前目录 ./helpers/xxx.py 中的一些 object</span></span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> .helpers.memory <span class="im">import</span> Memory          <span class="co"># class</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> .helpers.<span class="bu">format</span> <span class="im">import</span> format_cycle    <span class="co"># function</span></span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> .helpers.logger <span class="im">import</span> logger          <span class="co"># instance</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+</section>
 <section id="async-def-和-await" class="level4">
 <h4 class="anchored" data-anchor-id="async-def-和-await"><code>async def</code> 和 <code>await</code></h4>
 <ul>
@@ -1301,26 +1321,26 @@ Figure&nbsp;1: 循环引用问题
 <span id="lst-async-demopy-29"><a href="#lst-async-demopy-29" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>输出:</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>Arranged two tasks, waiting for complete ...</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>Task 1: Starting</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>Task 2: Starting</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>Task 2: Completed</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>Task 1: Completed</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>All tasks completed in 10.0 seconds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>Arranged two tasks, waiting for complete ...</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>Task 1: Starting</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>Task 2: Starting</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>Task 2: Completed</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>Task 1: Completed</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>All tasks completed in 10.0 seconds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="assert" class="level4">
 <h4 class="anchored" data-anchor-id="assert"><code>assert</code></h4>
 <ul>
 <li><p><code>assert</code> 用来 debug 很有用, 比如你要检查程序中间 <code>a</code> 是否等于 <code>1</code>:</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> a <span class="op">==</span> <span class="dv">1</span> <span class="co"># 如果 a 不等于 1, 程序会报错退出</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Test passed!"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> a <span class="op">==</span> <span class="dv">1</span> <span class="co"># 如果 a 不等于 1, 程序会报错退出</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Test passed!"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><p><code>assert</code> 后面接的就是一个布尔值, 所以:</p>
-<div class="sourceCode" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="va">True</span>  <span class="co"># No error</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="va">False</span> <span class="co"># Raises an AssertionError</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="va">True</span>  <span class="co"># No error</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> <span class="va">False</span> <span class="co"># Raises an AssertionError</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>也可以加上错误信息:</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> a <span class="op">==</span> <span class="dv">1</span>, <span class="st">"a is not equal to 1!"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> a <span class="op">==</span> <span class="dv">1</span>, <span class="st">"a is not equal to 1!"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
 </ul>
 </section>
@@ -1339,26 +1359,26 @@ Figure&nbsp;1: 循环引用问题
 <li>在类的内部用 <code>self.color</code>、外部用 <code>car1.color</code> 来访问和修改.</li>
 </ul></li>
 </ul>
-<div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Car:</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Class attributes</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    wheels <span class="op">=</span> <span class="dv">4</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, color, model):</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Instance attributes</span></span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.color <span class="op">=</span> color</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        Car.count <span class="op">+=</span> <span class="dv">1</span> <span class="co"># 每创建这样的类时, 计数加 1</span></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(Car.wheels)  <span class="co"># Accessing class attribute</span></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co"># print(Car.color) # Cannot access instance attribute without creating instances</span></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>car1 <span class="op">=</span> Car(<span class="st">"red"</span>, <span class="st">"Toyota"</span>)</span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>car2 <span class="op">=</span> Car(<span class="st">"blue"</span>, <span class="st">"Honda"</span>)</span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(car1.color)</span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(Car.count)  <span class="co"># Output: 2</span></span>
-<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Car:</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Class attributes</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    wheels <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, color, model):</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Instance attributes</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.color <span class="op">=</span> color</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>        Car.count <span class="op">+=</span> <span class="dv">1</span> <span class="co"># 每创建这样的类时, 计数加 1</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(Car.wheels)  <span class="co"># Accessing class attribute</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="co"># print(Car.color) # Cannot access instance attribute without creating instances</span></span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>car1 <span class="op">=</span> Car(<span class="st">"red"</span>, <span class="st">"Toyota"</span>)</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>car2 <span class="op">=</span> Car(<span class="st">"blue"</span>, <span class="st">"Honda"</span>)</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(car1.color)</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(Car.count)  <span class="co"># Output: 2</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="特殊方法-classmethodstaticmethod" class="level4">
 <h4 class="anchored" data-anchor-id="特殊方法-classmethodstaticmethod">特殊方法 <code>@classmethod</code>、<code>@staticmethod</code></h4>
@@ -1377,35 +1397,35 @@ Figure&nbsp;1: 循环引用问题
 <li>用实例名也可以调用该方法.</li>
 </ul></li>
 </ul>
-<div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Car:</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 常规初始化方法</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, color, model):</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.color <span class="op">=</span> color</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 两个可选的初始化方法</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> init_from_dict(cls, init_dict): <span class="co"># cls 代表一个类名, 只是约定俗成叫 cls, 可以叫别的名字</span></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(init_dict[<span class="st">'color'</span>], init_dict[<span class="st">'model'</span>])</span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
-<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> init_from_json(cls, json_str):</span>
-<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>        <span class="im">import</span> json</span>
-<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>        init_dict <span class="op">=</span> json.loads(json_str) <span class="co"># 将 json 字符串转换为字典</span></span>
-<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(init_dict[<span class="st">'color'</span>], init_dict[<span class="st">'model'</span>])</span>
-<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 一个sb降智方法</span></span>
-<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">@staticmethod</span></span>
-<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> car_add_print_numbers(num1, num2):</span>
-<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>num1 <span class="op">+</span> num2<span class="sc">}</span><span class="ss"> cars in total"</span>)</span>
-<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>        </span>
-<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a>car1 <span class="op">=</span> Car(<span class="st">"red"</span>, <span class="st">"Toyota"</span>) <span class="co"># 使用常规初始化方法</span></span>
-<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>car2 <span class="op">=</span> Car.init_from_dict({<span class="st">'color'</span>: <span class="st">'blue'</span>, <span class="st">'model'</span>: <span class="st">'Honda'</span>}) <span class="co"># 使用字典初始化方法</span></span>
-<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>car3 <span class="op">=</span> Car.init_from_json(<span class="st">'{"color": "green", "model": "Ford"}'</span>) <span class="co"># 使用 json 字符串初始化方法</span></span>
-<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>Car.car_add_print_numbers(<span class="dv">3</span>, <span class="dv">5</span>)  <span class="co"># Output: 8 cars in total</span></span>
-<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>car1.car_add_print_numbers(<span class="dv">10</span>, <span class="dv">20</span>)  <span class="co"># 用实例访问也行, Output: 30 cars in total</span></span>
-<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Car:</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 常规初始化方法</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, color, model):</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.color <span class="op">=</span> color</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.model <span class="op">=</span> model</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 两个可选的初始化方法</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> init_from_dict(cls, init_dict): <span class="co"># cls 代表一个类名, 只是约定俗成叫 cls, 可以叫别的名字</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(init_dict[<span class="st">'color'</span>], init_dict[<span class="st">'model'</span>])</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">@classmethod</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> init_from_json(cls, json_str):</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        <span class="im">import</span> json</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>        init_dict <span class="op">=</span> json.loads(json_str) <span class="co"># 将 json 字符串转换为字典</span></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> cls(init_dict[<span class="st">'color'</span>], init_dict[<span class="st">'model'</span>])</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 一个sb降智方法</span></span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">@staticmethod</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> car_add_print_numbers(num1, num2):</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>num1 <span class="op">+</span> num2<span class="sc">}</span><span class="ss"> cars in total"</span>)</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>car1 <span class="op">=</span> Car(<span class="st">"red"</span>, <span class="st">"Toyota"</span>) <span class="co"># 使用常规初始化方法</span></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>car2 <span class="op">=</span> Car.init_from_dict({<span class="st">'color'</span>: <span class="st">'blue'</span>, <span class="st">'model'</span>: <span class="st">'Honda'</span>}) <span class="co"># 使用字典初始化方法</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>car3 <span class="op">=</span> Car.init_from_json(<span class="st">'{"color": "green", "model": "Ford"}'</span>) <span class="co"># 使用 json 字符串初始化方法</span></span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>Car.car_add_print_numbers(<span class="dv">3</span>, <span class="dv">5</span>)  <span class="co"># Output: 8 cars in total</span></span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>car1.car_add_print_numbers(<span class="dv">10</span>, <span class="dv">20</span>)  <span class="co"># 用实例访问也行, Output: 30 cars in total</span></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <!-- ----------------------------------------- -->
 <div class="callout callout-style-default callout-tip callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
@@ -1425,6 +1445,21 @@ Figure&nbsp;1: 循环引用问题
 </div>
 <!-- ----------------------------------------- -->
 </section>
+<section id="动态访问实例属性-getattr" class="level4">
+<h4 class="anchored" data-anchor-id="动态访问实例属性-getattr">动态访问实例属性 <code>getattr()</code></h4>
+<ul>
+<li><p>如果你想访问的属性名在运行时才能决定, 比如:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Order:</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.price <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.qty <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>order <span class="op">=</span> Order()</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>attr_name <span class="op">=</span> <span class="st">"price"</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(order.attr_name)              <span class="co"># 这样是不行的!</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">getattr</span>(order, attr_name))    <span class="co"># 这样才行!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+</section>
 </section>
 <section id="python-常用数据结构" class="level3">
 <h3 class="anchored" data-anchor-id="python-常用数据结构">Python 常用数据结构</h3>
@@ -1435,10 +1470,10 @@ Figure&nbsp;1: 循环引用问题
 <ul>
 <li>注意 key 不存在时不会报错, 而是返回 <code>None</code>!</li>
 </ul>
-<div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> {<span class="st">'x'</span>: <span class="dv">1</span>, <span class="st">'y'</span>: <span class="dv">2</span>}</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(a.get(<span class="st">'x'</span>))  <span class="co"># 输出 1</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(a.get(<span class="st">"x"</span>))  <span class="co"># 也可以</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(a.get(<span class="st">'z'</span>))  <span class="co"># 输出 None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> {<span class="st">'x'</span>: <span class="dv">1</span>, <span class="st">'y'</span>: <span class="dv">2</span>}</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(a.get(<span class="st">'x'</span>))  <span class="co"># 输出 1</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(a.get(<span class="st">"x"</span>))  <span class="co"># 也可以</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(a.get(<span class="st">'z'</span>))  <span class="co"># 输出 None</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 </section>
@@ -1455,25 +1490,25 @@ Figure&nbsp;1: 循环引用问题
 <li>会配合 <code>for key, value in kwargs.items():</code> 解包使用!</li>
 </ul></li>
 </ul>
-<div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> student_info(name, age, <span class="op">*</span>courses, <span class="op">**</span>extras):</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co">    name: 必需参数</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co">    age: 必需参数  </span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co">    *courses: 可变数量的课程</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co">    **extras: 可变数量的额外信息</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"姓名: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"年龄: </span><span class="sc">{</span>age<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"课程: </span><span class="sc">{</span>courses<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"额外信息: </span><span class="sc">{</span>extras<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 使用, 从第一个格式为 "xxx=yyy" 的参数开始算 extras</span></span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>student_info(<span class="st">"张三"</span>, <span class="dv">18</span>, <span class="st">"数学"</span>, <span class="st">"物理"</span>, <span class="st">"化学"</span>, hobby<span class="op">=</span><span class="st">"篮球"</span>, score<span class="op">=</span><span class="dv">95</span>)</span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 可以没有 courses</span></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>student_info(<span class="st">"李四"</span>, <span class="dv">20</span>, hobby<span class="op">=</span><span class="st">"音乐"</span>)</span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="co"># "历史" 不是 "xxx=yyy" 结构, 报错!</span></span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="co"># student_info("王五", 22, "英语", hobby="阅读", "历史")  # SyntaxError</span></span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> student_info(name, age, <span class="op">*</span>courses, <span class="op">**</span>extras):</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co">    name: 必需参数</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co">    age: 必需参数  </span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co">    *courses: 可变数量的课程</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co">    **extras: 可变数量的额外信息</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"姓名: </span><span class="sc">{</span>name<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"年龄: </span><span class="sc">{</span>age<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"课程: </span><span class="sc">{</span>courses<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"额外信息: </span><span class="sc">{</span>extras<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># 使用, 从第一个格式为 "xxx=yyy" 的参数开始算 extras</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>student_info(<span class="st">"张三"</span>, <span class="dv">18</span>, <span class="st">"数学"</span>, <span class="st">"物理"</span>, <span class="st">"化学"</span>, hobby<span class="op">=</span><span class="st">"篮球"</span>, score<span class="op">=</span><span class="dv">95</span>)</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 可以没有 courses</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>student_info(<span class="st">"李四"</span>, <span class="dv">20</span>, hobby<span class="op">=</span><span class="st">"音乐"</span>)</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="co"># "历史" 不是 "xxx=yyy" 结构, 报错!</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="co"># student_info("王五", 22, "英语", hobby="阅读", "历史")  # SyntaxError</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="first-class-objects" class="level3">
 <h3 class="anchored" data-anchor-id="first-class-objects">First-class Objects</h3>
@@ -1618,6 +1653,48 @@ First-class Objects Examples
 </div>
 </section>
 </section>
+<section id="链式调用" class="level3">
+<h3 class="anchored" data-anchor-id="链式调用">链式调用</h3>
+<p>返回 <code>*this</code> 的引用可以实现链式调用:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>chaining.cpp</strong></pre>
+</div>
+<div class="sourceCode" id="lst-chaining" data-filename="chaining.cpp"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-chaining-1"><a href="#lst-chaining-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="lst-chaining-2"><a href="#lst-chaining-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-chaining-3"><a href="#lst-chaining-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Point <span class="op">{</span></span>
+<span id="lst-chaining-4"><a href="#lst-chaining-4" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="lst-chaining-5"><a href="#lst-chaining-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="va">x_</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="dt">int</span> <span class="va">y_</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="lst-chaining-6"><a href="#lst-chaining-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-chaining-7"><a href="#lst-chaining-7" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="lst-chaining-8"><a href="#lst-chaining-8" aria-hidden="true" tabindex="-1"></a>    Point<span class="op">&amp;</span> setX<span class="op">(</span><span class="dt">int</span> x<span class="op">)</span> <span class="op">{</span></span>
+<span id="lst-chaining-9"><a href="#lst-chaining-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">x_</span> <span class="op">=</span> x<span class="op">;</span></span>
+<span id="lst-chaining-10"><a href="#lst-chaining-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">*</span><span class="kw">this</span><span class="op">;</span> </span>
+<span id="lst-chaining-11"><a href="#lst-chaining-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-chaining-12"><a href="#lst-chaining-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-chaining-13"><a href="#lst-chaining-13" aria-hidden="true" tabindex="-1"></a>    Point<span class="op">&amp;</span> setY<span class="op">(</span><span class="dt">int</span> y<span class="op">)</span> <span class="op">{</span></span>
+<span id="lst-chaining-14"><a href="#lst-chaining-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">y_</span> <span class="op">=</span> y<span class="op">;</span></span>
+<span id="lst-chaining-15"><a href="#lst-chaining-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">*</span><span class="kw">this</span><span class="op">;</span></span>
+<span id="lst-chaining-16"><a href="#lst-chaining-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="lst-chaining-17"><a href="#lst-chaining-17" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
+<span id="lst-chaining-18"><a href="#lst-chaining-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-chaining-19"><a href="#lst-chaining-19" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="lst-chaining-20"><a href="#lst-chaining-20" aria-hidden="true" tabindex="-1"></a>    Point p<span class="op">;</span></span>
+<span id="lst-chaining-21"><a href="#lst-chaining-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set values by chaining</span></span>
+<span id="lst-chaining-22"><a href="#lst-chaining-22" aria-hidden="true" tabindex="-1"></a>    p<span class="op">.</span>setX<span class="op">(</span><span class="dv">10</span><span class="op">).</span>setY<span class="op">(</span><span class="dv">20</span><span class="op">);</span></span>
+<span id="lst-chaining-23"><a href="#lst-chaining-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-chaining-24"><a href="#lst-chaining-24" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="cocotb-库" class="level3">
+<h3 class="anchored" data-anchor-id="cocotb-库"><code>cocotb</code> 库</h3>
+<ul>
+<li>常用操作:</li>
+</ul>
+<div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cocotb</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cocotb.clock <span class="im">import</span> Clock</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> cocotb.triggers <span class="im">import</span> RisingEdge</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
 </section>
 <section id="pybind11" class="level2">
 <h2 class="anchored" data-anchor-id="pybind11">Pybind11</h2>
@@ -1656,12 +1733,12 @@ First-class Objects Examples
 </div>
 </div>
 <p>运行类似下面的命令:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">c++</span> <span class="at">-O3</span> <span class="at">-Wall</span> <span class="at">-shared</span> <span class="at">-std</span><span class="op">=</span>c++11 <span class="at">-fPIC</span> <span class="at">-undefined</span> dynamic_lookup <span class="dt">\</span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">-I</span>/opt/homebrew/anaconda3/lib/python3.12/site-packages/pybind11/include <span class="dt">\</span></span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">-I</span>/opt/homebrew/anaconda3/include/python3.12 <span class="dt">\</span></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    add_op.cpp <span class="at">-o</span> ops.cpython-312-darwin.so</span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> main.py <span class="co"># output 8</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">c++</span> <span class="at">-O3</span> <span class="at">-Wall</span> <span class="at">-shared</span> <span class="at">-std</span><span class="op">=</span>c++11 <span class="at">-fPIC</span> <span class="at">-undefined</span> dynamic_lookup <span class="dt">\</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">-I</span>/opt/homebrew/anaconda3/lib/python3.12/site-packages/pybind11/include <span class="dt">\</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">-I</span>/opt/homebrew/anaconda3/include/python3.12 <span class="dt">\</span></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    add_op.cpp <span class="at">-o</span> ops.cpython-312-darwin.so</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> main.py <span class="co"># output 8</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>第一个命令会在当前目录下产生一个 <code>.so</code> (shared object) 文件. 运行 <code>python main.py</code> 的时候在 <code>import ops</code> 的时候, <code>Python</code> 会在 <code>.so</code> 文件中找到 <code>add</code> 函数.</p>
 </section>
 <section id="build-tools-构建工具" class="level2">
@@ -1674,21 +1751,21 @@ First-class Objects Examples
 <h3 class="anchored" data-anchor-id="makefile">Makefile</h3>
 <ul>
 <li><p>格式:</p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="dv">target:</span><span class="dt"> prerequisites</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>recipe</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb32"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="dv">target:</span><span class="dt"> prerequisites</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="er">    </span>recipe</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>缺省规则</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="dt">.DEFAULT_GOAL</span> <span class="ch">:=</span><span class="st"> all</span></span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="dv">all:</span><span class="dt"> ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb33"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="dt">.DEFAULT_GOAL</span> <span class="ch">:=</span><span class="st"> all</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="dv">all:</span><span class="dt"> ...</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>伪规则</p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> all clean</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb34"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="ot">.PHONY:</span><span class="dt"> all clean</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>Append:</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="dt">CFLAGS</span> <span class="ch">+=</span><span class="st"> -Wall -O2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb35"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="dt">CFLAGS</span> <span class="ch">+=</span><span class="st"> -Wall -O2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>改后缀名:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="dt">SRCS_ASM</span> <span class="ch">=</span><span class="st"> start.S</span></span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="dt">OBJS</span> <span class="ch">=</span><span class="st"> </span><span class="ch">$(</span><span class="dt">SRCS_ASM</span><span class="kw">:</span><span class="ss">.S</span><span class="kw">=</span><span class="ss">.o</span><span class="ch">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb36"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="dt">SRCS_ASM</span> <span class="ch">=</span><span class="st"> start.S</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="dt">OBJS</span> <span class="ch">=</span><span class="st"> </span><span class="ch">$(</span><span class="dt">SRCS_ASM</span><span class="kw">:</span><span class="ss">.S</span><span class="kw">=</span><span class="ss">.o</span><span class="ch">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>冒号前面和后面:</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="dv">%.o :</span><span class="dt"> %.c</span></span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">$(</span><span class="dt">CC</span><span class="ch">)</span> <span class="ch">$(</span><span class="dt">CFLAGS</span><span class="ch">)</span> -c <span class="ch">$&lt;</span> -o <span class="ch">$@</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode makefile code-with-copy"><code class="sourceCode makefile"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="dv">%.o :</span><span class="dt"> %.c</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a><span class="er">    </span><span class="ch">$(</span><span class="dt">CC</span><span class="ch">)</span> <span class="ch">$(</span><span class="dt">CFLAGS</span><span class="ch">)</span> -c <span class="ch">$&lt;</span> -o <span class="ch">$@</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><code>%</code> 为通配符, 意思是每当你需要一个 <code>.o</code> 文件, 并且当前目录下有对应的 <code>.c</code> 文件时, 就用下面的命令来生成它</li>
 <li><code>$&lt;</code>: 第一个依赖文件</li>
@@ -1696,6 +1773,7 @@ First-class Objects Examples
 <li><code>$^</code>: 所有依赖文件</li>
 <li><code>$?</code>: 所有比目标文件新的依赖文件</li>
 </ul></li>
+<li><p>在 Makefile 里面调用 <code>make</code>: 建议用 <code>$(MAKE)</code> (不需要定义直接有).</p></li>
 </ul>
 </section>
 <section id="bazel" class="level3">
@@ -1738,65 +1816,6 @@ First-class Objects Examples
 <li><strong>Dependencies 依赖</strong></li>
 </ul>
 </section>
-</section>
-</section>
-<section id="coding-techniques" class="level2">
-<h2 class="anchored" data-anchor-id="coding-techniques">Coding Techniques</h2>
-<section id="正负无穷" class="level3">
-<h3 class="anchored" data-anchor-id="正负无穷">正负无穷</h3>
-<p>涉及最小/最大值初始化. 例如我们要找 <code>arr</code> 中的最大值:</p>
-<div class="sourceCode" id="cb36"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;float.h&gt;</span><span class="pp">   </span><span class="co">// for FLT_MAX</span></span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> arr<span class="op">[]</span> <span class="op">=</span> <span class="op">{</span><span class="fl">3.2</span><span class="op">,</span> <span class="op">-</span><span class="fl">1.5</span><span class="op">,</span> <span class="fl">7.8</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">4.4</span><span class="op">};</span></span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n <span class="op">=</span> <span class="kw">sizeof</span><span class="op">(</span>arr<span class="op">)</span> <span class="op">/</span> <span class="kw">sizeof</span><span class="op">(</span>arr<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> max_val <span class="op">=</span> <span class="op">-</span>FLT_MAX<span class="op">;</span>    <span class="co">// Initialize to -inf</span></span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> n<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>arr<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;</span> max_val<span class="op">)</span>   max_val <span class="op">=</span> arr<span class="op">[</span>i<span class="op">];</span></span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"Max value: "</span> <span class="op">&lt;&lt;</span> max_val <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="向上取整转为向下取整" class="level3">
-<h3 class="anchored" data-anchor-id="向上取整转为向下取整">向上取整转为向下取整</h3>
-<p>可通过 <span class="math display">\[\left\lceil \frac{x}{y} \right\rceil = \left\lfloor \frac{x + y - 1}{y} \right\rfloor\]</span> 实现 (由于整数除法默认向下取整):</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> ceil_div<span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">)</span> <span class="op">{</span></span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(</span>x <span class="op">+</span> y <span class="op">-</span> <span class="dv">1</span><span class="op">)</span> <span class="op">/</span> y<span class="op">;</span> <span class="co">// Automatically does floor division</span></span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-<section id="链式调用" class="level3">
-<h3 class="anchored" data-anchor-id="链式调用">链式调用</h3>
-<p>返回 <code>*this</code> 的引用可以实现链式调用:</p>
-<div class="code-with-filename">
-<div class="code-with-filename-file">
-<pre><strong>chaining.cpp</strong></pre>
-</div>
-<div class="sourceCode" id="lst-chaining" data-filename="chaining.cpp"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-chaining-1"><a href="#lst-chaining-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
-<span id="lst-chaining-2"><a href="#lst-chaining-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="lst-chaining-3"><a href="#lst-chaining-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Point <span class="op">{</span></span>
-<span id="lst-chaining-4"><a href="#lst-chaining-4" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
-<span id="lst-chaining-5"><a href="#lst-chaining-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> <span class="va">x_</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="dt">int</span> <span class="va">y_</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="lst-chaining-6"><a href="#lst-chaining-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="lst-chaining-7"><a href="#lst-chaining-7" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
-<span id="lst-chaining-8"><a href="#lst-chaining-8" aria-hidden="true" tabindex="-1"></a>    Point<span class="op">&amp;</span> setX<span class="op">(</span><span class="dt">int</span> x<span class="op">)</span> <span class="op">{</span></span>
-<span id="lst-chaining-9"><a href="#lst-chaining-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">x_</span> <span class="op">=</span> x<span class="op">;</span></span>
-<span id="lst-chaining-10"><a href="#lst-chaining-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">*</span><span class="kw">this</span><span class="op">;</span> </span>
-<span id="lst-chaining-11"><a href="#lst-chaining-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="lst-chaining-12"><a href="#lst-chaining-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="lst-chaining-13"><a href="#lst-chaining-13" aria-hidden="true" tabindex="-1"></a>    Point<span class="op">&amp;</span> setY<span class="op">(</span><span class="dt">int</span> y<span class="op">)</span> <span class="op">{</span></span>
-<span id="lst-chaining-14"><a href="#lst-chaining-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">y_</span> <span class="op">=</span> y<span class="op">;</span></span>
-<span id="lst-chaining-15"><a href="#lst-chaining-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">*</span><span class="kw">this</span><span class="op">;</span></span>
-<span id="lst-chaining-16"><a href="#lst-chaining-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="lst-chaining-17"><a href="#lst-chaining-17" aria-hidden="true" tabindex="-1"></a><span class="op">};</span></span>
-<span id="lst-chaining-18"><a href="#lst-chaining-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="lst-chaining-19"><a href="#lst-chaining-19" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="lst-chaining-20"><a href="#lst-chaining-20" aria-hidden="true" tabindex="-1"></a>    Point p<span class="op">;</span></span>
-<span id="lst-chaining-21"><a href="#lst-chaining-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set values by chaining</span></span>
-<span id="lst-chaining-22"><a href="#lst-chaining-22" aria-hidden="true" tabindex="-1"></a>    p<span class="op">.</span>setX<span class="op">(</span><span class="dv">10</span><span class="op">).</span>setY<span class="op">(</span><span class="dv">20</span><span class="op">);</span></span>
-<span id="lst-chaining-23"><a href="#lst-chaining-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="lst-chaining-24"><a href="#lst-chaining-24" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 </section>
 </section>
 <section id="coding-habits" class="level2">
@@ -1865,39 +1884,45 @@ First-class Objects Examples
 <ul>
 <li><p>能加上 <code>const</code> 尽量加上 (比如 <a href="#lst-account_private" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-account_private</span></a>).</p></li>
 <li><p><code>const</code> 用法:</p>
-<div class="sourceCode" id="cb38"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">int</span> <span class="op">*</span>p1<span class="op">;</span> <span class="co">// p1 本身可以修改, 但指向的内容不可以修改</span></span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span> <span class="at">const</span> p2<span class="op">;</span> <span class="co">// p2 本身不可以修改, 但指向的内容可以修改</span></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">int</span> <span class="op">*</span> <span class="at">const</span> p3<span class="op">;</span> <span class="co">// 都不能修改</span></span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="at">const</span><span class="op">&amp;</span> my_int<span class="op">;</span> <span class="co">// 引用的内容不可以修改, 同 const int&amp;</span></span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a><span class="co">// int &amp;const // 不合法</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb39"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">int</span> <span class="op">*</span>p1<span class="op">;</span> <span class="co">// p1 本身可以修改, 但指向的内容不可以修改</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="op">*</span> <span class="at">const</span> p2<span class="op">;</span> <span class="co">// p2 本身不可以修改, 但指向的内容可以修改</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">int</span> <span class="op">*</span> <span class="at">const</span> p3<span class="op">;</span> <span class="co">// 都不能修改</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> <span class="at">const</span><span class="op">&amp;</span> my_int<span class="op">;</span> <span class="co">// 引用的内容不可以修改, 同 const int&amp;</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="co">// int &amp;const // 不合法</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><code>Pytorch C++ API</code> 中提供 <code>TORCH_ARG</code> 宏, 用于自动生成类成员变量的 getter 和 setter 方法:</p>
-<div class="sourceCode" id="cb39"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;torch/torch.h&gt;</span></span>
-<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>TORCH_ARG<span class="op">(</span><span class="dt">double</span><span class="op">,</span> balance<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;torch/torch.h&gt;</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>TORCH_ARG<span class="op">(</span><span class="dt">double</span><span class="op">,</span> balance<span class="op">)</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>自动展开为:</p>
-<div class="sourceCode" id="cb40"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> <span class="va">balance_</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// getter</span></span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span><span class="op">&amp;</span> balance<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> <span class="va">balance_</span><span class="op">;</span> <span class="op">}</span></span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// setter</span></span>
-<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span><span class="op">&amp;</span> balance<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="va">balance_</span><span class="op">;</span> <span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">private</span><span class="op">:</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span> <span class="va">balance_</span> <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span><span class="op">:</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// getter</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">const</span> <span class="dt">double</span><span class="op">&amp;</span> balance<span class="op">()</span> <span class="at">const</span> <span class="op">{</span> <span class="cf">return</span> <span class="va">balance_</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// setter</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">double</span><span class="op">&amp;</span> balance<span class="op">()</span> <span class="op">{</span> <span class="cf">return</span> <span class="va">balance_</span><span class="op">;</span> <span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>这种写法类似 <a href="#lst-account_private" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-account_private</span></a>, <code>const double&amp;</code> 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 <code>const</code> 表示 getter 方法本身不会修改这个类的<strong>所有</strong>成员变量 (<code>balance_</code> in this case). 用户可以通过 <code>obj.balance()</code> 来获取余额, 也可以通过 <code>obj.balance() = 100.0;</code> 来修改余额.</p></li>
 <li><p><code>const</code> 和 <code>constexpr</code> 区别:</p>
 <ul>
 <li><code>constexpr</code> 变量在编译时就算出来了, 且不可修改. 一般用于<strong>性能优化</strong>或用作<strong>编译时才能决定声明的数组大小</strong>.</li>
 </ul>
-<div class="sourceCode" id="cb41"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">int</span> x <span class="op">=</span> some_runtime_function<span class="op">();</span> <span class="co">// 合法</span></span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> <span class="dt">int</span> y <span class="op">=</span> some_runtime_function<span class="op">();</span> <span class="co">// 不合法, 因为 some_runtime_function() 不是常量表达式</span></span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> <span class="dt">int</span> kTensorSize <span class="op">=</span> <span class="dv">256</span> <span class="op">*</span> <span class="dv">1024</span><span class="op">;</span> <span class="co">// 合法</span></span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="dt">uint8_t</span> tensor<span class="op">[</span>kTensorSize<span class="op">];</span> <span class="co">// 编译时决定的数组大小</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb42"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="at">const</span> <span class="dt">int</span> x <span class="op">=</span> some_runtime_function<span class="op">();</span> <span class="co">// 合法</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> <span class="dt">int</span> y <span class="op">=</span> some_runtime_function<span class="op">();</span> <span class="co">// 不合法, 因为 some_runtime_function() 不是常量表达式</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a><span class="kw">constexpr</span> <span class="dt">int</span> kTensorSize <span class="op">=</span> <span class="dv">256</span> <span class="op">*</span> <span class="dv">1024</span><span class="op">;</span> <span class="co">// 合法</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="dt">uint8_t</span> tensor<span class="op">[</span>kTensorSize<span class="op">];</span> <span class="co">// 编译时决定的数组大小</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+</section>
+<section id="for-循环的边界" class="level3">
+<h3 class="anchored" data-anchor-id="for-循环的边界"><code>for</code> 循环的边界</h3>
+<ul>
+<li>从 <code>0</code> 开始计数, 用 <code>&lt;</code> 而不是 <code>&lt;=</code>.</li>
 </ul>
 </section>
 </section>
-<section id="tips-on-code-reading" class="level2">
-<h2 class="anchored" data-anchor-id="tips-on-code-reading">Tips on Code Reading</h2>
+<section id="code-reading-techniques" class="level2">
+<h2 class="anchored" data-anchor-id="code-reading-techniques">Code Reading &amp; Techniques</h2>
 <section id="first-encounter" class="level3">
 <h3 class="anchored" data-anchor-id="first-encounter">First Encounter</h3>
 <ul>
@@ -1906,13 +1931,44 @@ First-class Objects Examples
 <li><p>先阅读接口函数 (一般会在 <code>.h</code> 文件中!). 如果直接看 <code>.cc</code> 文件, 会看到一些接口实现调用的函数, 而且这些函数会放在接口函数上面, 这样丢掉了重点.</p></li>
 <li><p>关注参数列表的 <code>const</code>, 这意味着这些是只读的不会改变!</p></li>
 <li><p>读懂参数的含义是一件费时的事情, 但很多时候费时的地方在弄懂信息的<strong>存储格式</strong>. 比如你看到:</p>
-<div class="sourceCode" id="cb42"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> DepthwiseConvPerChannel<span class="op">(</span><span class="at">const</span> DeptheiseParam<span class="op">&amp;</span> params<span class="op">,</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>                             <span class="at">const</span> <span class="dt">int32_t</span><span class="op">*</span> output_multiplier<span class="op">,</span></span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">const</span> <span class="dt">int32_t</span><span class="op">*</span> output_shift<span class="op">,</span></span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>                             <span class="at">const</span> RuntimeShape<span class="op">&amp;</span> in_shape<span class="op">,</span></span>
-<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>                             <span class="op">...)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> DepthwiseConvPerChannel<span class="op">(</span><span class="at">const</span> DeptheiseParam<span class="op">&amp;</span> params<span class="op">,</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>                             <span class="at">const</span> <span class="dt">int32_t</span><span class="op">*</span> output_multiplier<span class="op">,</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>                             <span class="at">const</span> <span class="dt">int32_t</span><span class="op">*</span> output_shift<span class="op">,</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>                             <span class="at">const</span> RuntimeShape<span class="op">&amp;</span> in_shape<span class="op">,</span></span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>                             <span class="op">...)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>就会很想知道 <code>params</code>, <code>output_multiplier</code> 等里面到底是怎样的结构. 但请克制自己不要知道, 或者自己随便构思一个结构让自己相信它是对的! 因为这些数据结构的实现非常 ad hoc 而且不重要.</p></li>
 </ul>
+</section>
+<section id="一些条件反射" class="level3">
+<h3 class="anchored" data-anchor-id="一些条件反射">一些条件反射</h3>
+<section id="二维数组的全局索引" class="level4">
+<h4 class="anchored" data-anchor-id="二维数组的全局索引">二维数组的全局索引</h4>
+<p>遇到下面这种形式的代码时, 要瞬间意识到这是在计算<strong>二维数组</strong>的全局索引:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>lsu_index <span class="op">=</span> i * THREADS_PER_BLOCK <span class="op">+</span> j<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="正负无穷" class="level4">
+<h4 class="anchored" data-anchor-id="正负无穷">正负无穷</h4>
+<p>涉及最小/最大值初始化. 例如我们要找 <code>arr</code> 中的最大值:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;float.h&gt;</span><span class="pp">   </span><span class="co">// for FLT_MAX</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> arr<span class="op">[]</span> <span class="op">=</span> <span class="op">{</span><span class="fl">3.2</span><span class="op">,</span> <span class="op">-</span><span class="fl">1.5</span><span class="op">,</span> <span class="fl">7.8</span><span class="op">,</span> <span class="fl">0.0</span><span class="op">,</span> <span class="fl">4.4</span><span class="op">};</span></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n <span class="op">=</span> <span class="kw">sizeof</span><span class="op">(</span>arr<span class="op">)</span> <span class="op">/</span> <span class="kw">sizeof</span><span class="op">(</span>arr<span class="op">[</span><span class="dv">0</span><span class="op">]);</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">float</span> max_val <span class="op">=</span> <span class="op">-</span>FLT_MAX<span class="op">;</span>    <span class="co">// Initialize to -inf</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> n<span class="op">;</span> i<span class="op">++)</span> <span class="op">{</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>arr<span class="op">[</span>i<span class="op">]</span> <span class="op">&gt;</span> max_val<span class="op">)</span>   max_val <span class="op">=</span> arr<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="st">"Max value: "</span> <span class="op">&lt;&lt;</span> max_val <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="向上取整转为向下取整" class="level4">
+<h4 class="anchored" data-anchor-id="向上取整转为向下取整">向上取整转为向下取整</h4>
+<p>可通过 <span class="math display">\[\left\lceil \frac{x}{y} \right\rceil = \left\lfloor \frac{x + y - 1}{y} \right\rfloor\]</span> 实现 (由于整数除法默认向下取整):</p>
+<div class="sourceCode" id="cb46"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> ceil_div<span class="op">(</span><span class="dt">int</span> x<span class="op">,</span> <span class="dt">int</span> y<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(</span>x <span class="op">+</span> y <span class="op">-</span> <span class="dv">1</span><span class="op">)</span> <span class="op">/</span> y<span class="op">;</span> <span class="co">// Automatically does floor division</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
 </section>
 </section>
 <section id="verilog" class="level2">
@@ -1936,64 +1992,64 @@ First-class Objects Examples
 <li><p>(procedure 一定要放在 always 块中吗?)</p></li>
 <li><p>(为什么 wire 类型不能在 always 里面被赋值?)</p></li>
 <li><p><code>always</code> 块中的代码是<strong>顺序执行</strong>的 (但在 <code>always</code> 块外的代码是<strong>并行执行</strong>的).</p>
-<div class="sourceCode" id="cb43"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> top <span class="op">(</span><span class="dt">input</span> my_in<span class="op">,</span> <span class="dt">output</span> <span class="dt">reg</span> my_out<span class="op">);</span></span>
-<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>        my_out <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
-<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>        my_out <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// This is valid! (Always block 按顺序执行)</span></span>
-<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
-<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb47"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> top <span class="op">(</span><span class="dt">input</span> my_in<span class="op">,</span> <span class="dt">output</span> <span class="dt">reg</span> my_out<span class="op">);</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>        my_out <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>        my_out <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// This is valid! (Always block 按顺序执行)</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><p><strong>Latch 推断</strong>: 下面如果 <code>cpu_overheated = 0</code> 则默认会让 <code>shut_off_computer</code> 保持上一个值, 这就是 latch 推断.</p>
-<div class="sourceCode" id="cb44"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>cpu_overheated<span class="op">)</span></span>
-<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>        shut_off_computer <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>cpu_overheated<span class="op">)</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>        shut_off_computer <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>有时我们就是需要这种推断, 但为了避免, 可以利用always 的顺序性先提前赋值:</p>
-<div class="sourceCode" id="cb45"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>    shut_off_computer <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// 先提前赋值</span></span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>cpu_overheated<span class="op">)</span></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>        shut_off_computer <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb49"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>    shut_off_computer <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// 先提前赋值</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>cpu_overheated<span class="op">)</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>        shut_off_computer <span class="op">=</span> <span class="dv">1</span><span class="op">;</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
 <li><p><code>input a</code> 默认为 <code>wire</code>.</p></li>
 <li><p><code>begin end</code> 在只有一行代码时可以省略 (相当于 C 中的 <code>{}</code>).</p></li>
 <li><p><code>wire</code> 不能在 <code>always</code> 块中被赋值. <code>reg</code> 才能在 <code>always</code> 中被赋值.</p>
-<div class="sourceCode" id="cb46"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> a<span class="op">;</span></span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> a <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Error!</span></span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb47"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> a<span class="op">;</span></span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    a <span class="op">&lt;=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Not an error, `a` is viewed as a reg.</span></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb50"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> a<span class="op">;</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">assign</span> a <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Error!</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> a<span class="op">;</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span>*<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>    a <span class="op">&lt;=</span> <span class="dv">1</span><span class="op">;</span> <span class="co">// Not an error, `a` is viewed as a reg.</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><strong>Synchronous and Asynchronous Reset</strong>:</p>
 <ul>
 <li><p>synchronous reset:</p>
-<div class="sourceCode" id="cb48"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>reset<span class="op">)</span></span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>        ...</span>
-<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb52"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>reset<span class="op">)</span></span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>        ...</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>asynchronous reset:</p>
-<div class="sourceCode" id="cb49"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk <span class="dt">or</span> <span class="kw">posedge</span> reset<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>reset<span class="op">)</span></span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>        ...</span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb53"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk <span class="dt">or</span> <span class="kw">posedge</span> reset<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>reset<span class="op">)</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>        ...</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
 <li><p><code>or</code> <strong>只能</strong>在 <code>always</code> 块中使用, <code>if ()</code> 中要用 <code>||</code>.</p></li>
 <li><p><strong>Inference</strong> 和 <strong>Instantiation</strong>:</p>
 <ul>
 <li><p><strong>Inference</strong>: 通过 <code>always</code> 块的内容推断出一个模块的功能.</p></li>
 <li><p><strong>Instantiation</strong>: 显式地实例化一个模块, 通过 <code>module_name instance_name (port_map)</code> 的方式:</p>
-<div class="sourceCode" id="cb50"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>fetcher #<span class="op">(</span></span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>    .PROGRAM_MEM_ADDR_BITS<span class="op">(</span>PROGRAM_MEM_ADDR_BITS<span class="op">),</span></span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>    .PROGRAM_MEM_DATA_BITS<span class="op">(</span>PROGRAM_MEM_DATA_BITS<span class="op">)</span></span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> fetcher_instance <span class="op">(</span></span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    .clk<span class="op">(</span>clk<span class="op">),</span></span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    .reset<span class="op">(</span>reset<span class="op">),</span></span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    .core_state<span class="op">(</span>core_state<span class="op">),</span></span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>    .current_pc<span class="op">(</span>current_pc<span class="op">),</span></span>
-<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>    ...</span>
-<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>fetcher #<span class="op">(</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    .PROGRAM_MEM_ADDR_BITS<span class="op">(</span>PROGRAM_MEM_ADDR_BITS<span class="op">),</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    .PROGRAM_MEM_DATA_BITS<span class="op">(</span>PROGRAM_MEM_DATA_BITS<span class="op">)</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> fetcher_instance <span class="op">(</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    .clk<span class="op">(</span>clk<span class="op">),</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>    .reset<span class="op">(</span>reset<span class="op">),</span></span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>    .core_state<span class="op">(</span>core_state<span class="op">),</span></span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    .current_pc<span class="op">(</span>current_pc<span class="op">),</span></span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>注意 <code>port_map</code> 左侧是模块内的端口名, 右侧是当前作用域内的信号名 (不一定要一样).</li>
 <li><code>#(...)</code> 是 <code>systemverilog</code> 的语法, 用来<strong>传递参数</strong>. 同样, 右侧是当前作用域内的参数名.
@@ -2003,9 +2059,9 @@ First-class Objects Examples
 </ul></li>
 </ul></li>
 <li><p>循环群结构 (Torus, etc) 如果用 <code>%</code> 运算符来处理会消耗大量资源, <strong>尽量用 <code>if</code> 语句</strong>:</p>
-<div class="sourceCode" id="cb51"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="op">(</span>mm <span class="op">==</span> <span class="bn">8'd59</span><span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>    mm <span class="op">&lt;=</span> <span class="bn">8'd0</span><span class="op">;</span></span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="op">(</span>mm <span class="op">==</span> <span class="bn">8'd59</span><span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>    mm <span class="op">&lt;=</span> <span class="bn">8'd0</span><span class="op">;</span></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>如果用 <code>%</code> 运算符来处理:
 <ul>
@@ -2025,13 +2081,13 @@ First-class Objects Examples
 <h3 class="anchored" data-anchor-id="verilog-向量">Verilog 向量</h3>
 <ul>
 <li><p>一个易错点</p>
-<div class="sourceCode" id="cb52"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="dt">reg</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> foo<span class="op">;</span>      <span class="co">// foo[i] 是 1 bit</span></span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="dt">reg</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> foo<span class="op">[</span><span class="dv">3</span><span class="op">:</span><span class="dv">0</span><span class="op">];</span> <span class="co">// foo[i] 是 8 bit</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb56"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="dt">reg</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> foo<span class="op">;</span>      <span class="co">// foo[i] 是 1 bit</span></span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="dt">reg</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> foo<span class="op">[</span><span class="dv">3</span><span class="op">:</span><span class="dv">0</span><span class="op">];</span> <span class="co">// foo[i] 是 8 bit</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>index 可以是负数:</p>
-<div class="sourceCode" id="cb53"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="dt">reg</span> <span class="op">[</span><span class="dv">5</span><span class="op">:-</span><span class="dv">1</span><span class="op">]</span> my_reg<span class="op">;</span> <span class="co">// index 可以是负数.</span></span>
-<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> <span class="op">[</span><span class="dv">0</span><span class="op">:</span><span class="dv">3</span><span class="op">]</span> my_wire<span class="op">;</span> <span class="co">// Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb57"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="dt">reg</span> <span class="op">[</span><span class="dv">5</span><span class="op">:-</span><span class="dv">1</span><span class="op">]</span> my_reg<span class="op">;</span> <span class="co">// index 可以是负数.</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a><span class="dt">wire</span> <span class="op">[</span><span class="dv">0</span><span class="op">:</span><span class="dv">3</span><span class="op">]</span> my_wire<span class="op">;</span> <span class="co">// Big-endian, mywire[0] is MSB, use my_wire[3:0] later is illegal!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><strong>Concatenation</strong>:</p>
-<div class="sourceCode" id="cb54"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> out <span class="op">=</span> <span class="op">{</span>tmp<span class="op">,</span> <span class="op">{</span><span class="dv">3</span><span class="op">{</span><span class="bn">3'b100</span><span class="op">}}};</span> <span class="co">// Concatenation, out = 0000011 100 100 100</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb58"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="kw">assign</span> out <span class="op">=</span> <span class="op">{</span>tmp<span class="op">,</span> <span class="op">{</span><span class="dv">3</span><span class="op">{</span><span class="bn">3'b100</span><span class="op">}}};</span> <span class="co">// Concatenation, out = 0000011 100 100 100</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="硬件代码生成" class="level3">
@@ -2042,20 +2098,20 @@ First-class Objects Examples
 <div class="quarto-layout-panel" data-layout-ncol="2">
 <div class="quarto-layout-row">
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div class="sourceCode" id="cb55"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="dt">genvar</span> i<span class="op">;</span></span>
-<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="kw">generate</span></span>
-<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">for</span> <span class="op">(</span>i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i <span class="op">=</span> i <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="kw">begin :</span><span class="dt"> gen_regs</span></span>
-<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>        <span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>            q<span class="op">[</span>i<span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span>i<span class="op">];</span></span>
-<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
-<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
-<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a><span class="kw">endgenerate</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb59"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="dt">genvar</span> i<span class="op">;</span> <span class="co">// 只用于生成硬件结构的循环变量</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="kw">generate</span></span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">for</span> <span class="op">(</span>i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> <span class="dv">4</span><span class="op">;</span> i <span class="op">=</span> i <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="kw">begin :</span><span class="dt"> gen_regs</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>        <span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>            q<span class="op">[</span>i<span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span>i<span class="op">];</span></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a><span class="kw">endgenerate</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div class="sourceCode" id="cb56"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> q<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> q<span class="op">[</span><span class="dv">1</span><span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span><span class="dv">1</span><span class="op">];</span></span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> q<span class="op">[</span><span class="dv">2</span><span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span><span class="dv">2</span><span class="op">];</span></span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> q<span class="op">[</span><span class="dv">3</span><span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span><span class="dv">3</span><span class="op">];</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> q<span class="op">[</span><span class="dv">0</span><span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span><span class="dv">0</span><span class="op">];</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> q<span class="op">[</span><span class="dv">1</span><span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span><span class="dv">1</span><span class="op">];</span></span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> q<span class="op">[</span><span class="dv">2</span><span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span><span class="dv">2</span><span class="op">];</span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> q<span class="op">[</span><span class="dv">3</span><span class="op">]</span> <span class="op">&lt;=</span> d<span class="op">[</span><span class="dv">3</span><span class="op">];</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -2065,44 +2121,44 @@ First-class Objects Examples
 <div class="quarto-layout-panel" data-layout-ncol="2">
 <div class="quarto-layout-row">
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div class="sourceCode" id="cb57"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> reg1 #<span class="op">(</span></span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">parameter</span> bit USE_RESET <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a><span class="op">)(</span></span>
-<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic clk<span class="op">,</span></span>
-<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic rstn<span class="op">,</span></span>
-<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic d<span class="op">,</span></span>
-<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">output</span> logic q</span>
-<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
-<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a><span class="kw">generate</span></span>
-<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>USE_RESET<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk <span class="dt">or</span> <span class="kw">negedge</span> rstn<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>            <span class="kw">if</span> <span class="op">(!</span>rstn<span class="op">)</span></span>
-<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>                q <span class="op">&lt;=</span> <span class="bn">1'b0</span><span class="op">;</span></span>
-<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>            <span class="kw">else</span></span>
-<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>                q <span class="op">&lt;=</span> d<span class="op">;</span></span>
-<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
-<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span> <span class="kw">else</span> <span class="kw">begin</span></span>
-<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a>            q <span class="op">&lt;=</span> d<span class="op">;</span></span>
-<span id="cb57-20"><a href="#cb57-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
-<span id="cb57-21"><a href="#cb57-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
-<span id="cb57-22"><a href="#cb57-22" aria-hidden="true" tabindex="-1"></a><span class="kw">endgenerate</span></span>
-<span id="cb57-23"><a href="#cb57-23" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> reg1 #<span class="op">(</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">parameter</span> bit USE_RESET <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a><span class="op">)(</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic clk<span class="op">,</span></span>
+<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic rstn<span class="op">,</span></span>
+<span id="cb61-6"><a href="#cb61-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic d<span class="op">,</span></span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">output</span> logic q</span>
+<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a><span class="kw">generate</span></span>
+<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>USE_RESET<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a>        <span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk <span class="dt">or</span> <span class="kw">negedge</span> rstn<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a>            <span class="kw">if</span> <span class="op">(!</span>rstn<span class="op">)</span></span>
+<span id="cb61-13"><a href="#cb61-13" aria-hidden="true" tabindex="-1"></a>                q <span class="op">&lt;=</span> <span class="bn">1'b0</span><span class="op">;</span></span>
+<span id="cb61-14"><a href="#cb61-14" aria-hidden="true" tabindex="-1"></a>            <span class="kw">else</span></span>
+<span id="cb61-15"><a href="#cb61-15" aria-hidden="true" tabindex="-1"></a>                q <span class="op">&lt;=</span> d<span class="op">;</span></span>
+<span id="cb61-16"><a href="#cb61-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb61-17"><a href="#cb61-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span> <span class="kw">else</span> <span class="kw">begin</span></span>
+<span id="cb61-18"><a href="#cb61-18" aria-hidden="true" tabindex="-1"></a>        <span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb61-19"><a href="#cb61-19" aria-hidden="true" tabindex="-1"></a>            q <span class="op">&lt;=</span> d<span class="op">;</span></span>
+<span id="cb61-20"><a href="#cb61-20" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb61-21"><a href="#cb61-21" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb61-22"><a href="#cb61-22" aria-hidden="true" tabindex="-1"></a><span class="kw">endgenerate</span></span>
+<span id="cb61-23"><a href="#cb61-23" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div class="sourceCode" id="cb58"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> reg1 <span class="op">(</span></span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic clk<span class="op">,</span></span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic rstn<span class="op">,</span></span>
-<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic d<span class="op">,</span></span>
-<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">output</span> logic q</span>
-<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
-<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk <span class="dt">or</span> <span class="kw">negedge</span> rstn<span class="op">)</span> <span class="kw">begin</span></span>
-<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(!</span>rstn<span class="op">)</span></span>
-<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>        q <span class="op">&lt;=</span> <span class="bn">1'b0</span><span class="op">;</span></span>
-<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">else</span></span>
-<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a>        q <span class="op">&lt;=</span> d<span class="op">;</span></span>
-<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
-<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> reg1 <span class="op">(</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic clk<span class="op">,</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic rstn<span class="op">,</span></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">input</span>  logic d<span class="op">,</span></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">output</span> logic q</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk <span class="dt">or</span> <span class="kw">negedge</span> rstn<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb62-8"><a href="#cb62-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(!</span>rstn<span class="op">)</span></span>
+<span id="cb62-9"><a href="#cb62-9" aria-hidden="true" tabindex="-1"></a>        q <span class="op">&lt;=</span> <span class="bn">1'b0</span><span class="op">;</span></span>
+<span id="cb62-10"><a href="#cb62-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">else</span></span>
+<span id="cb62-11"><a href="#cb62-11" aria-hidden="true" tabindex="-1"></a>        q <span class="op">&lt;=</span> d<span class="op">;</span></span>
+<span id="cb62-12"><a href="#cb62-12" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb62-13"><a href="#cb62-13" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>
@@ -2111,33 +2167,33 @@ First-class Objects Examples
 <h3 class="anchored" data-anchor-id="systemverilog-函数">Systemverilog 函数</h3>
 <ul>
 <li><p><code>$clog_2</code>: 向上取整的 <span class="math inline">\(\log_2(\cdot)\)</span>, 比如:</p>
-<div class="sourceCode" id="cb59"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="dt">input</span> <span class="dt">wire</span> <span class="op">[</span><span class="dt">$clog2</span><span class="op">(</span>THREADS_PER_BLOCK<span class="op">):</span><span class="dv">0</span><span class="op">]</span> thread_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb63"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="dt">input</span> <span class="dt">wire</span> <span class="op">[</span><span class="dt">$clog2</span><span class="op">(</span>THREADS_PER_BLOCK<span class="op">):</span><span class="dv">0</span><span class="op">]</span> thread_count</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="verilog-testbench" class="level3">
 <h3 class="anchored" data-anchor-id="verilog-testbench">Verilog Testbench</h3>
-<div class="sourceCode" id="cb60"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="ot">`timescale 1ns / 1ps </span><span class="co">// #1 代表 1ns, 最精确可以到 #1.001</span></span>
-<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="ot">`timescale 1ns / 1ns </span><span class="co">// #1 代表 1ns, #1.01 等是不合法的</span></span>
-<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="dt">$stop</span> <span class="co">//停下来</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="ot">`timescale 1ns / 1ps </span><span class="co">// #1 代表 1ns, 最精确可以到 #1.001</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="ot">`timescale 1ns / 1ns </span><span class="co">// #1 代表 1ns, #1.01 等是不合法的</span></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a><span class="dt">$stop</span> <span class="co">//停下来</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="chisel" class="level2">
 <h2 class="anchored" data-anchor-id="chisel">Chisel</h2>
 <ul>
 <li><p><code>+&amp;</code>: 如果 <code>io.in_a</code> 和 <code>io.in_b</code> 为 <code>4.W</code> 时, 则 <code>sum</code> 为 <code>5.W</code> (带溢出).</p>
-<div class="sourceCode" id="cb61"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> sum <span class="op">=</span> io<span class="op">.</span>in_a <span class="op">+&amp;</span> io<span class="op">.</span>in_b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb65"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> sum <span class="op">=</span> io<span class="op">.</span>in_a <span class="op">+&amp;</span> io<span class="op">.</span>in_b</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>允许多个 <code>:=</code> 赋值到同一个输出:</p>
-<div class="sourceCode" id="cb62"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span>out <span class="op">:=</span> <span class="fl">0.</span>U</span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span>out <span class="op">:=</span> <span class="fl">1.</span>U <span class="co">// 覆盖上一个</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb66"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span>out <span class="op">:=</span> <span class="fl">0.</span>U</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span>out <span class="op">:=</span> <span class="fl">1.</span>U <span class="co">// 覆盖上一个</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><code>if</code> 和 <code>when</code> 的区别:</p>
 <ul>
 <li><code>if</code> 用来在编译阶段决定电路是哪一种</li>
 <li><code>when</code> 用来生成固定的 verilog 电路, 相当于 verilog 的 <code>if</code>.</li>
 </ul></li>
 <li><p><code>orR</code>: reduction OR, 对所有位进行 OR 操作. 比如 GPR 读寄存器时, 只要地址不是全 0，就读出寄存器的值 (即创建了一个虚拟的 x0 寄存器，值恒为 0):</p>
-<div class="sourceCode" id="cb63"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span>rdata1 <span class="op">:=</span> <span class="fu">Mux</span><span class="op">(</span>io<span class="op">.</span>raddr1<span class="op">.</span>orR<span class="op">,</span> <span class="fu">regs</span><span class="op">(</span>io<span class="op">.</span>raddr1<span class="op">),</span> <span class="fl">0.</span>U<span class="op">)</span></span>
-<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span>rdata2 <span class="op">:=</span> <span class="fu">Mux</span><span class="op">(</span>io<span class="op">.</span>raddr2<span class="op">.</span>orR<span class="op">,</span> <span class="fu">regs</span><span class="op">(</span>io<span class="op">.</span>raddr2<span class="op">),</span> <span class="fl">0.</span>U<span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb67"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span>rdata1 <span class="op">:=</span> <span class="fu">Mux</span><span class="op">(</span>io<span class="op">.</span>raddr1<span class="op">.</span>orR<span class="op">,</span> <span class="fu">regs</span><span class="op">(</span>io<span class="op">.</span>raddr1<span class="op">),</span> <span class="fl">0.</span>U<span class="op">)</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>io<span class="op">.</span>rdata2 <span class="op">:=</span> <span class="fu">Mux</span><span class="op">(</span>io<span class="op">.</span>raddr2<span class="op">.</span>orR<span class="op">,</span> <span class="fu">regs</span><span class="op">(</span>io<span class="op">.</span>raddr2<span class="op">),</span> <span class="fl">0.</span>U<span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 <section id="area-optimization-面积优化方法" class="level3">
 <h3 class="anchored" data-anchor-id="area-optimization-面积优化方法">Area Optimization 面积优化方法</h3>
@@ -2147,12 +2203,12 @@ First-class Objects Examples
 <section id="cse-公共子表达式消除" class="level4">
 <h4 class="anchored" data-anchor-id="cse-公共子表达式消除">CSE 公共子表达式消除</h4>
 <p><strong>Common Subexpression Elimination</strong> 也是编译器优化的一种. 举个简单的例子:</p>
-<div class="sourceCode" id="cb64"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> x <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span>
-<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> y <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb68"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> x <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> y <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>可以优化为:</p>
-<div class="sourceCode" id="cb65"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> temp <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span>
-<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> x <span class="op">=</span> temp<span class="op">;</span></span>
-<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> y <span class="op">=</span> temp<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb69"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> temp <span class="op">=</span> a <span class="op">+</span> b<span class="op">;</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> x <span class="op">=</span> temp<span class="op">;</span></span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> y <span class="op">=</span> temp<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>这样就避免了重复计算 <code>a + b</code> 两次.</p>
 <p>在 RTL 设计中, 比如 <a href="#lst-AddSubSimple" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-AddSubSimple</span></a> 这个简单的加减法模块, <strong>注意到 “减法” 其实等价于 “加上 B 的补码”</strong>, 可以得到更优化的版本 <a href="#lst-AddSubArea" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-AddSubArea</span></a>:</p>
 <div class="quarto-layout-panel" data-layout-ncol="2">
@@ -2209,19 +2265,19 @@ First-class Objects Examples
 <div class="code-with-filename-file">
 <pre><strong>AddSubSimple.v</strong></pre>
 </div>
-<div class="sourceCode" id="cb66" data-filename="AddSubSimple.v"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> AddSubSimple<span class="op">(</span></span>
-<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        clock<span class="op">,</span></span>
-<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        reset<span class="op">,</span></span>
-<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_a<span class="op">,</span></span>
-<span id="cb66-5"><a href="#cb66-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_b<span class="op">,</span></span>
-<span id="cb66-6"><a href="#cb66-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        io_sub<span class="op">,</span></span>
-<span id="cb66-7"><a href="#cb66-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">output</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_out</span>
-<span id="cb66-8"><a href="#cb66-8" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
-<span id="cb66-9"><a href="#cb66-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> addRes <span class="op">=</span> io_a <span class="op">+</span> io_b<span class="op">;</span></span>
-<span id="cb66-10"><a href="#cb66-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> subRes <span class="op">=</span> io_a <span class="op">-</span> io_b<span class="op">;</span></span>
-<span id="cb66-11"><a href="#cb66-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">assign</span> io_out <span class="op">=</span> io_sub <span class="op">?</span> subRes <span class="op">:</span> addRes<span class="op">;</span></span>
-<span id="cb66-12"><a href="#cb66-12" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span>
-<span id="cb66-13"><a href="#cb66-13" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb70" data-filename="AddSubSimple.v"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> AddSubSimple<span class="op">(</span></span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        clock<span class="op">,</span></span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        reset<span class="op">,</span></span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_a<span class="op">,</span></span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_b<span class="op">,</span></span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        io_sub<span class="op">,</span></span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">output</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_out</span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> addRes <span class="op">=</span> io_a <span class="op">+</span> io_b<span class="op">;</span></span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> subRes <span class="op">=</span> io_a <span class="op">-</span> io_b<span class="op">;</span></span>
+<span id="cb70-11"><a href="#cb70-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">assign</span> io_out <span class="op">=</span> io_sub <span class="op">?</span> subRes <span class="op">:</span> addRes<span class="op">;</span></span>
+<span id="cb70-12"><a href="#cb70-12" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span>
+<span id="cb70-13"><a href="#cb70-13" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
@@ -2229,19 +2285,19 @@ First-class Objects Examples
 <div class="code-with-filename-file">
 <pre><strong>AddSubArea.v</strong></pre>
 </div>
-<div class="sourceCode" id="cb67" data-filename="AddSubArea.v"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> AddSubArea<span class="op">(</span></span>
-<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        clock<span class="op">,</span></span>
-<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        reset<span class="op">,</span></span>
-<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_a<span class="op">,</span></span>
-<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_b<span class="op">,</span></span>
-<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        io_sub<span class="op">,</span></span>
-<span id="cb67-7"><a href="#cb67-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">output</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_out</span>
-<span id="cb67-8"><a href="#cb67-8" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
-<span id="cb67-9"><a href="#cb67-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> _b_eff_T_1 <span class="op">=</span> <span class="bn">8'h0</span> <span class="op">-</span> io_b<span class="op">;</span></span>
-<span id="cb67-10"><a href="#cb67-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> b_eff <span class="op">=</span> io_sub <span class="op">?</span> _b_eff_T_1 <span class="op">:</span> io_b<span class="op">;</span></span>
-<span id="cb67-11"><a href="#cb67-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">assign</span> io_out <span class="op">=</span> io_a <span class="op">+</span> b_eff<span class="op">;</span></span>
-<span id="cb67-12"><a href="#cb67-12" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span>
-<span id="cb67-13"><a href="#cb67-13" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb71" data-filename="AddSubArea.v"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="kw">module</span> AddSubArea<span class="op">(</span></span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        clock<span class="op">,</span></span>
+<span id="cb71-3"><a href="#cb71-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        reset<span class="op">,</span></span>
+<span id="cb71-4"><a href="#cb71-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_a<span class="op">,</span></span>
+<span id="cb71-5"><a href="#cb71-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>  <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_b<span class="op">,</span></span>
+<span id="cb71-6"><a href="#cb71-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">input</span>        io_sub<span class="op">,</span></span>
+<span id="cb71-7"><a href="#cb71-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">output</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> io_out</span>
+<span id="cb71-8"><a href="#cb71-8" aria-hidden="true" tabindex="-1"></a><span class="op">);</span></span>
+<span id="cb71-9"><a href="#cb71-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> _b_eff_T_1 <span class="op">=</span> <span class="bn">8'h0</span> <span class="op">-</span> io_b<span class="op">;</span></span>
+<span id="cb71-10"><a href="#cb71-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">wire</span> <span class="op">[</span><span class="dv">7</span><span class="op">:</span><span class="dv">0</span><span class="op">]</span> b_eff <span class="op">=</span> io_sub <span class="op">?</span> _b_eff_T_1 <span class="op">:</span> io_b<span class="op">;</span></span>
+<span id="cb71-11"><a href="#cb71-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">assign</span> io_out <span class="op">=</span> io_a <span class="op">+</span> b_eff<span class="op">;</span></span>
+<span id="cb71-12"><a href="#cb71-12" aria-hidden="true" tabindex="-1"></a><span class="kw">endmodule</span></span>
+<span id="cb71-13"><a href="#cb71-13" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 </div>

@@ -535,7 +535,13 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#cuda" id="toc-cuda" class="nav-link active" data-scroll-target="#cuda">CUDA</a>
+  <li><a href="#硬件设计哲学" id="toc-硬件设计哲学" class="nav-link active" data-scroll-target="#硬件设计哲学">硬件设计哲学</a></li>
+  <li><a href="#gpu-架构-以-tiny-gpu-为例" id="toc-gpu-架构-以-tiny-gpu-为例" class="nav-link" data-scroll-target="#gpu-架构-以-tiny-gpu-为例">GPU 架构 (以 tiny-gpu 为例)</a>
+  <ul class="collapse">
+  <li><a href="#first-principles" id="toc-first-principles" class="nav-link" data-scroll-target="#first-principles">First Principles</a></li>
+  <li><a href="#tiny-gpu-implementation" id="toc-tiny-gpu-implementation" class="nav-link" data-scroll-target="#tiny-gpu-implementation">Tiny-GPU Implementation</a></li>
+  </ul></li>
+  <li><a href="#cuda" id="toc-cuda" class="nav-link" data-scroll-target="#cuda">CUDA</a>
   <ul class="collapse">
   <li><a href="#unified-memory-统一内存" id="toc-unified-memory-统一内存" class="nav-link" data-scroll-target="#unified-memory-统一内存">Unified Memory 统一内存</a></li>
   <li><a href="#synchronization-同步" id="toc-synchronization-同步" class="nav-link" data-scroll-target="#synchronization-同步">Synchronization 同步</a></li>
@@ -585,6 +591,115 @@ Figure&nbsp;1: GPU 就是核心多一点的 CPU. <span class="citation" data-cit
 <li><p>GPU 是典型的 SIMD Computer (a.k.a. Vector Computer).</p></li>
 <li><p>GPU 中不同的 ALU 执行的是同样的指令 (不同数据)</p></li>
 </ul>
+<section id="硬件设计哲学" class="level2">
+<h2 class="anchored" data-anchor-id="硬件设计哲学">硬件设计哲学</h2>
+<blockquote class="blockquote">
+<p>虽然一整个 GPU 很复杂, 但从 RTL 来看, 实现<strong>任何一个特定的功能</strong> (比如读个寄存器, 做某种 ALU 运算) <strong>都需要以下三种类型的信号</strong>! 部分名词是我自己取的.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>读懂一个模块首要的任务就是先弄清它<strong>有几个相对独立的功能</strong> (比如 <code>Registers</code> 有两个功能: 读寄存器和写寄存器), 然后针对<strong>每个功能去找这三种信号</strong>:</p>
+</blockquote>
+<ul>
+<li><strong>Common 信号</strong>: 几乎每个 sync 模块都有的<strong>信号组</strong>. 比如 <code>clk</code>, <code>reset</code>, <code>enable</code>.
+<ul>
+<li>要 <code>clk</code> 是因为大部分动作都是时钟同步的.</li>
+<li>有些操作比如写寄存器有一个清零 (<code>reset</code>) 的操作会很方便.</li>
+<li><code>enable</code> 有两种: <strong>全局的</strong>和<strong>某功能专属的</strong>. 全局的 <code>enable</code> 是指整个模块在某些周期不工作 (省电), 局部的 <code>enable</code> 一般情况是多余的, 但是经常配合下面的选择信号使用.</li>
+</ul></li>
+<li><strong>Selection 选择信号</strong>: 它们不承载关键数据, 只是用来<strong>选择</strong>使用哪个输入的信号. 一般有类似有「编码」思想的信号都是 selection 信号, 比如 <code>opcode</code>, <code>funct3</code>, etc.
+<ul>
+<li><p>选择信号会有层级之分, 高层级的 (<code>state</code>) 一般用 <code>if</code>, 低层级的 (sel) 一般会用 macro 宏 + case 来选择, 比如下面这个典型的选择结构:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode verilog code-with-copy"><code class="sourceCode verilog"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">localparam</span> ARITHMETIC <span class="op">=</span> <span class="bn">2'b00</span><span class="op">,</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>           MEMORY <span class="op">=</span> <span class="bn">2'b01</span><span class="op">,</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>           CONSTANT <span class="op">=</span> <span class="bn">2'b10</span><span class="op">;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">always</span> <span class="op">@(</span><span class="kw">posedge</span> clk<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> reset <span class="kw">begin</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        rs <span class="op">&lt;=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        ...</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span> <span class="kw">else</span> <span class="kw">if</span> <span class="op">(</span>enable<span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>state <span class="op">==</span> <span class="bn">2'b01</span><span class="op">)</span> <span class="kw">begin</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>            <span class="kw">case</span> <span class="op">(</span>sel<span class="op">)</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                <span class="dv">ARITHMETIC:</span> <span class="kw">begin</span> ... <span class="kw">end</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                <span class="dv">MEMORY:</span> <span class="kw">begin</span> ... <span class="kw">end</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>                <span class="dv">CONSTANT:</span> <span class="kw">begin</span> ... <span class="kw">end</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>            <span class="kw">endcase</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="kw">end</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>选择启动一个功能 (比如选择信号为 <code>3b'011</code>) 有时会再加入一个这个功能的专属 <code>enable</code>, 以防止误操作 (比如下面 <a href="#sec-registers" class="quarto-xref"><span class="quarto-unresolved-ref">sec-registers</span></a> 中的写操作).</p></li>
+<li><p>1 bit 的选择信号一般也叫做 <strong>flag</strong> (比如 <code>mem_read_valid</code>).</p></li>
+</ul></li>
+<li><strong>Minority Valid 数据信号</strong>: 其实就是一般意义下的<strong>承载数据</strong>的信号, 比如 <code>next_pc</code>, <code>imm</code>, etc. 但是我这样起名字是因为我想强调虽然一个模块的输入多得吓人, 其实大部分都是数据信号, 但在一个时钟周期里, 其实只有很少部分的信号是有效参加计算的, 大部分的信号都被 selection 信号屏蔽调了!</li>
+</ul>
+</section>
+<section id="gpu-架构-以-tiny-gpu-为例" class="level2">
+<h2 class="anchored" data-anchor-id="gpu-架构-以-tiny-gpu-为例">GPU 架构 (以 <a href="https://github.com/adam-maj/tiny-gpu?tab=readme-ov-file">tiny-gpu</a> 为例)</h2>
+<blockquote class="blockquote">
+<p>架构的 <strong>First Principles</strong> 和 <strong>Actual Implementation</strong> 是两个极端, 前者引入了设计哲学, 后者可加深理解而且不唯一 (而且较为随意说实话).</p>
+</blockquote>
+<section id="first-principles" class="level3">
+<h3 class="anchored" data-anchor-id="first-principles">First Principles</h3>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-tiny-gpu-arch" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tiny-gpu-arch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tiny-gpu-arch.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tiny-gpu-arch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Tiny-gpu 架构 (4 核) <span class="citation" data-cites="adammajmudar_2024_github"><a href="#ref-adammajmudar_2024_github" role="doc-biblioref">[2]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-tiny-gpu-core" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tiny-gpu-core-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tiny-gpu-core.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tiny-gpu-core-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Tiny-gpu 单核架构 (4 线程) <span class="citation" data-cites="adammajmudar_2024_github"><a href="#ref-adammajmudar_2024_github" role="doc-biblioref">[2]</a></span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Registers 寄存器</strong></li>
+</ul>
+</section>
+<section id="tiny-gpu-implementation" class="level3">
+<h3 class="anchored" data-anchor-id="tiny-gpu-implementation">Tiny-GPU Implementation</h3>
+<section id="sec-registers" class="level4">
+<h4 class="anchored" data-anchor-id="sec-registers"><code>Registers</code> 寄存器</h4>
+<div id="fig-registers" class="quarto-float quarto-figure quarto-figure-center anchored" width="70%">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-registers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="registers.png" id="fig-registers" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-registers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4
+</figcaption>
+</figure>
+</div>
+<ul>
+<li><p>一个 <code>Registers</code> 里面总共 16 个 8 位寄存器, 前 13 个是通用寄存器, 后三个是特殊的只读寄存器, 分别存放: <code>blockIdx</code>, <code>blockDim</code>, <code>threadIdx</code>.</p></li>
+<li><p><strong>Read</strong>: 能且只能<strong>同时读两个寄存器</strong>的值 (通过 <code>decoded_rs_address</code> 和 <code>decoded_rt_address</code>).</p>
+<ul>
+<li><code>core_state == 3b'011</code> 时读寄存器.</li>
+</ul></li>
+<li><p><strong>Write</strong>: 写只能是<strong>一个</strong> (通过 <code>decoded_rd_address</code>).</p>
+<ul>
+<li><code>core_state == 3b'110</code> 且 <code>decoded_reg_write_enable</code> 为真时, 才写寄存器.</li>
+</ul></li>
+</ul>
+</section>
+</section>
+</section>
 <section id="cuda" class="level2">
 <h2 class="anchored" data-anchor-id="cuda">CUDA</h2>
 <ul>
@@ -600,7 +715,7 @@ Figure&nbsp;1: GPU 就是核心多一点的 CPU. <span class="citation" data-cit
 <img src="nvidia-gpu.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nvidia-gpu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: NVidia GPU 架构 <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
+Figure&nbsp;5: NVidia GPU 架构 <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
 </figcaption>
 </figure>
 </div></li>
@@ -611,7 +726,7 @@ Figure&nbsp;2: NVidia GPU 架构 <span class="citation" data-cites="emory"><a hr
 <img src="seperate-memory.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-seperate-memory-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Seperate memory systems <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
+Figure&nbsp;6: Seperate memory systems <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
 </figcaption>
 </figure>
 </div></li>
@@ -626,7 +741,7 @@ Figure&nbsp;3: Seperate memory systems <span class="citation" data-cites="emory"
 <h3 class="anchored" data-anchor-id="unified-memory-统一内存">Unified Memory 统一内存</h3>
 <ul>
 <li><p>全局变量: 可以被 CPU 和 GPU 访问的变量, <strong>不能用 local variable 的方式声明</strong>!</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>__managed__ <span class="dt">int</span> x<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>__managed__ <span class="dt">int</span> x<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>统一内存允许 CPU 和 GPU 共享同一块内存区域, 比如 <a href="#lst-managed" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-managed</span></a> 中的 CPU 和 GPU 都能访问和改变 <code>x</code> 变量:</p></li>
 </ul>
 <div class="code-with-filename">
@@ -655,18 +770,18 @@ Figure&nbsp;3: Seperate memory systems <span class="citation" data-cites="emory"
 <span id="lst-managed-20"><a href="#lst-managed-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>输出:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 0</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 0</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>注意是 CPU 先打印 (因为没有用 <code>cudaDeviceSynchronize()</code>)!</p>
 </section>
 <section id="synchronization-同步" class="level3">
 <h3 class="anchored" data-anchor-id="synchronization-同步">Synchronization 同步</h3>
 <p>CPU 将指令发到 GPU 之后<strong>不会等 GPU 执行完再继续往下执行</strong> (默认 async), 如果需要等 GPU 执行完再继续, 将 <code>my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);</code> 改为:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode cu code-with-copy"><code class="sourceCode isocpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>my_kernel<span class="op">&lt;&lt;&lt;</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span><span class="op">&gt;&gt;&gt;(</span>x_ptr<span class="op">);</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>cudaDeviceSynchronize<span class="op">();</span> <span class="co">// Wait for GPU to finish</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cu code-with-copy"><code class="sourceCode isocpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>my_kernel<span class="op">&lt;&lt;&lt;</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span><span class="op">&gt;&gt;&gt;(</span>x_ptr<span class="op">);</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>cudaDeviceSynchronize<span class="op">();</span> <span class="co">// Wait for GPU to finish</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>输出:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="stream-流" class="level3">
 <h3 class="anchored" data-anchor-id="stream-流">Stream 流</h3>
@@ -679,6 +794,9 @@ Figure&nbsp;3: Seperate memory systems <span class="citation" data-cites="emory"
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
 <div id="ref-emory" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[1] </div><div class="csl-right-inline">S. Y. Cheung, <span>“Lecture notes on computer science courses: Computer architecture (CS355),”</span> 2025, Available: <a href="https://www.cs.emory.edu/~cheung/Courses/355/Syllabus/syl.html#CURRENT">https://www.cs.emory.edu/~cheung/Courses/355/Syllabus/syl.html#CURRENT</a></div>
+</div>
+<div id="ref-adammajmudar_2024_github" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">A. Majmudar, <span>“GitHub - adam-maj/tiny-gpu: A minimal GPU design in verilog to learn how GPUs work from the ground up.”</span> GitHub, 2024. Available: <a href="https://github.com/adam-maj/tiny-gpu">https://github.com/adam-maj/tiny-gpu</a>. [Accessed: Jan. 18, 2026]</div>
 </div>
 </div>
 </section>

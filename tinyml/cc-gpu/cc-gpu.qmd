@@ -11,6 +11,74 @@ title: "GPU 原理速成"
 
 - GPU 中不同的 ALU 执行的是同样的指令 (不同数据)
 
+## 硬件设计哲学
+
+> 虽然一整个 GPU 很复杂, 但从 RTL 来看, 实现**任何一个特定的功能** (比如读个寄存器, 做某种 ALU 运算) **都需要以下三种类型的信号**! 部分名词是我自己取的.
+
+> 读懂一个模块首要的任务就是先弄清它**有几个相对独立的功能** (比如 `Registers` 有两个功能: 读寄存器和写寄存器), 然后针对**每个功能去找这三种信号**:
+
+- **Common 信号**: 几乎每个 sync 模块都有的**信号组**. 比如 `clk`, `reset`, `enable`.
+    - 要 `clk` 是因为大部分动作都是时钟同步的. 
+    - 有些操作比如写寄存器有一个清零 (`reset`) 的操作会很方便. 
+    - `enable` 有两种: **全局的**和**某功能专属的**. 全局的 `enable` 是指整个模块在某些周期不工作 (省电), 局部的 `enable` 一般情况是多余的, 但是经常配合下面的选择信号使用.
+
+- **Selection 选择信号**: 它们不承载关键数据, 只是用来**选择**使用哪个输入的信号. 一般有类似有「编码」思想的信号都是 selection 信号, 比如 `opcode`, `funct3`, etc.
+    - 选择信号会有层级之分, 高层级的 (`state`) 一般用 `if`, 低层级的 (sel) 一般会用 macro 宏 + case 来选择, 比如下面这个典型的选择结构:
+
+        ```verilog
+        localparam ARITHMETIC = 2'b00,
+                   MEMORY = 2'b01,
+                   CONSTANT = 2'b10;
+        always @(posedge clk) begin
+            if reset begin
+                rs <= 0;
+                ...
+            end else if (enable) begin
+                if (state == 2'b01) begin
+                    case (sel)
+                        ARITHMETIC: begin ... end
+                        MEMORY: begin ... end
+                        CONSTANT: begin ... end
+                    endcase
+                end
+            end
+        end
+        ...
+        ```
+    - 选择启动一个功能 (比如选择信号为 `3b'011`) 有时会再加入一个这个功能的专属 `enable`, 以防止误操作 (比如下面 @sec-registers 中的写操作).
+    - 1 bit 的选择信号一般也叫做 **flag** (比如 `mem_read_valid`).
+
+- **Minority Valid 数据信号**: 其实就是一般意义下的**承载数据**的信号, 比如 `next_pc`, `imm`, etc. 但是我这样起名字是因为我想强调虽然一个模块的输入多得吓人, 其实大部分都是数据信号, 但在一个时钟周期里, 其实只有很少部分的信号是有效参加计算的, 大部分的信号都被 selection 信号屏蔽调了!
+
+## GPU 架构 (以 [tiny-gpu](https://github.com/adam-maj/tiny-gpu?tab=readme-ov-file) 为例)
+
+> 架构的 **First Principles** 和 **Actual Implementation** 是两个极端, 前者引入了设计哲学, 后者可加深理解而且不唯一 (而且较为随意说实话).
+
+
+### First Principles
+
+::: {layout = "[50,50]"}
+![Tiny-gpu 架构 (4 核) @adammajmudar_2024_github.](tiny-gpu-arch.png){#fig-tiny-gpu-arch}
+
+![Tiny-gpu 单核架构 (4 线程) @adammajmudar_2024_github](tiny-gpu-core.png){#fig-tiny-gpu-core}
+:::
+
+- **Registers 寄存器**
+
+### Tiny-GPU Implementation
+
+#### `Registers` 寄存器 {#sec-registers}
+
+![](registers.png){#fig-registers width=70%}
+
+- 一个 `Registers` 里面总共 16 个 8 位寄存器, 前 13 个是通用寄存器, 后三个是特殊的只读寄存器, 分别存放: `blockIdx`, `blockDim`, `threadIdx`.
+
+- **Read**: 能且只能**同时读两个寄存器**的值 (通过 `decoded_rs_address` 和 `decoded_rt_address`).
+    - `core_state == 3b'011` 时读寄存器.
+
+- **Write**: 写只能是**一个** (通过 `decoded_rd_address`).
+    - `core_state == 3b'110` 且 `decoded_reg_write_enable` 为真时, 才写寄存器.
+
 ## CUDA
 
 - 2026 年之前 GPU 只能做特定的函数运算, 2026 年之后引入了 GPGPU (General Purpose GPU), 有一整套库函数来对 GPU 进行编程.
