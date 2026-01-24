@@ -15,12 +15,18 @@ title: "GPU 原理速成"
 
 > 虽然一整个 GPU 很复杂, 但从 RTL 来看, 实现**任何一个特定的功能** (比如读个寄存器, 做某种 ALU 运算) **都需要以下三种类型的信号**! 部分名词是我自己取的.
 
-> 读懂一个模块首要的任务就是先弄清它**有几个相对独立的功能** (比如 `Registers` 有两个功能: 读寄存器和写寄存器), 然后针对**每个功能去找这三种信号**:
+> 读懂一个模块首要的任务就是先弄清它**有几个相对独立的功能** (比如 @fig-registers 有两个功能: 读寄存器和写寄存器), 然后针对**每个功能去找这三种信号**:
+
+::: {.column-margin}
+![Tiny-GPU 中的寄存器 @adammajmudar_2024_github.](registers.png){#fig-registers}
+:::
 
 - **Common 信号**: 几乎每个 sync 模块都有的**信号组**. 比如 `clk`, `reset`, `enable`.
     - 要 `clk` 是因为大部分动作都是时钟同步的. 
     - 有些操作比如写寄存器有一个清零 (`reset`) 的操作会很方便. 
-    - `enable` 有两种: **全局的**和**某功能专属的**. 全局的 `enable` 是指整个模块在某些周期不工作 (省电), 局部的 `enable` 一般情况是多余的, 但是经常配合下面的选择信号使用.
+    - `enable` 有两种: **全局的**和**某功能专属的**. 
+        - 全局的 `enable` 是指整个模块在某些周期不工作 (省电). 一般会跟 `reset` 一起用, 只有 `reset=0` 且 `enable=1` 时模块才执行**主逻辑**.
+        - 局部的 `enable` 一般情况是多余的, 但是经常配合下文的选择信号使用.
 
 - **Selection 选择信号**: 它们不承载关键数据, 只是用来**选择**使用哪个输入的信号. 一般有类似有「编码」思想的信号都是 selection 信号, 比如 `opcode`, `funct3`, etc.
     - 选择信号会有层级之分, 高层级的 (`state`) 一般用 `if`, 低层级的 (sel) 一般会用 macro 宏 + case 来选择, 比如下面这个典型的选择结构:
@@ -45,17 +51,17 @@ title: "GPU 原理速成"
         end
         ...
         ```
-    - 选择启动一个功能 (比如选择信号为 `3b'011`) 有时会再加入一个这个功能的专属 `enable`, 以防止误操作 (比如下面 @sec-registers 中的写操作).
+    - 选择启动一个功能 (比如选择信号为 `3b'011`) 有时会再加入一个这个功能的专属 `enable`, 以防止误操作 (比如下面 Tiny-GPU `registers` 中的写操作).
     - 1 bit 的选择信号一般也叫做 **flag** (比如 `mem_read_valid`).
 
 - **Minority Valid 数据信号**: 其实就是一般意义下的**承载数据**的信号, 比如 `next_pc`, `imm`, etc. 但是我这样起名字是因为我想强调虽然一个模块的输入多得吓人, 其实大部分都是数据信号, 但在一个时钟周期里, 其实只有很少部分的信号是有效参加计算的, 大部分的信号都被 selection 信号屏蔽调了!
 
-## GPU 架构 (以 [tiny-gpu](https://github.com/adam-maj/tiny-gpu?tab=readme-ov-file) 为例)
 
-> 架构的 **First Principles** 和 **Actual Implementation** 是两个极端, 前者引入了设计哲学, 后者可加深理解而且不唯一 (而且较为随意说实话).
+## Tiny-GPU
 
+> 本章用 [tiny-gpu](https://github.com/adam-maj/tiny-gpu?tab=readme-ov-file) 为例入门 GPU 架构.
 
-### First Principles
+> 架构的 **First Principles** 和 **Actual Implementation** 是两个极端, 前者引入了设计哲学, 后者可加深理解而且不唯一 (而且较为随意说实话), 下面是 Tiny-GPU 的设计哲学:
 
 ::: {layout = "[50,50]"}
 ![Tiny-gpu 架构 (4 核) @adammajmudar_2024_github.](tiny-gpu-arch.png){#fig-tiny-gpu-arch}
@@ -63,21 +69,97 @@ title: "GPU 原理速成"
 ![Tiny-gpu 单核架构 (4 线程) @adammajmudar_2024_github](tiny-gpu-core.png){#fig-tiny-gpu-core}
 :::
 
-- **Registers 寄存器**
 
-### Tiny-GPU Implementation
+### 线程 `thread`
 
-#### `Registers` 寄存器 {#sec-registers}
+- **寄存器 `registers`**
+    - 作为一个储存器:
+        - 地址宽度: 4 bit (16 个寄存器)
+        - 数据宽度: 8 bit (每个寄存器 8 位)
+        - **2R1W**: 
+            - 能且只能**同时读两个寄存器**的值 
+            - 只能**写一个寄存器**的值.
 
-![](registers.png){#fig-registers width=70%}
+    | Name | I/O | Width | Description |
+    |----|---|-----|-----------|
+    | `clk` | In | 1b | 该模块**所有**动作必须在时钟上升沿才被执行. |
+    | `reset` | In | 1b | 清零 `R0`-`R13`, 载入 `R14=%blockDim`, `R15=%threadIdx`. |
+    | `enable` | In | 1b | 当 `reset=0` 且 `enable=1` 时模块执行**主逻辑**. |
+    | `registers` | Hide Reg | 16 × 8b | 16 个 8 位寄存器, 前 13 个是通用寄存器, 后三个是特殊的只读寄存器, 分别存放: `blockIdx`, `blockDim`, `threadIdx`.
+    | `block_id` | In | 8b | 主逻辑下载入 `R13=%blockIdx`. |
+    | `core_state` | In | 3b | 主逻辑下选择是读 (`011`) 还是写 (`110`) 寄存器. |
+    | `decoded_rd_address` | In | 4b | 主逻辑下写寄存器时指定要**写**的寄存器地址. |
+    | `decoded_rs_address` | In | 4b | 主逻辑下读寄存器时指定要**读**的第一个寄存器地址. |
+    | `decoded_rt_address` | In | 4b | 主逻辑下读寄存器时指定要**读**的第二个寄存器地址. |
+    | `decoded_reg_write_enable` | In | 1b | 主逻辑下额外的**写使能**. |
+    | `decoded_reg_input_mux` | In | 2b | 主逻辑下选择写寄存器时的数据来源 (`decoded_immediate`, `alu_out`, `lsu_out` 三选一) |
+    | `decoded_immediate` | In | 8b | 可能要存的数据. |
+    | `alu_out` | In | 8b | 可能要存的数据. |
+    | `lsu_out` | In | 8b | 可能要存的数据. |
+    | `rs` | Out | 8b | 读出的第一个寄存器的值. |
+    | `rt` | Out | 8b | 读出的第二个寄存器的值. |
 
-- 一个 `Registers` 里面总共 16 个 8 位寄存器, 前 13 个是通用寄存器, 后三个是特殊的只读寄存器, 分别存放: `blockIdx`, `blockDim`, `threadIdx`.
 
-- **Read**: 能且只能**同时读两个寄存器**的值 (通过 `decoded_rs_address` 和 `decoded_rt_address`).
-    - `core_state == 3b'011` 时读寄存器.
+- **运算单元 `alu`**
+    - 支持的运算 macro: `ADD`, `SUB`, `MUL`, `DIV`.
 
-- **Write**: 写只能是**一个** (通过 `decoded_rd_address`).
-    - `core_state == 3b'110` 且 `decoded_reg_write_enable` 为真时, 才写寄存器.
+    | Name | I/O | Width | Description |
+    |----|---|-----|-----------|
+    | `clk` | In | 1b | - | 该模块**所有**动作必须在时钟上升沿才被执行. |
+    | `reset` | In | 1b | 清零输出寄存器 `alu_out`. |
+    | `enable` | In | 1b | 当 `reset=0` 且 `enable=1` 时模块执行**主逻辑**. |
+    | `core_state` | In | 3b | 主逻辑下为 `101` 时才可能开始运算. |
+    | `decoded_alu_output_mux` | In | 1b | 主逻辑下为 `1` 时输出 NZP 结果 `00000NZP`, 为 `0` 时输出运算结果. |
+    | `decoded_alu_arithmetic_mux` | In | 2b | 主逻辑且 `decoded_alu_output_mux=0` 时选择输出哪种运算结果, `ADD` (`00`), `SUB` (`01`), `MUL` (`10`), `DIV` (`11`). |
+    | `rs` | In | 8b | 第一个操作数. |
+    | `rt` | In | 8b | 第二个操作数. |
+    | `alu_out` | Out | 8b | 运算结果或 NZP 结果. |
+
+- **程序计数器 `pc`**
+
+    | Name | I/O | Width | Description |
+    |----|---|-----|-----------|
+    | `clk` | In | 1b | - | 该模块**所有**动作必须在时钟上升沿才被执行. |
+    | `nzp` | Hide Reg | 3b | NZP 标志寄存器. |
+    | `reset` | In | 1b | 清零 `next_pc` 和 `nzp`. |
+    | `enable` | In | 1b | 当 `reset=0` 且 `enable=1` 时模块执行**主逻辑**. |
+    | `core_state` | In | 3b | 主逻辑下选择更新 `next_pc` (`101`) 还是 `nzp` (`110`). |
+    | `decoded_pc_mux` | In | 1b | 主逻辑且 `core_state=101` 时若为 `1` 则比较 `decoded_nzp` 和 `nzp`, 若一样则说明是跳转, 加载 `decoded_immediate` 到输出; 否则就正常加载 `current_pc + 1`. `core_state=110` 时且 `decoded_nzp_write_enable=1` 时加载 `alu_out` 的低三位到 `nzp`. |
+    | `decoded_nzp` | In | 3b | 输入的 NZP 标志位, 用来和当前 NZP 标志寄存器**比较**. |
+    | `alu_out` | In | 8b | 不是用来比较, 而是用来**更新** NZP 标志寄存器的值. |
+    | `current_pc` | In | 8b | 当前 PC 值. |
+    | `decoded_immediate` | In | 8b | 可能要跳转的目标地址. |
+    | `next_pc` | Out | 8b | 下一个 PC 值. |
+
+- **Load-Store Unit `lsu`**
+    
+    | Name | I/O | Width | Description |
+    |----|---|-----|-----------|
+    | `clk` | In | 1b | - | 该模块**所有**动作必须在时钟上升沿才被执行. |
+    | `reset` | In | 1b | 清零所有输出寄存器. |
+    | `enable` | In | 1b | 当 `reset=0` 且 `enable=1` 时模块执行**主逻辑**. |
+    | `decoded_mem_read_enable` | In | 1b | `decoder` 的输出, 为 `1` 说明是 `LDR` 指令. |
+    | `decoded_mem_write_enable` | In | 1b | `decoder` 的输出, 为 `1` 说明是 `STR` 指令. |
+    | `lsu_state` | Out | 2b | FSM 的状态, `IDLE` (`00`), `REQUESTING` (`01`), `WAITING` (`10`), `DONE` (`11`). |
+    | `core_state` | In | 1b | 在 `LDR` 和 `STR` 指令下触发 `00`->`01` (`core_state=011`) 和 `11`->`00` (`core_state=110`) 的状态转移. |
+    | `rs` | In | 8b | `LDR` 指令下 `01`->`10` 状态转移时写入 `mem_read_address`; `STR` 指令下 `01`->`10` 状态转移时写入 `mem_write_address`. |
+    | `rt` | In | 8b | `STR` 指令下 `01`->`10` 状态转移时写入 `mem_write_data`. |
+    | ... | ... | ... | ... |
+
+
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## `lsu` FSM 演示
+
+![`LDR` 指令的 FSM.](lsu-ldr.png){#fig-lsu-ldr}
+
+![`STR` 指令的 FSM.](lsu-str.png){#fig-lsu-str}
+:::
+<!-- ----------------------------------------- -->
+
+
+
+
 
 ## CUDA
 

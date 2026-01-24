@@ -58,3 +58,26 @@ int ceil_div(int x, int y) {
     return (x + y - 1) / y; // Automatically does floor division
 }
 ```
+
+### RTL 代码阅读
+
+- 下面的 Verilog 代码片段说明这个模块有**两个功能**, 功能的启用由 `<func>_enable` 决定; 每个功能是一个 **3 个状态的 FSM**.
+    - 如果 `...` 的部分没有什么 operation 和 splitter, 只有将**输入赋值给输出**的操作, 那么这个模块其实就是一个**有条件的连接器**而已!!
+
+    ```verilog
+    if (xxx_enable) begin 
+        case (state)
+            A: begin ... lsu_state <= B; end
+            B: begin ... lsu_state <= C; end
+            C: begin ... lsu_state <= A; end
+        endcase
+    end
+
+    if (yyy_enable) begin 
+        case (state)
+            A: begin ... lsu_state <= B; end
+            B: begin ... lsu_state <= C; end
+            C: begin ... lsu_state <= A; end
+        endcase
+    end
+    ```

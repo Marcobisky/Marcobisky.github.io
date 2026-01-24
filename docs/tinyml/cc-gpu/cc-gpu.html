@@ -132,7 +132,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -536,10 +536,9 @@ div.csl-indent {
    
   <ul>
   <li><a href="#硬件设计哲学" id="toc-硬件设计哲学" class="nav-link active" data-scroll-target="#硬件设计哲学">硬件设计哲学</a></li>
-  <li><a href="#gpu-架构-以-tiny-gpu-为例" id="toc-gpu-架构-以-tiny-gpu-为例" class="nav-link" data-scroll-target="#gpu-架构-以-tiny-gpu-为例">GPU 架构 (以 tiny-gpu 为例)</a>
+  <li><a href="#tiny-gpu" id="toc-tiny-gpu" class="nav-link" data-scroll-target="#tiny-gpu">Tiny-GPU</a>
   <ul class="collapse">
-  <li><a href="#first-principles" id="toc-first-principles" class="nav-link" data-scroll-target="#first-principles">First Principles</a></li>
-  <li><a href="#tiny-gpu-implementation" id="toc-tiny-gpu-implementation" class="nav-link" data-scroll-target="#tiny-gpu-implementation">Tiny-GPU Implementation</a></li>
+  <li><a href="#线程-thread" id="toc-线程-thread" class="nav-link" data-scroll-target="#线程-thread">线程 <code>thread</code></a></li>
   </ul></li>
   <li><a href="#cuda" id="toc-cuda" class="nav-link" data-scroll-target="#cuda">CUDA</a>
   <ul class="collapse">
@@ -552,7 +551,7 @@ div.csl-indent {
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../cc-gpu/cc-gpu.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">GPU 原理速成</span></a></li></ol></nav>
@@ -591,20 +590,36 @@ Figure&nbsp;1: GPU 就是核心多一点的 CPU. <span class="citation" data-cit
 <li><p>GPU 是典型的 SIMD Computer (a.k.a. Vector Computer).</p></li>
 <li><p>GPU 中不同的 ALU 执行的是同样的指令 (不同数据)</p></li>
 </ul>
-<section id="硬件设计哲学" class="level2">
+<section id="硬件设计哲学" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="硬件设计哲学">硬件设计哲学</h2>
 <blockquote class="blockquote">
 <p>虽然一整个 GPU 很复杂, 但从 RTL 来看, 实现<strong>任何一个特定的功能</strong> (比如读个寄存器, 做某种 ALU 运算) <strong>都需要以下三种类型的信号</strong>! 部分名词是我自己取的.</p>
 </blockquote>
 <blockquote class="blockquote">
-<p>读懂一个模块首要的任务就是先弄清它<strong>有几个相对独立的功能</strong> (比如 <code>Registers</code> 有两个功能: 读寄存器和写寄存器), 然后针对<strong>每个功能去找这三种信号</strong>:</p>
+<p>读懂一个模块首要的任务就是先弄清它<strong>有几个相对独立的功能</strong> (比如 <a href="#fig-registers" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-registers</span></a> 有两个功能: 读寄存器和写寄存器), 然后针对<strong>每个功能去找这三种信号</strong>:</p>
 </blockquote>
-<ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-registers" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-registers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="registers.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-registers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Tiny-GPU 中的寄存器 <span class="citation" data-cites="adammajmudar_2024_github"><a href="#ref-adammajmudar_2024_github" role="doc-biblioref">[2]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div></div><ul>
 <li><strong>Common 信号</strong>: 几乎每个 sync 模块都有的<strong>信号组</strong>. 比如 <code>clk</code>, <code>reset</code>, <code>enable</code>.
 <ul>
 <li>要 <code>clk</code> 是因为大部分动作都是时钟同步的.</li>
 <li>有些操作比如写寄存器有一个清零 (<code>reset</code>) 的操作会很方便.</li>
-<li><code>enable</code> 有两种: <strong>全局的</strong>和<strong>某功能专属的</strong>. 全局的 <code>enable</code> 是指整个模块在某些周期不工作 (省电), 局部的 <code>enable</code> 一般情况是多余的, 但是经常配合下面的选择信号使用.</li>
+<li><code>enable</code> 有两种: <strong>全局的</strong>和<strong>某功能专属的</strong>.
+<ul>
+<li>全局的 <code>enable</code> 是指整个模块在某些周期不工作 (省电). 一般会跟 <code>reset</code> 一起用, 只有 <code>reset=0</code> 且 <code>enable=1</code> 时模块才执行<strong>主逻辑</strong>.</li>
+<li>局部的 <code>enable</code> 一般情况是多余的, 但是经常配合下文的选择信号使用.</li>
+</ul></li>
 </ul></li>
 <li><strong>Selection 选择信号</strong>: 它们不承载关键数据, 只是用来<strong>选择</strong>使用哪个输入的信号. 一般有类似有「编码」思想的信号都是 selection 信号, 比如 <code>opcode</code>, <code>funct3</code>, etc.
 <ul>
@@ -627,19 +642,20 @@ Figure&nbsp;1: GPU 就是核心多一点的 CPU. <span class="citation" data-cit
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p>选择启动一个功能 (比如选择信号为 <code>3b'011</code>) 有时会再加入一个这个功能的专属 <code>enable</code>, 以防止误操作 (比如下面 <a href="#sec-registers" class="quarto-xref"><span class="quarto-unresolved-ref">sec-registers</span></a> 中的写操作).</p></li>
+<li><p>选择启动一个功能 (比如选择信号为 <code>3b'011</code>) 有时会再加入一个这个功能的专属 <code>enable</code>, 以防止误操作 (比如下面 Tiny-GPU <code>registers</code> 中的写操作).</p></li>
 <li><p>1 bit 的选择信号一般也叫做 <strong>flag</strong> (比如 <code>mem_read_valid</code>).</p></li>
 </ul></li>
 <li><strong>Minority Valid 数据信号</strong>: 其实就是一般意义下的<strong>承载数据</strong>的信号, 比如 <code>next_pc</code>, <code>imm</code>, etc. 但是我这样起名字是因为我想强调虽然一个模块的输入多得吓人, 其实大部分都是数据信号, 但在一个时钟周期里, 其实只有很少部分的信号是有效参加计算的, 大部分的信号都被 selection 信号屏蔽调了!</li>
 </ul>
 </section>
-<section id="gpu-架构-以-tiny-gpu-为例" class="level2">
-<h2 class="anchored" data-anchor-id="gpu-架构-以-tiny-gpu-为例">GPU 架构 (以 <a href="https://github.com/adam-maj/tiny-gpu?tab=readme-ov-file">tiny-gpu</a> 为例)</h2>
+<section id="tiny-gpu" class="level2">
+<h2 class="anchored" data-anchor-id="tiny-gpu">Tiny-GPU</h2>
 <blockquote class="blockquote">
-<p>架构的 <strong>First Principles</strong> 和 <strong>Actual Implementation</strong> 是两个极端, 前者引入了设计哲学, 后者可加深理解而且不唯一 (而且较为随意说实话).</p>
+<p>本章用 <a href="https://github.com/adam-maj/tiny-gpu?tab=readme-ov-file">tiny-gpu</a> 为例入门 GPU 架构.</p>
 </blockquote>
-<section id="first-principles" class="level3">
-<h3 class="anchored" data-anchor-id="first-principles">First Principles</h3>
+<blockquote class="blockquote">
+<p>架构的 <strong>First Principles</strong> 和 <strong>Actual Implementation</strong> 是两个极端, 前者引入了设计哲学, 后者可加深理解而且不唯一 (而且较为随意说实话), 下面是 Tiny-GPU 的设计哲学:</p>
+</blockquote>
 <div class="quarto-layout-panel" data-layout="[50,50]">
 <div class="quarto-layout-row">
 <div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
@@ -649,7 +665,7 @@ Figure&nbsp;1: GPU 就是核心多一点的 CPU. <span class="citation" data-cit
 <img src="tiny-gpu-arch.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tiny-gpu-arch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Tiny-gpu 架构 (4 核) <span class="citation" data-cites="adammajmudar_2024_github"><a href="#ref-adammajmudar_2024_github" role="doc-biblioref">[2]</a></span>.
+Figure&nbsp;3: Tiny-gpu 架构 (4 核) <span class="citation" data-cites="adammajmudar_2024_github"><a href="#ref-adammajmudar_2024_github" role="doc-biblioref">[2]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -661,43 +677,421 @@ Figure&nbsp;2: Tiny-gpu 架构 (4 核) <span class="citation" data-cites="adamma
 <img src="tiny-gpu-core.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tiny-gpu-core-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Tiny-gpu 单核架构 (4 线程) <span class="citation" data-cites="adammajmudar_2024_github"><a href="#ref-adammajmudar_2024_github" role="doc-biblioref">[2]</a></span>
+Figure&nbsp;4: Tiny-gpu 单核架构 (4 线程) <span class="citation" data-cites="adammajmudar_2024_github"><a href="#ref-adammajmudar_2024_github" role="doc-biblioref">[2]</a></span>
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
 </div>
+<section id="线程-thread" class="level3">
+<h3 class="anchored" data-anchor-id="线程-thread">线程 <code>thread</code></h3>
 <ul>
-<li><strong>Registers 寄存器</strong></li>
+<li><p><strong>寄存器 <code>registers</code></strong></p>
+<ul>
+<li>作为一个储存器:
+<ul>
+<li>地址宽度: 4 bit (16 个寄存器)</li>
+<li>数据宽度: 8 bit (每个寄存器 8 位)</li>
+<li><strong>2R1W</strong>:
+<ul>
+<li>能且只能<strong>同时读两个寄存器</strong>的值</li>
+<li>只能<strong>写一个寄存器</strong>的值.</li>
+</ul></li>
+</ul></li>
 </ul>
-</section>
-<section id="tiny-gpu-implementation" class="level3">
-<h3 class="anchored" data-anchor-id="tiny-gpu-implementation">Tiny-GPU Implementation</h3>
-<section id="sec-registers" class="level4">
-<h4 class="anchored" data-anchor-id="sec-registers"><code>Registers</code> 寄存器</h4>
-<div id="fig-registers" class="quarto-float quarto-figure quarto-figure-center anchored" width="70%">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 13%">
+<col style="width: 21%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>I/O</th>
+<th>Width</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>clk</code></td>
+<td>In</td>
+<td>1b</td>
+<td>该模块<strong>所有</strong>动作必须在时钟上升沿才被执行.</td>
+</tr>
+<tr class="even">
+<td><code>reset</code></td>
+<td>In</td>
+<td>1b</td>
+<td>清零 <code>R0</code>-<code>R13</code>, 载入 <code>R14=%blockDim</code>, <code>R15=%threadIdx</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>enable</code></td>
+<td>In</td>
+<td>1b</td>
+<td>当 <code>reset=0</code> 且 <code>enable=1</code> 时模块执行<strong>主逻辑</strong>.</td>
+</tr>
+<tr class="even">
+<td><code>registers</code></td>
+<td>Hide Reg</td>
+<td>16 × 8b</td>
+<td>16 个 8 位寄存器, 前 13 个是通用寄存器, 后三个是特殊的只读寄存器, 分别存放: <code>blockIdx</code>, <code>blockDim</code>, <code>threadIdx</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>block_id</code></td>
+<td>In</td>
+<td>8b</td>
+<td>主逻辑下载入 <code>R13=%blockIdx</code>.</td>
+</tr>
+<tr class="even">
+<td><code>core_state</code></td>
+<td>In</td>
+<td>3b</td>
+<td>主逻辑下选择是读 (<code>011</code>) 还是写 (<code>110</code>) 寄存器.</td>
+</tr>
+<tr class="odd">
+<td><code>decoded_rd_address</code></td>
+<td>In</td>
+<td>4b</td>
+<td>主逻辑下写寄存器时指定要<strong>写</strong>的寄存器地址.</td>
+</tr>
+<tr class="even">
+<td><code>decoded_rs_address</code></td>
+<td>In</td>
+<td>4b</td>
+<td>主逻辑下读寄存器时指定要<strong>读</strong>的第一个寄存器地址.</td>
+</tr>
+<tr class="odd">
+<td><code>decoded_rt_address</code></td>
+<td>In</td>
+<td>4b</td>
+<td>主逻辑下读寄存器时指定要<strong>读</strong>的第二个寄存器地址.</td>
+</tr>
+<tr class="even">
+<td><code>decoded_reg_write_enable</code></td>
+<td>In</td>
+<td>1b</td>
+<td>主逻辑下额外的<strong>写使能</strong>.</td>
+</tr>
+<tr class="odd">
+<td><code>decoded_reg_input_mux</code></td>
+<td>In</td>
+<td>2b</td>
+<td>主逻辑下选择写寄存器时的数据来源 (<code>decoded_immediate</code>, <code>alu_out</code>, <code>lsu_out</code> 三选一)</td>
+</tr>
+<tr class="even">
+<td><code>decoded_immediate</code></td>
+<td>In</td>
+<td>8b</td>
+<td>可能要存的数据.</td>
+</tr>
+<tr class="odd">
+<td><code>alu_out</code></td>
+<td>In</td>
+<td>8b</td>
+<td>可能要存的数据.</td>
+</tr>
+<tr class="even">
+<td><code>lsu_out</code></td>
+<td>In</td>
+<td>8b</td>
+<td>可能要存的数据.</td>
+</tr>
+<tr class="odd">
+<td><code>rs</code></td>
+<td>Out</td>
+<td>8b</td>
+<td>读出的第一个寄存器的值.</td>
+</tr>
+<tr class="even">
+<td><code>rt</code></td>
+<td>Out</td>
+<td>8b</td>
+<td>读出的第二个寄存器的值.</td>
+</tr>
+</tbody>
+</table></li>
+<li><p><strong>运算单元 <code>alu</code></strong></p>
+<ul>
+<li>支持的运算 macro: <code>ADD</code>, <code>SUB</code>, <code>MUL</code>, <code>DIV</code>.</li>
+</ul>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 13%">
+<col style="width: 21%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>I/O</th>
+<th>Width</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>clk</code></td>
+<td>In</td>
+<td>1b</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><code>reset</code></td>
+<td>In</td>
+<td>1b</td>
+<td>清零输出寄存器 <code>alu_out</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>enable</code></td>
+<td>In</td>
+<td>1b</td>
+<td>当 <code>reset=0</code> 且 <code>enable=1</code> 时模块执行<strong>主逻辑</strong>.</td>
+</tr>
+<tr class="even">
+<td><code>core_state</code></td>
+<td>In</td>
+<td>3b</td>
+<td>主逻辑下为 <code>101</code> 时才可能开始运算.</td>
+</tr>
+<tr class="odd">
+<td><code>decoded_alu_output_mux</code></td>
+<td>In</td>
+<td>1b</td>
+<td>主逻辑下为 <code>1</code> 时输出 NZP 结果 <code>00000NZP</code>, 为 <code>0</code> 时输出运算结果.</td>
+</tr>
+<tr class="even">
+<td><code>decoded_alu_arithmetic_mux</code></td>
+<td>In</td>
+<td>2b</td>
+<td>主逻辑且 <code>decoded_alu_output_mux=0</code> 时选择输出哪种运算结果, <code>ADD</code> (<code>00</code>), <code>SUB</code> (<code>01</code>), <code>MUL</code> (<code>10</code>), <code>DIV</code> (<code>11</code>).</td>
+</tr>
+<tr class="odd">
+<td><code>rs</code></td>
+<td>In</td>
+<td>8b</td>
+<td>第一个操作数.</td>
+</tr>
+<tr class="even">
+<td><code>rt</code></td>
+<td>In</td>
+<td>8b</td>
+<td>第二个操作数.</td>
+</tr>
+<tr class="odd">
+<td><code>alu_out</code></td>
+<td>Out</td>
+<td>8b</td>
+<td>运算结果或 NZP 结果.</td>
+</tr>
+</tbody>
+</table></li>
+<li><p><strong>程序计数器 <code>pc</code></strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 13%">
+<col style="width: 21%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>I/O</th>
+<th>Width</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>clk</code></td>
+<td>In</td>
+<td>1b</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><code>nzp</code></td>
+<td>Hide Reg</td>
+<td>3b</td>
+<td>NZP 标志寄存器.</td>
+</tr>
+<tr class="odd">
+<td><code>reset</code></td>
+<td>In</td>
+<td>1b</td>
+<td>清零 <code>next_pc</code> 和 <code>nzp</code>.</td>
+</tr>
+<tr class="even">
+<td><code>enable</code></td>
+<td>In</td>
+<td>1b</td>
+<td>当 <code>reset=0</code> 且 <code>enable=1</code> 时模块执行<strong>主逻辑</strong>.</td>
+</tr>
+<tr class="odd">
+<td><code>core_state</code></td>
+<td>In</td>
+<td>3b</td>
+<td>主逻辑下选择更新 <code>next_pc</code> (<code>101</code>) 还是 <code>nzp</code> (<code>110</code>).</td>
+</tr>
+<tr class="even">
+<td><code>decoded_pc_mux</code></td>
+<td>In</td>
+<td>1b</td>
+<td>主逻辑且 <code>core_state=101</code> 时若为 <code>1</code> 则比较 <code>decoded_nzp</code> 和 <code>nzp</code>, 若一样则说明是跳转, 加载 <code>decoded_immediate</code> 到输出; 否则就正常加载 <code>current_pc + 1</code>. <code>core_state=110</code> 时且 <code>decoded_nzp_write_enable=1</code> 时加载 <code>alu_out</code> 的低三位到 <code>nzp</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>decoded_nzp</code></td>
+<td>In</td>
+<td>3b</td>
+<td>输入的 NZP 标志位, 用来和当前 NZP 标志寄存器<strong>比较</strong>.</td>
+</tr>
+<tr class="even">
+<td><code>alu_out</code></td>
+<td>In</td>
+<td>8b</td>
+<td>不是用来比较, 而是用来<strong>更新</strong> NZP 标志寄存器的值.</td>
+</tr>
+<tr class="odd">
+<td><code>current_pc</code></td>
+<td>In</td>
+<td>8b</td>
+<td>当前 PC 值.</td>
+</tr>
+<tr class="even">
+<td><code>decoded_immediate</code></td>
+<td>In</td>
+<td>8b</td>
+<td>可能要跳转的目标地址.</td>
+</tr>
+<tr class="odd">
+<td><code>next_pc</code></td>
+<td>Out</td>
+<td>8b</td>
+<td>下一个 PC 值.</td>
+</tr>
+</tbody>
+</table></li>
+<li><p><strong>Load-Store Unit <code>lsu</code></strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 13%">
+<col style="width: 21%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>I/O</th>
+<th>Width</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>clk</code></td>
+<td>In</td>
+<td>1b</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><code>reset</code></td>
+<td>In</td>
+<td>1b</td>
+<td>清零所有输出寄存器.</td>
+</tr>
+<tr class="odd">
+<td><code>enable</code></td>
+<td>In</td>
+<td>1b</td>
+<td>当 <code>reset=0</code> 且 <code>enable=1</code> 时模块执行<strong>主逻辑</strong>.</td>
+</tr>
+<tr class="even">
+<td><code>decoded_mem_read_enable</code></td>
+<td>In</td>
+<td>1b</td>
+<td><code>decoder</code> 的输出, 为 <code>1</code> 说明是 <code>LDR</code> 指令.</td>
+</tr>
+<tr class="odd">
+<td><code>decoded_mem_write_enable</code></td>
+<td>In</td>
+<td>1b</td>
+<td><code>decoder</code> 的输出, 为 <code>1</code> 说明是 <code>STR</code> 指令.</td>
+</tr>
+<tr class="even">
+<td><code>lsu_state</code></td>
+<td>Out</td>
+<td>2b</td>
+<td>FSM 的状态, <code>IDLE</code> (<code>00</code>), <code>REQUESTING</code> (<code>01</code>), <code>WAITING</code> (<code>10</code>), <code>DONE</code> (<code>11</code>).</td>
+</tr>
+<tr class="odd">
+<td><code>core_state</code></td>
+<td>In</td>
+<td>1b</td>
+<td>在 <code>LDR</code> 和 <code>STR</code> 指令下触发 <code>00</code>-&gt;<code>01</code> (<code>core_state=011</code>) 和 <code>11</code>-&gt;<code>00</code> (<code>core_state=110</code>) 的状态转移.</td>
+</tr>
+<tr class="even">
+<td><code>rs</code></td>
+<td>In</td>
+<td>8b</td>
+<td><code>LDR</code> 指令下 <code>01</code>-&gt;<code>10</code> 状态转移时写入 <code>mem_read_address</code>; <code>STR</code> 指令下 <code>01</code>-&gt;<code>10</code> 状态转移时写入 <code>mem_write_address</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>rt</code></td>
+<td>In</td>
+<td>8b</td>
+<td><code>STR</code> 指令下 <code>01</code>-&gt;<code>10</code> 状态转移时写入 <code>mem_write_data</code>.</td>
+</tr>
+<tr class="even">
+<td>…</td>
+<td>…</td>
+<td>…</td>
+<td>…</td>
+</tr>
+</tbody>
+</table></li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<code>lsu</code> FSM 演示
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div id="fig-lsu-ldr" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-registers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="registers.png" id="fig-registers" class="img-fluid figure-img" style="width:70.0%">
+<div aria-describedby="fig-lsu-ldr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lsu-ldr.png" class="img-fluid figure-img">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-registers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lsu-ldr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: <code>LDR</code> 指令的 FSM.
 </figcaption>
 </figure>
 </div>
-<ul>
-<li><p>一个 <code>Registers</code> 里面总共 16 个 8 位寄存器, 前 13 个是通用寄存器, 后三个是特殊的只读寄存器, 分别存放: <code>blockIdx</code>, <code>blockDim</code>, <code>threadIdx</code>.</p></li>
-<li><p><strong>Read</strong>: 能且只能<strong>同时读两个寄存器</strong>的值 (通过 <code>decoded_rs_address</code> 和 <code>decoded_rt_address</code>).</p>
-<ul>
-<li><code>core_state == 3b'011</code> 时读寄存器.</li>
-</ul></li>
-<li><p><strong>Write</strong>: 写只能是<strong>一个</strong> (通过 <code>decoded_rd_address</code>).</p>
-<ul>
-<li><code>core_state == 3b'110</code> 且 <code>decoded_reg_write_enable</code> 为真时, 才写寄存器.</li>
-</ul></li>
-</ul>
-</section>
+<div id="fig-lsu-str" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lsu-str-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="lsu-str.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lsu-str-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: <code>STR</code> 指令的 FSM.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
 </section>
 </section>
 <section id="cuda" class="level2">
@@ -715,7 +1109,7 @@ Figure&nbsp;4
 <img src="nvidia-gpu.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nvidia-gpu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: NVidia GPU 架构 <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
+Figure&nbsp;7: NVidia GPU 架构 <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
 </figcaption>
 </figure>
 </div></li>
@@ -726,7 +1120,7 @@ Figure&nbsp;5: NVidia GPU 架构 <span class="citation" data-cites="emory"><a hr
 <img src="seperate-memory.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-seperate-memory-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: Seperate memory systems <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
+Figure&nbsp;8: Seperate memory systems <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
 </figcaption>
 </figure>
 </div></li>

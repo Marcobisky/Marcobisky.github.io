@@ -2,6 +2,8 @@
 title: "CPU 原理速成"
 ---
 
+> This chapter is under construction!
+
 ## Change of Mind
 
 - 对于有时钟的电路, 我们应该想象成: 电路的状态**只在时钟的上升沿**「**瞬间**」变化. 时钟的上升沿发生时电路做了两件事情:
@@ -71,7 +73,73 @@ title: "CPU 原理速成"
     - 突发总线: 
 
 
-### Cache
+### Cache 缓存
+
+> Cache 的存在就是由于 DRAM 的读写太慢了, 如果 RAM 读写非常快的话就不需要 Cache 了.
+
+> Cache 劫持 CPU 访存的地址, 在 CPU 和 memory 之间做完全透明的中间人.
+
+- 地址分段: 在网络中相当于子网划分, 在线性地址空间中相当于给数据加张量的结构 (但只是逻辑上的划分, 物理上地址还是线性的!).
+    - **\$Line**: Cache 和 RAM 之间交换数据的最小单位. 
+        - 注意不是一次加载 1B/1 word, 而是搬运请求地址**附近**的一整块数据, 因为内存附近的地址很可能马上用 (**Spatial Locality**), 一般是 64B (也有 32B, 128B 的), @fig-addr-partition 中是 4B.
+        - 有对齐操作! 不一定是从请求地址开始搬运, 如 @fig-addr-partition 是请求地址所在的 4B 对齐块开始搬运!
+    - **\$Set**: 见 @fig-addr-partition (c).
+        - **Fully Associative Cache**: 没有 set 概念的 Cache (或者说只有 1 个 set).
+    - **\$Tag**: 见 @fig-addr-partition (c).
+    - **Way**: 由于 Cache 容量有限 (即 @fig-cache-miss 中 Cache 的高度肯定小于 RAM 的高度), 在 Cache 中我们将 tag 附加在 \$Line 里, 纵坐标起名为 **way** (@fig-cache-miss 中有 2 个 way).
+        - **Direct-Mapped Cache**: 只有 1 个 way 的 Cache.
+
+- **Request Type**: R/W.
+
+- **Cache Miss/Hit**: 请求 R/W 的数据地址不在/在 Cache 里. 
+    - **Cache Read Policy**: Read 内存比较简单, 不会产生 **Cache Coherence** 问题. 在的话直接返回, 不在则需要从内存搬运数据到 Cache 里, 搬运过程见 @fig-cache-miss, 由 **Cache controller** 控制.
+    - **Cache Write Policy**: 多核处理器中写入某内存地址的时候, 要不要加载数据到 cache 以及要不要立即更新 RAM ().
+        - **Write-Hit**: 请求写入的地址在 Cache 里.
+            - **Write-Through**: 写入 Cache 的同时也写入 RAM.
+                - 这样数据一致性最好, 但是由于要写两边, 写入速度慢; 而且如果经常占用 memory bus 访问 RAM 的话会影响其它设备的访存效率.
+            - **Write-Back**: 先只写入 Cache, 当 block eviction 或 cash flush 时再写入 RAM.
+                - 这样可以多次写入 Cache 而只写一次写入 RAM, 提升写入效率、减少 memory bus 占用. 但是比较复杂, 需要引入 **dirty bit** 来标记某个 \$Line 是否被修改过而且还没与 RAM 同步.
+        - **Write-Miss**: 请求写入的地址不在 Cache 里.
+            - **Write-Allocate**: 先将要写的地址的 \$Line 从 RAM 搬运到 Cache, 然后再写入 Cache. (后续是否要立即写入 RAM 取决于 Write-Hit 的策略, 但是一般是 Write-Back)
+            - **No-Write-Allocate**: 彻底绕过 cache, 直接写入 RAM. (一般配合 Write-Through 使用)
+
+- **Cache Replacement Algorithm**: Cache Miss 时, 会找**没有用过**的 way 的相应 set 放数据. 如果都用过了, 则根据某种**替换策略**将某个 way 的数据换出去, 放入新数据. 下面是一些常见的算法的简化解释[^replacement-algorithms]:
+    - **LRU (Least Recently Used)**: 将对应 set 中**最少使用**的 \$Line 换出去. (最常用的算法)
+    - **LFU (Least Frequently Used)**: 将对应 set 中**使用频率最低**的 \$Line 换出去. (很少使用)
+    - **Random Replacement**: 随机选择某个 \$Line 换出去. (用于访问模式不可预测或追求简单的场景)
+    - **FIFO (First In First Out)**: 将对应 set 中**最早进入**的 \$Line 换出去. (个人感觉没啥逻辑, 最早进来的数据不一定就不常用)
+    - **MRU (Most Recently Used)**: 将对应 set 中**最近使用**的 \$Line 换出去. (有点反直觉, 但适用于旧数据更容易被访问的场景)
+    - **Adaptive Replacement**: 将 set 分成 3 组, 前两组固定使用前面的两种算法, 第三组根据前两组的命中率动态调整使用哪种算法.
+
+[^replacement-algorithms]: 由于要让计算机知道哪些 \$Line 最少使用/使用频率最低等等, 每个 \$Line 都需要额外存储一些 metadata, 比如 LFU 中每个 \$Line 上面不光有 tag 字段, 还有一个 frequency counter, 记录使用频率.
+
+
+![对 RAM (8b 为例) 地址的**逻辑分段**. (a) 是不分段的线性结构; (b) 分为 2 段, 高 6b 相同的 byte 在一个 **line** 里; (c) 分为 3 段, 高 2b 相同的 byte 在一个 **tag** 里, 中间 3b 相同的 byte 在一个 **set** 里.](addr-partition.png){#fig-addr-partition}
+
+
+![**8-Way Set Associative Cache 的 Cache Miss**. CPU 向 0x11001001 内存地址发起读请求, cache miss, 改地址所在的 line 被搬运到 \$ way 0 中.](cache-miss.png){#fig-cache-miss width=70%}
+
+- **Cache Hierarchy**
+    - **L1 Cache**: 一般分为 Instruction Cache 和 Data Cache, 每个 core 独享. 但由于速度要求非常高, 容量很小 (16KB-128KB, 2-8 ways), 为了补偿容量小的问题, 我们引入:
+    - **L2 Cache**: 直接与核内的 L1 Cache 连接, Instruction 或 Data 都能存. (256KB-2MB, 4-16 ways)
+    - **L3 Cache**: 多核共享. (2MB-32MB, 16 ways)
+    - **L4 Cache**: L3 和 RAM 之间有时再加一层 L4 Cache.
+
+    ![Cache Hierarchy.](cache-hierarchy.png){#fig-cache-hierarchy width=50%}
+
+- **Inclusion Policy**: 相邻两级 cache 的数据 chunk 的包含关系, 分为:
+    - **Inclusive**: L1 的数据一定会在 L2 里, etc.
+    - **Exclusive**: L1 的数据一定不会在 L2 里, etc.
+    - **NINE (Non-Inclusive Non-Exclusive)**: L1 的数据可能会也可能不会在 L2 里, etc.
+
+::: {layout = "[37,31,31]"}
+![Inclusive @bitlemon_2024_cache.](cache-inclusive.png){#fig-cache-inclusive}
+
+![Exclusive @bitlemon_2024_cache.](cache-exclusive.png){#fig-cache-exclusive}
+
+![NINE @bitlemon_2024_cache.](cache-nine.png){#fig-cache-nine}
+:::
+
 
 ### Memory
 
@@ -87,3 +155,5 @@ title: "CPU 原理速成"
 ## Macros 宏
 
 - `xlen = 32`: **Word length 字长**, 即 GPR 寄存器宽度 (由于通用寄存器被命名为 x0~x31)
+
+## References

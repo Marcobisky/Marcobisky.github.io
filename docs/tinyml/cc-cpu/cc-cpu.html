@@ -97,7 +97,7 @@ div.csl-indent {
 
 </head>
 
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -506,15 +506,16 @@ div.csl-indent {
   <li><a href="#分而治之-穷举-控制信号" id="toc-分而治之-穷举-控制信号" class="nav-link" data-scroll-target="#分而治之-穷举-控制信号">分而治之, 穷举 + 控制信号</a></li>
   <li><a href="#流水线" id="toc-流水线" class="nav-link" data-scroll-target="#流水线">流水线</a></li>
   <li><a href="#第三阶段" id="toc-第三阶段" class="nav-link" data-scroll-target="#第三阶段">第三阶段</a></li>
-  <li><a href="#cache" id="toc-cache" class="nav-link" data-scroll-target="#cache">Cache</a></li>
+  <li><a href="#cache-缓存" id="toc-cache-缓存" class="nav-link" data-scroll-target="#cache-缓存">Cache 缓存</a></li>
   <li><a href="#memory" id="toc-memory" class="nav-link" data-scroll-target="#memory">Memory</a></li>
   </ul></li>
   <li><a href="#macros-宏" id="toc-macros-宏" class="nav-link" data-scroll-target="#macros-宏">Macros 宏</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 
 <header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../cc-cpu/cc-cpu.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">CPU 原理速成</span></a></li></ol></nav>
@@ -536,6 +537,9 @@ div.csl-indent {
 </header>
 
 
+<blockquote class="blockquote">
+<p>This chapter is under construction!</p>
+</blockquote>
 <section id="change-of-mind" class="level2">
 <h2 class="anchored" data-anchor-id="change-of-mind">Change of Mind</h2>
 <ul>
@@ -546,7 +550,7 @@ div.csl-indent {
 </ul></li>
 </ul>
 </section>
-<section id="cpu-是如何成为现在这个样子的" class="level2">
+<section id="cpu-是如何成为现在这个样子的" class="level2 page-columns page-full">
 <h2 class="anchored" data-anchor-id="cpu-是如何成为现在这个样子的">CPU 是如何成为现在这个样子的?</h2>
 <blockquote class="blockquote">
 <p>The following is a critical path towards understanding CPU. You can’t drop any of them. 以下是理解 CPU 的必经之路.</p>
@@ -643,8 +647,151 @@ Figure&nbsp;1: 为了提升指令执行效率引入了 Pipeline <span class="cit
 </ul></li>
 </ul>
 </section>
-<section id="cache" class="level3">
-<h3 class="anchored" data-anchor-id="cache">Cache</h3>
+<section id="cache-缓存" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="cache-缓存">Cache 缓存</h3>
+<blockquote class="blockquote">
+<p>Cache 的存在就是由于 DRAM 的读写太慢了, 如果 RAM 读写非常快的话就不需要 Cache 了.</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>Cache 劫持 CPU 访存的地址, 在 CPU 和 memory 之间做完全透明的中间人.</p>
+</blockquote>
+<ul>
+<li><p>地址分段: 在网络中相当于子网划分, 在线性地址空间中相当于给数据加张量的结构 (但只是逻辑上的划分, 物理上地址还是线性的!).</p>
+<ul>
+<li><strong>$Line</strong>: Cache 和 RAM 之间交换数据的最小单位.
+<ul>
+<li>注意不是一次加载 1B/1 word, 而是搬运请求地址<strong>附近</strong>的一整块数据, 因为内存附近的地址很可能马上用 (<strong>Spatial Locality</strong>), 一般是 64B (也有 32B, 128B 的), <a href="#fig-addr-partition" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-addr-partition</span></a> 中是 4B.</li>
+<li>有对齐操作! 不一定是从请求地址开始搬运, 如 <a href="#fig-addr-partition" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-addr-partition</span></a> 是请求地址所在的 4B 对齐块开始搬运!</li>
+</ul></li>
+<li><strong>$Set</strong>: 见 <a href="#fig-addr-partition" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-addr-partition</span></a> (c).
+<ul>
+<li><strong>Fully Associative Cache</strong>: 没有 set 概念的 Cache (或者说只有 1 个 set).</li>
+</ul></li>
+<li><strong>$Tag</strong>: 见 <a href="#fig-addr-partition" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-addr-partition</span></a> (c).</li>
+<li><strong>Way</strong>: 由于 Cache 容量有限 (即 <a href="#fig-cache-miss" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cache-miss</span></a> 中 Cache 的高度肯定小于 RAM 的高度), 在 Cache 中我们将 tag 附加在 $Line 里, 纵坐标起名为 <strong>way</strong> (<a href="#fig-cache-miss" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cache-miss</span></a> 中有 2 个 way).
+<ul>
+<li><strong>Direct-Mapped Cache</strong>: 只有 1 个 way 的 Cache.</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Request Type</strong>: R/W.</p></li>
+<li><p><strong>Cache Miss/Hit</strong>: 请求 R/W 的数据地址不在/在 Cache 里.</p>
+<ul>
+<li><strong>Cache Read Policy</strong>: Read 内存比较简单, 不会产生 <strong>Cache Coherence</strong> 问题. 在的话直接返回, 不在则需要从内存搬运数据到 Cache 里, 搬运过程见 <a href="#fig-cache-miss" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cache-miss</span></a>, 由 <strong>Cache controller</strong> 控制.</li>
+<li><strong>Cache Write Policy</strong>: 多核处理器中写入某内存地址的时候, 要不要加载数据到 cache 以及要不要立即更新 RAM ().
+<ul>
+<li><strong>Write-Hit</strong>: 请求写入的地址在 Cache 里.
+<ul>
+<li><strong>Write-Through</strong>: 写入 Cache 的同时也写入 RAM.
+<ul>
+<li>这样数据一致性最好, 但是由于要写两边, 写入速度慢; 而且如果经常占用 memory bus 访问 RAM 的话会影响其它设备的访存效率.</li>
+</ul></li>
+<li><strong>Write-Back</strong>: 先只写入 Cache, 当 block eviction 或 cash flush 时再写入 RAM.
+<ul>
+<li>这样可以多次写入 Cache 而只写一次写入 RAM, 提升写入效率、减少 memory bus 占用. 但是比较复杂, 需要引入 <strong>dirty bit</strong> 来标记某个 $Line 是否被修改过而且还没与 RAM 同步.</li>
+</ul></li>
+</ul></li>
+<li><strong>Write-Miss</strong>: 请求写入的地址不在 Cache 里.
+<ul>
+<li><strong>Write-Allocate</strong>: 先将要写的地址的 $Line 从 RAM 搬运到 Cache, 然后再写入 Cache. (后续是否要立即写入 RAM 取决于 Write-Hit 的策略, 但是一般是 Write-Back)</li>
+<li><strong>No-Write-Allocate</strong>: 彻底绕过 cache, 直接写入 RAM. (一般配合 Write-Through 使用)</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><p><strong>Cache Replacement Algorithm</strong>: Cache Miss 时, 会找<strong>没有用过</strong>的 way 的相应 set 放数据. 如果都用过了, 则根据某种<strong>替换策略</strong>将某个 way 的数据换出去, 放入新数据. 下面是一些常见的算法的简化解释<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>:</p>
+<ul>
+<li><strong>LRU (Least Recently Used)</strong>: 将对应 set 中<strong>最少使用</strong>的 $Line 换出去. (最常用的算法)</li>
+<li><strong>LFU (Least Frequently Used)</strong>: 将对应 set 中<strong>使用频率最低</strong>的 $Line 换出去. (很少使用)</li>
+<li><strong>Random Replacement</strong>: 随机选择某个 $Line 换出去. (用于访问模式不可预测或追求简单的场景)</li>
+<li><strong>FIFO (First In First Out)</strong>: 将对应 set 中<strong>最早进入</strong>的 $Line 换出去. (个人感觉没啥逻辑, 最早进来的数据不一定就不常用)</li>
+<li><strong>MRU (Most Recently Used)</strong>: 将对应 set 中<strong>最近使用</strong>的 $Line 换出去. (有点反直觉, 但适用于旧数据更容易被访问的场景)</li>
+<li><strong>Adaptive Replacement</strong>: 将 set 分成 3 组, 前两组固定使用前面的两种算法, 第三组根据前两组的命中率动态调整使用哪种算法.</li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;由于要让计算机知道哪些 $Line 最少使用/使用频率最低等等, 每个 $Line 都需要额外存储一些 metadata, 比如 LFU 中每个 $Line 上面不光有 tag 字段, 还有一个 frequency counter, 记录使用频率.</p></div></div><div id="fig-addr-partition" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-addr-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="addr-partition.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-addr-partition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 对 RAM (8b 为例) 地址的<strong>逻辑分段</strong>. (a) 是不分段的线性结构; (b) 分为 2 段, 高 6b 相同的 byte 在一个 <strong>line</strong> 里; (c) 分为 3 段, 高 2b 相同的 byte 在一个 <strong>tag</strong> 里, 中间 3b 相同的 byte 在一个 <strong>set</strong> 里.
+</figcaption>
+</figure>
+</div>
+<div id="fig-cache-miss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cache-miss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="cache-miss.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cache-miss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: <strong>8-Way Set Associative Cache 的 Cache Miss</strong>. CPU 向 0x11001001 内存地址发起读请求, cache miss, 改地址所在的 line 被搬运到 $ way 0 中.
+</figcaption>
+</figure>
+</div>
+<ul>
+<li><strong>Cache Hierarchy</strong>
+<ul>
+<li><strong>L1 Cache</strong>: 一般分为 Instruction Cache 和 Data Cache, 每个 core 独享. 但由于速度要求非常高, 容量很小 (16KB-128KB, 2-8 ways), 为了补偿容量小的问题, 我们引入:</li>
+<li><strong>L2 Cache</strong>: 直接与核内的 L1 Cache 连接, Instruction 或 Data 都能存. (256KB-2MB, 4-16 ways)</li>
+<li><strong>L3 Cache</strong>: 多核共享. (2MB-32MB, 16 ways)</li>
+<li><strong>L4 Cache</strong>: L3 和 RAM 之间有时再加一层 L4 Cache.</li>
+</ul>
+<div id="fig-cache-hierarchy" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cache-hierarchy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="cache-hierarchy.png" class="img-fluid figure-img" style="width:50.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cache-hierarchy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Cache Hierarchy.
+</figcaption>
+</figure>
+</div></li>
+<li><strong>Inclusion Policy</strong>: 相邻两级 cache 的数据 chunk 的包含关系, 分为:
+<ul>
+<li><strong>Inclusive</strong>: L1 的数据一定会在 L2 里, etc.</li>
+<li><strong>Exclusive</strong>: L1 的数据一定不会在 L2 里, etc.</li>
+<li><strong>NINE (Non-Inclusive Non-Exclusive)</strong>: L1 的数据可能会也可能不会在 L2 里, etc.</li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[37,31,31]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 37.4%;justify-content: flex-start;">
+<div id="fig-cache-inclusive" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cache-inclusive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="cache-inclusive.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cache-inclusive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Inclusive <span class="citation" data-cites="bitlemon_2024_cache"><a href="#ref-bitlemon_2024_cache" role="doc-biblioref">[3]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 31.3%;justify-content: flex-start;">
+<div id="fig-cache-exclusive" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cache-exclusive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="cache-exclusive.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cache-exclusive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Exclusive <span class="citation" data-cites="bitlemon_2024_cache"><a href="#ref-bitlemon_2024_cache" role="doc-biblioref">[3]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 31.3%;justify-content: flex-start;">
+<div id="fig-cache-nine" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-cache-nine-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="cache-nine.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cache-nine-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: NINE <span class="citation" data-cites="bitlemon_2024_cache"><a href="#ref-bitlemon_2024_cache" role="doc-biblioref">[3]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
 </section>
 <section id="memory" class="level3">
 <h3 class="anchored" data-anchor-id="memory">Memory</h3>
@@ -667,6 +814,9 @@ Figure&nbsp;1: 为了提升指令执行效率引入了 Pipeline <span class="cit
 <ul>
 <li><code>xlen = 32</code>: <strong>Word length 字长</strong>, 即 GPR 寄存器宽度 (由于通用寄存器被命名为 x0~x31)</li>
 </ul>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
 
 
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
@@ -676,8 +826,12 @@ Figure&nbsp;1: 为了提升指令执行效率引入了 Pipeline <span class="cit
 <div id="ref-Slchoi_2025_velog" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[2] </div><div class="csl-right-inline">Slchoi, <span>“Multi-cycle implementation &amp; pipelining,”</span> 2025, Available: <a href="https://velog.io/@taegon1998/4.2-4.3-Multi-Cycle-Implementation-Pipelining">https://velog.io/@taegon1998/4.2-4.3-Multi-Cycle-Implementation-Pipelining</a></div>
 </div>
+<div id="ref-bitlemon_2024_cache" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">BitLemon, <span>“Cache hierarchy: How modern CPU caches are organized (L1, L2 and L3).”</span> YouTube, Dec. 2024. Available: <a href="https://www.youtube.com/watch?v=7yrK_9PderQ&amp;list=PL38NNHQLqJqYnNrTenxBvGJSPCkV9EOWk&amp;index=5">https://www.youtube.com/watch?v=7yrK_9PderQ&amp;list=PL38NNHQLqJqYnNrTenxBvGJSPCkV9EOWk&amp;index=5</a>. [Accessed: Jan. 24, 2026]</div>
+</div>
 </div>
 </section>
+
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
