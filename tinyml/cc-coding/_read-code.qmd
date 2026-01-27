@@ -1,6 +1,10 @@
+> 本人看代码的速度极慢, 为了优化这一点, 我打算建立本章来积累一些阅读代码的经验和技巧, 主要是消除阅读代码时的心理负担. 本章也与 [Coding Habits](cc-coding.qmd#sec-coding-habits) 有很多的重合之处, 以后可能会把两章合并 (TODO).
+
 ### First Encounter
 
-- **Take it Easy**: 一个 `C++` project 不过是一堆 class 和一个 main. 
+- 心理建设:
+    - **Take it Easy**: 一个 `C++` project 不过是一堆 class 和一个 main.
+    - 大段代码其实逻辑不会很复杂, 要关注有没有类型检查、边界检查等等冗余代码. 还有 `if else` 语句只有一个会被执行, 另一半都是没用的.
 
 - 如果是 OOP, 关注类会**改变**哪些外部变量 (通常是引用传递) 而不是某个方法的具体实现.
 
@@ -11,7 +15,7 @@
 - 读懂参数的含义是一件费时的事情, 但很多时候费时的地方在弄懂信息的**存储格式**. 比如你看到: 
 
     ```cpp
-    void DepthwiseConvPerChannel(const DeptheiseParam& params,
+    void DepthwiseConvPerChannel(const DepthwiseParam& params,
                                  const int32_t* output_multiplier,
                                  const int32_t* output_shift,
                                  const RuntimeShape& in_shape,
@@ -20,49 +24,52 @@
 
     就会很想知道 `params`, `output_multiplier` 等里面到底是怎样的结构. 但请克制自己不要知道, 或者自己随便构思一个结构让自己相信它是对的! 因为这些数据结构的实现非常 ad hoc 而且不重要.
 
-### 一些条件反射
+- 不要一行一行读代码, 要**功能性**地读代码. 比如:
 
-#### 二维数组的全局索引
-
-遇到下面这种形式的代码时, 要瞬间意识到这是在计算**二维数组**的全局索引:
-
-```verilog
-lsu_index = i * THREADS_PER_BLOCK + j;
-```
-
-#### 正负无穷
-
-涉及最小/最大值初始化. 例如我们要找 `arr` 中的最大值:
-
-```cpp
-#include <float.h>   // for FLT_MAX
-
-int main() {
-    float arr[] = {3.2, -1.5, 7.8, 0.0, 4.4};
-    int n = sizeof(arr) / sizeof(arr[0]);
-    float max_val = -FLT_MAX;    // Initialize to -inf
-    for (int i = 0; i < n; i++) {
-        if (arr[i] > max_val)   max_val = arr[i];
+    ```cpp
+    void relu_f32 (torch::Tensor input, torch::Tensor output) {
+        if (x.options().dtype() != torch::kFloat32) {
+            std::cout << "Tensor info: " << x.options() << std::endl;
+            throw std::runtime_error("Input tensor must be torch::kFloat32");
+        }
+        if (y.options().dtype() != torch::kFloat32) {
+            std::cout << "Tensor info: " << y.options() << std::endl;
+            throw std::runtime_error("Output tensor must be torch::kFloat32");
+        }
+        ...
     }
-    std::cout << "Max value: " << max_val << std::endl;
-    return 0;
-}
-```
+    ```
+    这个代码是在检查数据类型, 当你知道这一点时就别在纠结 `options()` 是什么了.
 
-#### 向上取整转为向下取整
 
-可通过 $$\left\lceil \frac{x}{y} \right\rceil = \left\lfloor \frac{x + y - 1}{y} \right\rfloor$$ 实现 (由于整数除法默认向下取整):
+- 当一个 `cpp` 文件有多个函数定义时, 一般最下面的函数才是对外暴露的接口 (因为它调用了上面的函数), 先看最下面的函数.
+    - 如果有很多个名字差不多的函数, 最短的那个将是对其它的封装, 比如:
 
-```cpp
-int ceil_div(int x, int y) {
-    return (x + y - 1) / y; // Automatically does floor division
-}
-```
+    ```cpp
+    void _relu_f32_kernel(...) { ... }
+    __global__ void relu_f32_kernel(...) { ... }
+    void relu_f32_util(...) { ... }
+    void relu_f32(...) { ... } // True API
+    ```
+
+    单从名字上来看, `_relu_f32_kernel()` 仅给 `relu_f32_kernel()` 使用 (因为有下划线而且重名); 而 `relu_f32` 封装了 `relu_f32_kernel` 和 `relu_f32_util` (因为名字 match 前缀且更短).
+
+- **对象作为元数据**: 比如 `torch::Tensor` 这个对象里并不是 tensor 数据本身, 而是:
+
+    ```txt
+    Tensor
+    ├─ sizes
+    ├─ strides
+    ├─ dtype
+    ├─ device
+    └─ data_ptr  ---> 实际数据的指针
+    ```
+    - 所以你会看到很多 `tensor.data_ptr()` 这样看上去取了两次数据的感觉, 其实第一层的 `tensor` 只是元数据, 第二层才是实际数据.
 
 ### RTL 代码阅读
 
 - 下面的 Verilog 代码片段说明这个模块有**两个功能**, 功能的启用由 `<func>_enable` 决定; 每个功能是一个 **3 个状态的 FSM**.
-    - 如果 `...` 的部分没有什么 operation 和 splitter, 只有将**输入赋值给输出**的操作, 那么这个模块其实就是一个**有条件的连接器**而已!!
+    - 如果 `...` 的部分没有什么 operation, 只有将**输入赋值给输出**的操作, 那么这个模块其实就是一个**有条件的连接器**而已!! 如果有 splitter 之类的就有 decoder 的功能.
 
     ```verilog
     if (xxx_enable) begin 

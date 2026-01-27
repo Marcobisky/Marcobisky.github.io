@@ -551,6 +551,7 @@ div.csl-indent {
   <li><a href="#synchronization-同步" id="toc-synchronization-同步" class="nav-link" data-scroll-target="#synchronization-同步">Synchronization 同步</a></li>
   <li><a href="#stream-流" id="toc-stream-流" class="nav-link" data-scroll-target="#stream-流">Stream 流</a></li>
   </ul></li>
+  <li><a href="#cuda-的-pytorch-接口" id="toc-cuda-的-pytorch-接口" class="nav-link" data-scroll-target="#cuda-的-pytorch-接口">CUDA 的 Pytorch 接口</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -1166,7 +1167,11 @@ Figure&nbsp;8: 不参与 <code>if</code> 分支的 thread 也不能提前执行 
 <ul>
 <li>Block 内的 threads 一定会在同一个 SM 上运行 (为什么?). 一个 SM 可以同时运行很多个 blocks.</li>
 </ul></li>
-<li><p><strong>Grid</strong>: 一组 blocks. 一个 <strong>Kernel</strong> 函数启动是相当于启动一个 grid.</p></li>
+<li><p><strong>Grid</strong>: 一组 blocks.</p>
+<ul>
+<li>一个 kernel 函数一般会启动很多个 grid. 但一般是先决定 block 的大小 (一般是 256, 但不能太大, 不然放不进一个 SM 里), 再用 <code>N / 256</code> 来自动算出 grid 的大小.</li>
+</ul></li>
+<li><p><strong>Cluster</strong>: 一组 blocks (比 grid 小). 同一个 cluster 里的 blocks 会被分配到同一个 GPC 上运行.</p></li>
 </ul>
 </section>
 </section>
@@ -1202,8 +1207,8 @@ Figure&nbsp;10: Seperate memory systems <span class="citation" data-cites="emory
 </div></li>
 <li><p><strong>Kernel functions</strong> <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>:</p>
 <ul>
-<li><code>__host__</code>: 默认在 CPU (host) 上运行的函数.</li>
-<li><code>__global__</code>: 在 GPU 上运行, 可被 CPU 调用的函数.</li>
+<li><code>__host__</code>: 在 CPU 上运行, 只能被 CPU 调用的函数.</li>
+<li><code>__global__</code>: 在 GPU 上运行, 可被 CPU/GPU 调用的函数.</li>
 <li><code>__device__</code>: 在 GPU 上运行, 只能被 GPU 调用的函数.</li>
 </ul></li>
 </ul>
@@ -1256,6 +1261,10 @@ Figure&nbsp;10: Seperate memory systems <span class="citation" data-cites="emory
 <section id="stream-流" class="level3">
 <h3 class="anchored" data-anchor-id="stream-流">Stream 流</h3>
 </section>
+</section>
+<section id="cuda-的-pytorch-接口" class="level2">
+<h2 class="anchored" data-anchor-id="cuda-的-pytorch-接口">CUDA 的 Pytorch 接口</h2>
+<p>直接用 Pybind, 见 <a href="../cc-coding/cc-coding.html#sec-pybind11">Pybind 11</a>.</p>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>

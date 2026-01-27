@@ -196,7 +196,10 @@ title: "GPU 原理速成"
 - **Block**: 一组 threads.
     - Block 内的 threads 一定会在同一个 SM 上运行 (为什么?). 一个 SM 可以同时运行很多个 blocks.
 
-- **Grid**: 一组 blocks. 一个 **Kernel** 函数启动是相当于启动一个 grid.
+- **Grid**: 一组 blocks.
+    - 一个 kernel 函数一般会启动很多个 grid. 但一般是先决定 block 的大小 (一般是 256, 但不能太大, 不然放不进一个 SM 里), 再用 `N / 256` 来自动算出 grid 的大小.
+
+- **Cluster**: 一组 blocks (比 grid 小). 同一个 cluster 里的 blocks 会被分配到同一个 GPC 上运行.
 
 
 ## CUDA
@@ -215,8 +218,8 @@ title: "GPU 原理速成"
     ![Seperate memory systems @emory](seperate-memory.png){#fig-seperate-memory width=80%}
 
 - **Kernel functions** @emory:
-    - `__host__`: 默认在 CPU (host) 上运行的函数.
-    - `__global__`: 在 GPU 上运行, 可被 CPU 调用的函数.
+    - `__host__`: 在 CPU 上运行, 只能被 CPU 调用的函数.
+    - `__global__`: 在 GPU 上运行, 可被 CPU/GPU 调用的函数.
     - `__device__`: 在 GPU 上运行, 只能被 GPU 调用的函数.
 
 ### Unified Memory 统一内存
@@ -259,5 +262,10 @@ CPU sees x = 1
 ```
 
 ### Stream 流
+
+
+## CUDA 的 Pytorch 接口
+
+直接用 Pybind, 见 [Pybind 11](../cc-coding/cc-coding.qmd#sec-pybind11).
 
 ## References
