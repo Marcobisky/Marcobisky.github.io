@@ -157,8 +157,46 @@ title: "GPU 原理速成"
 :::
 <!-- ----------------------------------------- -->
 
+## Nvidia GPU
 
+> 介绍一些 Nvidia GPU 的基本概念.
 
+### Hardware Concepts
+
+> 不同的架构在硬件上是有区别的.
+
+- **CUDA Core/SP (Stream Processor)**
+    - 每个 CUDA Core 都有自己的 PC.
+    - 一个 CUDA Core 上面只能计算单精度/整数
+
+- **SM (Streaming Multiprocessor)**: 包括很多 CUDA Cores, SFU (Special Function Unit, 比如计算 `__cos()`), LD/ST 单元, Scheduler, etc.
+    - Pascal 架构中一个 SM 有 128 个 CUDA 核心.
+    - 一个 SM 里面只有一个大的 Reg File/shared memory/L1 cache, 而不是每个 CUDA Core 都有.
+        
+- **GPC (Graphics Processing Cluster)**: 包括多个 SM.
+
+### Software Concepts
+
+- **Thread**: 一个 thread 在同一时间只能在一个 CUDA Core 上运行, 但一个 CUDA Core 可以被 Warp Scheduler 分时间片给多个 threads 运行.
+
+- **Warp**: **Warp Scheduler** 硬件模块会每次调度 32 个 threads, 是调度的最小单位. 
+    - **Active Warp**: 当有足够的资源给一个 block 去运行的时候, 它立即成为 **active block**, 里面的所有 warp 都称为 **active warp**, 它可以分为:
+        - **Selected Warp**: Warp Scheduler 硬件模块每个 cycle 会挑选 active warp 并分配 32 个 CUDA Core 中去执行, 选中的 warp 称为 **selected warp**.
+            - **Stalled Warp**: 如果一个 selected warp 在执行过程中发现需要等待某些资源 (比如 memory load 的结果), Warp scheduler 会暂时丢弃它转而选择其它的 eligible warp 执行, 它就变成 **stalled warp** (挂起/阻塞), 暂时不能被选中.
+
+                ![Warp 0 被挂起 @_2022_warp.](stall-warp.png){#fig-stall-warp}
+
+        - **Eligible Warp**: 没被选中的 active warp 称为 **eligible warp**, 它随时可以被选中去执行.
+
+    - **Warp Divergence**: 一个 Warp 里面的所有 CUDA Core 都执行同样的指令, 但路径可能不同 (如遇到 `if` 分支), 这时有些分支需要等待 (**Stall**) 其它分支, 称为 Warp Divergence.
+        - 不同 warp 之间不会有等待的情况.
+
+        ![不参与 `if` 分支的 thread 也不能提前执行 `else` 分支而要等待哪些执行 `if` 分支的 thread @_2022_warp.](warp-divergence.png){#fig-warp-divergence}
+
+- **Block**: 一组 threads.
+    - Block 内的 threads 一定会在同一个 SM 上运行 (为什么?). 一个 SM 可以同时运行很多个 blocks.
+
+- **Grid**: 一组 blocks. 一个 **Kernel** 函数启动是相当于启动一个 grid.
 
 
 ## CUDA

@@ -540,6 +540,11 @@ div.csl-indent {
   <ul class="collapse">
   <li><a href="#线程-thread" id="toc-线程-thread" class="nav-link" data-scroll-target="#线程-thread">线程 <code>thread</code></a></li>
   </ul></li>
+  <li><a href="#nvidia-gpu" id="toc-nvidia-gpu" class="nav-link" data-scroll-target="#nvidia-gpu">Nvidia GPU</a>
+  <ul class="collapse">
+  <li><a href="#hardware-concepts" id="toc-hardware-concepts" class="nav-link" data-scroll-target="#hardware-concepts">Hardware Concepts</a></li>
+  <li><a href="#software-concepts" id="toc-software-concepts" class="nav-link" data-scroll-target="#software-concepts">Software Concepts</a></li>
+  </ul></li>
   <li><a href="#cuda" id="toc-cuda" class="nav-link" data-scroll-target="#cuda">CUDA</a>
   <ul class="collapse">
   <li><a href="#unified-memory-统一内存" id="toc-unified-memory-统一内存" class="nav-link" data-scroll-target="#unified-memory-统一内存">Unified Memory 统一内存</a></li>
@@ -1094,6 +1099,77 @@ Figure&nbsp;6: <code>STR</code> 指令的 FSM.
 <!-- ----------------------------------------- -->
 </section>
 </section>
+<section id="nvidia-gpu" class="level2">
+<h2 class="anchored" data-anchor-id="nvidia-gpu">Nvidia GPU</h2>
+<blockquote class="blockquote">
+<p>介绍一些 Nvidia GPU 的基本概念.</p>
+</blockquote>
+<section id="hardware-concepts" class="level3">
+<h3 class="anchored" data-anchor-id="hardware-concepts">Hardware Concepts</h3>
+<blockquote class="blockquote">
+<p>不同的架构在硬件上是有区别的.</p>
+</blockquote>
+<ul>
+<li><strong>CUDA Core/SP (Stream Processor)</strong>
+<ul>
+<li>每个 CUDA Core 都有自己的 PC.</li>
+<li>一个 CUDA Core 上面只能计算单精度/整数</li>
+</ul></li>
+<li><strong>SM (Streaming Multiprocessor)</strong>: 包括很多 CUDA Cores, SFU (Special Function Unit, 比如计算 <code>__cos()</code>), LD/ST 单元, Scheduler, etc.
+<ul>
+<li>Pascal 架构中一个 SM 有 128 个 CUDA 核心.</li>
+<li>一个 SM 里面只有一个大的 Reg File/shared memory/L1 cache, 而不是每个 CUDA Core 都有.</li>
+</ul></li>
+<li><strong>GPC (Graphics Processing Cluster)</strong>: 包括多个 SM.</li>
+</ul>
+</section>
+<section id="software-concepts" class="level3">
+<h3 class="anchored" data-anchor-id="software-concepts">Software Concepts</h3>
+<ul>
+<li><p><strong>Thread</strong>: 一个 thread 在同一时间只能在一个 CUDA Core 上运行, 但一个 CUDA Core 可以被 Warp Scheduler 分时间片给多个 threads 运行.</p></li>
+<li><p><strong>Warp</strong>: <strong>Warp Scheduler</strong> 硬件模块会每次调度 32 个 threads, 是调度的最小单位.</p>
+<ul>
+<li><strong>Active Warp</strong>: 当有足够的资源给一个 block 去运行的时候, 它立即成为 <strong>active block</strong>, 里面的所有 warp 都称为 <strong>active warp</strong>, 它可以分为:
+<ul>
+<li><strong>Selected Warp</strong>: Warp Scheduler 硬件模块每个 cycle 会挑选 active warp 并分配 32 个 CUDA Core 中去执行, 选中的 warp 称为 <strong>selected warp</strong>.
+<ul>
+<li><p><strong>Stalled Warp</strong>: 如果一个 selected warp 在执行过程中发现需要等待某些资源 (比如 memory load 的结果), Warp scheduler 会暂时丢弃它转而选择其它的 eligible warp 执行, 它就变成 <strong>stalled warp</strong> (挂起/阻塞), 暂时不能被选中.</p>
+<div id="fig-stall-warp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stall-warp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="stall-warp.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stall-warp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Warp 0 被挂起 <span class="citation" data-cites="_2022_warp"><a href="#ref-_2022_warp" role="doc-biblioref">[3]</a></span>.
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+<li><strong>Eligible Warp</strong>: 没被选中的 active warp 称为 <strong>eligible warp</strong>, 它随时可以被选中去执行.</li>
+</ul></li>
+<li><strong>Warp Divergence</strong>: 一个 Warp 里面的所有 CUDA Core 都执行同样的指令, 但路径可能不同 (如遇到 <code>if</code> 分支), 这时有些分支需要等待 (<strong>Stall</strong>) 其它分支, 称为 Warp Divergence.
+<ul>
+<li>不同 warp 之间不会有等待的情况.</li>
+</ul>
+<div id="fig-warp-divergence" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-warp-divergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="warp-divergence.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-warp-divergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: 不参与 <code>if</code> 分支的 thread 也不能提前执行 <code>else</code> 分支而要等待哪些执行 <code>if</code> 分支的 thread <span class="citation" data-cites="_2022_warp"><a href="#ref-_2022_warp" role="doc-biblioref">[3]</a></span>.
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+<li><p><strong>Block</strong>: 一组 threads.</p>
+<ul>
+<li>Block 内的 threads 一定会在同一个 SM 上运行 (为什么?). 一个 SM 可以同时运行很多个 blocks.</li>
+</ul></li>
+<li><p><strong>Grid</strong>: 一组 blocks. 一个 <strong>Kernel</strong> 函数启动是相当于启动一个 grid.</p></li>
+</ul>
+</section>
+</section>
 <section id="cuda" class="level2">
 <h2 class="anchored" data-anchor-id="cuda">CUDA</h2>
 <ul>
@@ -1109,7 +1185,7 @@ Figure&nbsp;6: <code>STR</code> 指令的 FSM.
 <img src="nvidia-gpu.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-nvidia-gpu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: NVidia GPU 架构 <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
+Figure&nbsp;9: NVidia GPU 架构 <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
 </figcaption>
 </figure>
 </div></li>
@@ -1120,7 +1196,7 @@ Figure&nbsp;7: NVidia GPU 架构 <span class="citation" data-cites="emory"><a hr
 <img src="seperate-memory.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-seperate-memory-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;8: Seperate memory systems <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
+Figure&nbsp;10: Seperate memory systems <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>
 </figcaption>
 </figure>
 </div></li>
@@ -1191,6 +1267,9 @@ Figure&nbsp;8: Seperate memory systems <span class="citation" data-cites="emory"
 </div>
 <div id="ref-adammajmudar_2024_github" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[2] </div><div class="csl-right-inline">A. Majmudar, <span>“GitHub - adam-maj/tiny-gpu: A minimal GPU design in verilog to learn how GPUs work from the ground up.”</span> GitHub, 2024. Available: <a href="https://github.com/adam-maj/tiny-gpu">https://github.com/adam-maj/tiny-gpu</a>. [Accessed: Jan. 18, 2026]</div>
+</div>
+<div id="ref-_2022_warp" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">별준, <span>“WARP execution.”</span> Jan. 2022. Available: <a href="https://junstar92.tistory.com/277">https://junstar92.tistory.com/277</a>. [Accessed: Jan. 27, 2026]</div>
 </div>
 </div>
 </section>
