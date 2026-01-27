@@ -6,13 +6,17 @@ class B; // Let A know B
 class A {
 public:
     std::weak_ptr<B> bptr;
-    ~A() { std::cout << "A destroyed\n"; }
+    ~A() {
+        std::cout << "A destroyed\n";
+    }
 };
 
 class B {
 public:
     std::weak_ptr<A> aptr;
-    ~B() { std::cout << "B destroyed\n"; }
+    ~B() {
+        std::cout << "B destroyed\n";
+    }
 };
 
 int main() {

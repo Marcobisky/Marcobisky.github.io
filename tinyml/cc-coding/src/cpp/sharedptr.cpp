@@ -6,13 +6,17 @@ class B; // Let A know B
 class A {
 public:
     std::shared_ptr<B> bptr;
-    ~A() { std::cout << "A destroyed\n"; }
+    ~A() {
+        std::cout << "A destroyed\n"; 
+    }
 };
 
 class B {
 public:
     std::shared_ptr<A> aptr;
-    ~B() { std::cout << "B destroyed\n"; }
+    ~B() {
+        std::cout << "B destroyed\n";
+    }
 };
 
 int main() {
@@ -22,5 +26,5 @@ int main() {
     a->bptr = b; // b2
     b->aptr = a; // a2
 
-    // No destroy messages!!! (Memory leak)
+    // No destroy messages! (Memory leak)
 } // b1 a1 (not 0!)

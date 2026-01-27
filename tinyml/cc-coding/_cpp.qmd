@@ -146,10 +146,21 @@ TODO
 
 #### Constructor, Init List 构造函数与初始化列表
 
-- **Constructor**: 相当于 `Python` 里的 `__init__` 方法. 每次创建对象时会被调用. 可以有多个 Constructor (根据是否带参数区分). 名字是 `ClassName()`.
-    - **Destructor**: 相当于 `Python` 里的 `__del__` 方法. 每次对象被销毁时会被调用. 名字是 `~ClassName()`.
+- **Constructor 构造函数**: 相当于 `Python` 里的 `__init__` 方法. 每次创建对象时会被调用.
+    - 可以有多个 Constructor (根据初始化时所带参数数量和类型自动调用, 也是**多态**的一种体现). 名字必须直接用类名: `ClassName()`.
+    - 如果没写则编译器默认会生成一个效果跟下面一样的构造函数:
 
-- **Constructor member initializer list**: 用于在 Constructor 体**执行前**初始化成员变量 (用 `:` 引出). 那跟放在 Constructor 体里初始化有什么区别呢? 见下面例子:
+        ```cpp
+        ClassName() {} // Default constructor
+        // Or
+        ClassName() = default;
+        ```
+    建议显式写出默认构造函数, 以防止别人以为你忘了写.
+    
+- **Destructor 析构函数**: 相当于 `Python` 里的 `__del__` 方法. 每次对象被销毁时会被调用. 名字是 `~ClassName()`.
+
+- **Constructor member initializer list**: 用于在 Constructor 体**执行前**初始化成员变量 (用 `:` 引出). 那跟放在 Constructor 体里初始化有什么区别呢?
+    - `C++` 规定: **所有成员对象, 必须在进入构造函数体之前完成构造**, 比如 #lst-constructorcpp 中进入 `Big(int in) {...}` 之前就必须构造出 `small`, 那只能调用 `Small` 的默认构造方法 `Small()`. 所以 `1` 先被打印. 
 
 ::: {layout-ncol=2}
 ```{.cpp filename="constructor.cpp" #lst-constructorcpp}
@@ -213,16 +224,31 @@ class A : public B
 
 #### `typedef` 和 `using` 关键字
 
-下面两个都是给 `std::vector<int>` 起别名 `IntList`, 效果一样:
+下面两个都是给复杂类型 `std::vector<int>` 起好听一点的名字 `IntList`, 效果一样:
 
 ```cpp
 using IntList = std::vector<int>;
 typedef std::vector<int> IntList;
 ```
 
-#### Overloading 重载
+### Polymorphism 多态
 
-- 重载使得 `+`, `*` 这些运算符可以用于自定义 class 之间的运算 (而不仅限于 `int`, `float` 等).
+> 多态: 同一个接口用于不同的数据类型. 这是 OOP 的重要特性之一. 分为:
+
+- 编译时多态: **函数重载**、**运算符重载**.
+- 运行时多态: **虚函数**、**纯虚函数**.
+
+#### 函数重载
+
+- 如果你需要让很多同名的函数支持不同类型或数量的参数, 可以把他们放进一个 class 里面, 因为 class 支持**函数重载**:
+
+```{.cpp filename="overload_function.cpp" #lst-overloadfunctioncpp}
+{{< include src/cpp/overload_function.cpp >}}
+```
+
+#### 运算符重载
+
+- 运算符重载使得 `+`, `*` 这些运算符可以用于自定义 class 之间的运算 (而不仅限于 `int`, `float` 等).
 - `Python` 里面也有 `__add__` 这种魔法方法实现重载.
 - 重载是不好的编程习惯! 但在写 API 的时候要提供重载和非重载两种接口供开发者使用 (比如下面的 `Add()` 和 `operator+()` 方法), 定义的时候可以用重载定义非重载, 也可以反过来:
 
@@ -241,6 +267,69 @@ typedef std::vector<int> IntList;
 ```{.cpp filename="overload_main.cpp" #lst-overloadmaincpp}
 {{< include src/cpp/overload_main.cpp >}}
 ```
+
+#### 虚函数
+
+- 我们想用同一个函数 `print_res()` 来打印 `A` 类和 `B` 类 (derived from `A`) **各自**的 `forward()` 结果, 我们在 C++ 和 Python 里实现它们, 发现虽然 `print_res()` 定义时规定参数类型是 `A*`, Python 成功调用了各自的 `forward()` 方法, 但 C++ 却都用的是 `A` 类的 `forward()` 方法 (这不是我们所期望的).
+
+::: {layout-ncol=2}
+```{.cpp filename="virtual.cc" #lst-virtualcc}
+{{< include src/cpp/virtual.cc >}}
+```
+
+```{.cpp filename="virtual.py" #lst-virtualpy}
+{{< include src/cpp/virtual.py >}}
+```
+:::
+
+- 为了使得子类的方法能够覆盖 (override) 父类的方法, 我们需要在**父类**的方法前加上 `virtual`, 子类的函数体前加上 `override` (也可以不加).
+
+    ```cpp
+    class A {
+    public:
+        virtual int forward(int x) const {
+            return x;
+        }
+    };
+
+    class B : public A {
+    public:
+        int forward(int x) const override {
+            return 2*x;
+        }
+    };
+    ```
+
+- 虚函数通过 **vtable** 实现, 会增加一点点内存和时间开销, 但小到可以忽略.
+
+#### 纯虚函数 (a.k.a. 接口, 抽象类)
+
+- **动机**: 有时候我们希望一个类**没有**一个具体的方法 (只有一个抽象的方法), 很多子类都去实现这个方法. 以 @lst-virtualcc 来说的话就是我们希望 `A` 类的 `forward()` 方法不要有具体实现, 让所有子类都去实现它. 这样的类叫做 **Abstract Class 抽象类**, 也叫做 **Interface 接口** (很形象吧).
+    - 比如 @lst-virtualpurecc 中的 `Speaker` 很抽象吧嘿嘿.
+
+- 实现: 在父类的方法后面前加上 `= 0`, 称为一个 **Pure Virtual Function 纯虚函数**.
+    - 这样的抽象类不能被实例化, 只有子类可以被实例化.
+
+```{.cpp filename="virtual_pure.cc" #lst-virtualpurecc}
+{{< include src/cpp/virtual_pure.cc >}}
+```
+
+- 但是 @lst-virtualpurecc 会有个 warning: 
+
+    ```bash
+    virtual_pure.cc:34:5: warning: delete called on 'Speaker' that is abstract but has non-virtual destructor [-Wdelete-abstract-non-virtual-dtor]
+    34 |     delete cat;
+       |     ^
+    ```
+    这是因为 `delete` 一个 `Speaker` 类型的指针时, 会去调用 `Speaker` 抽象类的析构函数 (注意这个析构函数是被隐式创建过的), 这时候编译器非常贴心的提醒我们: **你应该想调用的是子类的析构函数吧**, 你最好把父类的析构函数也声明为 `virtual`:
+
+    ```cpp
+    class Speaker {
+    public:
+        virtual ~Speaker() = default;
+        virtual void speak() = 0; // pure virtual
+    };
+    ```
 
 
 ### Namespace 命名空间
