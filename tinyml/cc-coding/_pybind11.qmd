@@ -12,7 +12,7 @@
 ```
 :::
 
-@lst-addopcpp 中第一个 `add` 是 Python 里调用用的函数名, 第二个是 C++ 里的函数名. `ops` 和 `m` 也可以换成任意别的名字. 运行类似下面的命令:
+- @lst-addopcpp 中第一个 `add` 是 Python 里调用用的函数名, 第二个是 C++ 里的函数名. `ops` 和 `m` 也可以换成任意别的名字. 运行类似下面的命令:
 
 ```bash
 c++ -O3 -Wall -shared -std=c++11 -fPIC -undefined dynamic_lookup \
@@ -27,3 +27,69 @@ python main.py # output 8
 
 ### Python 调用 C++ 类
 
+```{.cpp filename="ml_bind.cc" #lst-mlbindcc}
+{{< include src/pybind/class/ml_bind.cc >}}
+```
+
+- 上面的代码把 C++ 中的 `Model` 类和其子类 `LinearModel` 绑定到 Python 中. 下面对未注释的代码进行解释:
+    - `<>` 中表示告诉 Python 前者是要绑定的类, 后者是其父类; 并且在 Python 里这个类叫 `LinearModel` (同名).
+
+        ```cpp
+        pybind11::class_<ml::LinearModel, ml::Model>(m, "LinearModel")
+        ```
+    - 绑定类的构造函数: 这里表示 `LinearModel` 的构造函数接受一个 `double` 类型的参数 `weight`, 默认值是 `1.0`.
+
+        ```cpp
+        .def(pybind11::init<double>(), pybind11::arg("weight") = 1.0)
+        ```
+    在 Python 里可以这样构造:
+
+        ```python
+        LinearModel()           # weight 默认为 1.0
+        LinearModel(2.5)        # weight 设为 2.5
+        LinearModel(weight=2.5) # 同上
+        ```
+    - 绑定类的成员变量 `weight`:
+
+        ```cpp
+        .def_readwrite("weight", &ml::LinearModel::weight);
+        ```
+    在 Python 里可以直接读写:
+
+        ```python
+        lm.weight
+        lm.weight = 5.0
+        ```
+    - 为什么 `Model` 要加下面的析构虚函数?
+
+        ```cpp
+        virtual ~Model() = default;
+        ```
+    是因为下面 Python 会使用 `std::shared_ptr` 创建对象 `Model`, 并在代码在结束时销毁它, 如果没有虚析构函数, 可能会导致派生类 `LinearModel` 的析构函数不被调用 (不加会有 warning).
+
+```{.python filename="main.py" #lst-mainpyclass}
+{{< include src/pybind/class/main.py >}}
+```
+
+- 再写一个 `setup.py` 来编译绑定代码:
+
+```{.python filename="setup.py" #lst-setuppy}
+{{< include src/pybind/class/setup.py >}}
+```
+
+- 运行:
+
+    ```bash
+    # Generate something like ml_ops.cpython-39-darwin.so
+    python setup.py build_ext --inplace
+    python main.py
+    ```
+- 运行结果:
+
+    ```bash
+    2.0
+    6.0
+    True
+    3.0
+    10.0
+    ```

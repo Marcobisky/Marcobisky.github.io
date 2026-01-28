@@ -148,6 +148,7 @@ TODO
 
 - **Constructor 构造函数**: 相当于 `Python` 里的 `__init__` 方法. 每次创建对象时会被调用.
     - 可以有多个 Constructor (根据初始化时所带参数数量和类型自动调用, 也是**多态**的一种体现). 名字必须直接用类名: `ClassName()`.
+        - 也支持 **Default Arguments 默认参数**: `ClassName(int w = 1)` 意思是如果创建对象时没传参数 `w` 就等于 `1`.
     - 如果没写则编译器默认会生成一个效果跟下面一样的构造函数:
 
         ```cpp
@@ -190,11 +191,12 @@ public:
 
 #### 类继承
 
-```cpp
-class A : public B
-```
+- 下面代码表示 `class A` 继承 `class B` (记作 "A is-a B").
+    - `public` 表示**公开继承**, 即 `B` 的 `public` 和 `protected` 成员在 `A` 里依然是 `public` 和 `protected`[^protected].
 
-上面代码表示让 `class A` 继承 `class B`. `public` 表示**公开继承**, 即 `B` 的 `public` 和 `protected` 成员在 `A` 里依然是 `public` 和 `protected`[^protected].
+    ```cpp
+    class A : public B
+    ```
 
 [^protected]: `protected` 和 `private` 区别: 前者代表本类和子类可以访问, 后者只能本类访问 (子类不行).
 
@@ -270,7 +272,7 @@ typedef std::vector<int> IntList;
 
 #### 虚函数
 
-- 我们想用同一个函数 `print_res()` 来打印 `A` 类和 `B` 类 (derived from `A`) **各自**的 `forward()` 结果, 我们在 C++ 和 Python 里实现它们, 发现虽然 `print_res()` 定义时规定参数类型是 `A*`, Python 成功调用了各自的 `forward()` 方法, 但 C++ 却都用的是 `A` 类的 `forward()` 方法 (这不是我们所期望的).
+- 我们想用同一个函数 `print_res()` 来打印 `A` 类和 `B` 类 (derived from `A`) **各自**的 `forward()` 结果, 我们在 C++ 和 Python 里实现它们. 发现虽然两种语言 `print_res()` 定义时规定参数类型都是 `A*`, Python 就很聪明, 成功调用了各自的 `forward()` 方法; 而 C++ 却都用的是 `A` 类的 `forward()` 方法 (这不是我们所期望的).
 
 ::: {layout-ncol=2}
 ```{.cpp filename="virtual.cc" #lst-virtualcc}
