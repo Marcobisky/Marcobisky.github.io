@@ -1,6 +1,181 @@
 ### CMakeLists
 
-TODO
+#### 一般工作流与设计哲学
+
+- 典型工程结构 (**Out-of-source build**):
+
+    ```css
+    myproj/
+    ├── docs/           # 文档
+    ├── CMakeLists.txt  # 所在文件绝对路径成为 CMAKE_SOURCE_DIR 的值
+    ├── cmake/          # CMake 自身基础设施
+    │   └── FindXXX.cmake
+    ├── src/            # 核心源码
+    │   ├── module1/
+    │   │   ├── mod1.cc
+    │   │   ├── mod1.h
+    │   │   └── CMakeLists.txt
+    │   ├── main.cc
+    │   └── CMakeLists.txt
+    ├── include/        # 如果你写的是一个库的话就要这个
+    │   └── myproj/
+    │       └── api.h
+    ├── test/
+    │   ├── test_mod1.cc
+    │   └── CMakeLists.txt
+    ├── third_party/
+    ├── tools/
+    └── build/
+        └── a.out       # You are here!
+    ```
+    - 如果是 **In-source build**:
+
+        ```css
+        myproj/
+        ├── main.cpp
+        ├── Makefile
+        └── a.out
+        ```
+        这样做会把编译生成的文件和源代码文件混在一起, 不推荐!
+
+- 典型工作流:
+
+    ```bash
+    rm -rf build && mkdir build
+    git submodule init && git submodule update
+    cd build
+    cmake ..
+    make && make install
+    ```
+
+    - **配置阶段**:
+        - 一般会在 `build/` 目录下运行: `cmake ..` 而不是在 CMAKE_SOURCE_DIR 目录下运行 `cmake .`!
+            - `build/` 的绝对路径会被 CMake 作为 CMAKE_BINARY_DIR.
+        - 仅配置阶段生效的命令要格外注意! 配置完了改变文件不重新 `cmake ..` 的话是不会生效的!
+
+    - **构建阶段**
+
+- 一些 **CMake built-in variables 内置变量**:
+    - `CMAKE_SOURCE_DIR`: `myproj/`.
+    - `CMAKE_BINARY_DIR`: `myproj/build/`.
+    - `CMAKE_CURRENT_SOURCE_DIR`: 非顶层 CMakeLists.txt 所在目录 (比如 `myproj/src/module1/`).
+    - `CMAKE_CURRENT_BINARY_DIR`: 非顶层 CMakeLists.txt 镜像到的 build 目录 (比如 `myproj/build/src/module1/`).
+
+#### CMakeLists 作为计算机语言
+
+> 下面的命令都写在 `CMakeLists.txt` 里面, 并用: `cmake -P CMakeLists.txt` 运行.
+
+- 基本操作:
+
+    ```cmake
+    # 赋值, 只有 string
+    set(A 123)          # A = "123"
+    set(MY_LIST a b c)  # 伪 List 类型, 不等价于 set(MY_LIST "abc")
+    # 打印
+    message(A)          # 输出: A (没有自动解引用! 同 message("A"))
+    message(${A})       # 输出: 123
+    message(${MY_LIST}) # 输出: abc
+    # 追加字符
+    list(APPEND A 4)
+    list(APPEND MY_LIST de)
+    message(${A})       # 输出: 1234
+    message(${MY_LIST}) # 输出: abcde
+    ```
+
+- MACRO
+
+    ```cmake
+    # MACRO (纯文本展开!)
+    macro(my_macro x y)
+        message("x=${x}, y=${y}")
+        set(X 100)
+    endmacro()
+
+    set(X 1)
+    message(${X})       # 输出: 1
+    my_macro(10 20)     # 输出: x=10, y=20
+    message(${X})       # 输出: 100
+    ```
+
+- FUNCTION
+
+    ```cmake
+    # FUNCTION
+    function(f a b)                 # f: 函数名. a,b: 形参
+        message("a=${a}, b=${b}")
+        message(${ARGC})            # 参数个数, 是全局变量!
+        message(${ARGV})            # 所有参数列表, 是全局变量!
+        message(${ARGV0})           # 第0个参数, 是全局变量! 同理有 ARGV1, etc.
+        message(${ARGN})            # 额外参数列表, 是全局变量!
+        set(X 200)
+    endfunction()
+
+    set(X 2)
+    f(q ww e r t)                   # 输出: a=q, b=ww
+                                    #       5
+                                    #       qwwert
+                                    #       q
+                                    #       ert
+    message(${X})                   # 输出: 2 (函数内修改不影响外部变量)
+    ```
+
+- 分支
+
+    ```cmake
+    # 分支
+    set(MY_FLAG ON)         # 相当于 True, ON 也可以换成: 1, YES, TRUE, Y
+    if(MY_FLAG)
+        message("true")     # 输出: true
+    else()
+        message("false")    # 不会执行
+    endif()
+    ```
+    - 在 `if()` 括号里面的还有很多常见判断 (遇到了知道什么意思就行), 比如:
+    
+    ```cmake
+    if(3 GREATER 2)         # 比较运算: GREATER, LESS, EQUAL, etc.
+    if(DEFINED VAR)         # 变量是否定义
+    if(EXISTS "${CMAKE_SOURCE_DIR}/test.cc")    # CMAKE_SOURCE_DIR 是 CMakeLists.txt 所在目录
+    ```
+
+#### CMake Built-in Commands
+
+- 命令的参数顺序: **子命令 + 输入/变量 + 输入/变量**. 以 `file()` 为例:
+
+    ```cmake
+    file(GLOB MY_CSRCS *.c)     # GLOB (Global pattern matching): 子命令
+                                # MY_CSRCS: 定义了一个变量
+                                # *.c: 表示收集所有的 .c 文件
+    ```
+
+- `file()`: 文件操作
+
+    ```cmake
+    file(READ version.txt VERSION)          # 读取 version.txt 并定义到变量 VERSION
+    file(WRITE output.txt "Hello World")    # 写入文件
+    file(COPY)
+    file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output) # 创建目录
+    file(REMOVE temp.txt)                   # 删除文件
+    file(GLOB MY_CSRCS *.c *.cpp *.cc)      # 收集当前目录所有符合模式的文件名到变量 MY_CSRCS
+    file(GLOB_RECURSE MY_SRCS src/*.c)      # src/ 的子目录中的 .c 也算 (仅配置阶段生效, 不建议使用)
+    file(RELATIVE_PATH MY_REL_PATH /a/b/c /a/b/e/f.json)   # MY_REL_PATH = ../e/f.json
+    ```
+
+- 其它常用命令:
+
+    ```cmake
+    add_executable(myapp main.cc utils.cc)  # 定义一个 target 可执行文件叫 myapp
+    add_subdirectory(ops)                   # 执行当前目录下的子目录 ops 中的 CMakeLists, 并把其中定义的 targets 加入当前构建图
+    target_include_directories(mylib
+        PUBLIC include
+        PRIVATE src
+    ) # target mylib 的头文件在 include/ 和 src/ 目录下. PRIVATE 表示只有 mylib 自己能用 src/ 目录下的头文件, PUBLIC 表示 mylib 的使用者也能用 include/ 目录下的头文件
+    target_link_libraries(myapp PRIVATE mylib)  # 定义 target myapp 依赖 mylib 库
+    set_target_properties(myapp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)    # 让 target myapp 的可执行文件输出到 build/bin/ 目录下
+    install(TARGETS myapp
+        RUNTIME DESTINATION bin
+    )   # 安装 target myapp 的可执行文件到系统的 bin/ 目录下 (一般是 /usr/local/bin/)
+    ```
 
 ### Makefile
 
