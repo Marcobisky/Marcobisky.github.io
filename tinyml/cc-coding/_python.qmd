@@ -72,6 +72,37 @@ All tasks completed in 10.0 seconds
         assert a == 1, "a is not equal to 1!"
         ```
 
+#### 异常控制
+
+- `try`, `except`, `else`, `finally` 经典 4 块结构:
+
+```python
+{{< include src/python/exception-control.py >}}
+```
+
+- `with` + `__enter__` 和 `__exit__` 实现资源的自动管理 (上下文管理器):
+    - 经典的例子:
+
+        ```python
+        with open("file.txt", "r") as f:
+            data = f.read()
+        ```
+        还有:
+    
+        ```python
+        with torch.no_grad():
+            ...
+        # 相当于 (假设之前设置过 torch.set_grad_enabled(True)):
+        # torch.set_grad_enabled(False)
+        # ...
+        # torch.set_grad_enabled(True)
+        ```
+    - `with` 后面跟的一定是一个 class 的实例 (可以现创建或用已有的实例), 而且该 class 必须实现 `__enter__` 和 `__exit__` 方法:
+
+```python
+{{< include src/python/with-demo.py >}}
+```
+
 ### Python Class 类
 
 #### 类属性和实例属性
@@ -112,7 +143,7 @@ All tasks completed in 10.0 seconds
 - 如果你想访问的属性名在运行时才能决定, 比如:
 
     ```python
-    class Order:
+    class Order(object):    # object 可写可不写 (历史包袱)
         def __init__(self):
             self.price = 100
             self.qty = 5
