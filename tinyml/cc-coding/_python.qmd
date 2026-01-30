@@ -1,5 +1,13 @@
 ### Python Basics
 
+#### Python 变量
+
+- **Mutable 可变类型**
+
+- **Immutable 不可变类型**
+
+- 函数传参时不可变类型按值传递, 可变类型按引用传递 (是这样吗, TODO).
+
 #### Import Libraries
 
 - 导入库就是让定义在别的文件中**所有 object** (**函数、类、实例、变量等**) 在本文件中可以被使用, 一般有下面几种使用方法:
@@ -115,9 +123,148 @@ All tasks completed in 10.0 seconds
     print(getattr(order, attr_name))    # 这样才行!
     ```
 
+### Python 下划线
+
+#### 下划线的基本用法
+
+- 作为大数字的分隔符 (只是看起来更舒服):
+
+    ```python
+    num = 1_000_000 # 相当于 num = 1000000
+    ```
+
+- 作为不重要的变量, 常见的有:
+    - 循环变量
+
+    ```python
+    for _ in range(5):  # 表示循环变量不重要, 不会在循环体内使用
+        print("Hello")
+    ```
+    - 解包变量
+
+    ```python
+    a, _, b = (1, 2, 3)  # 表示中间的变量不重要
+    print(a, b)          # 输出: 1 3
+    ```
+
+- 用来避免保留关键字 (仅仅是约定, 众所周知程序员很不擅长取名字, 不用 `foo` 就很好了, 理解一下):
+
+    ```python
+    class_ = "MyClass"  # 避免和关键字 class 冲突
+    ```
+
+#### Python 下划线命名的可见性
+
+> 我们研究单下划线、双下划线的 **变量、函数、类属性、实例属性、类方法、实例方法、类名** 在 **类内部、子类、类外同文件、不同文件** 中的可见性.
+
+> 总体来说, 单下划线开头 $\approx$ "protected", 双下划线开头 $=$ "private".
+
+```{.python filename="myModule.py" #lst-myModulepy}
+_var = 5                # module variable
+__var = 6               # module variable
+
+def _g():               # module function
+    print("_g called")
+
+def __g():              # module function
+    print("__g called")
+
+class A:
+    _ca = 1             # Class attribute
+    __ca = 2            # Class attribute
+    def __init__(self):
+        self._ia = 3    # Instance attribute
+        self.__ia = 4   # Instance attribute
+    def _f(self):
+        print("_f called")
+    def __f(self):
+        print("__f called")
+    @classmethod
+    def _cf(cls):
+        print("_cf called")
+    @classmethod
+    def __cf(cls):
+        print("__cf called")
+
+class _A:               # module class
+    pass
+
+class __A:              # module class
+    pass
+```
+
+- 单下划线: 在**所有地方**都能访问 (相当于没有下划线, 但除了子类访问父类的所有单下划线开头的东西没有警告, 其它都会有警告), 除了不同文件的这种访问方法: 
+
+    ```python
+    from myModule import *
+    print(_var)    # Error: _var is not defined
+    print(_A)      # Error: _A is not defined
+    _g()           # Error: _g is not defined
+    ```
+    但这样是可以的:
+    
+    ```python
+    import myModule
+    print(myModule._var)  # 输出: 5
+    print(myModule._A)    # 输出: <class 'myModule._A'>
+    myModule._g()         # 输出: _g called
+    ```
+    这样可以:
+    
+    ```python
+    from myModule import _var, _A, _g
+    ```
+
+- 双下划线:
+    - 类中所有双下划线的 (`__ca`, `__ia`, `__f`, `__cf`) 都**只能**在类的内部使用 (即 "private", 子类和类外同文件都不行).
+        - 其实是 **Name Mangling**, 比如 `__ca` 在 runtime 会变成 `_A__ca` (类名 + 变量名), 用这种方法可以访问 (在 Python 中没有什么是绝对 private 的!):
+        
+        ```python
+        import myModule
+        print(myModule.A._A__ca)  # 输出: 2
+        ```
+    - 类外的双下划线 (`__var`, `__g`, `__A`) 必须用:
+
+        ```python
+        import myModule
+        from myModule import __var, __g, __A    # 也可以
+        ```
+        这种方法导出其它文件.
+
+
+#### Dunder Method 魔法方法
+
+> 以双下划线开头和结尾的方法, 表示对某个类进行某种特定操作 (比如创建、销毁、加法、当作函数调用等) 时自动调用的方法 (如同 C++ 的运算符重载).
+
+- 注意所有的魔法方法都是 Python 提供的, 自己不能定义!
+
+```{.python filename="dunder-method.py" #lst-dunder-methodpy}
+{{< include src/python/dunder-method.py >}}
+```
+
+
 ### Python 常用数据结构
 
 #### Dictionary 字典
+
+- 访问 key, value 和 key-value 对: 
+
+    ```python
+    a = {'x': 1, 'y': 2, 'z': 3}
+    print(a.keys())        # 输出 dict_keys(['x', 'y', 'z'])
+    print(a.values())      # 输出 dict_values([1, 2, 3])
+    print(a.items())       # 输出 dict_items([('x', 1), ('y', 2), ('z', 3)])
+    ```
+    - 注意返回的不是 list 而是**视图对象** (原对象变化后可以跟着变):
+
+        ```python
+        a = {'x': 1, 'y': 2, 'z': 3}
+        keys_view = a.keys()
+        print(keys_view)       # 输出 dict_keys(['x', 'y', 'z'])
+        a['w'] = 4
+        print(keys_view)       # keys_view 也变了,
+                               # 输出 dict_keys(['x', 'y', 'z', 'w'])
+        ```
 
 - 用 `get()` 来访问 key, 返回对应的 value
     - 注意 key 不存在时不会报错, 而是返回 `None`!
