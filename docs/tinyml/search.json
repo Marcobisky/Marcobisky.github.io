@@ -154,6 +154,17 @@
     ]
   },
   {
+    "objectID": "resources/resources.html#useful-tools",
+    "href": "resources/resources.html#useful-tools",
+    "title": "Resources 学习资料汇总",
+    "section": "Useful Tools",
+    "text": "Useful Tools\n\nGithub 仓库结构解释工具\n\nDeep Wiki: ★★★☆☆ 仓库好像比 Code Wiki 多一点\nCode Wiki: 没怎么用过, 待评价.",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Resources 学习资料汇总</span>"
+    ]
+  },
+  {
     "objectID": "resources/resources.html#references",
     "href": "resources/resources.html#references",
     "title": "Resources 学习资料汇总",
@@ -302,6 +313,17 @@
     "title": "Glossary 名词解释",
     "section": "Optimization",
     "text": "Optimization\n\nTSP (Travelling Salesman Problem): 旅行商问题. 给定若干城市与它们之间的距离, 目标是找出一条路径, 使旅行者每个城市恰好访问一次, 最终回到起点, 并且总旅行距离最短.\nCVRP (Capacitated Vehicle Routing Problem): 带容量限制的车辆路径问题. 多辆车运送货物给多个城市, 每辆车只能装有限重量的货物, 目标是货物全送到并让运送距离最短.\nFFSP (Flexible Flow Shop Problem): 灵活流水车间调度问题.\n\n\n\n\n\n\nFigure 25: FFSP",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
+    ]
+  },
+  {
+    "objectID": "glossary/glossary.html#工业与商业模式",
+    "href": "glossary/glossary.html#工业与商业模式",
+    "title": "Glossary 名词解释",
+    "section": "工业与商业模式",
+    "text": "工业与商业模式\n\n核心商业模式:\n\nIP 提供商: 设计 IP 核并授权给芯片设计制造商使用. E.g., ARM (CPU 内核设计)\n芯片设计制造商: 购买 IP 核并设计和生产关键芯片. E.g., Xilinx (被 AMD 收购), ST (STM32 核心芯片的制造商).\n开发板制造商: 从芯片设计制造商处采购芯片, 并设计供电电路、时钟电路、将方形黑色的芯片底部的引脚引出接入各种物理接口、设计 PCB 等, 最终生产出开发板. E.g., Alinx, 正点原子, Digilent.\n\nOEM (Original Equipment Manufacturer): 原始设备制造商 (代工厂或贴牌制造商).\nODM (Original Design Manufacturer): 原始设计制造商.",
     "crumbs": [
       "Prologue",
       "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
@@ -649,11 +671,11 @@
     ]
   },
   {
-    "objectID": "cc-coding/cc-coding.html#pybind11",
-    "href": "cc-coding/cc-coding.html#pybind11",
+    "objectID": "cc-coding/cc-coding.html#sec-pybind11",
+    "href": "cc-coding/cc-coding.html#sec-pybind11",
     "title": "Random Notes on Coding",
     "section": "Pybind11",
-    "text": "Pybind11\nPybind11 是一个 C++ 库, 使得我们可以在 Python 代码中调用 C++ 函数和类. 比如:\n\n\n\n\n\nadd_op.cpp\n\n#include &lt;pybind11/pybind11.h&gt;\n\nint add(int a, int b) {\n    return a + b;\n}\n\n/// @param ops library name\nPYBIND11_MODULE(ops, m) {\n    m.def(\"add\", &add);\n}\n\n\n\n\n\n\nmain.py\n\nimport ops\n\nprint(ops.add(3, 5))\n\n\n\n\n\n运行类似下面的命令:\nc++ -O3 -Wall -shared -std=c++11 -fPIC -undefined dynamic_lookup \\\n    -I/opt/homebrew/anaconda3/lib/python3.12/site-packages/pybind11/include \\\n    -I/opt/homebrew/anaconda3/include/python3.12 \\\n    add_op.cpp -o ops.cpython-312-darwin.so\n\npython main.py # output 8\n第一个命令会在当前目录下产生一个 .so (shared object) 文件. 运行 python main.py 的时候在 import ops 的时候, Python 会在 .so 文件中找到 add 函数.",
+    "text": "Pybind11\nPybind11 是一个 C++ 库, 使得我们可以在 Python 代码中调用 C++ 函数和类.\n\nPython 调用 C++ 函数\n\n\n\n\n\nadd_op.cpp\n\n#include &lt;pybind11/pybind11.h&gt;\n\nint add(int a, int b) {\n    return a + b;\n}\n\n/// @param ops library name\nPYBIND11_MODULE(ops, m) {\n    m.def(\"add\", &add);\n}\n\n\n\n\n\n\nmain.py\n\nimport ops\n\nprint(ops.add(3, 5))\n\n\n\n\n\n\nListing lst-addopcpp 中第一个 add 是 Python 里调用用的函数名, 第二个是 C++ 里的函数名. ops 和 m 也可以换成任意别的名字. 运行类似下面的命令:\n\nc++ -O3 -Wall -shared -std=c++11 -fPIC -undefined dynamic_lookup \\\n    -I/opt/homebrew/anaconda3/lib/python3.12/site-packages/pybind11/include \\\n    -I/opt/homebrew/anaconda3/include/python3.12 \\\n    add_op.cpp -o ops.cpython-312-darwin.so\n\npython main.py # output 8\n第一个命令会在当前目录下产生一个 .so (shared object) 文件. 运行 python main.py 的时候在 import ops 的时候, Python 会在 .so 文件中找到 add 函数.\n\n\nPython 调用 C++ 类\n\n\nml_bind.cc\n\n#include &lt;pybind11/pybind11.h&gt;\n\nnamespace ml {\n\nclass Model {\npublic:\n    Model() = default;\n    virtual ~Model() = default; // 虚析构函数以确保派生类正确析构\n\n    virtual double forward(double x) const {\n        return x;\n    }\n};\n\nclass LinearModel : public Model {\npublic:\n    double weight;\n    LinearModel(double w = 1.0) : weight(w) {}\n\n    double forward(double x) const override {\n        return weight * x;\n    }\n};\n\n} // namespace ml\n\nPYBIND11_MODULE(ml_ops, m) {\n    pybind11::class_&lt;ml::Model&gt;(m, \"Model\")     // ml::Model 映射到 Python 里的 Model\n        .def(pybind11::init&lt;&gt;())                // 绑定类的默认构造函数\n        .def(\"forward\", &ml::Model::forward);   // 绑定类的成员函数 `forward`.\n\n    pybind11::class_&lt;ml::LinearModel, ml::Model&gt;(m, \"LinearModel\")\n        .def(pybind11::init&lt;double&gt;(), pybind11::arg(\"weight\") = 1.0)\n        .def(\"forward\", &ml::LinearModel::forward) // 绑定类的成员函数 `forward`.\n        .def_readwrite(\"weight\", &ml::LinearModel::weight);\n}\n\n\n\n上面的代码把 C++ 中的 Model 类和其子类 LinearModel 绑定到 Python 中. 下面对未注释的代码进行解释:\n\n&lt;&gt; 中表示告诉 Python 前者是要绑定的类, 后者是其父类; 并且在 Python 里这个类叫 LinearModel (同名).\npybind11::class_&lt;ml::LinearModel, ml::Model&gt;(m, \"LinearModel\")\n绑定类的构造函数: 这里表示 LinearModel 的构造函数接受一个 double 类型的参数 weight, 默认值是 1.0.\n.def(pybind11::init&lt;double&gt;(), pybind11::arg(\"weight\") = 1.0)\n在 Python 里可以这样构造:\nLinearModel()           # weight 默认为 1.0\nLinearModel(2.5)        # weight 设为 2.5\nLinearModel(weight=2.5) # 同上\n绑定类的成员变量 weight:\n.def_readwrite(\"weight\", &ml::LinearModel::weight);\n在 Python 里可以直接读写:\nlm.weight\nlm.weight = 5.0\n为什么 Model 要加下面的析构虚函数?\nvirtual ~Model() = default;\n是因为下面 Python 会使用 std::shared_ptr 创建对象 Model, 并在代码在结束时销毁它, 如果没有虚析构函数, 可能会导致派生类 LinearModel 的析构函数不被调用 (不加会有 warning).\n\n\n\n\nmain.py\n\nfrom ml_ops import Model, LinearModel\n\n# 使用基类\nmodel = Model()\nprint(model.forward(2.0))               # 2.0\n\n# 使用派生类\nlinearModel = LinearModel(weight=3.0)\nprint(linearModel.forward(2.0))         # 6.0\n\n# 验证继承关系\nprint(isinstance(linearModel, Model))   # True\n\n# 访问 C++ 成员变量\nprint(linearModel.weight)               # 3.0\nlinearModel.weight = 5.0\nprint(linearModel.forward(2.0))         # 10.0\n\n\n\n再写一个 setup.py 来编译绑定代码:\n\n\n\nsetup.py\n\nfrom setuptools import setup, Extension\nimport pybind11\n\next_modules = [\n    Extension(\n        \"ml_ops\",\n        [\"ml_bind.cc\"],\n        include_dirs=[pybind11.get_include()],\n        language=\"c++\",\n        extra_compile_args=[\"-std=c++17\"],\n    ),\n]\n\nsetup(\n    name=\"ml_ops\",\n    ext_modules=ext_modules,\n)\n\n\n\n运行:\n# Generate something like ml_ops.cpython-39-darwin.so\npython setup.py build_ext --inplace\npython main.py\n运行结果:\n2.0\n6.0\nTrue\n3.0\n10.0",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
@@ -682,33 +704,22 @@
     ]
   },
   {
-    "objectID": "cc-coding/cc-coding.html#coding-techniques",
-    "href": "cc-coding/cc-coding.html#coding-techniques",
-    "title": "Random Notes on Coding",
-    "section": "Coding Techniques",
-    "text": "Coding Techniques\n\n正负无穷\n涉及最小/最大值初始化. 例如我们要找 arr 中的最大值:\n#include &lt;float.h&gt;   // for FLT_MAX\n\nint main() {\n    float arr[] = {3.2, -1.5, 7.8, 0.0, 4.4};\n    int n = sizeof(arr) / sizeof(arr[0]);\n    float max_val = -FLT_MAX;    // Initialize to -inf\n    for (int i = 0; i &lt; n; i++) {\n        if (arr[i] &gt; max_val)   max_val = arr[i];\n    }\n    std::cout &lt;&lt; \"Max value: \" &lt;&lt; max_val &lt;&lt; std::endl;\n    return 0;\n}\n\n\n向上取整转为向下取整\n可通过 \\[\\left\\lceil \\frac{x}{y} \\right\\rceil = \\left\\lfloor \\frac{x + y - 1}{y} \\right\\rfloor\\] 实现 (由于整数除法默认向下取整):\nint ceil_div(int x, int y) {\n    return (x + y - 1) / y; // Automatically does floor division\n}\n\n\n链式调用\n返回 *this 的引用可以实现链式调用:\n\n\nchaining.cpp\n\n#include &lt;iostream&gt;\n\nclass Point {\nprivate:\n    int x_ = 0; int y_ = 0;\n\npublic:\n    Point& setX(int x) {\n        x_ = x;\n        return *this; \n    }\n\n    Point& setY(int y) {\n        y_ = y;\n        return *this;\n    }\n};\n\nint main() {\n    Point p;\n    // Set values by chaining\n    p.setX(10).setY(20);\n}",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
-    ]
-  },
-  {
-    "objectID": "cc-coding/cc-coding.html#coding-habits",
-    "href": "cc-coding/cc-coding.html#coding-habits",
+    "objectID": "cc-coding/cc-coding.html#sec-coding-habits",
+    "href": "cc-coding/cc-coding.html#sec-coding-habits",
     "title": "Random Notes on Coding",
     "section": "Coding Habits",
-    "text": "Coding Habits\n\n下面是一些常见的编程习惯和技巧, 注意反过来的脑回路: 读到类似的这些代码的时候也要立即条件反射出来他们在干什么!\n\n\nGeneral\n\n能引用尽量引用不要用指针!\n函数的参数尽量少.\n写程序的时候先关注主逻辑, 函数的实现放到最后写.\n\n\n\n检查相等\n\n浮点数不能直接用 == 检查相等!\n\nCPU 上一般用 std::numeric_limits&lt;float&gt;::epsilon() 作为误差.\nCPU 和 GPU 运算结果比较时一般用绝对误差比如 1e-8f (库函数提供的可能会太严格).\n\n\n\n\nis_equal_float.cc\n\n#include &lt;iostream&gt;\n\nbool is_equal_float(\n    const float *a, \n    const float *b\n) {\n    const float eps_f = std::numeric_limits&lt;float&gt;::epsilon();\n    // const float eps_f = 1e-8f; // 比较 CPU 和 GPU 的计算结果.\n    float diff = std::fabs(*a - *b);\n    if (diff &gt; eps_f) {\n        std::cout &lt;&lt; \"Not Equal\" &lt;&lt; std::endl;\n        return false;\n    } else {\n        std::cout &lt;&lt; \"Equal\" &lt;&lt; std::endl;\n        return true;\n    }\n}\n\nint main() {\n    float a = 0.1f + 0.3f;\n    float b = 0.4f;\n    is_equal_float(&a, &b);\n}\n\n\n\n\n正负无穷\n\n涉及最小/最大值初始化. 例如我们要找 arr 中的最大值:\n#include &lt;float.h&gt;   // for FLT_MAX\n\nint main() {\n    float arr[] = {3.2, -1.5, 7.8, 0.0, 4.4};\n    int n = sizeof(arr) / sizeof(arr[0]);\n    float max_val = -FLT_MAX;    // Initialize to -inf\n    for (int i = 0; i &lt; n; i++) {\n        if (arr[i] &gt; max_val)   max_val = arr[i];\n    }\n    std::cout &lt;&lt; \"Max value: \" &lt;&lt; max_val &lt;&lt; std::endl;\n    return 0;\n}\n\n\n\n向上取整\n\n向上取整的操作非常常见, 比如 HPC 里面分配多少个 block 等. 可通过 \\[\\left\\lceil \\frac{x}{y} \\right\\rceil = \\left\\lfloor \\frac{x + y - 1}{y} \\right\\rfloor\\] 实现 (由于整数除法默认向下取整):\n\nint ceil_div(const int x, const int y) {\n    return (x + y - 1) / y; // Automatically does floor division\n}\n\n\n遍历数组和张量\n\n看见下面的代码时要立刻意识到这不仅是一个循环, 而且是一个遍历!!!\nfor (int i = 0; i &lt; N; i++) {\n    for (int j = 0; j &lt; M; j++) {\n        // Process element at (i, j)\n    }\n}\n// for (int i = 1; i &lt;= N; i++) {} // 不推荐\n\nfor 循环的边界: 从 0 开始计数而不是 1, 用 &lt; 而不是 &lt;=, 因为下标往往是从 0 开始的 (Matlab 除外), 如果用从 1 开始, 循环体里面还要减 1, 很麻烦.\nTODO: 如何思考高阶张量的处理? 不要用 global 的 mental picture?\n\n\n\n\n全局索引与局部索引的转换\n\n遇到下面这种形式的代码时, 要瞬间意识到这是在进行二维数组的 flatten/unflatten 操作!\n\nFlattening:\nlsu_index = i * THREADS_PER_BLOCK + j;\nint idx = blockIdx.x * blockDim.x + threadIdx.x;\nUnflattening:\nint block_id = idx / block_dim;\nint thread_id = idx % block_dim;\n\n\n\n\n命名习惯\n\nk: 用于常量变量 (constant variable), 例如 const int kBufferSize = 1024;.\n\n\n\ngetters 和 Setters\n为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 public, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 private + getter/setter 的方式来控制对成员变量的访问和修改.\n\n\n\n\n\naccount_public.cpp\n\nclass Account {\npublic:\n    double balance;\n};\n\nint main() {\n    Account acc;\n    acc.balance = -999999; // Not recommended\n}\n\n\n\n\n\n\naccount_private.cpp\n\nclass Account {\nprivate:\n    double balance;\n\npublic:\n    // const: no modification to member variables\n    double getBalance() const { return balance; }\n\n    void deposit(double amount) {\n        if (amount &gt; 0)\n            balance += amount;\n    }\n};\n\n\n\n\n\n\n\n常写 const\n\n能加上 const 尽量加上 (比如 Listing lst-account_private), 比如函数声明时的参数列表、返回值和函数体, 这样尤其是参数有指针的函数可以一眼看出来哪些是可读、可写的.\nconst 用法:\nconst int *p1; // p1 本身可以修改, 但指向的内容不可以修改\nint * const p2; // p2 本身不可以修改, 但指向的内容可以修改\nconst int * const p3; // 都不能修改\n\nint const& my_int; // 引用的内容不可以修改, 同 const int&\n// int &const // 不合法\nPytorch C++ API 中提供 TORCH_ARG 宏, 用于自动生成类成员变量的 getter 和 setter 方法:\n#include &lt;torch/torch.h&gt;\nTORCH_ARG(double, balance) = 0;\n自动展开为:\nprivate:\n    double balance_ = 0;\n\npublic:\n    // getter\n    const double& balance() const { return balance_; }\n\n    // setter\n    double& balance() { return balance_; }\n这种写法类似 Listing lst-account_private, const double& 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 const 表示 getter 方法本身不会修改这个类的所有成员变量 (balance_ in this case). 用户可以通过 obj.balance() 来获取余额, 也可以通过 obj.balance() = 100.0; 来修改余额.\nconst 和 constexpr 区别:\n\nconstexpr 变量在编译时就算出来了, 且不可修改. 一般用于性能优化或用作编译时才能决定声明的数组大小.\n\nconst int x = some_runtime_function(); // 合法\nconstexpr int y = some_runtime_function(); // 不合法, 因为 some_runtime_function() 不是常量表达式\nconstexpr int kTensorSize = 256 * 1024; // 合法\nuint8_t tensor[kTensorSize]; // 编译时决定的数组大小",
+    "text": "Coding Habits\n\n下面是一些常见的编程习惯和技巧, 注意反过来的脑回路: 读到类似的这些代码的时候也要立即条件反射出来他们在干什么!\n\n\nGeneral\n\n能引用尽量引用不要用指针!\n函数的参数尽量少.\n写程序的时候先关注主逻辑, 函数的实现放到最后写.\nC++ 中 namespace 中的内容不要缩进.\n\n\n\n检查相等\n\n浮点数不能直接用 == 检查相等!\n\nCPU 上一般用 std::numeric_limits&lt;float&gt;::epsilon() 作为误差.\nCPU 和 GPU 运算结果比较时一般用绝对误差比如 1e-8f (库函数提供的可能会太严格).\n\n\n\n\nis_equal_float.cc\n\n#include &lt;iostream&gt;\n\nbool is_equal_float(\n    const float *a, \n    const float *b\n) {\n    const float eps_f = std::numeric_limits&lt;float&gt;::epsilon();\n    // const float eps_f = 1e-8f; // 比较 CPU 和 GPU 的计算结果.\n    float diff = std::fabs(*a - *b);\n    if (diff &gt; eps_f) {\n        std::cout &lt;&lt; \"Not Equal\" &lt;&lt; std::endl;\n        return false;\n    } else {\n        std::cout &lt;&lt; \"Equal\" &lt;&lt; std::endl;\n        return true;\n    }\n}\n\nint main() {\n    float a = 0.1f + 0.3f;\n    float b = 0.4f;\n    is_equal_float(&a, &b);\n}\n\n\n\n\n正负无穷\n\n涉及最小/最大值初始化. 例如我们要找 arr 中的最大值:\n#include &lt;float.h&gt;   // for FLT_MAX\n\nint main() {\n    float arr[] = {3.2, -1.5, 7.8, 0.0, 4.4};\n    int n = sizeof(arr) / sizeof(arr[0]);\n    float max_val = -FLT_MAX;    // Initialize to -inf\n    for (int i = 0; i &lt; n; i++) {\n        if (arr[i] &gt; max_val)   max_val = arr[i];\n    }\n    std::cout &lt;&lt; \"Max value: \" &lt;&lt; max_val &lt;&lt; std::endl;\n    return 0;\n}\n\n\n\n向上取整\n\n向上取整的操作非常常见, 比如 HPC 里面分配多少个 block 等. 可通过 \\[\\left\\lceil \\frac{x}{y} \\right\\rceil = \\left\\lfloor \\frac{x + y - 1}{y} \\right\\rfloor\\] 实现 (由于整数除法默认向下取整):\n\nint ceil_div(const int x, const int y) {\n    return (x + y - 1) / y; // Automatically does floor division\n}\n\n\n遍历数组和张量\n\n看见下面的代码时要立刻意识到这不仅是一个循环, 而且是一个遍历!!!\nfor (int i = 0; i &lt; N; i++) {\n    for (int j = 0; j &lt; M; j++) {\n        // Process element at (i, j)\n    }\n}\n// for (int i = 1; i &lt;= N; i++) {} // 不推荐\n\nfor 循环的边界: 从 0 开始计数而不是 1, 用 &lt; 而不是 &lt;=, 因为下标往往是从 0 开始的 (Matlab 除外), 如果用从 1 开始, 循环体里面还要减 1, 很麻烦.\nTODO: 如何思考高阶张量的处理? 不要用 global 的 mental picture?\n\n\n\n\n全局索引与局部索引的转换\n\n遇到下面这种形式的代码时, 要瞬间意识到这是在进行二维数组的 flatten/unflatten 操作!\n\nFlattening:\nlsu_index = i * THREADS_PER_BLOCK + j;\nint idx = blockIdx.x * blockDim.x + threadIdx.x;\nUnflattening:\nint block_id = idx / block_dim;\nint thread_id = idx % block_dim;\n\n\n\n\n命名习惯\n\nk: 用于常量变量 (constant variable), 例如 const int kBufferSize = 1024;.\nfoo(), bar(): 表示程序员不想起名字 (就像 Alice 和 Bob).\n\n来源于 FUBAR (Fucked up beyond all recognition).\n\n功能相似的函数和文件用前缀匹配: 比如用 add_float(), add_float_vec(), add_int() 而不是: float_add(), vec_float_add(), int_add(). 因为如果它们作为文件名的话, 前缀 match 的文件会放在一起, 方便查找!\n\n\n\ngetters 和 Setters\n为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 public, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 private + getter/setter 的方式来控制对成员变量的访问和修改.\n\n\n\n\n\naccount_public.cpp\n\nclass Account {\npublic:\n    double balance;\n};\n\nint main() {\n    Account acc;\n    acc.balance = -999999; // Not recommended\n}\n\n\n\n\n\n\naccount_private.cpp\n\nclass Account {\nprivate:\n    double balance;\n\npublic:\n    // const: no modification to member variables\n    double getBalance() const { return balance; }\n\n    void deposit(double amount) {\n        if (amount &gt; 0)\n            balance += amount;\n    }\n};\n\n\n\n\n\n\n\n常写 const\n\n能加上 const 尽量加上 (比如 Listing lst-account_private), 比如函数声明时的参数列表、返回值和函数体, 这样尤其是参数有指针的函数可以一眼看出来哪些是可读、可写的.\nconst 用法:\nconst int *p1; // p1 本身可以修改, 但指向的内容不可以修改\nint * const p2; // p2 本身不可以修改, 但指向的内容可以修改\nconst int * const p3; // 都不能修改\n\nint const& my_int; // 引用的内容不可以修改, 同 const int&\n// int &const // 不合法\nPytorch C++ API 中提供 TORCH_ARG 宏, 用于自动生成类成员变量的 getter 和 setter 方法:\n#include &lt;torch/torch.h&gt;\nTORCH_ARG(double, balance) = 0;\n自动展开为:\nprivate:\n    double balance_ = 0;\n\npublic:\n    // getter\n    const double& balance() const { return balance_; }\n\n    // setter\n    double& balance() { return balance_; }\n这种写法类似 Listing lst-account_private, const double& 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 const 表示 getter 方法本身不会修改这个类的所有成员变量 (balance_ in this case). 用户可以通过 obj.balance() 来获取余额, 也可以通过 obj.balance() = 100.0; 来修改余额.\nconst 和 constexpr 区别:\n\nconstexpr 变量在编译时就算出来了, 且不可修改. 一般用于性能优化或用作编译时才能决定声明的数组大小.\n\nconst int x = some_runtime_function(); // 合法\nconstexpr int y = some_runtime_function(); // 不合法, 因为 some_runtime_function() 不是常量表达式\nconstexpr int kTensorSize = 256 * 1024; // 合法\nuint8_t tensor[kTensorSize]; // 编译时决定的数组大小",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
     ]
   },
   {
-    "objectID": "cc-coding/cc-coding.html#tips-on-code-reading",
-    "href": "cc-coding/cc-coding.html#tips-on-code-reading",
+    "objectID": "cc-coding/cc-coding.html#code-reading-techniques",
+    "href": "cc-coding/cc-coding.html#code-reading-techniques",
     "title": "Random Notes on Coding",
-    "section": "Tips on Code Reading",
-    "text": "Tips on Code Reading\n\nFirst Encounter\n\nTake it Easy: 一个 C++ project 不过是一堆 class 和一个 main.\n如果是 OOP, 关注类会改变哪些外部变量 (通常是引用传递) 而不是某个方法的具体实现.\n先阅读接口函数 (一般会在 .h 文件中!). 如果直接看 .cc 文件, 会看到一些接口实现调用的函数, 而且这些函数会放在接口函数上面, 这样丢掉了重点.\n关注参数列表的 const, 这意味着这些是只读的不会改变!\n读懂参数的含义是一件费时的事情, 但很多时候费时的地方在弄懂信息的存储格式. 比如你看到:\nvoid DepthwiseConvPerChannel(const DeptheiseParam& params,\n                             const int32_t* output_multiplier,\n                             const int32_t* output_shift,\n                             const RuntimeShape& in_shape,\n                             ...)\n就会很想知道 params, output_multiplier 等里面到底是怎样的结构. 但请克制自己不要知道, 或者自己随便构思一个结构让自己相信它是对的! 因为这些数据结构的实现非常 ad hoc 而且不重要.",
+    "section": "Code Reading & Techniques",
+    "text": "Code Reading & Techniques\n\n本人看代码的速度极慢, 为了优化这一点, 我打算建立本章来积累一些阅读代码的经验和技巧, 主要是消除阅读代码时的心理负担. 本章也与 Coding Habits 有很多的重合之处, 以后可能会把两章合并 (TODO).\n\n\nFirst Encounter\n\n心理建设:\n\nTake it Easy: 一个 C++ project 不过是一堆 class 和一个 main.\n大段代码其实逻辑不会很复杂, 要关注有没有类型检查、边界检查等等冗余代码. 还有 if else 语句只有一个会被执行, 另一半都是没用的.\n\n如果是 OOP, 关注类会改变哪些外部变量 (通常是引用传递) 而不是某个方法的具体实现.\n先阅读接口函数 (一般会在 .h 文件中!). 如果直接看 .cc 文件, 会看到一些接口实现调用的函数, 而且这些函数会放在接口函数上面, 这样丢掉了重点.\n关注参数列表的 const, 这意味着这些是只读的不会改变!\n读懂参数的含义是一件费时的事情, 但很多时候费时的地方在弄懂信息的存储格式. 比如你看到:\nvoid DepthwiseConvPerChannel(const DepthwiseParam& params,\n                             const int32_t* output_multiplier,\n                             const int32_t* output_shift,\n                             const RuntimeShape& in_shape,\n                             ...)\n就会很想知道 params, output_multiplier 等里面到底是怎样的结构. 但请克制自己不要知道, 或者自己随便构思一个结构让自己相信它是对的! 因为这些数据结构的实现非常 ad hoc 而且不重要.\n不要一行一行读代码, 要功能性地读代码. 比如:\nvoid relu_f32 (torch::Tensor input, torch::Tensor output) {\n    if (x.options().dtype() != torch::kFloat32) {\n        std::cout &lt;&lt; \"Tensor info: \" &lt;&lt; x.options() &lt;&lt; std::endl;\n        throw std::runtime_error(\"Input tensor must be torch::kFloat32\");\n    }\n    if (y.options().dtype() != torch::kFloat32) {\n        std::cout &lt;&lt; \"Tensor info: \" &lt;&lt; y.options() &lt;&lt; std::endl;\n        throw std::runtime_error(\"Output tensor must be torch::kFloat32\");\n    }\n    ...\n}\n这个代码是在检查数据类型, 当你知道这一点时就别在纠结 options() 是什么了.\n当一个 cpp 文件有多个函数定义时, 一般最下面的函数才是对外暴露的接口 (因为它调用了上面的函数), 先看最下面的函数.\n\n如果有很多个名字差不多的函数, 最短的那个将是对其它的封装, 比如:\n\nvoid _relu_f32_kernel(...) { ... }\n__global__ void relu_f32_kernel(...) { ... }\nvoid relu_f32_util(...) { ... }\nvoid relu_f32(...) { ... } // True API\n单从名字上来看, _relu_f32_kernel() 仅给 relu_f32_kernel() 使用 (因为有下划线而且重名); 而 relu_f32 封装了 relu_f32_kernel 和 relu_f32_util (因为名字 match 前缀且更短).\n对象作为元数据: 比如 torch::Tensor 这个对象里并不是 tensor 数据本身, 而是:\nTensor\n├─ sizes\n├─ strides\n├─ dtype\n├─ device\n└─ data_ptr  ---&gt; 实际数据的指针\n\n所以你会看到很多 tensor.data_ptr() 这样看上去取了两次数据的感觉, 其实第一层的 tensor 只是元数据, 第二层才是实际数据.\n\n\n\n\nRTL 代码阅读\n\n下面的 Verilog 代码片段说明这个模块有两个功能, 功能的启用由 &lt;func&gt;_enable 决定; 每个功能是一个 3 个状态的 FSM.\n\n如果 ... 的部分没有什么 operation, 只有将输入赋值给输出的操作, 那么这个模块其实就是一个有条件的连接器而已!! 如果有 splitter 之类的就有 decoder 的功能.\n\nif (xxx_enable) begin \n    case (state)\n        A: begin ... lsu_state &lt;= B; end\n        B: begin ... lsu_state &lt;= C; end\n        C: begin ... lsu_state &lt;= A; end\n    endcase\nend\n\nif (yyy_enable) begin \n    case (state)\n        A: begin ... lsu_state &lt;= B; end\n        B: begin ... lsu_state &lt;= C; end\n        C: begin ... lsu_state &lt;= A; end\n    endcase\nend",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
@@ -924,6 +935,17 @@
     ]
   },
   {
+    "objectID": "cc-cpu/cc-cpu.html#references",
+    "href": "cc-cpu/cc-cpu.html#references",
+    "title": "CPU 原理速成",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] Y. N. Patt and S. J. Patel, Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill, 2020.\n\n\n[2] Slchoi, “Multi-cycle implementation & pipelining,” 2025, Available: https://velog.io/@taegon1998/4.2-4.3-Multi-Cycle-Implementation-Pipelining\n\n\n[3] BitLemon, “Cache hierarchy: How modern CPU caches are organized (L1, L2 and L3).” YouTube, Dec. 2024. Available: https://www.youtube.com/watch?v=7yrK_9PderQ&list=PL38NNHQLqJqYnNrTenxBvGJSPCkV9EOWk&index=5. [Accessed: Jan. 24, 2026]",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>13</span>  <span class='chapter-title'>CPU 原理速成</span>"
+    ]
+  },
+  {
     "objectID": "cc-gpu/cc-gpu.html",
     "href": "cc-gpu/cc-gpu.html",
     "title": "GPU 原理速成",
@@ -935,11 +957,55 @@
     ]
   },
   {
+    "objectID": "cc-gpu/cc-gpu.html#硬件设计哲学",
+    "href": "cc-gpu/cc-gpu.html#硬件设计哲学",
+    "title": "GPU 原理速成",
+    "section": "",
+    "text": "虽然一整个 GPU 很复杂, 但从 RTL 来看, 实现任何一个特定的功能 (比如读个寄存器, 做某种 ALU 运算) 都需要以下三种类型的信号! 部分名词是我自己取的.\n\n\n读懂一个模块首要的任务就是先弄清它有几个相对独立的功能 (比如 Figure fig-registers 有两个功能: 读寄存器和写寄存器), 然后针对每个功能去找这三种信号:\n\n\n\n\n\n\n\n\n\nFigure 2: Tiny-GPU 中的寄存器 [2].\n\n\n\n\nCommon 信号: 几乎每个 sync 模块都有的信号组. 比如 clk, reset, enable.\n\n要 clk 是因为大部分动作都是时钟同步的.\n有些操作比如写寄存器有一个清零 (reset) 的操作会很方便.\nenable 有两种: 全局的和某功能专属的.\n\n全局的 enable 是指整个模块在某些周期不工作 (省电). 一般会跟 reset 一起用, 只有 reset=0 且 enable=1 时模块才执行主逻辑.\n局部的 enable 一般情况是多余的, 但是经常配合下文的选择信号使用.\n\n\nSelection 选择信号: 它们不承载关键数据, 只是用来选择使用哪个输入的信号. 一般有类似有「编码」思想的信号都是 selection 信号, 比如 opcode, funct3, etc.\n\n选择信号会有层级之分, 高层级的 (state) 一般用 if, 低层级的 (sel) 一般会用 macro 宏 + case 来选择, 比如下面这个典型的选择结构:\nlocalparam ARITHMETIC = 2'b00,\n           MEMORY = 2'b01,\n           CONSTANT = 2'b10;\nalways @(posedge clk) begin\n    if reset begin\n        rs &lt;= 0;\n        ...\n    end else if (enable) begin\n        if (state == 2'b01) begin\n            case (sel)\n                ARITHMETIC: begin ... end\n                MEMORY: begin ... end\n                CONSTANT: begin ... end\n            endcase\n        end\n    end\nend\n...\n选择启动一个功能 (比如选择信号为 3b'011) 有时会再加入一个这个功能的专属 enable, 以防止误操作 (比如下面 Tiny-GPU registers 中的写操作).\n1 bit 的选择信号一般也叫做 flag (比如 mem_read_valid).\n\nMinority Valid 数据信号: 其实就是一般意义下的承载数据的信号, 比如 next_pc, imm, etc. 但是我这样起名字是因为我想强调虽然一个模块的输入多得吓人, 其实大部分都是数据信号, 但在一个时钟周期里, 其实只有很少部分的信号是有效参加计算的, 大部分的信号都被 selection 信号屏蔽调了!",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-gpu/cc-gpu.html#tiny-gpu",
+    "href": "cc-gpu/cc-gpu.html#tiny-gpu",
+    "title": "GPU 原理速成",
+    "section": "Tiny-GPU",
+    "text": "Tiny-GPU\n\n本章用 tiny-gpu 为例入门 GPU 架构.\n\n\n架构的 First Principles 和 Actual Implementation 是两个极端, 前者引入了设计哲学, 后者可加深理解而且不唯一 (而且较为随意说实话), 下面是 Tiny-GPU 的设计哲学:\n\n\n\n\n\n\n\n\n\n\nFigure 3: Tiny-gpu 架构 (4 核) [2].\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Tiny-gpu 单核架构 (4 线程) [2]\n\n\n\n\n\n\n\n线程 thread\n\n寄存器 registers\n\n作为一个储存器:\n\n地址宽度: 4 bit (16 个寄存器)\n数据宽度: 8 bit (每个寄存器 8 位)\n2R1W:\n\n能且只能同时读两个寄存器的值\n只能写一个寄存器的值.\n\n\n\n\n\n\n\n\n\n\n\n\nName\nI/O\nWidth\nDescription\n\n\n\n\nclk\nIn\n1b\n该模块所有动作必须在时钟上升沿才被执行.\n\n\nreset\nIn\n1b\n清零 R0-R13, 载入 R14=%blockDim, R15=%threadIdx.\n\n\nenable\nIn\n1b\n当 reset=0 且 enable=1 时模块执行主逻辑.\n\n\nregisters\nHide Reg\n16 × 8b\n16 个 8 位寄存器, 前 13 个是通用寄存器, 后三个是特殊的只读寄存器, 分别存放: blockIdx, blockDim, threadIdx.\n\n\nblock_id\nIn\n8b\n主逻辑下载入 R13=%blockIdx.\n\n\ncore_state\nIn\n3b\n主逻辑下选择是读 (011) 还是写 (110) 寄存器.\n\n\ndecoded_rd_address\nIn\n4b\n主逻辑下写寄存器时指定要写的寄存器地址.\n\n\ndecoded_rs_address\nIn\n4b\n主逻辑下读寄存器时指定要读的第一个寄存器地址.\n\n\ndecoded_rt_address\nIn\n4b\n主逻辑下读寄存器时指定要读的第二个寄存器地址.\n\n\ndecoded_reg_write_enable\nIn\n1b\n主逻辑下额外的写使能.\n\n\ndecoded_reg_input_mux\nIn\n2b\n主逻辑下选择写寄存器时的数据来源 (decoded_immediate, alu_out, lsu_out 三选一)\n\n\ndecoded_immediate\nIn\n8b\n可能要存的数据.\n\n\nalu_out\nIn\n8b\n可能要存的数据.\n\n\nlsu_out\nIn\n8b\n可能要存的数据.\n\n\nrs\nOut\n8b\n读出的第一个寄存器的值.\n\n\nrt\nOut\n8b\n读出的第二个寄存器的值.\n\n\n\n运算单元 alu\n\n支持的运算 macro: ADD, SUB, MUL, DIV.\n\n\n\n\n\n\n\n\n\n\nName\nI/O\nWidth\nDescription\n\n\n\n\nclk\nIn\n1b\n-\n\n\nreset\nIn\n1b\n清零输出寄存器 alu_out.\n\n\nenable\nIn\n1b\n当 reset=0 且 enable=1 时模块执行主逻辑.\n\n\ncore_state\nIn\n3b\n主逻辑下为 101 时才可能开始运算.\n\n\ndecoded_alu_output_mux\nIn\n1b\n主逻辑下为 1 时输出 NZP 结果 00000NZP, 为 0 时输出运算结果.\n\n\ndecoded_alu_arithmetic_mux\nIn\n2b\n主逻辑且 decoded_alu_output_mux=0 时选择输出哪种运算结果, ADD (00), SUB (01), MUL (10), DIV (11).\n\n\nrs\nIn\n8b\n第一个操作数.\n\n\nrt\nIn\n8b\n第二个操作数.\n\n\nalu_out\nOut\n8b\n运算结果或 NZP 结果.\n\n\n\n程序计数器 pc\n\n\n\n\n\n\n\n\n\nName\nI/O\nWidth\nDescription\n\n\n\n\nclk\nIn\n1b\n-\n\n\nnzp\nHide Reg\n3b\nNZP 标志寄存器.\n\n\nreset\nIn\n1b\n清零 next_pc 和 nzp.\n\n\nenable\nIn\n1b\n当 reset=0 且 enable=1 时模块执行主逻辑.\n\n\ncore_state\nIn\n3b\n主逻辑下选择更新 next_pc (101) 还是 nzp (110).\n\n\ndecoded_pc_mux\nIn\n1b\n主逻辑且 core_state=101 时若为 1 则比较 decoded_nzp 和 nzp, 若一样则说明是跳转, 加载 decoded_immediate 到输出; 否则就正常加载 current_pc + 1. core_state=110 时且 decoded_nzp_write_enable=1 时加载 alu_out 的低三位到 nzp.\n\n\ndecoded_nzp\nIn\n3b\n输入的 NZP 标志位, 用来和当前 NZP 标志寄存器比较.\n\n\nalu_out\nIn\n8b\n不是用来比较, 而是用来更新 NZP 标志寄存器的值.\n\n\ncurrent_pc\nIn\n8b\n当前 PC 值.\n\n\ndecoded_immediate\nIn\n8b\n可能要跳转的目标地址.\n\n\nnext_pc\nOut\n8b\n下一个 PC 值.\n\n\n\nLoad-Store Unit lsu\n\n\n\n\n\n\n\n\n\nName\nI/O\nWidth\nDescription\n\n\n\n\nclk\nIn\n1b\n-\n\n\nreset\nIn\n1b\n清零所有输出寄存器.\n\n\nenable\nIn\n1b\n当 reset=0 且 enable=1 时模块执行主逻辑.\n\n\ndecoded_mem_read_enable\nIn\n1b\ndecoder 的输出, 为 1 说明是 LDR 指令.\n\n\ndecoded_mem_write_enable\nIn\n1b\ndecoder 的输出, 为 1 说明是 STR 指令.\n\n\nlsu_state\nOut\n2b\nFSM 的状态, IDLE (00), REQUESTING (01), WAITING (10), DONE (11).\n\n\ncore_state\nIn\n1b\n在 LDR 和 STR 指令下触发 00-&gt;01 (core_state=011) 和 11-&gt;00 (core_state=110) 的状态转移.\n\n\nrs\nIn\n8b\nLDR 指令下 01-&gt;10 状态转移时写入 mem_read_address; STR 指令下 01-&gt;10 状态转移时写入 mem_write_address.\n\n\nrt\nIn\n8b\nSTR 指令下 01-&gt;10 状态转移时写入 mem_write_data.\n\n\n…\n…\n…\n…\n\n\n\n\n\n\n\n\n\n\n\nlsu FSM 演示\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: LDR 指令的 FSM.\n\n\n\n\n\n\n\n\n\nFigure 6: STR 指令的 FSM.",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-gpu/cc-gpu.html#nvidia-gpu",
+    "href": "cc-gpu/cc-gpu.html#nvidia-gpu",
+    "title": "GPU 原理速成",
+    "section": "Nvidia GPU",
+    "text": "Nvidia GPU\n\n介绍一些 Nvidia GPU 的基本概念.\n\n\nHardware Concepts\n\n不同的架构在硬件上是有区别的.\n\n\nCUDA Core/SP (Stream Processor)\n\n每个 CUDA Core 都有自己的 PC.\n一个 CUDA Core 上面只能计算单精度/整数\n\nSM (Streaming Multiprocessor): 包括很多 CUDA Cores, SFU (Special Function Unit, 比如计算 __cos()), LD/ST 单元, Scheduler, etc.\n\nPascal 架构中一个 SM 有 128 个 CUDA 核心.\n一个 SM 里面只有一个大的 Reg File/shared memory/L1 cache, 而不是每个 CUDA Core 都有.\n\nGPC (Graphics Processing Cluster): 包括多个 SM.\n\n\n\nSoftware Concepts\n\nThread: 一个 thread 在同一时间只能在一个 CUDA Core 上运行, 但一个 CUDA Core 可以被 Warp Scheduler 分时间片给多个 threads 运行.\nWarp: Warp Scheduler 硬件模块会每次调度 32 个 threads, 是调度的最小单位.\n\nActive Warp: 当有足够的资源给一个 block 去运行的时候, 它立即成为 active block, 里面的所有 warp 都称为 active warp, 它可以分为:\n\nSelected Warp: Warp Scheduler 硬件模块每个 cycle 会挑选 active warp 并分配 32 个 CUDA Core 中去执行, 选中的 warp 称为 selected warp.\n\nStalled Warp: 如果一个 selected warp 在执行过程中发现需要等待某些资源 (比如 memory load 的结果), Warp scheduler 会暂时丢弃它转而选择其它的 eligible warp 执行, 它就变成 stalled warp (挂起/阻塞), 暂时不能被选中.\n\n\n\n\n\n\nFigure 7: Warp 0 被挂起 [3].\n\n\n\n\nEligible Warp: 没被选中的 active warp 称为 eligible warp, 它随时可以被选中去执行.\n\nWarp Divergence: 一个 Warp 里面的所有 CUDA Core 都执行同样的指令, 但路径可能不同 (如遇到 if 分支), 这时有些分支需要等待 (Stall) 其它分支, 称为 Warp Divergence.\n\n不同 warp 之间不会有等待的情况.\n\n\n\n\n\n\n\nFigure 8: 不参与 if 分支的 thread 也不能提前执行 else 分支而要等待哪些执行 if 分支的 thread [3].\n\n\n\n\nBlock: 一组 threads.\n\nBlock 内的 threads 一定会在同一个 SM 上运行 (为什么?). 一个 SM 可以同时运行很多个 blocks.\n\nGrid: 一组 blocks.\n\n一个 kernel 函数一般会启动很多个 grid. 但一般是先决定 block 的大小 (一般是 256, 但不能太大, 不然放不进一个 SM 里), 再用 N / 256 来自动算出 grid 的大小.\n\nCluster: 一组 blocks (比 grid 小). 同一个 cluster 里的 blocks 会被分配到同一个 GPC 上运行.",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
+    ]
+  },
+  {
     "objectID": "cc-gpu/cc-gpu.html#cuda",
     "href": "cc-gpu/cc-gpu.html#cuda",
     "title": "GPU 原理速成",
     "section": "CUDA",
     "text": "CUDA\n\n2026 年之前 GPU 只能做特定的函数运算, 2026 年之后引入了 GPGPU (General Purpose GPU), 有一整套库函数来对 GPU 进行编程.\n\nCUDA: Compute Unified Device Architecture (NVIDIA, 闭源)\nOpenCL: Open Computing Language (Apple Inc., 开源)\n\nGPU device memory 可以被所有 CUDA 核心共享:\n\n\n\n\n\n\nFigure 9: NVidia GPU 架构 [1]\n\n\n\n连接有 GPU 的 CPU 二者的 memory 是不共享的 [1], 二者之间的数据由 DMA 搬运.\n\n\n\n\n\n\nFigure 10: Seperate memory systems [1]\n\n\n\nKernel functions [1]:\n\n__host__: 在 CPU 上运行, 只能被 CPU 调用的函数.\n__global__: 在 GPU 上运行, 可被 CPU/GPU 调用的函数.\n__device__: 在 GPU 上运行, 只能被 GPU 调用的函数.\n\n\n\nUnified Memory 统一内存\n\n全局变量: 可以被 CPU 和 GPU 访问的变量, 不能用 local variable 的方式声明!\n__managed__ int x;\n统一内存允许 CPU 和 GPU 共享同一块内存区域, 比如 Listing lst-managed 中的 CPU 和 GPU 都能访问和改变 x 变量:\n\n\n\nmanaged.cu\n\n#include &lt;stdio.h&gt;\n#include &lt;cuda_runtime.h&gt;\n\n__global__ void my_kernel(int* x_ptr) {\n    *x_ptr = 1;\n    printf(\"GPU sees x = %d\\n\", *x_ptr);\n}\n\nint main() {\n    int x = 0;\n    int* x_ptr = &x;\n    cudaMallocManaged(&x_ptr, sizeof(int));\n\n    my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);\n\n    printf(\"CPU sees x = %d\\n\", x);\n\n    cudaFree(x_ptr);\n    return 0;\n}\n\n输出:\nCPU sees x = 0\nGPU sees x = 1\n注意是 CPU 先打印 (因为没有用 cudaDeviceSynchronize())!\n\n\nSynchronization 同步\nCPU 将指令发到 GPU 之后不会等 GPU 执行完再继续往下执行 (默认 async), 如果需要等 GPU 执行完再继续, 将 my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr); 改为:\nmy_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);\ncudaDeviceSynchronize(); // Wait for GPU to finish\n输出:\nGPU sees x = 1\nCPU sees x = 1\n\n\nStream 流",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
+    ]
+  },
+  {
+    "objectID": "cc-gpu/cc-gpu.html#cuda-的-pytorch-接口",
+    "href": "cc-gpu/cc-gpu.html#cuda-的-pytorch-接口",
+    "title": "GPU 原理速成",
+    "section": "CUDA 的 Pytorch 接口",
+    "text": "CUDA 的 Pytorch 接口\n直接用 Pybind, 见 Pybind 11.",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
@@ -1133,6 +1199,17 @@
     ]
   },
   {
+    "objectID": "ml-infra/ml-infra.html",
+    "href": "ml-infra/ml-infra.html",
+    "title": "ML Infra 基础",
+    "section": "",
+    "text": "Tensor Broadcasting\nTODO",
+    "crumbs": [
+      "ML Accelerators",
+      "<span class='chapter-number'>18</span>  <span class='chapter-title'>ML Infra 基础</span>"
+    ]
+  },
+  {
     "objectID": "cfu-proj-struct/cfu-proj-struct.html",
     "href": "cfu-proj-struct/cfu-proj-struct.html",
     "title": "CFU-Playground 工程结构",
@@ -1140,7 +1217,7 @@
     "text": "Folder 文件夹描述",
     "crumbs": [
       "CFU Playground",
-      "<span class='chapter-number'>18</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
+      "<span class='chapter-number'>19</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
     ]
   },
   {
@@ -1151,128 +1228,7 @@
     "text": "soc: 存放一个完整的 CPU 的 verilog 设计.\n\n有很多种 CPU, 比如带或不带 CFU 接口的.",
     "crumbs": [
       "CFU Playground",
-      "<span class='chapter-number'>18</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
-    ]
-  },
-  {
-    "objectID": "resources/resources.html#useful-tools",
-    "href": "resources/resources.html#useful-tools",
-    "title": "Resources 学习资料汇总",
-    "section": "Useful Tools",
-    "text": "Useful Tools\n\nGithub 仓库结构解释工具\n\nDeep Wiki: ★★★☆☆ 仓库好像比 Code Wiki 多一点\nCode Wiki: 没怎么用过, 待评价.",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Resources 学习资料汇总</span>"
-    ]
-  },
-  {
-    "objectID": "cc-gpu/cc-gpu.html#硬件设计哲学",
-    "href": "cc-gpu/cc-gpu.html#硬件设计哲学",
-    "title": "GPU 原理速成",
-    "section": "",
-    "text": "虽然一整个 GPU 很复杂, 但从 RTL 来看, 实现任何一个特定的功能 (比如读个寄存器, 做某种 ALU 运算) 都需要以下三种类型的信号! 部分名词是我自己取的.\n\n\n读懂一个模块首要的任务就是先弄清它有几个相对独立的功能 (比如 Figure fig-registers 有两个功能: 读寄存器和写寄存器), 然后针对每个功能去找这三种信号:\n\n\n\n\n\n\n\n\n\nFigure 2: Tiny-GPU 中的寄存器 [2].\n\n\n\n\nCommon 信号: 几乎每个 sync 模块都有的信号组. 比如 clk, reset, enable.\n\n要 clk 是因为大部分动作都是时钟同步的.\n有些操作比如写寄存器有一个清零 (reset) 的操作会很方便.\nenable 有两种: 全局的和某功能专属的.\n\n全局的 enable 是指整个模块在某些周期不工作 (省电). 一般会跟 reset 一起用, 只有 reset=0 且 enable=1 时模块才执行主逻辑.\n局部的 enable 一般情况是多余的, 但是经常配合下文的选择信号使用.\n\n\nSelection 选择信号: 它们不承载关键数据, 只是用来选择使用哪个输入的信号. 一般有类似有「编码」思想的信号都是 selection 信号, 比如 opcode, funct3, etc.\n\n选择信号会有层级之分, 高层级的 (state) 一般用 if, 低层级的 (sel) 一般会用 macro 宏 + case 来选择, 比如下面这个典型的选择结构:\nlocalparam ARITHMETIC = 2'b00,\n           MEMORY = 2'b01,\n           CONSTANT = 2'b10;\nalways @(posedge clk) begin\n    if reset begin\n        rs &lt;= 0;\n        ...\n    end else if (enable) begin\n        if (state == 2'b01) begin\n            case (sel)\n                ARITHMETIC: begin ... end\n                MEMORY: begin ... end\n                CONSTANT: begin ... end\n            endcase\n        end\n    end\nend\n...\n选择启动一个功能 (比如选择信号为 3b'011) 有时会再加入一个这个功能的专属 enable, 以防止误操作 (比如下面 Tiny-GPU registers 中的写操作).\n1 bit 的选择信号一般也叫做 flag (比如 mem_read_valid).\n\nMinority Valid 数据信号: 其实就是一般意义下的承载数据的信号, 比如 next_pc, imm, etc. 但是我这样起名字是因为我想强调虽然一个模块的输入多得吓人, 其实大部分都是数据信号, 但在一个时钟周期里, 其实只有很少部分的信号是有效参加计算的, 大部分的信号都被 selection 信号屏蔽调了!",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-gpu/cc-gpu.html#gpu-架构-以-tiny-gpu-为例",
-    "href": "cc-gpu/cc-gpu.html#gpu-架构-以-tiny-gpu-为例",
-    "title": "GPU 原理速成",
-    "section": "GPU 架构 (以 tiny-gpu 为例)",
-    "text": "GPU 架构 (以 tiny-gpu 为例)\n\n架构的 First Principles 和 Actual Implementation 是两个极端, 前者引入了设计哲学, 后者可加深理解而且不唯一 (而且较为随意说实话).\n\n\nFirst Principles\n\n\n\n\n\n\n\n\n\nFigure 2: Tiny-gpu 架构 (4 核) [2].\n\n\n\n\n\n\n\n\n\n\n\nFigure 3: Tiny-gpu 单核架构 (4 线程) [2]\n\n\n\n\n\n\n\nRegisters 寄存器\n\n\n\nTiny-GPU Implementation\n\nRegisters 寄存器\n\n\n\n\n\n\nFigure 4\n\n\n\n\n一个 Registers 里面总共 16 个 8 位寄存器, 前 13 个是通用寄存器, 后三个是特殊的只读寄存器, 分别存放: blockIdx, blockDim, threadIdx.\nRead: 能且只能同时读两个寄存器的值 (通过 decoded_rs_address 和 decoded_rt_address).\n\ncore_state == 3b'011 时读寄存器.\n\nWrite: 写只能是一个 (通过 decoded_rd_address).\n\ncore_state == 3b'110 且 decoded_reg_write_enable 为真时, 才写寄存器.",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "glossary/glossary.html#工业与商业模式",
-    "href": "glossary/glossary.html#工业与商业模式",
-    "title": "Glossary 名词解释",
-    "section": "工业与商业模式",
-    "text": "工业与商业模式\n\n核心商业模式:\n\nIP 提供商: 设计 IP 核并授权给芯片设计制造商使用. E.g., ARM (CPU 内核设计)\n芯片设计制造商: 购买 IP 核并设计和生产关键芯片. E.g., Xilinx (被 AMD 收购), ST (STM32 核心芯片的制造商).\n开发板制造商: 从芯片设计制造商处采购芯片, 并设计供电电路、时钟电路、将方形黑色的芯片底部的引脚引出接入各种物理接口、设计 PCB 等, 最终生产出开发板. E.g., Alinx, 正点原子, Digilent.\n\nOEM (Original Equipment Manufacturer): 原始设备制造商 (代工厂或贴牌制造商).\nODM (Original Design Manufacturer): 原始设计制造商.",
-    "crumbs": [
-      "Prologue",
-      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Glossary 名词解释</span>"
-    ]
-  },
-  {
-    "objectID": "cc-coding/cc-coding.html#code-reading-techniques",
-    "href": "cc-coding/cc-coding.html#code-reading-techniques",
-    "title": "Random Notes on Coding",
-    "section": "Code Reading & Techniques",
-    "text": "Code Reading & Techniques\n\n本人看代码的速度极慢, 为了优化这一点, 我打算建立本章来积累一些阅读代码的经验和技巧, 主要是消除阅读代码时的心理负担. 本章也与 Coding Habits 有很多的重合之处, 以后可能会把两章合并 (TODO).\n\n\nFirst Encounter\n\n心理建设:\n\nTake it Easy: 一个 C++ project 不过是一堆 class 和一个 main.\n大段代码其实逻辑不会很复杂, 要关注有没有类型检查、边界检查等等冗余代码. 还有 if else 语句只有一个会被执行, 另一半都是没用的.\n\n如果是 OOP, 关注类会改变哪些外部变量 (通常是引用传递) 而不是某个方法的具体实现.\n先阅读接口函数 (一般会在 .h 文件中!). 如果直接看 .cc 文件, 会看到一些接口实现调用的函数, 而且这些函数会放在接口函数上面, 这样丢掉了重点.\n关注参数列表的 const, 这意味着这些是只读的不会改变!\n读懂参数的含义是一件费时的事情, 但很多时候费时的地方在弄懂信息的存储格式. 比如你看到:\nvoid DepthwiseConvPerChannel(const DepthwiseParam& params,\n                             const int32_t* output_multiplier,\n                             const int32_t* output_shift,\n                             const RuntimeShape& in_shape,\n                             ...)\n就会很想知道 params, output_multiplier 等里面到底是怎样的结构. 但请克制自己不要知道, 或者自己随便构思一个结构让自己相信它是对的! 因为这些数据结构的实现非常 ad hoc 而且不重要.\n不要一行一行读代码, 要功能性地读代码. 比如:\nvoid relu_f32 (torch::Tensor input, torch::Tensor output) {\n    if (x.options().dtype() != torch::kFloat32) {\n        std::cout &lt;&lt; \"Tensor info: \" &lt;&lt; x.options() &lt;&lt; std::endl;\n        throw std::runtime_error(\"Input tensor must be torch::kFloat32\");\n    }\n    if (y.options().dtype() != torch::kFloat32) {\n        std::cout &lt;&lt; \"Tensor info: \" &lt;&lt; y.options() &lt;&lt; std::endl;\n        throw std::runtime_error(\"Output tensor must be torch::kFloat32\");\n    }\n    ...\n}\n这个代码是在检查数据类型, 当你知道这一点时就别在纠结 options() 是什么了.\n当一个 cpp 文件有多个函数定义时, 一般最下面的函数才是对外暴露的接口 (因为它调用了上面的函数), 先看最下面的函数.\n\n如果有很多个名字差不多的函数, 最短的那个将是对其它的封装, 比如:\n\nvoid _relu_f32_kernel(...) { ... }\n__global__ void relu_f32_kernel(...) { ... }\nvoid relu_f32_util(...) { ... }\nvoid relu_f32(...) { ... } // True API\n单从名字上来看, _relu_f32_kernel() 仅给 relu_f32_kernel() 使用 (因为有下划线而且重名); 而 relu_f32 封装了 relu_f32_kernel 和 relu_f32_util (因为名字 match 前缀且更短).\n对象作为元数据: 比如 torch::Tensor 这个对象里并不是 tensor 数据本身, 而是:\nTensor\n├─ sizes\n├─ strides\n├─ dtype\n├─ device\n└─ data_ptr  ---&gt; 实际数据的指针\n\n所以你会看到很多 tensor.data_ptr() 这样看上去取了两次数据的感觉, 其实第一层的 tensor 只是元数据, 第二层才是实际数据.\n\n\n\n\nRTL 代码阅读\n\n下面的 Verilog 代码片段说明这个模块有两个功能, 功能的启用由 &lt;func&gt;_enable 决定; 每个功能是一个 3 个状态的 FSM.\n\n如果 ... 的部分没有什么 operation, 只有将输入赋值给输出的操作, 那么这个模块其实就是一个有条件的连接器而已!! 如果有 splitter 之类的就有 decoder 的功能.\n\nif (xxx_enable) begin \n    case (state)\n        A: begin ... lsu_state &lt;= B; end\n        B: begin ... lsu_state &lt;= C; end\n        C: begin ... lsu_state &lt;= A; end\n    endcase\nend\n\nif (yyy_enable) begin \n    case (state)\n        A: begin ... lsu_state &lt;= B; end\n        B: begin ... lsu_state &lt;= C; end\n        C: begin ... lsu_state &lt;= A; end\n    endcase\nend",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
-    ]
-  },
-  {
-    "objectID": "cc-gpu/cc-gpu.html#tiny-gpu",
-    "href": "cc-gpu/cc-gpu.html#tiny-gpu",
-    "title": "GPU 原理速成",
-    "section": "Tiny-GPU",
-    "text": "Tiny-GPU\n\n本章用 tiny-gpu 为例入门 GPU 架构.\n\n\n架构的 First Principles 和 Actual Implementation 是两个极端, 前者引入了设计哲学, 后者可加深理解而且不唯一 (而且较为随意说实话), 下面是 Tiny-GPU 的设计哲学:\n\n\n\n\n\n\n\n\n\n\nFigure 3: Tiny-gpu 架构 (4 核) [2].\n\n\n\n\n\n\n\n\n\n\n\nFigure 4: Tiny-gpu 单核架构 (4 线程) [2]\n\n\n\n\n\n\n\n线程 thread\n\n寄存器 registers\n\n作为一个储存器:\n\n地址宽度: 4 bit (16 个寄存器)\n数据宽度: 8 bit (每个寄存器 8 位)\n2R1W:\n\n能且只能同时读两个寄存器的值\n只能写一个寄存器的值.\n\n\n\n\n\n\n\n\n\n\n\n\nName\nI/O\nWidth\nDescription\n\n\n\n\nclk\nIn\n1b\n该模块所有动作必须在时钟上升沿才被执行.\n\n\nreset\nIn\n1b\n清零 R0-R13, 载入 R14=%blockDim, R15=%threadIdx.\n\n\nenable\nIn\n1b\n当 reset=0 且 enable=1 时模块执行主逻辑.\n\n\nregisters\nHide Reg\n16 × 8b\n16 个 8 位寄存器, 前 13 个是通用寄存器, 后三个是特殊的只读寄存器, 分别存放: blockIdx, blockDim, threadIdx.\n\n\nblock_id\nIn\n8b\n主逻辑下载入 R13=%blockIdx.\n\n\ncore_state\nIn\n3b\n主逻辑下选择是读 (011) 还是写 (110) 寄存器.\n\n\ndecoded_rd_address\nIn\n4b\n主逻辑下写寄存器时指定要写的寄存器地址.\n\n\ndecoded_rs_address\nIn\n4b\n主逻辑下读寄存器时指定要读的第一个寄存器地址.\n\n\ndecoded_rt_address\nIn\n4b\n主逻辑下读寄存器时指定要读的第二个寄存器地址.\n\n\ndecoded_reg_write_enable\nIn\n1b\n主逻辑下额外的写使能.\n\n\ndecoded_reg_input_mux\nIn\n2b\n主逻辑下选择写寄存器时的数据来源 (decoded_immediate, alu_out, lsu_out 三选一)\n\n\ndecoded_immediate\nIn\n8b\n可能要存的数据.\n\n\nalu_out\nIn\n8b\n可能要存的数据.\n\n\nlsu_out\nIn\n8b\n可能要存的数据.\n\n\nrs\nOut\n8b\n读出的第一个寄存器的值.\n\n\nrt\nOut\n8b\n读出的第二个寄存器的值.\n\n\n\n运算单元 alu\n\n支持的运算 macro: ADD, SUB, MUL, DIV.\n\n\n\n\n\n\n\n\n\n\nName\nI/O\nWidth\nDescription\n\n\n\n\nclk\nIn\n1b\n-\n\n\nreset\nIn\n1b\n清零输出寄存器 alu_out.\n\n\nenable\nIn\n1b\n当 reset=0 且 enable=1 时模块执行主逻辑.\n\n\ncore_state\nIn\n3b\n主逻辑下为 101 时才可能开始运算.\n\n\ndecoded_alu_output_mux\nIn\n1b\n主逻辑下为 1 时输出 NZP 结果 00000NZP, 为 0 时输出运算结果.\n\n\ndecoded_alu_arithmetic_mux\nIn\n2b\n主逻辑且 decoded_alu_output_mux=0 时选择输出哪种运算结果, ADD (00), SUB (01), MUL (10), DIV (11).\n\n\nrs\nIn\n8b\n第一个操作数.\n\n\nrt\nIn\n8b\n第二个操作数.\n\n\nalu_out\nOut\n8b\n运算结果或 NZP 结果.\n\n\n\n程序计数器 pc\n\n\n\n\n\n\n\n\n\nName\nI/O\nWidth\nDescription\n\n\n\n\nclk\nIn\n1b\n-\n\n\nnzp\nHide Reg\n3b\nNZP 标志寄存器.\n\n\nreset\nIn\n1b\n清零 next_pc 和 nzp.\n\n\nenable\nIn\n1b\n当 reset=0 且 enable=1 时模块执行主逻辑.\n\n\ncore_state\nIn\n3b\n主逻辑下选择更新 next_pc (101) 还是 nzp (110).\n\n\ndecoded_pc_mux\nIn\n1b\n主逻辑且 core_state=101 时若为 1 则比较 decoded_nzp 和 nzp, 若一样则说明是跳转, 加载 decoded_immediate 到输出; 否则就正常加载 current_pc + 1. core_state=110 时且 decoded_nzp_write_enable=1 时加载 alu_out 的低三位到 nzp.\n\n\ndecoded_nzp\nIn\n3b\n输入的 NZP 标志位, 用来和当前 NZP 标志寄存器比较.\n\n\nalu_out\nIn\n8b\n不是用来比较, 而是用来更新 NZP 标志寄存器的值.\n\n\ncurrent_pc\nIn\n8b\n当前 PC 值.\n\n\ndecoded_immediate\nIn\n8b\n可能要跳转的目标地址.\n\n\nnext_pc\nOut\n8b\n下一个 PC 值.\n\n\n\nLoad-Store Unit lsu\n\n\n\n\n\n\n\n\n\nName\nI/O\nWidth\nDescription\n\n\n\n\nclk\nIn\n1b\n-\n\n\nreset\nIn\n1b\n清零所有输出寄存器.\n\n\nenable\nIn\n1b\n当 reset=0 且 enable=1 时模块执行主逻辑.\n\n\ndecoded_mem_read_enable\nIn\n1b\ndecoder 的输出, 为 1 说明是 LDR 指令.\n\n\ndecoded_mem_write_enable\nIn\n1b\ndecoder 的输出, 为 1 说明是 STR 指令.\n\n\nlsu_state\nOut\n2b\nFSM 的状态, IDLE (00), REQUESTING (01), WAITING (10), DONE (11).\n\n\ncore_state\nIn\n1b\n在 LDR 和 STR 指令下触发 00-&gt;01 (core_state=011) 和 11-&gt;00 (core_state=110) 的状态转移.\n\n\nrs\nIn\n8b\nLDR 指令下 01-&gt;10 状态转移时写入 mem_read_address; STR 指令下 01-&gt;10 状态转移时写入 mem_write_address.\n\n\nrt\nIn\n8b\nSTR 指令下 01-&gt;10 状态转移时写入 mem_write_data.\n\n\n…\n…\n…\n…\n\n\n\n\n\n\n\n\n\n\n\nlsu FSM 演示\n\n\n\n\n\n\n\n\n\n\n\nFigure 5: LDR 指令的 FSM.\n\n\n\n\n\n\n\n\n\nFigure 6: STR 指令的 FSM.",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-cpu/cc-cpu.html#references",
-    "href": "cc-cpu/cc-cpu.html#references",
-    "title": "CPU 原理速成",
-    "section": "References",
-    "text": "References\n\n\n\n\n[1] Y. N. Patt and S. J. Patel, Introduction to computing systems : From bits and gates to c/c++ & beyond. Mcgraw-Hill, 2020.\n\n\n[2] Slchoi, “Multi-cycle implementation & pipelining,” 2025, Available: https://velog.io/@taegon1998/4.2-4.3-Multi-Cycle-Implementation-Pipelining\n\n\n[3] BitLemon, “Cache hierarchy: How modern CPU caches are organized (L1, L2 and L3).” YouTube, Dec. 2024. Available: https://www.youtube.com/watch?v=7yrK_9PderQ&list=PL38NNHQLqJqYnNrTenxBvGJSPCkV9EOWk&index=5. [Accessed: Jan. 24, 2026]",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>13</span>  <span class='chapter-title'>CPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-gpu/cc-gpu.html#nvidia-gpu",
-    "href": "cc-gpu/cc-gpu.html#nvidia-gpu",
-    "title": "GPU 原理速成",
-    "section": "Nvidia GPU",
-    "text": "Nvidia GPU\n\n介绍一些 Nvidia GPU 的基本概念.\n\n\nHardware Concepts\n\n不同的架构在硬件上是有区别的.\n\n\nCUDA Core/SP (Stream Processor)\n\n每个 CUDA Core 都有自己的 PC.\n一个 CUDA Core 上面只能计算单精度/整数\n\nSM (Streaming Multiprocessor): 包括很多 CUDA Cores, SFU (Special Function Unit, 比如计算 __cos()), LD/ST 单元, Scheduler, etc.\n\nPascal 架构中一个 SM 有 128 个 CUDA 核心.\n一个 SM 里面只有一个大的 Reg File/shared memory/L1 cache, 而不是每个 CUDA Core 都有.\n\nGPC (Graphics Processing Cluster): 包括多个 SM.\n\n\n\nSoftware Concepts\n\nThread: 一个 thread 在同一时间只能在一个 CUDA Core 上运行, 但一个 CUDA Core 可以被 Warp Scheduler 分时间片给多个 threads 运行.\nWarp: Warp Scheduler 硬件模块会每次调度 32 个 threads, 是调度的最小单位.\n\nActive Warp: 当有足够的资源给一个 block 去运行的时候, 它立即成为 active block, 里面的所有 warp 都称为 active warp, 它可以分为:\n\nSelected Warp: Warp Scheduler 硬件模块每个 cycle 会挑选 active warp 并分配 32 个 CUDA Core 中去执行, 选中的 warp 称为 selected warp.\n\nStalled Warp: 如果一个 selected warp 在执行过程中发现需要等待某些资源 (比如 memory load 的结果), Warp scheduler 会暂时丢弃它转而选择其它的 eligible warp 执行, 它就变成 stalled warp (挂起/阻塞), 暂时不能被选中.\n\n\n\n\n\n\nFigure 7: Warp 0 被挂起 [3].\n\n\n\n\nEligible Warp: 没被选中的 active warp 称为 eligible warp, 它随时可以被选中去执行.\n\nWarp Divergence: 一个 Warp 里面的所有 CUDA Core 都执行同样的指令, 但路径可能不同 (如遇到 if 分支), 这时有些分支需要等待 (Stall) 其它分支, 称为 Warp Divergence.\n\n不同 warp 之间不会有等待的情况.\n\n\n\n\n\n\n\nFigure 8: 不参与 if 分支的 thread 也不能提前执行 else 分支而要等待哪些执行 if 分支的 thread [3].\n\n\n\n\nBlock: 一组 threads.\n\nBlock 内的 threads 一定会在同一个 SM 上运行 (为什么?). 一个 SM 可以同时运行很多个 blocks.\n\nGrid: 一组 blocks.\n\n一个 kernel 函数一般会启动很多个 grid. 但一般是先决定 block 的大小 (一般是 256, 但不能太大, 不然放不进一个 SM 里), 再用 N / 256 来自动算出 grid 的大小.\n\nCluster: 一组 blocks (比 grid 小). 同一个 cluster 里的 blocks 会被分配到同一个 GPC 上运行.",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-gpu/cc-gpu.html#cuda-的-pytorch-接口",
-    "href": "cc-gpu/cc-gpu.html#cuda-的-pytorch-接口",
-    "title": "GPU 原理速成",
-    "section": "CUDA 的 Pytorch 接口",
-    "text": "CUDA 的 Pytorch 接口\n直接用 Pybind, 见 Pybind 11.",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>14</span>  <span class='chapter-title'>GPU 原理速成</span>"
-    ]
-  },
-  {
-    "objectID": "cc-coding/cc-coding.html#sec-coding-habits",
-    "href": "cc-coding/cc-coding.html#sec-coding-habits",
-    "title": "Random Notes on Coding",
-    "section": "Coding Habits",
-    "text": "Coding Habits\n\n下面是一些常见的编程习惯和技巧, 注意反过来的脑回路: 读到类似的这些代码的时候也要立即条件反射出来他们在干什么!\n\n\nGeneral\n\n能引用尽量引用不要用指针!\n函数的参数尽量少.\n写程序的时候先关注主逻辑, 函数的实现放到最后写.\nC++ 中 namespace 中的内容不要缩进.\n\n\n\n检查相等\n\n浮点数不能直接用 == 检查相等!\n\nCPU 上一般用 std::numeric_limits&lt;float&gt;::epsilon() 作为误差.\nCPU 和 GPU 运算结果比较时一般用绝对误差比如 1e-8f (库函数提供的可能会太严格).\n\n\n\n\nis_equal_float.cc\n\n#include &lt;iostream&gt;\n\nbool is_equal_float(\n    const float *a, \n    const float *b\n) {\n    const float eps_f = std::numeric_limits&lt;float&gt;::epsilon();\n    // const float eps_f = 1e-8f; // 比较 CPU 和 GPU 的计算结果.\n    float diff = std::fabs(*a - *b);\n    if (diff &gt; eps_f) {\n        std::cout &lt;&lt; \"Not Equal\" &lt;&lt; std::endl;\n        return false;\n    } else {\n        std::cout &lt;&lt; \"Equal\" &lt;&lt; std::endl;\n        return true;\n    }\n}\n\nint main() {\n    float a = 0.1f + 0.3f;\n    float b = 0.4f;\n    is_equal_float(&a, &b);\n}\n\n\n\n\n正负无穷\n\n涉及最小/最大值初始化. 例如我们要找 arr 中的最大值:\n#include &lt;float.h&gt;   // for FLT_MAX\n\nint main() {\n    float arr[] = {3.2, -1.5, 7.8, 0.0, 4.4};\n    int n = sizeof(arr) / sizeof(arr[0]);\n    float max_val = -FLT_MAX;    // Initialize to -inf\n    for (int i = 0; i &lt; n; i++) {\n        if (arr[i] &gt; max_val)   max_val = arr[i];\n    }\n    std::cout &lt;&lt; \"Max value: \" &lt;&lt; max_val &lt;&lt; std::endl;\n    return 0;\n}\n\n\n\n向上取整\n\n向上取整的操作非常常见, 比如 HPC 里面分配多少个 block 等. 可通过 \\[\\left\\lceil \\frac{x}{y} \\right\\rceil = \\left\\lfloor \\frac{x + y - 1}{y} \\right\\rfloor\\] 实现 (由于整数除法默认向下取整):\n\nint ceil_div(const int x, const int y) {\n    return (x + y - 1) / y; // Automatically does floor division\n}\n\n\n遍历数组和张量\n\n看见下面的代码时要立刻意识到这不仅是一个循环, 而且是一个遍历!!!\nfor (int i = 0; i &lt; N; i++) {\n    for (int j = 0; j &lt; M; j++) {\n        // Process element at (i, j)\n    }\n}\n// for (int i = 1; i &lt;= N; i++) {} // 不推荐\n\nfor 循环的边界: 从 0 开始计数而不是 1, 用 &lt; 而不是 &lt;=, 因为下标往往是从 0 开始的 (Matlab 除外), 如果用从 1 开始, 循环体里面还要减 1, 很麻烦.\nTODO: 如何思考高阶张量的处理? 不要用 global 的 mental picture?\n\n\n\n\n全局索引与局部索引的转换\n\n遇到下面这种形式的代码时, 要瞬间意识到这是在进行二维数组的 flatten/unflatten 操作!\n\nFlattening:\nlsu_index = i * THREADS_PER_BLOCK + j;\nint idx = blockIdx.x * blockDim.x + threadIdx.x;\nUnflattening:\nint block_id = idx / block_dim;\nint thread_id = idx % block_dim;\n\n\n\n\n命名习惯\n\nk: 用于常量变量 (constant variable), 例如 const int kBufferSize = 1024;.\nfoo(), bar(): 表示程序员不想起名字 (就像 Alice 和 Bob).\n\n来源于 FUBAR (Fucked up beyond all recognition).\n\n功能相似的函数和文件用前缀匹配: 比如用 add_float(), add_float_vec(), add_int() 而不是: float_add(), vec_float_add(), int_add(). 因为如果它们作为文件名的话, 前缀 match 的文件会放在一起, 方便查找!\n\n\n\ngetters 和 Setters\n为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 public, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 private + getter/setter 的方式来控制对成员变量的访问和修改.\n\n\n\n\n\naccount_public.cpp\n\nclass Account {\npublic:\n    double balance;\n};\n\nint main() {\n    Account acc;\n    acc.balance = -999999; // Not recommended\n}\n\n\n\n\n\n\naccount_private.cpp\n\nclass Account {\nprivate:\n    double balance;\n\npublic:\n    // const: no modification to member variables\n    double getBalance() const { return balance; }\n\n    void deposit(double amount) {\n        if (amount &gt; 0)\n            balance += amount;\n    }\n};\n\n\n\n\n\n\n\n常写 const\n\n能加上 const 尽量加上 (比如 Listing lst-account_private), 比如函数声明时的参数列表、返回值和函数体, 这样尤其是参数有指针的函数可以一眼看出来哪些是可读、可写的.\nconst 用法:\nconst int *p1; // p1 本身可以修改, 但指向的内容不可以修改\nint * const p2; // p2 本身不可以修改, 但指向的内容可以修改\nconst int * const p3; // 都不能修改\n\nint const& my_int; // 引用的内容不可以修改, 同 const int&\n// int &const // 不合法\nPytorch C++ API 中提供 TORCH_ARG 宏, 用于自动生成类成员变量的 getter 和 setter 方法:\n#include &lt;torch/torch.h&gt;\nTORCH_ARG(double, balance) = 0;\n自动展开为:\nprivate:\n    double balance_ = 0;\n\npublic:\n    // getter\n    const double& balance() const { return balance_; }\n\n    // setter\n    double& balance() { return balance_; }\n这种写法类似 Listing lst-account_private, const double& 意思是返回一个不可修改的引用 (若用值拷贝的话速度较慢). 第二个 const 表示 getter 方法本身不会修改这个类的所有成员变量 (balance_ in this case). 用户可以通过 obj.balance() 来获取余额, 也可以通过 obj.balance() = 100.0; 来修改余额.\nconst 和 constexpr 区别:\n\nconstexpr 变量在编译时就算出来了, 且不可修改. 一般用于性能优化或用作编译时才能决定声明的数组大小.\n\nconst int x = some_runtime_function(); // 合法\nconstexpr int y = some_runtime_function(); // 不合法, 因为 some_runtime_function() 不是常量表达式\nconstexpr int kTensorSize = 256 * 1024; // 合法\nuint8_t tensor[kTensorSize]; // 编译时决定的数组大小",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
-    ]
-  },
-  {
-    "objectID": "cc-coding/cc-coding.html#sec-pybind11",
-    "href": "cc-coding/cc-coding.html#sec-pybind11",
-    "title": "Random Notes on Coding",
-    "section": "Pybind11",
-    "text": "Pybind11\nPybind11 是一个 C++ 库, 使得我们可以在 Python 代码中调用 C++ 函数和类.\n\nPython 调用 C++ 函数\n\n\n\n\n\nadd_op.cpp\n\n#include &lt;pybind11/pybind11.h&gt;\n\nint add(int a, int b) {\n    return a + b;\n}\n\n/// @param ops library name\nPYBIND11_MODULE(ops, m) {\n    m.def(\"add\", &add);\n}\n\n\n\n\n\n\nmain.py\n\nimport ops\n\nprint(ops.add(3, 5))\n\n\n\n\n\n\nListing lst-addopcpp 中第一个 add 是 Python 里调用用的函数名, 第二个是 C++ 里的函数名. ops 和 m 也可以换成任意别的名字. 运行类似下面的命令:\n\nc++ -O3 -Wall -shared -std=c++11 -fPIC -undefined dynamic_lookup \\\n    -I/opt/homebrew/anaconda3/lib/python3.12/site-packages/pybind11/include \\\n    -I/opt/homebrew/anaconda3/include/python3.12 \\\n    add_op.cpp -o ops.cpython-312-darwin.so\n\npython main.py # output 8\n第一个命令会在当前目录下产生一个 .so (shared object) 文件. 运行 python main.py 的时候在 import ops 的时候, Python 会在 .so 文件中找到 add 函数.\n\n\nPython 调用 C++ 类\n\n\nml_bind.cc\n\n#include &lt;pybind11/pybind11.h&gt;\n\nnamespace ml {\n\nclass Model {\npublic:\n    Model() = default;\n    virtual ~Model() = default; // 虚析构函数以确保派生类正确析构\n\n    virtual double forward(double x) const {\n        return x;\n    }\n};\n\nclass LinearModel : public Model {\npublic:\n    double weight;\n    LinearModel(double w = 1.0) : weight(w) {}\n\n    double forward(double x) const override {\n        return weight * x;\n    }\n};\n\n} // namespace ml\n\nPYBIND11_MODULE(ml_ops, m) {\n    pybind11::class_&lt;ml::Model&gt;(m, \"Model\")     // ml::Model 映射到 Python 里的 Model\n        .def(pybind11::init&lt;&gt;())                // 绑定类的默认构造函数\n        .def(\"forward\", &ml::Model::forward);   // 绑定类的成员函数 `forward`.\n\n    pybind11::class_&lt;ml::LinearModel, ml::Model&gt;(m, \"LinearModel\")\n        .def(pybind11::init&lt;double&gt;(), pybind11::arg(\"weight\") = 1.0)\n        .def(\"forward\", &ml::LinearModel::forward) // 绑定类的成员函数 `forward`.\n        .def_readwrite(\"weight\", &ml::LinearModel::weight);\n}\n\n\n\n上面的代码把 C++ 中的 Model 类和其子类 LinearModel 绑定到 Python 中. 下面对未注释的代码进行解释:\n\n&lt;&gt; 中表示告诉 Python 前者是要绑定的类, 后者是其父类; 并且在 Python 里这个类叫 LinearModel (同名).\npybind11::class_&lt;ml::LinearModel, ml::Model&gt;(m, \"LinearModel\")\n绑定类的构造函数: 这里表示 LinearModel 的构造函数接受一个 double 类型的参数 weight, 默认值是 1.0.\n.def(pybind11::init&lt;double&gt;(), pybind11::arg(\"weight\") = 1.0)\n在 Python 里可以这样构造:\nLinearModel()           # weight 默认为 1.0\nLinearModel(2.5)        # weight 设为 2.5\nLinearModel(weight=2.5) # 同上\n绑定类的成员变量 weight:\n.def_readwrite(\"weight\", &ml::LinearModel::weight);\n在 Python 里可以直接读写:\nlm.weight\nlm.weight = 5.0\n为什么 Model 要加下面的析构虚函数?\nvirtual ~Model() = default;\n是因为下面 Python 会使用 std::shared_ptr 创建对象 Model, 并在代码在结束时销毁它, 如果没有虚析构函数, 可能会导致派生类 LinearModel 的析构函数不被调用 (不加会有 warning).\n\n\n\n\nmain.py\n\nfrom ml_ops import Model, LinearModel\n\n# 使用基类\nmodel = Model()\nprint(model.forward(2.0))               # 2.0\n\n# 使用派生类\nlinearModel = LinearModel(weight=3.0)\nprint(linearModel.forward(2.0))         # 6.0\n\n# 验证继承关系\nprint(isinstance(linearModel, Model))   # True\n\n# 访问 C++ 成员变量\nprint(linearModel.weight)               # 3.0\nlinearModel.weight = 5.0\nprint(linearModel.forward(2.0))         # 10.0\n\n\n\n再写一个 setup.py 来编译绑定代码:\n\n\n\nsetup.py\n\nfrom setuptools import setup, Extension\nimport pybind11\n\next_modules = [\n    Extension(\n        \"ml_ops\",\n        [\"ml_bind.cc\"],\n        include_dirs=[pybind11.get_include()],\n        language=\"c++\",\n        extra_compile_args=[\"-std=c++17\"],\n    ),\n]\n\nsetup(\n    name=\"ml_ops\",\n    ext_modules=ext_modules,\n)\n\n\n\n运行:\n# Generate something like ml_ops.cpython-39-darwin.so\npython setup.py build_ext --inplace\npython main.py\n运行结果:\n2.0\n6.0\nTrue\n3.0\n10.0",
-    "crumbs": [
-      "Crash Courses",
-      "<span class='chapter-number'>10</span>  <span class='chapter-title'>Random Notes on Coding</span>"
+      "<span class='chapter-number'>19</span>  <span class='chapter-title'>CFU-Playground 工程结构</span>"
     ]
   }
 ]

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>OS 操作系统原理 – TinyML</title>
+<title>ML Infra 基础 – TinyML</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,8 +30,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../cc-coding/cc-coding.html" rel="next">
-<link href="../riscv/riscv.html" rel="prev">
+<link href="../cfu-proj-struct/cfu-proj-struct.html" rel="next">
+<link href="../coral-npu/coral-npu.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -74,35 +74,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -286,7 +257,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../cc-os/cc-os.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">OS 操作系统原理</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../coral-npu/coral-npu.html">ML Accelerators</a></li><li class="breadcrumb-item"><a href="../ml-infra/ml-infra.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -406,7 +377,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../cc-os/cc-os.html" class="sidebar-item-text sidebar-link active">
+  <a href="../cc-os/cc-os.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">OS 操作系统原理</span></span></a>
   </div>
 </li>
@@ -482,7 +453,7 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../ml-infra/ml-infra.html" class="sidebar-item-text sidebar-link">
+  <a href="../ml-infra/ml-infra.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
   </div>
 </li>
@@ -510,16 +481,22 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#tensor-broadcasting" id="toc-tensor-broadcasting" class="nav-link active" data-scroll-target="#tensor-broadcasting">Tensor Broadcasting</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../c-riscv-asm/c-riscv-asm.html">Crash Courses</a></li><li class="breadcrumb-item"><a href="../cc-os/cc-os.html"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">OS 操作系统原理</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../coral-npu/coral-npu.html">ML Accelerators</a></li><li class="breadcrumb-item"><a href="../ml-infra/ml-infra.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">OS 操作系统原理</h1>
+<h1 class="title">ML Infra 基础</h1>
 </div>
 
 
@@ -536,67 +513,12 @@ window.Quarto = {
 </header>
 
 
-<ul>
-<li><p>操作系统:</p>
-<ul>
-<li>狭义: 内核</li>
-<li>广义: 发行版</li>
-</ul></li>
-<li><p>快捷参考表:</p>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Unit</th>
-<th># Bytes</th>
-<th>Hex</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>1 KB</td>
-<td><span class="math inline">\(2^{10}\)</span> B</td>
-<td>0x00000400</td>
-</tr>
-<tr class="even">
-<td>4 KB</td>
-<td><span class="math inline">\(2^{12}\)</span> B</td>
-<td>0x00001000</td>
-</tr>
-<tr class="odd">
-<td>1 MB</td>
-<td><span class="math inline">\(2^{20}\)</span> B</td>
-<td>0x00100000</td>
-</tr>
-<tr class="even">
-<td>128 MB</td>
-<td><span class="math inline">\(2^{27}\)</span> B</td>
-<td>0x08000000</td>
-</tr>
-<tr class="odd">
-<td>1 GB</td>
-<td><span class="math inline">\(2^{30}\)</span> B</td>
-<td>0x40000000</td>
-</tr>
-</tbody>
-</table></li>
-</ul>
-<blockquote class="blockquote">
-<p>A <strong>process</strong> is an abstract data structure that represents all of the necessary information to run a program.</p>
-</blockquote>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="process-layout.png" class="img-fluid figure-img"></p>
-<figcaption>一个 Process 初始化后在内存中的结构 和给 OS 的 Process Control Block</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="Multiple-level-queues-scheduling-algorithm-GIF.gif" class="img-fluid figure-img"></p>
-<figcaption>Process Scheduling 进程调度</figcaption>
-</figure>
-</div>
+<section id="tensor-broadcasting" class="level2">
+<h2 class="anchored" data-anchor-id="tensor-broadcasting">Tensor Broadcasting</h2>
+<p>TODO</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1013,13 +935,13 @@ window.Quarto = {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../riscv/riscv.html" class="pagination-link" aria-label="RISCV ISA">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">RISCV ISA</span></span>
+      <a href="../coral-npu/coral-npu.html" class="pagination-link" aria-label="Google Coral NPU">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../cc-coding/cc-coding.html" class="pagination-link" aria-label="Random Notes on Coding">
-        <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Random Notes on Coding</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../cfu-proj-struct/cfu-proj-struct.html" class="pagination-link" aria-label="CFU-Playground 工程结构">
+        <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
