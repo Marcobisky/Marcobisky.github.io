@@ -110,7 +110,8 @@ All tasks completed in 10.0 seconds
 - **Class attribute 类属性**: 只不过是定义在类里面的常量而已, **所有实例共享**, 比如可用于 track 某个 class 的实例个数.
     - 在类的内部和外部都可以用 `Car.wheels` 来访问和修改.
 
-- **Instance attribute 实例属性**: 放在 `__init__` 里面的属性, **只有创建了实例后才能访问, 不同的实例可以有不同的值 (独有)**!
+- **Instance attribute 实例属性**: 在类里面用 `self.xxx` 来定义的属性, **只有创建了实例后才能访问, 不同的实例可以有不同的值 (独有)**!
+    - 最好在 `__init__` 里面定义完整! 虽然也可以在后面的方法里面新建新的实例属性 (例子: @lst-dunder-method-dict), 但是这种习惯不方便阅读和理解.
     - 在类的内部用 `self.color`、外部用 `car1.color` 来访问和修改.
 
 ```python
@@ -272,6 +273,33 @@ class __A:              # module class
 ```{.python filename="dunder-method.py" #lst-dunder-methodpy}
 {{< include src/python/dunder-method.py >}}
 ```
+
+- 其它 dunder method:
+    - `__dict__`: 返回所有实例属性的字典, 比如:
+
+        ```{.python #lst-dunder-method-dict}
+        class Foo:
+            def __init__(self):
+                self.a = 1
+            def add_attr(self):
+                self.b = 2
+
+        foo = Foo()
+        print(foo.__dict__) # 输出: {'a': 1}
+        foo.add_attr()
+        print(foo.__dict__) # 输出: {'a': 1, 'b': 2}, 这里实例的属性多了一条!
+        ```
+
+#### 子模块初始化
+
+- 设 `utils` 是一个可以 `import` 的库, 那在 `import utils` 时, Python 会自动执行 `utils/__init__.py` 里面的代码.
+
+    ```css
+    myproj/
+    └── utils/
+        ├── __init__.py
+        └── math_tools.py
+    ```
 
 
 ### Python 常用数据结构
