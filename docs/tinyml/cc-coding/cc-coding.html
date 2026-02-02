@@ -803,13 +803,71 @@ window.Quarto = {
 </section>
 <section id="smart-pointers-智能指针" class="level4 page-columns page-full">
 <h4 class="anchored" data-anchor-id="smart-pointers-智能指针">Smart Pointers 智能指针</h4>
+<blockquote class="blockquote">
 <p>Smart Pointers = <code>new</code> without <code>delete</code>. 即不需要担心内存泄漏问题.</p>
+</blockquote>
 <ul>
 <li><p><code>std::unique_ptr&lt;T&gt;</code>: 不能被复制:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>unique_ptr<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> p1 <span class="op">=</span> <span class="bu">std::</span>make_unique<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;(</span><span class="dv">42</span><span class="op">);</span> <span class="co">// Create unique_ptr</span></span>
+<div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">std::</span>unique_ptr<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> p1 <span class="op">=</span> <span class="bu">std::</span>make_unique<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;(</span><span class="dv">42</span><span class="op">);</span> <span class="co">// 在堆上分配一个 int, 初始化为 42, 并将其地址赋给智能指针 p1</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co">// std::unique_ptr&lt;int&gt; p2 = p1; // Error: cannot copy unique_ptr</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><code>std::shared_ptr&lt;T&gt;</code>: 可以被复制 (用过引用计数来管理内存).</p></li>
-<li><p><code>std::weak_ptr&lt;T&gt;</code>: 不会增加引用计数, 用于解决 <code>shared_ptr</code> 循环引用问题 (<a href="#fig-cirref" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cirref</span></a>, <code>a1</code> 表示 <code>a</code> 的引用计数为 1 (<code>a.use_count() == 1</code>)):</p></li>
+</ul>
+<div class="quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>copy_sharedptr.cc</strong></pre>
+</div>
+<div class="sourceCode" id="lst-copysharedptrcc" data-filename="copy_sharedptr.cc"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-copysharedptrcc-1"><a href="#lst-copysharedptrcc-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="lst-copysharedptrcc-2"><a href="#lst-copysharedptrcc-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> <span class="kw">namespace</span> std<span class="op">;</span></span>
+<span id="lst-copysharedptrcc-3"><a href="#lst-copysharedptrcc-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-copysharedptrcc-4"><a href="#lst-copysharedptrcc-4" aria-hidden="true" tabindex="-1"></a>shared_ptr<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> <span class="va">g_shared</span><span class="op">;</span></span>
+<span id="lst-copysharedptrcc-5"><a href="#lst-copysharedptrcc-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-copysharedptrcc-6"><a href="#lst-copysharedptrcc-6" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> store<span class="op">(</span>shared_ptr<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;</span> p<span class="op">)</span> <span class="op">{</span></span>
+<span id="lst-copysharedptrcc-7"><a href="#lst-copysharedptrcc-7" aria-hidden="true" tabindex="-1"></a>    <span class="va">g_shared</span> <span class="op">=</span> p<span class="op">;</span>   <span class="co">// 复制</span></span>
+<span id="lst-copysharedptrcc-8"><a href="#lst-copysharedptrcc-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-copysharedptrcc-9"><a href="#lst-copysharedptrcc-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-copysharedptrcc-10"><a href="#lst-copysharedptrcc-10" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="lst-copysharedptrcc-11"><a href="#lst-copysharedptrcc-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-copysharedptrcc-12"><a href="#lst-copysharedptrcc-12" aria-hidden="true" tabindex="-1"></a>        <span class="kw">auto</span> x <span class="op">=</span> make_shared<span class="op">&lt;</span><span class="dt">int</span><span class="op">&gt;(</span><span class="dv">23</span><span class="op">);</span></span>
+<span id="lst-copysharedptrcc-13"><a href="#lst-copysharedptrcc-13" aria-hidden="true" tabindex="-1"></a>        store<span class="op">(</span>x<span class="op">);</span></span>
+<span id="lst-copysharedptrcc-14"><a href="#lst-copysharedptrcc-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span><span class="co">// main 里的 x 消失, 但对象还活着</span></span>
+<span id="lst-copysharedptrcc-15"><a href="#lst-copysharedptrcc-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// g_shared 仍然有效</span></span>
+<span id="lst-copysharedptrcc-16"><a href="#lst-copysharedptrcc-16" aria-hidden="true" tabindex="-1"></a>    cout <span class="op">&lt;&lt;</span> <span class="op">*</span><span class="va">g_shared</span> <span class="op">&lt;&lt;</span> endl<span class="op">;</span> <span class="co">// 23</span></span>
+<span id="lst-copysharedptrcc-17"><a href="#lst-copysharedptrcc-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-copysharedptrcc-18"><a href="#lst-copysharedptrcc-18" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>copy_wildptr.cc</strong></pre>
+</div>
+<div class="sourceCode" id="lst-copywildptrcc" data-filename="copy_wildptr.cc"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-copywildptrcc-1"><a href="#lst-copywildptrcc-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="lst-copywildptrcc-2"><a href="#lst-copywildptrcc-2" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> <span class="kw">namespace</span> std<span class="op">;</span></span>
+<span id="lst-copywildptrcc-3"><a href="#lst-copywildptrcc-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-copywildptrcc-4"><a href="#lst-copywildptrcc-4" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span><span class="op">*</span> g<span class="op">;</span></span>
+<span id="lst-copywildptrcc-5"><a href="#lst-copywildptrcc-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-copywildptrcc-6"><a href="#lst-copywildptrcc-6" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> store<span class="op">(</span><span class="dt">int</span><span class="op">*</span> p<span class="op">)</span> <span class="op">{</span></span>
+<span id="lst-copywildptrcc-7"><a href="#lst-copywildptrcc-7" aria-hidden="true" tabindex="-1"></a>    g <span class="op">=</span> p<span class="op">;</span></span>
+<span id="lst-copywildptrcc-8"><a href="#lst-copywildptrcc-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-copywildptrcc-9"><a href="#lst-copywildptrcc-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-copywildptrcc-10"><a href="#lst-copywildptrcc-10" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="lst-copywildptrcc-11"><a href="#lst-copywildptrcc-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="lst-copywildptrcc-12"><a href="#lst-copywildptrcc-12" aria-hidden="true" tabindex="-1"></a>        <span class="dt">int</span> x <span class="op">=</span> <span class="dv">23</span><span class="op">;</span></span>
+<span id="lst-copywildptrcc-13"><a href="#lst-copywildptrcc-13" aria-hidden="true" tabindex="-1"></a>        store<span class="op">(&amp;</span>x<span class="op">);</span></span>
+<span id="lst-copywildptrcc-14"><a href="#lst-copywildptrcc-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span><span class="co">// x 生命周期结束</span></span>
+<span id="lst-copywildptrcc-15"><a href="#lst-copywildptrcc-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">// g 变成野指针</span></span>
+<span id="lst-copywildptrcc-16"><a href="#lst-copywildptrcc-16" aria-hidden="true" tabindex="-1"></a>    cout <span class="op">&lt;&lt;</span> <span class="op">*</span>g <span class="op">&lt;&lt;</span> endl<span class="op">;</span><span class="co">// 未定义</span></span>
+<span id="lst-copywildptrcc-17"><a href="#lst-copywildptrcc-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-copywildptrcc-18"><a href="#lst-copywildptrcc-18" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><code>std::weak_ptr&lt;T&gt;</code>: 不会增加引用计数, 用于解决 <code>shared_ptr</code> 循环引用问题 (<a href="#fig-cirref" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cirref</span></a>, <code>a1</code> 表示 <code>a</code> 的引用计数为 1 (<code>a.use_count() == 1</code>)):</li>
 </ul>
 
 <div class="no-row-height column-margin column-container"><div class="">
