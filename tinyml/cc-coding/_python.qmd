@@ -144,7 +144,7 @@ All tasks completed in 10.0 seconds
 - 如果你想访问的属性名在运行时才能决定, 比如:
 
     ```python
-    class Order(object):    # object 可写可不写 (历史包袱)
+    class Order():
         def __init__(self):
             self.price = 100
             self.qty = 5
@@ -154,6 +154,25 @@ All tasks completed in 10.0 seconds
     print(order.attr_name)              # 这样是不行的!
     print(getattr(order, attr_name))    # 这样才行!
     ```
+
+#### Python 类继承
+
+- `object` 类是所有类的基类 (所有类都默认继承自 `object`).
+    - 所以所有的类都可以调用 `print()` 之类的方法, 因为 `print()` 最终会调用 `object` 类的 `__str__()` 方法.
+
+- `super()` 用于执行父类的某方法 (仅此而已), 不一定是 `__init__()` 方法, 也可以是其它方法.
+
+- **多继承**: Python 允许一个类同时继承多个类, 比如 @lst-superpy 中定义了 @fig-super 的简单多继承结构, 每个类都调用了父类的 `foo()` 方法.
+    - 具体调用顺序由 C3 算法决定 (见 [Algorithm Notes 算法笔记](../cc-algo/cc-algo.qmd#sec-c3-algo)).
+
+```{.python filename="super.py" #lst-superpy}
+{{< include src/python/super.py >}}
+```
+
+::: {.column-margin}
+![一个简单的多继承结构.](super.png){#fig-super}
+:::
+
 
 ### Python 下划线
 
