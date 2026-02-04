@@ -1939,7 +1939,39 @@ Figure&nbsp;2: 一个简单的多继承结构.
 </figcaption>
 </figure>
 </div>
-</div></div></section>
+</div></div><ul>
+<li>有参数的 <code>super()</code>:
+<ul>
+<li><code>super()</code> 不比放在类里面, 也可以放在函数里. 放在类里面时自动替换为 <code>super(CurrentClass, self)</code>.</li>
+<li><code>super(ClassName, instance/cls)</code> 表示从 <code>ClassName</code> 的<strong>下一个类</strong>的 MRO 开始往后找 (即跳过 <code>ClassName</code>) <code>instance/cls</code> 中的方法, 比如:</li>
+</ul></li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>super-para.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-superparapy" data-filename="super-para.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-superparapy-1"><a href="#lst-superparapy-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> A:</span>
+<span id="lst-superparapy-2"><a href="#lst-superparapy-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> f(<span class="va">self</span>):</span>
+<span id="lst-superparapy-3"><a href="#lst-superparapy-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"A.f"</span>)</span>
+<span id="lst-superparapy-4"><a href="#lst-superparapy-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-superparapy-5"><a href="#lst-superparapy-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> B(A):</span>
+<span id="lst-superparapy-6"><a href="#lst-superparapy-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> f(<span class="va">self</span>):</span>
+<span id="lst-superparapy-7"><a href="#lst-superparapy-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"B.f"</span>)</span>
+<span id="lst-superparapy-8"><a href="#lst-superparapy-8" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().f()         <span class="co"># Equivalent to call_super(B, self)</span></span>
+<span id="lst-superparapy-9"><a href="#lst-superparapy-9" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-superparapy-10"><a href="#lst-superparapy-10" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> C(B):</span>
+<span id="lst-superparapy-11"><a href="#lst-superparapy-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> f(<span class="va">self</span>):</span>
+<span id="lst-superparapy-12"><a href="#lst-superparapy-12" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"C.f"</span>)</span>
+<span id="lst-superparapy-13"><a href="#lst-superparapy-13" aria-hidden="true" tabindex="-1"></a>        call_super(B, <span class="va">self</span>) <span class="co"># C will skip B and call A.f()</span></span>
+<span id="lst-superparapy-14"><a href="#lst-superparapy-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-superparapy-15"><a href="#lst-superparapy-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> call_super(after, find_cls):</span>
+<span id="lst-superparapy-16"><a href="#lst-superparapy-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">super</span>(after, find_cls).f()</span>
+<span id="lst-superparapy-17"><a href="#lst-superparapy-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-superparapy-18"><a href="#lst-superparapy-18" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> C()</span>
+<span id="lst-superparapy-19"><a href="#lst-superparapy-19" aria-hidden="true" tabindex="-1"></a>c.f()                       <span class="co"># Output: C.f A.f</span></span>
+<span id="lst-superparapy-20"><a href="#lst-superparapy-20" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 <section id="python-下划线" class="level3">
 <h3 class="anchored" data-anchor-id="python-下划线">Python 下划线</h3>
