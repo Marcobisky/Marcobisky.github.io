@@ -14,6 +14,7 @@ TODO
     - **Manual Differentiation**: 人工推导导数公式, 然后写进代码.
     - **Symbolic Differentiation**: 计算机符号化地推导导数公式, 然后生成代码 (Mathematica 就是这么干的)
     - **Numerical Differentiation**: 用数值方法近似地计算导数.
+    - **Automatic Differentiation**: 通过链式法则和计算图, 自动地计算导数.
 
         ![计算机中微分的 4 种方式 @baydin2018automaticdifferentiationmachinelearning.](diff-computer.png){#fig-diff-computer width=90%}
 
@@ -34,7 +35,7 @@ TODO
 ::: {.callout-note icon=true collapse=false}
 ## EXAMPLE: A scalar computational graph
 
-考虑式子:
+考虑式子 @deep_thoughts_2021_derive:
 $$
 y := \ln x_1 + x_1 x_2 - e^{x_2}
 $${#eq-example}
@@ -68,7 +69,7 @@ $$
 
 ### Minimal Implementation
 
-我们将 @fig-ex-forward 的棕色方块建模为 `Tensor` 类, 青色圆形建模为算子比如 `Add`. 这是 autograd 重点关注的两个结构. 现在我们实现 @eq-example 的 autograd 库 (只实现了必要的算子). **主要关注 `Tensor` 类的 `backward()` 方法和各个算子的 `backward()` 方法的相互调用!**
+我们将 @fig-ex-forward 的棕色方块建模为 `Tensor` 类, 青色圆形建模为算子比如 `Add`. 这是 autograd 重点关注的两个结构. 现在我们实现 @eq-example 的 autograd 库 (只实现了必要的算子, adapted from @eduardoleito_2024_documented). **主要关注 `Tensor` 类的 `backward()` 方法和各个算子的 `backward()` 方法的相互调用!**
 
 
 ```{.python filename="mytorch/tensor.py" #lst-tensorpy}
