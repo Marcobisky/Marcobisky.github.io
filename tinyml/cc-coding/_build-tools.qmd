@@ -2,84 +2,99 @@
 
 #### 一般工作流与设计哲学
 
-- 典型工程结构 (**Out-of-source build**):
+> 下面以这个工程模版为演示:
 
-    ```css
-    myproj/
-    ├── docs/           # 文档
-    ├── CMakeLists.txt  # 所在文件绝对路径成为 CMAKE_SOURCE_DIR 的值
-    ├── cmake/          # CMake 自身基础设施
-    │   └── FindXXX.cmake
-    ├── src/            # 核心源码
-    │   ├── module1/
-    │   │   ├── mod1.cc
-    │   │   ├── mod1.h
-    │   │   └── CMakeLists.txt
-    │   ├── main.cc
-    │   └── CMakeLists.txt
-    ├── include/        # 如果你写的是一个库的话就要这个
-    │   └── myproj/
-    │       └── api.h
-    ├── test/
-    │   ├── test_mod1.cc
-    │   └── CMakeLists.txt
-    ├── third_party/
-    ├── tools/
-    └── build/
-        └── a.out       # You are here!
-    ```
-    - 如果是 **In-source build**:
+```{.css #lst-demoproj}
+demo-proj/
+├── build/                      # 所在目录绝对路径成为 CMAKE_BINARY_DIR 的值
+│   ├── CMakeFiles/...
+│   ├── math/...
+│   ├── Makefile
+│   └── ...
+├── install/
+│   ├── bin/
+│   │   └── myapp               # 可执行文件
+│   ├── include/                # 给使用者的头文件
+│   │   ├── add.h
+│   │   └── utils.h
+│   └── lib/                    # 动态链接库 (myapp 必须要这些文件才能运行!)
+│       ├── libmathlib.dylib
+│       └── libutilslib.dylib
+├── math/
+│   ├── add.cc
+│   ├── add.h
+│   ├── utils.cc
+│   ├── utils.h
+│   └── CMakeLists.txt
+├── main.cc
+└── CMakeLists.txt              # 所在文件绝对路径成为 CMAKE_SOURCE_DIR 的值
+```
+
+- **Out-of-source build** 与 **In-source build**:
+    - 上面的工程采用的是 Out-of-source build, 即把编译生成的文件都放在 `install/` 目录下, 源代码和编译生成的文件分开存放.
+    - 如果是 In-source build, 则会把编译生成的文件和源代码文件混在一起, 不推荐:
 
         ```css
-        myproj/
+        demo-proj/
         ├── main.cpp
         ├── Makefile
-        └── a.out
+        └── myapp
         ```
-        这样做会把编译生成的文件和源代码文件混在一起, 不推荐!
 
-- 典型工作流:
+- 工作流:
 
     ```bash
     rm -rf build && mkdir build
-    git submodule init && git submodule update
     cd build
-    cmake ..
-    make && make install
+    cmake ..                                            # 配置阶段
+    make                                                # 构建阶段
+    cd .. && cmake --install build --prefix install     # 安装阶段: 生成 install/ 目录, 没有 prefix 则默认安装到 /usr/local/ (要 sudo)
     ```
 
     - **配置阶段**:
         - 一般会在 `build/` 目录下运行: `cmake ..` 而不是在 CMAKE_SOURCE_DIR 目录下运行 `cmake .`!
-            - `build/` 的绝对路径会被 CMake 作为 CMAKE_BINARY_DIR.
         - 仅配置阶段生效的命令要格外注意! 配置完了改变文件不重新 `cmake ..` 的话是不会生效的!
-
     - **构建阶段**
+    - **安装阶段**
 
 - 一些 **CMake built-in variables 内置变量**:
-    - `CMAKE_SOURCE_DIR`: `myproj/`.
-    - `CMAKE_BINARY_DIR`: `myproj/build/`.
-    - `CMAKE_CURRENT_SOURCE_DIR`: 非顶层 CMakeLists.txt 所在目录 (比如 `myproj/src/module1/`).
-    - `CMAKE_CURRENT_BINARY_DIR`: 非顶层 CMakeLists.txt 镜像到的 build 目录 (比如 `myproj/build/src/module1/`).
+    - `CMAKE_SOURCE_DIR`: 顶层 `CMakeLists.txt` 所在目录, 比如 `demo-proj/`.
+    - `CMAKE_BINARY_DIR`: `cmake ..` 命令运行的根目录, 一般是 `demo-proj/build/`.
+    - `CMAKE_CURRENT_SOURCE_DIR`: **当前** `CMakeLists.txt` 所在目录, 可以是顶层也可以是非顶层 (比如 `demo-proj/math/`).
+    - `CMAKE_CURRENT_BINARY_DIR`: **当前** `CMakeLists.txt` 镜像到的 build 目录 (比如 `demo-proj/build/math/`).
 
 #### CMakeLists 作为计算机语言
 
 > 下面的命令都写在 `CMakeLists.txt` 里面, 并用: `cmake -P CMakeLists.txt` 运行.
 
+> **String 字符串**: CMake 中的唯一类型!
+
 - 基本操作:
 
     ```cmake
-    # 赋值, 只有 string
+    # 赋值, 只有 string!
     set(A 123)          # A = "123"
-    set(MY_LIST a b c)  # 伪 List 类型, 不等价于 set(MY_LIST "abc")
+    set(MY_LIST a b c)  # MY_LIST = "a;b;c", 还是字符串, 只不过自动用分号隔开了. 
+                        # 不等价于 set(MY_LIST "abc"), 等价于 set(MY_LIST "a;b;c")
     # 打印
     message(A)          # 输出: A (没有自动解引用! 同 message("A"))
     message(${A})       # 输出: 123
-    message(${MY_LIST}) # 输出: abc
+    message(STATUS ${MY_LIST})  # 输出: -- abc (STATUS 表示这是状态信息, 会有 -- 前缀, 可选项还有 WARNING, ERROR)
+    message("${MY_LIST}")       # 输出: a;b;c (用引号防止分号被忽略! 一般都用这种)
+
+    # 字符串操作:
     # 追加字符
     list(APPEND A 4)
     list(APPEND MY_LIST de)
-    message(${A})       # 输出: 1234
-    message(${MY_LIST}) # 输出: abcde
+    message(${A})         # 输出: 1234
+    message("${MY_LIST}") # 输出: a;b;c;de
+    # 过滤字符
+    set(MY_SRCS main.c utils.c main_test.c utils_test.c)
+    list(FILTER MY_SRCS EXCLUDE REGEX "_test\\.c$")  # 过滤掉所有以 _test.c 结尾的文件
+    message("${MY_SRCS}")  # 输出: main.c;utils.c
+    # 替换字符
+    string(REPLACE ".c" ".o" MY_OBJS "${MY_SRCS}")
+    message("${MY_OBJS}")  # 输出: main.o;utils.o
     ```
 
 - MACRO
@@ -119,6 +134,54 @@
     message(${X})                   # 输出: 2 (函数内修改不影响外部变量)
     ```
 
+
+    - `cmake_parse_arguments()`: 解析命令行参数
+
+        ```cmake
+        function(test_parse)    # test_parse 函数名, 暂时不写参数
+            # 1. 定义三类参数名, 这三种参数要严格遵循下面的顺序:
+            set(aa AA)          # bool param
+            set(bb BB)          # single value param
+            set(cc CC1 CC2)     # multi values param
+
+            # 2. 解析参数
+            cmake_parse_arguments(MYPREFIX  # 表示在所有的宏变量前加 MYPREFIX_ 前缀
+                "${aa}"                     # 匹配 AA
+                "${bb}"                     # 匹配 BB
+                "${cc}"                     # 匹配 CC1 CC2 CC3
+                ${ARGN}                     # 匹配未匹配的参数
+            )
+            # 如果要忽略某个参数比如 bb, 一定要用 "" 代替而不能忽略:
+            # cmake_parse_arguments(MYPREFIX "${aa}" "" "${cc}" ${ARGN})
+
+            # 3. 打印结果
+            message("${MYPREFIX_UNPARSED_ARGUMENTS}")   # 这个宏由 CMake 定义, 名字是固定的
+            message("AA = ${MYPREFIX_AA}")
+            message("BB = ${MYPREFIX_BB}")
+            message("CC1 = ${MYPREFIX_CC1}")
+            message("CC2 = ${MYPREFIX_CC2}")
+        endfunction()
+
+        # 4. 调用函数
+        test_parse(
+            test1 test2                     # test1 和 test2 会在未匹配参数中
+            AA test3                        # test3 会在未匹配参数中
+            BB main.cpp test4               # test4 也会在未匹配参数中
+            CC1 inc include CC2 src test5   # test5 会在 CC2 中!
+        )
+        ```
+
+        输出:
+
+        ```bash
+        test1;test2;test3;test4
+        AA = TRUE
+        BB = main.cpp
+        CC1 = inc;include
+        CC2 = src;test5
+        ```
+
+
 - 分支
 
     ```cmake
@@ -132,11 +195,11 @@
     ```
     - 在 `if()` 括号里面的还有很多常见判断 (遇到了知道什么意思就行), 比如:
     
-    ```cmake
-    if(3 GREATER 2)         # 比较运算: GREATER, LESS, EQUAL, etc.
-    if(DEFINED VAR)         # 变量是否定义
-    if(EXISTS "${CMAKE_SOURCE_DIR}/test.cc")    # CMAKE_SOURCE_DIR 是 CMakeLists.txt 所在目录
-    ```
+        ```cmake
+        if(3 GREATER 2)         # 比较运算: GREATER, LESS, EQUAL, etc.
+        if(DEFINED VAR)         # 变量是否定义
+        if(EXISTS "${CMAKE_SOURCE_DIR}/test.cc")    # CMAKE_SOURCE_DIR 是 CMakeLists.txt 所在目录
+        ```
 
 #### CMake Built-in Commands
 
@@ -153,6 +216,7 @@
     ```cmake
     file(READ version.txt VERSION)          # 读取 version.txt 并定义到变量 VERSION
     file(WRITE output.txt "Hello World")    # 写入文件
+    file(STRINGS params.json CONTENT)       # 将 params.json 的内容读到 CONTENT 变量 (每行之间的换行符会被替换为分号)
     file(COPY)
     file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/output) # 创建目录
     file(REMOVE temp.txt)                   # 删除文件
@@ -161,21 +225,79 @@
     file(RELATIVE_PATH MY_REL_PATH /a/b/c /a/b/e/f.json)   # MY_REL_PATH = ../e/f.json
     ```
 
-- 其它常用命令:
+    - 模版文件: `configure_file()` 读入一个模版文件 `x.in`, 用当前 CMakeLists 中有的变量替换 `x.in` 中的变量然后输出到指定文件, 比如用以下工程结构:
 
-    ```cmake
-    add_executable(myapp main.cc utils.cc)  # 定义一个 target 可执行文件叫 myapp
-    add_subdirectory(ops)                   # 执行当前目录下的子目录 ops 中的 CMakeLists, 并把其中定义的 targets 加入当前构建图
-    target_include_directories(mylib
-        PUBLIC include
-        PRIVATE src
-    ) # target mylib 的头文件在 include/ 和 src/ 目录下. PRIVATE 表示只有 mylib 自己能用 src/ 目录下的头文件, PUBLIC 表示 mylib 的使用者也能用 include/ 目录下的头文件
-    target_link_libraries(myapp PRIVATE mylib)  # 定义 target myapp 依赖 mylib 库
-    set_target_properties(myapp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)    # 让 target myapp 的可执行文件输出到 build/bin/ 目录下
-    install(TARGETS myapp
-        RUNTIME DESTINATION bin
-    )   # 安装 target myapp 的可执行文件到系统的 bin/ 目录下 (一般是 /usr/local/bin/)
-    ```
+        ```css
+        .
+        ├── CMakeLists.txt
+        ├── hello.cc.in
+        └── hello.cc            /* 也可以不创建, 自动生成 */
+        ```
+        
+        ```{.cpp filename="hello.cc.in" @lst-helloccin}
+        #include <iostream>
+        int main() {
+            std::cout << "Hello, ${NAME}!" << std::endl;
+            return 0;
+        }
+        ```
+
+        ```{.cmake filename="CMakeLists.txt" @lst-cmakelists}
+        # 定义一个变量
+        set(NAME World)
+
+        # 用模板生成真实文件
+        configure_file(
+            hello.cc.in   # 输入模板
+            hello.cc      # 输出文件
+        )
+        ```
+
+        运行后:
+
+        ```{.cpp filename="hello.cc" @lst-hellocc}
+        #include <iostream>
+        int main() {
+            std::cout << "Hello, World!" << std::endl;
+            return 0;
+        }
+        ```
+
+
+- 模版工程 @lst-demoproj 中的文件细节:
+
+```{.cpp filename="demo-proj/main.cc" #lst-maincc}
+{{< include src/cmake/demo-proj/main.cc >}}
+```
+
+```{.cmake filename="demo-proj/CMakeLists.txt" #lst-cmakelistsdemo}
+{{< include src/cmake/demo-proj/CMakeLists.txt >}}
+```
+
+::: {layout-ncol=2}
+```{.cpp filename="demo-proj/math/add.cc" #lst-addcc}
+{{< include src/cmake/demo-proj/math/add.cc >}}
+```
+
+```{.cmake filename="demo-proj/math/add.h" #lst-addh}
+{{< include src/cmake/demo-proj/math/add.h >}}
+```
+:::
+
+::: {layout-ncol=2}
+```{.cpp filename="demo-proj/math/utils.cc" #lst-utilscc}
+{{< include src/cmake/demo-proj/math/utils.cc >}}
+```
+
+```{.cmake filename="demo-proj/math/utils.h" #lst-utilsh}
+{{< include src/cmake/demo-proj/math/utils.h >}}
+```
+:::
+
+```{.cmake filename="demo-proj/math/CMakeLists.txt" #lst-cmakelistsmath}
+{{< include src/cmake/demo-proj/math/CMakeLists.txt >}}
+```
+
 
 ### Makefile
 

@@ -45,12 +45,12 @@
 - 当一个 `cpp` 文件有多个函数定义时, 一般最下面的函数才是对外暴露的接口 (因为它调用了上面的函数), 先看最下面的函数.
     - 如果有很多个名字差不多的函数, 最短的那个将是对其它的封装, 比如:
 
-    ```cpp
-    void _relu_f32_kernel(...) { ... }
-    __global__ void relu_f32_kernel(...) { ... }
-    void relu_f32_util(...) { ... }
-    void relu_f32(...) { ... } // True API
-    ```
+        ```cpp
+        void _relu_f32_kernel(...) { ... }
+        __global__ void relu_f32_kernel(...) { ... }
+        void relu_f32_util(...) { ... }
+        void relu_f32(...) { ... } // True API
+        ```
 
     单从名字上来看, `_relu_f32_kernel()` 仅给 `relu_f32_kernel()` 使用 (因为有下划线而且重名); 而 `relu_f32` 封装了 `relu_f32_kernel` 和 `relu_f32_util` (因为名字 match 前缀且更短).
 
@@ -69,7 +69,6 @@
 ### RTL 代码阅读
 
 - 下面的 Verilog 代码片段说明这个模块有**两个功能**, 功能的启用由 `<func>_enable` 决定; 每个功能是一个 **3 个状态的 FSM**.
-    - 如果 `...` 的部分没有什么 operation, 只有将**输入赋值给输出**的操作, 那么这个模块其实就是一个**有条件的连接器**而已!! 如果有 splitter 之类的就有 decoder 的功能.
 
     ```verilog
     if (xxx_enable) begin 
@@ -88,3 +87,5 @@
         endcase
     end
     ```
+
+    - 如果 `...` 的部分没有什么 operation, 只有将**输入赋值给输出**的操作, 那么这个模块其实就是一个**有条件的连接器**而已!! 如果有 splitter 之类的就有 decoder 的功能.

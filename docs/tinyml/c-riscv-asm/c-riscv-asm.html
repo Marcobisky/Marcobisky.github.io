@@ -466,6 +466,12 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">GPU 原理速成</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-algo/cc-algo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Algorithm Notes 算法笔记</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -480,13 +486,13 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-arch/nn-arch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
   </div>
 </li>
       </ul>
@@ -503,13 +509,13 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../coral-npu/coral-npu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../ml-infra/ml-infra.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
   </div>
 </li>
       </ul>
@@ -526,7 +532,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
   </div>
 </li>
       </ul>
@@ -543,6 +549,7 @@ div.csl-indent {
   <ul>
   <li><a href="#c-编译过程" id="toc-c-编译过程" class="nav-link active" data-scroll-target="#c-编译过程">C 编译过程</a></li>
   <li><a href="#riscv-汇编语言" id="toc-riscv-汇编语言" class="nav-link" data-scroll-target="#riscv-汇编语言">RISCV 汇编语言</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
     </div>
@@ -570,19 +577,17 @@ div.csl-indent {
 
 
 <ul>
-<li><strong>IR (Intermediate Representation)</strong>: 中间代码的作用: 相当于有一个中间缓冲, 可以看成编译器的前端, 通过增加这一个模块, 可以让编译器的前端和后端解耦, 方便支持多种语言和多种目标架构.</li>
-</ul>
-<pre><code>             frontend                              backend
-           +----------+                        +------------+
-      C -&gt; |  Clang   | -+                 +-&gt; |  llvm-x86  | -&gt; x86
-           +----------+  |                 |   +------------+
-           +----------+  +-&gt; +----------+ -+   +------------+
-Fortran -&gt; | llvm-gcc | ---&gt; | llvm-opt | ---&gt; |  llvm-arm  | -&gt; ARM
-           +----------+  +-&gt; +----------+ -+   +------------+
-           +----------+  |                 |   +------------+
-Haskell -&gt; |    GHC   | -+                 +-&gt; | llvm-riscv | -&gt; RISC-V
-           +----------+  LLVM IR      LLRM IR  +------------+</code></pre>
-<ul>
+<li><p><strong>IR (Intermediate Representation)</strong>: 中间代码的作用: 相当于有一个中间缓冲, 可以看成编译器的前端, 通过增加这一个模块, 可以让编译器的前端和后端解耦, 方便支持多种语言和多种目标架构.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode txt code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>             frontend                              backend</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>           +----------+                        +------------+</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>      C -&gt; |  Clang   | -+                 +-&gt; |  llvm-x86  | -&gt; x86</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>           +----------+  |                 |   +------------+</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>           +----------+  +-&gt; +----------+ -+   +------------+</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>Fortran -&gt; | llvm-gcc | ---&gt; | llvm-opt | ---&gt; |  llvm-arm  | -&gt; ARM</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>           +----------+  +-&gt; +----------+ -+   +------------+</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>           +----------+  |                 |   +------------+</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>Haskell -&gt; |    GHC   | -+                 +-&gt; | llvm-riscv | -&gt; RISC-V</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>           +----------+  LLVM IR      LLRM IR  +------------+</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p><code>volatile</code> 关键字: 告诉编译器不要优化这个语句.</p></li>
 <li><p>在 C 中插入汇编代码 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[1]</a></span>:</p>
 <ul>
@@ -769,6 +774,9 @@ Key to Flags:
 <li><p>标签其实表示地址:</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">_start:</span> li x6<span class="op">,</span> <span class="dv">5</span> <span class="co"># _start 标签其实就是这条指令的地址</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
 
 
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">

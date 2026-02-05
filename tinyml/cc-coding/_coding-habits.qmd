@@ -40,11 +40,11 @@
 
 - 向上取整的操作非常常见, 比如 HPC 里面分配多少个 block 等. 可通过 $$\left\lceil \frac{x}{y} \right\rceil = \left\lfloor \frac{x + y - 1}{y} \right\rfloor$$ 实现 (由于整数除法默认向下取整):
 
-```cpp
-int ceil_div(const int x, const int y) {
-    return (x + y - 1) / y; // Automatically does floor division
-}
-```
+    ```cpp
+    int ceil_div(const int x, const int y) {
+        return (x + y - 1) / y; // Automatically does floor division
+    }
+    ```
 
 ### 遍历数组和张量
 
@@ -59,7 +59,7 @@ int ceil_div(const int x, const int y) {
     // for (int i = 1; i <= N; i++) {} // 不推荐
     ```
 
-    - `for` 循环的边界: 从 `0` 开始计数而不是 `1`, 用 `<` 而不是 `<=`, 因为下标往往是从 `0` 开始的 (Matlab 除外), 如果用从 `1` 开始, 循环体里面还要减 `1`, 很麻烦.
+    - **`for` 循环的边界**: 从 `0` 开始计数而不是 `1`, 用 `<` 而不是 `<=`, 因为下标往往是从 `0` 开始的 (Matlab 除外), 如果用从 `1` 开始, 循环体里面还要减 `1`, 很麻烦.
     - TODO: 如何思考高阶张量的处理? 不要用 global 的 mental picture?
 
 ### 全局索引与局部索引的转换
@@ -86,14 +86,15 @@ int ceil_div(const int x, const int y) {
 
 - `k`: 用于常量变量 (constant variable), 例如 `const int kBufferSize = 1024;`.
 
-- `foo(), bar()`: 表示程序员不想起名字 (就像 Alice 和 Bob).
-    - 来源于 FUBAR (Fucked up beyond all recognition).
+- `foo(), bar()`: 表示程序员不想起名字[^foo] (就像 Alice 和 Bob).
+
+[^foo]:来源于 FUBAR (Fucked up beyond all recognition).
 
 - **功能相似的函数和文件用前缀匹配**: 比如用 `add_float()`, `add_float_vec()`, `add_int()` 而不是: `float_add()`, `vec_float_add()`, `int_add()`. 因为如果它们作为文件名的话, **前缀 match** 的文件会放在一起, 方便查找!
 
 ### getters 和 Setters
 
-为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 `public`, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 `private` + getter/setter 的方式来控制对成员变量的访问和修改.
+- 为了让外部代码访问和修改类的成员变量, 一种办法是将成员变量声明为 `public`, 但一旦外部代码写入了不合法的值, 就会导致类的状态变得不可预测. 因此我们用 `private` + getter/setter 的方式来控制对成员变量的访问和修改.
 
 ::: {layout-ncol=2}
 ```{.cpp filename="account_public.cpp" #lst-account_public}
