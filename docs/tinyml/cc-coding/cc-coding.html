@@ -1560,29 +1560,35 @@ Figure&nbsp;1: 循环引用问题
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>Orange Hello</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><p>不要到处拉 <code>using namespace xxx;</code> 的 shit!</p></li>
-<li><p>全局作用域运算符:</p></li>
+<li><p>全局作用域运算符:</p>
+<ul>
+<li>所以自己的 namespace 最好避开有可能称为官方 namespace 的名字, 比如 <code>namespace cuda { ... }</code>.</li>
+</ul></li>
 </ul>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
-<pre><strong>globalnamespace.cpp</strong></pre>
+<pre><strong>namespace-global.cpp</strong></pre>
 </div>
-<div class="sourceCode" id="lst-globalnamespacecpp" data-filename="globalnamespace.cpp"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-globalnamespacecpp-1"><a href="#lst-globalnamespacecpp-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
-<span id="lst-globalnamespacecpp-2"><a href="#lst-globalnamespacecpp-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="lst-globalnamespacecpp-3"><a href="#lst-globalnamespacecpp-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> value <span class="op">=</span> <span class="dv">10</span><span class="op">;</span>  <span class="co">// Global namespace value</span></span>
-<span id="lst-globalnamespacecpp-4"><a href="#lst-globalnamespacecpp-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="lst-globalnamespacecpp-5"><a href="#lst-globalnamespacecpp-5" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> A <span class="op">{</span></span>
-<span id="lst-globalnamespacecpp-6"><a href="#lst-globalnamespacecpp-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> value <span class="op">=</span> <span class="dv">20</span><span class="op">;</span>  <span class="co">// A::value</span></span>
-<span id="lst-globalnamespacecpp-7"><a href="#lst-globalnamespacecpp-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="lst-globalnamespacecpp-8"><a href="#lst-globalnamespacecpp-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">void</span> print<span class="op">()</span> <span class="op">{</span></span>
-<span id="lst-globalnamespacecpp-9"><a href="#lst-globalnamespacecpp-9" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> value <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span>      <span class="co">// Output 20</span></span>
-<span id="lst-globalnamespacecpp-10"><a href="#lst-globalnamespacecpp-10" aria-hidden="true" tabindex="-1"></a>        <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="op">::</span>value <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span>    <span class="co">// Output 10</span></span>
-<span id="lst-globalnamespacecpp-11"><a href="#lst-globalnamespacecpp-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="lst-globalnamespacecpp-12"><a href="#lst-globalnamespacecpp-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="lst-globalnamespacecpp-13"><a href="#lst-globalnamespacecpp-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="lst-globalnamespacecpp-14"><a href="#lst-globalnamespacecpp-14" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
-<span id="lst-globalnamespacecpp-15"><a href="#lst-globalnamespacecpp-15" aria-hidden="true" tabindex="-1"></a>    A<span class="op">::</span>print<span class="op">();</span></span>
-<span id="lst-globalnamespacecpp-16"><a href="#lst-globalnamespacecpp-16" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="lst-globalnamespacecpp-17"><a href="#lst-globalnamespacecpp-17" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="lst-namespaceglobalcpp" data-filename="namespace-global.cpp"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="lst-namespaceglobalcpp-1"><a href="#lst-namespaceglobalcpp-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;iostream&gt;</span></span>
+<span id="lst-namespaceglobalcpp-2"><a href="#lst-namespaceglobalcpp-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-namespaceglobalcpp-3"><a href="#lst-namespaceglobalcpp-3" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> A <span class="op">{</span> <span class="dt">int</span> x <span class="op">=</span> <span class="dv">1</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="lst-namespaceglobalcpp-4"><a href="#lst-namespaceglobalcpp-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-namespaceglobalcpp-5"><a href="#lst-namespaceglobalcpp-5" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> B <span class="op">{</span></span>
+<span id="lst-namespaceglobalcpp-6"><a href="#lst-namespaceglobalcpp-6" aria-hidden="true" tabindex="-1"></a><span class="kw">namespace</span> A <span class="op">{</span> <span class="dt">int</span> x <span class="op">=</span> <span class="dv">2</span><span class="op">;</span> <span class="op">}</span></span>
+<span id="lst-namespaceglobalcpp-7"><a href="#lst-namespaceglobalcpp-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-namespaceglobalcpp-8"><a href="#lst-namespaceglobalcpp-8" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> f<span class="op">()</span> <span class="op">{</span></span>
+<span id="lst-namespaceglobalcpp-9"><a href="#lst-namespaceglobalcpp-9" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> A<span class="op">::</span>x <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span>     <span class="co">// 表示当前命名空间下的 A</span></span>
+<span id="lst-namespaceglobalcpp-10"><a href="#lst-namespaceglobalcpp-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-namespaceglobalcpp-11"><a href="#lst-namespaceglobalcpp-11" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> g<span class="op">()</span> <span class="op">{</span></span>
+<span id="lst-namespaceglobalcpp-12"><a href="#lst-namespaceglobalcpp-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">std::</span>cout <span class="op">&lt;&lt;</span> <span class="op">::</span>A<span class="op">::</span>x <span class="op">&lt;&lt;</span> <span class="bu">std::</span>endl<span class="op">;</span>   <span class="co">// 表示全局命名空间下的 A</span></span>
+<span id="lst-namespaceglobalcpp-13"><a href="#lst-namespaceglobalcpp-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-namespaceglobalcpp-14"><a href="#lst-namespaceglobalcpp-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-namespaceglobalcpp-15"><a href="#lst-namespaceglobalcpp-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-namespaceglobalcpp-16"><a href="#lst-namespaceglobalcpp-16" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">()</span> <span class="op">{</span></span>
+<span id="lst-namespaceglobalcpp-17"><a href="#lst-namespaceglobalcpp-17" aria-hidden="true" tabindex="-1"></a>    B<span class="op">::</span>f<span class="op">();</span>     <span class="co">// 输出: 2</span></span>
+<span id="lst-namespaceglobalcpp-18"><a href="#lst-namespaceglobalcpp-18" aria-hidden="true" tabindex="-1"></a>    B<span class="op">::</span>g<span class="op">();</span>     <span class="co">// 输出: 1</span></span>
+<span id="lst-namespaceglobalcpp-19"><a href="#lst-namespaceglobalcpp-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="lst-namespaceglobalcpp-20"><a href="#lst-namespaceglobalcpp-20" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li><code>::</code> 可用于<strong>调用</strong> namespace 里的函数 或 class 里的 <code>static</code> 变量或方法. 在外部<strong>定义</strong>类的方法实现时必须用 <code>::</code> (调用时用 <code>.</code>).</li>
