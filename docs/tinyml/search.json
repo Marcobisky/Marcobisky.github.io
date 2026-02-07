@@ -631,7 +631,7 @@
     "href": "cc-os/cc-os.html",
     "title": "OS 操作系统原理",
     "section": "",
-    "text": "操作系统:\n\n狭义: 内核\n广义: 发行版\n\n快捷参考表:\n\n\n\nUnit\n# Bytes\nHex\n\n\n\n\n1 KB\n\\(2^{10}\\) B\n0x00000400\n\n\n4 KB\n\\(2^{12}\\) B\n0x00001000\n\n\n1 MB\n\\(2^{20}\\) B\n0x00100000\n\n\n128 MB\n\\(2^{27}\\) B\n0x08000000\n\n\n1 GB\n\\(2^{30}\\) B\n0x40000000\n\n\n\n\n\nA process is an abstract data structure that represents all of the necessary information to run a program.\n\n\n\n\n一个 Process 初始化后在内存中的结构 和给 OS 的 Process Control Block\n\n\n\n\n\nProcess Scheduling 进程调度",
+    "text": "基本概念",
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>9</span>  <span class='chapter-title'>OS 操作系统原理</span>"
@@ -1284,6 +1284,39 @@
     "crumbs": [
       "Crash Courses",
       "<span class='chapter-number'>7</span>  <span class='chapter-title'>C 和 RISCV 汇编</span>"
+    ]
+  },
+  {
+    "objectID": "resources/resources.html#algorithms",
+    "href": "resources/resources.html#algorithms",
+    "title": "Resources 学习资料汇总",
+    "section": "Algorithms",
+    "text": "Algorithms\n\nNeedCode: ★☆☆☆☆ 或许比 LeetCode 更好用? (笔者没用过).",
+    "crumbs": [
+      "Prologue",
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Resources 学习资料汇总</span>"
+    ]
+  },
+  {
+    "objectID": "cc-os/cc-os.html#基本概念",
+    "href": "cc-os/cc-os.html#基本概念",
+    "title": "OS 操作系统原理",
+    "section": "",
+    "text": "Process 进程\n\nProgram vs Process:\n\nProgram: 理解为一段汇编程序加上一些用到的内存中的数据.\n\n汇编程序和数据其实都在内存中, 其实从本质上来看无法将他们区分. 数据和指令是等价的.\n也可以理解为一个 process 的 代码段 (.text) 和 数据段 (.data).\n\nProcess: A program in execution.\n\n一个 Process 除了包含 Program 的内容, 还有在运行的时候动态增长的堆 (heap) 和 栈 (stack).\n一个 Program (比如一个 C 编译出来的可执行文件) 可以被同时运行两次, 这时候就会有两个 Process, 只有他们的代码段部分是一样的, 但是数据段、堆和栈一般都不一样.\nAddress Space: 每个 Process 都有自己独立的地址空间 (见 Figure fig-program-process 的红色区域).\n\n\n\n\n\n\n\n\nFigure 1: 相同 program (text editor) 被打开两次形成两个独立的 process [1].\n\n\n\nProcess Control Block (PCB): OS 用来管理 Process 的数据结构, 包含 Figure fig-process-layout 所示的信息.\n\n\n\n\n\n\nFigure 2: 一个 Process 初始化后在内存中的结构 和给 OS 的 PCB.\n\n\n\nContext Switch 上下文切换\n安全问题:\n\n安全问题的实现需要两个前提:\n\n必须软硬件协同完成 (不能单靠软件)\nOS 必须是可信任的.\n\n硬件上有标志位来区分当前 CPU 运行在哪种 Mode 上 (Kernel / User).\nCPU 必须支持 Interrupt, 触发后 PC 自动跳到指定地址 (Interrupt routine), 并自动切换到 Kernel Mode.\n\n这说明该地址的 program 有完全的权限来操作硬件.\n所以该地址将不能允许被加载用户程序, 只能存放 OS 内核代码.\n\n\nKernel (Privileged) Mode / User Mode\n\n仅 Kernel Mode 能做的事情\n\n执行 Privileged Instructions.\n访问网卡、硬盘、显卡、键盘、操作 MMU (如果能操作 MMU 就相当于可以对整个 Physical Memory 进行操作了)\n\n\nSystem calls 系统调用\n\n动机: User 程序显然需要以某种方式执行特权指令 (比如读写硬盘), OS 提供了一组 API (如 fork(), open(), etc.)\n\nProcess Schedule 进程调度\n\n\n\n\n\n\nFigure 3: Multiple level queues 的 Process Scheduling 进程调度",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>OS 操作系统原理</span>"
+    ]
+  },
+  {
+    "objectID": "cc-os/cc-os.html#references",
+    "href": "cc-os/cc-os.html#references",
+    "title": "OS 操作系统原理",
+    "section": "References",
+    "text": "References\n\n\n\n\n[1] J. Villalta, “Operating systems theory.” YouTube, 2024. Available: https://www.youtube.com/channel/UCGKEMK3s-ZPbjVOIuAV8clQ. [Accessed: Feb. 06, 2026]",
+    "crumbs": [
+      "Crash Courses",
+      "<span class='chapter-number'>9</span>  <span class='chapter-title'>OS 操作系统原理</span>"
     ]
   }
 ]

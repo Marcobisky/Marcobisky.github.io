@@ -20,7 +20,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -440,6 +460,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">GPU 原理速成</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-algo/cc-algo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Algorithm Notes 算法笔记</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -454,13 +480,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-arch/nn-arch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
   </div>
 </li>
       </ul>
@@ -477,13 +503,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../coral-npu/coral-npu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../ml-infra/ml-infra.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
   </div>
 </li>
       </ul>
@@ -500,7 +526,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
   </div>
 </li>
       </ul>
@@ -510,8 +536,18 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#基本概念" id="toc-基本概念" class="nav-link active" data-scroll-target="#基本概念">基本概念</a>
+  <ul class="collapse">
+  <li><a href="#process-进程" id="toc-process-进程" class="nav-link" data-scroll-target="#process-进程">Process 进程</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -580,23 +616,97 @@ window.Quarto = {
 </tbody>
 </table></li>
 </ul>
-<blockquote class="blockquote">
-<p>A <strong>process</strong> is an abstract data structure that represents all of the necessary information to run a program.</p>
-</blockquote>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="process-layout.png" class="img-fluid figure-img"></p>
-<figcaption>一个 Process 初始化后在内存中的结构 和给 OS 的 Process Control Block</figcaption>
-</figure>
+<section id="基本概念" class="level2">
+<h2 class="anchored" data-anchor-id="基本概念">基本概念</h2>
+<section id="process-进程" class="level3">
+<h3 class="anchored" data-anchor-id="process-进程">Process 进程</h3>
+<ul>
+<li><p><strong>Program vs Process</strong>:</p>
+<ul>
+<li><strong>Program</strong>: 理解为一段汇编程序加上一些用到的内存中的数据.
+<ul>
+<li>汇编程序和数据其实都在内存中, 其实从本质上来看无法将他们区分. 数据和指令是等价的.</li>
+<li>也可以理解为一个 process 的 <strong>代码段 (<code>.text</code>)</strong> 和 <strong>数据段 (<code>.data</code>)</strong>.</li>
+</ul></li>
+<li><strong>Process</strong>: A program in execution.
+<ul>
+<li>一个 Process 除了包含 Program 的内容, 还有在运行的时候动态增长的<strong>堆 (<code>heap</code>)</strong> 和 <strong>栈 (<code>stack</code>)</strong>.</li>
+<li>一个 Program (比如一个 C 编译出来的可执行文件) 可以被同时运行两次, 这时候就会有两个 Process, 只有他们的代码段部分是一样的, 但是数据段、堆和栈一般都不一样.</li>
+<li><strong>Address Space</strong>: 每个 Process 都有自己独立的地址空间 (见 <a href="#fig-program-process" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-program-process</span></a> 的红色区域).</li>
+</ul></li>
+</ul>
+<div id="fig-program-process" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-program-process-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="program-process.png" class="img-fluid figure-img">
 </div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="Multiple-level-queues-scheduling-algorithm-GIF.gif" class="img-fluid figure-img"></p>
-<figcaption>Process Scheduling 进程调度</figcaption>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-program-process-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 相同 program (text editor) 被打开两次形成两个独立的 process <span class="citation" data-cites="villalta_2024_operating"><a href="#ref-villalta_2024_operating" role="doc-biblioref">[1]</a></span>.
+</figcaption>
 </figure>
+</div></li>
+<li><p><strong>Process Control Block (PCB)</strong>: OS 用来管理 Process 的数据结构, 包含 <a href="#fig-process-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-process-layout</span></a> 所示的信息.</p>
+<div id="fig-process-layout" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-process-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="process-layout.png" class="img-fluid figure-img">
 </div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-process-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 一个 Process 初始化后在内存中的结构 和给 OS 的 PCB.
+</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Context Switch 上下文切换</strong></p></li>
+<li><p>安全问题:</p>
+<ul>
+<li>安全问题的实现需要两个前提:
+<ul>
+<li>必须软硬件协同完成 (不能单靠软件)</li>
+<li>OS 必须是可信任的.</li>
+</ul></li>
+<li>硬件上有标志位来区分当前 CPU 运行在哪种 Mode 上 (Kernel / User).</li>
+<li>CPU 必须支持 Interrupt, 触发后 PC 自动跳到指定地址 (Interrupt routine), 并自动切换到 Kernel Mode.
+<ul>
+<li>这说明该地址的 program 有完全的权限来操作硬件.</li>
+<li>所以该地址将不能允许被加载用户程序, 只能存放 OS 内核代码.</li>
+</ul></li>
+</ul></li>
+<li><p>Kernel (Privileged) Mode / User Mode</p>
+<ul>
+<li>仅 <strong>Kernel Mode</strong> 能做的事情
+<ul>
+<li>执行 Privileged Instructions.</li>
+<li>访问网卡、硬盘、显卡、键盘、操作 MMU (如果能操作 MMU 就相当于可以对整个 Physical Memory 进行操作了)</li>
+</ul></li>
+</ul></li>
+<li><p><strong>System calls 系统调用</strong></p>
+<ul>
+<li>动机: User 程序显然需要以某种方式执行特权指令 (比如读写硬盘), OS 提供了一组 API (如 <code>fork()</code>, <code>open()</code>, etc.)</li>
+</ul></li>
+<li><p><strong>Process Schedule 进程调度</strong></p>
+<div id="fig-proc-sche" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-proc-sche-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="proc-sche.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-proc-sche-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Multiple level queues 的 Process Scheduling 进程调度
+</figcaption>
+</figure>
+</div></li>
+</ul>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
 
 
+<div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-villalta_2024_operating" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline">J. Villalta, <span>“Operating systems theory.”</span> YouTube, 2024. Available: <a href="https://www.youtube.com/channel/UCGKEMK3s-ZPbjVOIuAV8clQ">https://www.youtube.com/channel/UCGKEMK3s-ZPbjVOIuAV8clQ</a>. [Accessed: Feb. 06, 2026]</div>
+</div>
+</div>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
