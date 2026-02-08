@@ -417,6 +417,91 @@ class __A:              # module class
 {{< include src/python/decorator.py >}}
 ```
 
+#### Python Iterator 迭代器
+
+- 动机: 在 C 语言中没有迭代器这种东西, 如果要遍历数组和链表, 需要用两种完全不同的方法遍历, 非常不方便. 我们希望在 Python 中都能统一用 `for i in entity` 这种方法来遍历, 引入了迭代器.
+
+- Python 中引入了下面两个类 (注意区分!):
+    - **Iterable 可迭代对象**: 指这个对象有 `__iter__()` 方法.
+        - 可迭代对象能被 `for` 遍历:
+
+            ```python
+            a = [1, 2, 3]   # List
+            b = (1, 2, 3)   # Tuple
+            c = {1, 2, 3}   # Set
+            d = {'a': 1, 'b': 2, 'c': 3}   # Dictionary
+            e = "hello"     # String
+            f = range(5)    # Range
+
+            for item in a:
+                print(item)     # 1 2 3
+                
+            for item in d:
+                print(item, d[item])    # a 1 b 2 c 3
+                
+            for item in f:
+                print(item)     # 0 1 2 3 4
+            ```
+
+    - **Iterator 迭代器**: 指这个可迭代对象不仅有 `__iter__()` 方法, 还有 `__next__()` 方法 (“迭代器协议”).
+        - 由定义知: 迭代器一定是可迭代的.
+        - 上面这些对象都不是迭代器, 但是可通过 `iter()` 函数转换为迭代器:
+
+            ```python
+            a = [1, 2, 3]
+            # print(a.__next__())   # a is not an iterator!
+            a = iter(a)             # convert a to iterator
+            print(a.__next__())     # 1
+            print(a.__next__())     # 2
+            print(a.__next__())     # 3
+            # print(a.__next__())   # StopIteration Error
+            ```
+
+        - 天生就是迭代器的对象:
+
+            ```python
+            gen = (2*x for x in [1,2,3])        # generator
+            m = map(lambda x: 2*x, [1,2,3])     # map object
+
+            print(gen.__next__())   # 2
+            print(m.__next__())     # 2
+            ```
+        - 可以给自己的类实现 `__iter__()` 和 `__next__()` 方法使其成为一个迭代器. (也可用 `yield`)
+
+- `for` 循环的本质 (左边等价于右边)
+
+::: {layout-ncol=2}
+```{.python #lst-for}
+a = [1, 2, 3]
+
+for i in a:
+    print(i)
+```
+
+```{.python #lst-while}
+a = [1, 2, 3]
+
+a_it = iter(a)
+while True:
+    try:
+        x = a_it.__next__()
+        print(x)
+    except StopIteration:
+        break
+```
+:::
+
+### Python Lambda 表达式
+
+- Lambda 表达式一般用于小的、没必要写成函数的计算. 一般与 `for` 可以相互代替, 注意下面三者的区别:
+
+    ```python
+    gen = (2*x for x in [1,2,3])        # generator, 是 iterator
+    my_list = [2*x for x in [1,2,3]]    # list, 仅仅是 iterable
+    m = map(lambda x: 2*x, [1,2,3])     # map object, 是 iterator
+    ```
+
+
 ### 链式调用
 
 返回 `*this` 的引用可以实现链式调用:
