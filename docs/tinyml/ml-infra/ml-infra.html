@@ -161,7 +161,7 @@ window.Quarto = {
 
 </head>
 
-<body class="nav-sidebar floating quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -341,7 +341,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../coral-npu/coral-npu.html">ML Accelerators</a></li><li class="breadcrumb-item"><a href="../ml-infra/ml-infra.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../coral-npu/coral-npu.html">ML Accelerators</a></li><li class="breadcrumb-item"><a href="../ml-infra/ml-infra.html"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -495,6 +495,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">GPU 原理速成</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-algo/cc-algo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Algorithm Notes 算法笔记</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -509,13 +515,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-arch/nn-arch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
   </div>
 </li>
       </ul>
@@ -532,13 +538,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../coral-npu/coral-npu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../ml-infra/ml-infra.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
   </div>
 </li>
       </ul>
@@ -555,7 +561,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
   </div>
 </li>
       </ul>
@@ -570,7 +576,13 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#tensor-broadcasting" id="toc-tensor-broadcasting" class="nav-link active" data-scroll-target="#tensor-broadcasting">Tensor Broadcasting</a></li>
+  <li><a href="#tensor-张量" id="toc-tensor-张量" class="nav-link active" data-scroll-target="#tensor-张量">Tensor 张量</a>
+  <ul class="collapse">
+  <li><a href="#tensor-memory-layout" id="toc-tensor-memory-layout" class="nav-link" data-scroll-target="#tensor-memory-layout">Tensor Memory Layout</a></li>
+  <li><a href="#mental-picture-of-tensors" id="toc-mental-picture-of-tensors" class="nav-link" data-scroll-target="#mental-picture-of-tensors">Mental Picture of Tensors</a></li>
+  <li><a href="#tensor-形状改变-einops-库" id="toc-tensor-形状改变-einops-库" class="nav-link" data-scroll-target="#tensor-形状改变-einops-库">Tensor 形状改变 (<code>einops</code> 库)</a></li>
+  <li><a href="#tensor-broadcasting" id="toc-tensor-broadcasting" class="nav-link" data-scroll-target="#tensor-broadcasting">Tensor Broadcasting</a></li>
+  </ul></li>
   <li><a href="#autograd-机制" id="toc-autograd-机制" class="nav-link" data-scroll-target="#autograd-机制">Autograd 机制</a>
   <ul class="collapse">
   <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a></li>
@@ -581,10 +593,10 @@ window.Quarto = {
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content page-columns page-full" id="quarto-document-content">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../coral-npu/coral-npu.html">ML Accelerators</a></li><li class="breadcrumb-item"><a href="../ml-infra/ml-infra.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../coral-npu/coral-npu.html">ML Accelerators</a></li><li class="breadcrumb-item"><a href="../ml-infra/ml-infra.html"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">ML Infra 基础</h1>
 </div>
@@ -603,9 +615,126 @@ window.Quarto = {
 </header>
 
 
-<section id="tensor-broadcasting" class="level2">
-<h2 class="anchored" data-anchor-id="tensor-broadcasting">Tensor Broadcasting</h2>
+<section id="tensor-张量" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="tensor-张量">Tensor 张量</h2>
+<ul>
+<li><p><strong>动机</strong>: 很多<strong>地位都相同</strong>的数据可以用一维数组存储. 如果有很多不同「地位」的数据, 我们给没种地位分配一个维度来存储, 这就是张量.</p></li>
+<li><p>名字来源: 由于数学里 <span class="math inline">\((0,k)\)</span>-tensor <span class="math inline">\(T: V^k \to \mathbb{F}\)</span> 在选取一组 basis <span class="math inline">\(\{\mathbf{e}_i\}_{i=1}^k\)</span> 后的 representation 刚好是一个 <span class="math inline">\(k\)</span> 维数组 <span class="math inline">\(T_{i_1i_2 \cdots i_k}\)</span> (正如 linear functional 可以被一个 covector 描述, bilinear functional 可以被一个 matrix 描述).</p></li>
+<li><p>机器学习里 <strong>training data</strong>, <strong>kernel</strong>, <strong>feature map</strong> 等都用 tensor 来描述, Python 自带的 <code>list</code> 和 <code>np.array()</code>, 统统都要转化为 <code>torch.tensor</code> 来进行计算 (因为 <code>Tensor</code> 类提供了很多现成的方法可以调用).</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># python list to tensor</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>data_list <span class="op">=</span> [[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>list2tensor <span class="op">=</span> torch.tensor(data_list)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># numpy array to tensor</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>data_array <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]])</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>array2tensor <span class="op">=</span> torch.from_numpy(data_array)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+<section id="tensor-memory-layout" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="tensor-memory-layout">Tensor Memory Layout</h3>
+<ul>
+<li><p><strong>4D tensor</strong>: 特别是在图像处理中, 4D 张量非常常见, 现在单独详细研究一下它:</p>
+<ul>
+<li><p><strong>H, W, C(D), N(B) 维度语义</strong>: Height, Width, Channel(Depth), Batch size (见 <a href="#fig-tensor-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-tensor-layout</span></a> 左图).</p></li>
+<li><p><strong>描述顺序和内存中的布局</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>: (注意无论多少维度的张量, 在内存中显然都是以 (也只能以) 一维数组的形式连续存储).</p>
+<ul>
+<li><u>HWC</u><strong>N</strong>: Batch 在最后.</li>
+<li><strong>N</strong><u>HWC</u>: Batch 在最前, <code>numpy</code> 采用.</li>
+<li><strong>N</strong><u>CHW</u>: Batch 在最前, <code>pytorch</code> 采用 (个人感觉这是最符合直觉的顺序!)</li>
+</ul>
+<div id="fig-tensor-layout" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor-layout.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 三种 Data Layout Formats <span class="citation" data-cites="a2023_understanding"><a href="#ref-a2023_understanding" role="doc-biblioref">[1]</a></span>.
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;<em>记忆方法</em>: 反过来看, 如 NHWC, 先沿着 C 方向将数据拉直, 结束后跳到下一个 W, 然后换 H, 最后换 N.</p></div></div></section>
+<section id="mental-picture-of-tensors" class="level3">
+<h3 class="anchored" data-anchor-id="mental-picture-of-tensors">Mental Picture of Tensors</h3>
+<ul>
+<li><p><strong>同一个中括号内用逗号分割</strong>的元素一般被认为<strong>地位相同</strong>. 比如下面 <code>1</code>, <code>2</code>, <code>3</code> 地位相同, <code>[1,2,3]</code> 和 <code>[4,5,6]</code> 地位相同.</p></li>
+<li><p><strong>Tensor size</strong>: 笔者习惯从最内层中括号开始读起, 每层中括号相同地位的元素个数即为该维度的大小, <strong>从右向左</strong> 列出来即为 tensor shape.</p>
+<ul>
+<li><p>比如:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>torch.Size([<span class="dv">2</span>, <span class="dv">4</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>应解读为两个 <code>[....]</code> 而不是 4 个 <code>[..]</code>.</p></li>
+<li><p>这里留两个练习, 给出下面两个 tensor 的 shape:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.tensor([</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">1</span>], [<span class="dv">2</span>],  [<span class="dv">3</span>],  [<span class="dv">4</span>]  ],</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">5</span>], [<span class="dv">6</span>],  [<span class="dv">7</span>],  [<span class="dv">8</span>]  ],</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">9</span>], [<span class="dv">10</span>], [<span class="dv">11</span>], [<span class="dv">12</span>] ]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> torch.tensor([</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    [ [ [ [<span class="dv">1</span>] ] ], [ [ [<span class="dv">2</span>] ] ] ]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(t.shape)  <span class="co"># 输出: torch.Size([3, 4, 1])</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(u.shape)  <span class="co"># 输出: torch.Size([1, 2, 1, 1, 1])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>每个维度看到的「元素」都是「<strong>片面</strong>」且「<strong>抽象</strong>」的.</p>
+<div id="fig-tensor-abstract" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-abstract-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor-abstract.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-abstract-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 每个维度即不能看到其元素内部 (「抽象」), 也无法看到外部 (「片面」).
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+</ul>
+</section>
+<section id="tensor-形状改变-einops-库" class="level3">
+<h3 class="anchored" data-anchor-id="tensor-形状改变-einops-库">Tensor 形状改变 (<code>einops</code> 库)</h3>
+<blockquote class="blockquote">
+<p><code>einops</code> 提供了方便的 API 来改变 tensor 的形状.</p>
+</blockquote>
+<ul>
+<li><p><strong>所有 Tensor 形状变化构成群, 可由下面三个生成元 (Grouping, Transposition, Concatenation) 生成</strong>:</p>
+<div id="fig-tensor-generator" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-generator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor-generator.png" class="img-fluid figure-img" style="width:50.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-generator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Tensor 变形的三个生成元.
+</figcaption>
+</figure>
+</div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> einops <span class="im">import</span> rearrange</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.tensor([<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>])</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> rearrange(t, <span class="st">'(b a) -&gt; b a'</span>, a<span class="op">=</span><span class="dv">2</span>)   <span class="co"># Grouping, t.shape = [4,2], t = [[1,2],[3,4],[5,6],[7,8]]</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> rearrange(t, <span class="st">'b a -&gt; a b'</span>)          <span class="co"># Transposition, t.shape = [2,4], t = [[1,3,5,7],[2,4,6,8]]</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> rearrage(t, <span class="st">'b a -&gt; (b a)'</span>, a<span class="op">=</span><span class="dv">4</span>)    <span class="co"># Concatenation, t.shape = [8], t = [1,3,5,7,2,4,6,8]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>小练习 (以 <a href="#fig-tensor-abstract" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-tensor-abstract</span></a> 为例):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> einops <span class="im">import</span> rearrange</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.tensor([</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">1</span>], [<span class="dv">2</span>],  [<span class="dv">3</span>],  [<span class="dv">4</span>]  ],</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">5</span>], [<span class="dv">6</span>],  [<span class="dv">7</span>],  [<span class="dv">8</span>]  ],</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">9</span>], [<span class="dv">10</span>], [<span class="dv">11</span>], [<span class="dv">12</span>] ]</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> rearrange(t, <span class="st">'a (b1 b2) c -&gt; (a c) (b2 b1)'</span>, b1<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(t.shape)  <span class="co"># torch.Size([3, 4])</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(t) <span class="co"># tensor([[ 1,  3,  2,  4],</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                 <span class="co"># [ 5,  7,  6,  8],</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                 <span class="co"># [ 9, 11, 10, 12]])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>这里的变形可以拆成:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">'a (b1 b2) c -&gt; a (b2 b1) c -&gt; a c (b2 b1) -&gt; (a c) (b2 b1)'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+</section>
+<section id="tensor-broadcasting" class="level3">
+<h3 class="anchored" data-anchor-id="tensor-broadcasting">Tensor Broadcasting</h3>
 <p>TODO</p>
+</section>
 </section>
 <section id="autograd-机制" class="level2">
 <h2 class="anchored" data-anchor-id="autograd-机制">Autograd 机制</h2>
@@ -624,7 +753,7 @@ window.Quarto = {
 <img src="diff-computer.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-diff-computer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: 计算机中微分的 4 种方式 <span class="citation" data-cites="baydin2018automaticdifferentiationmachinelearning"><a href="#ref-baydin2018automaticdifferentiationmachinelearning" role="doc-biblioref">[1]</a></span>.
+Figure&nbsp;4: 计算机中微分的 4 种方式 <span class="citation" data-cites="baydin2018automaticdifferentiationmachinelearning"><a href="#ref-baydin2018automaticdifferentiationmachinelearning" role="doc-biblioref">[2]</a></span>.
 </figcaption>
 </figure>
 </div></li>
@@ -647,7 +776,7 @@ Figure&nbsp;1: 计算机中微分的 4 种方式 <span class="citation" data-cit
 <img src="chain-rule.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chain-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Chain Rule 的局部视角, 求 <span class="math inline">\(\partial_v y\)</span> 只需要知道蓝色的信息, 对于 <span class="math inline">\(a,b, \ldots, c\)</span> 与 <span class="math inline">\(y\)</span> 的关系不需要知道!
+Figure&nbsp;5: Chain Rule 的局部视角, 求 <span class="math inline">\(\partial_v y\)</span> 只需要知道蓝色的信息, 对于 <span class="math inline">\(a,b, \ldots, c\)</span> 与 <span class="math inline">\(y\)</span> 的关系不需要知道!
 </figcaption>
 </figure>
 </div></li>
@@ -667,7 +796,7 @@ EXAMPLE: A scalar computational graph
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
-<p>考虑式子 <span class="citation" data-cites="deep_thoughts_2021_derive"><a href="#ref-deep_thoughts_2021_derive" role="doc-biblioref">[2]</a></span>: <span id="eq-example"><span class="math display">\[
+<p>考虑式子 <span class="citation" data-cites="deep_thoughts_2021_derive"><a href="#ref-deep_thoughts_2021_derive" role="doc-biblioref">[3]</a></span>: <span id="eq-example"><span class="math display">\[
 y := \ln x_1 + x_1 x_2 - e^{x_2}
 \tag{1}\]</span></span></p>
 <p>可以由以下图表示:</p>
@@ -677,7 +806,7 @@ y := \ln x_1 + x_1 x_2 - e^{x_2}
 <img src="example-plain.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-example-plain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Computational graph demo.
+Figure&nbsp;6: Computational graph demo.
 </figcaption>
 </figure>
 </div>
@@ -690,7 +819,7 @@ Figure&nbsp;3: Computational graph demo.
 <img src="ex-forward.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ex-forward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Forward propagation.
+Figure&nbsp;7: Forward propagation.
 </figcaption>
 </figure>
 </div></li>
@@ -701,7 +830,7 @@ Figure&nbsp;4: Forward propagation.
 <img src="ex-backward.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ex-backward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Backward propagation.
+Figure&nbsp;8: Backward propagation.
 </figcaption>
 </figure>
 </div></li>
@@ -720,7 +849,7 @@ Figure&nbsp;5: Backward propagation.
 </section>
 <section id="minimal-implementation" class="level3">
 <h3 class="anchored" data-anchor-id="minimal-implementation">Minimal Implementation</h3>
-<p>我们将 <a href="#fig-ex-forward" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-ex-forward</span></a> 的棕色方块建模为 <code>Tensor</code> 类, 青色圆形建模为算子比如 <code>Add</code>. 这是 autograd 重点关注的两个结构. 现在我们实现 <a href="#eq-example" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-example</span></a> 的 autograd 库 (只实现了必要的算子, adapted from <span class="citation" data-cites="eduardoleito_2024_documented"><a href="#ref-eduardoleito_2024_documented" role="doc-biblioref">[3]</a></span>). <strong>主要关注 <code>Tensor</code> 类的 <code>backward()</code> 方法和各个算子的 <code>backward()</code> 方法的相互调用!</strong></p>
+<p>我们将 <a href="#fig-ex-forward" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-ex-forward</span></a> 的棕色方块建模为 <code>Tensor</code> 类, 青色圆形建模为算子比如 <code>Add</code>. 这是 autograd 重点关注的两个结构. 现在我们实现 <a href="#eq-example" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-example</span></a> 的 autograd 库 (只实现了必要的算子, adapted from <span class="citation" data-cites="eduardoleito_2024_documented"><a href="#ref-eduardoleito_2024_documented" role="doc-biblioref">[4]</a></span>). <strong>主要关注 <code>Tensor</code> 类的 <code>backward()</code> 方法和各个算子的 <code>backward()</code> 方法的相互调用!</strong></p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>mytorch/tensor.py</strong></pre>
@@ -921,16 +1050,16 @@ Figure&nbsp;5: Backward propagation.
 <span id="lst-tensor-backwardpy-19"><a href="#lst-tensor-backwardpy-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"x2.grad ="</span>, x2.grad)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>运行结果:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">loss</span> = <span class="pp">[-</span><span class="ss">137.72001192</span><span class="pp">]</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">x1.grad</span> = <span class="pp">[</span><span class="ss">5.5</span><span class="pp">]</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">x2.grad</span> = <span class="pp">[-</span><span class="ss">146.41316</span><span class="pp">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">loss</span> = <span class="pp">[-</span><span class="ss">137.72001192</span><span class="pp">]</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">x1.grad</span> = <span class="pp">[</span><span class="ss">5.5</span><span class="pp">]</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="ex">x2.grad</span> = <span class="pp">[-</span><span class="ss">146.41316</span><span class="pp">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div id="fig-tensor" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-tensor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="tensor.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: 每个 tensor 包含 data, grad (y 对它的导数), 创建它的 operator 和依赖它的 tensors (红色的 tensor 含有红色区域的信息, etc.)
+Figure&nbsp;9: 每个 tensor 包含 data, grad (y 对它的导数), 创建它的 operator 和依赖它的 tensors (红色的 tensor 含有红色区域的信息, etc.)
 </figcaption>
 </figure>
 </div>
@@ -940,7 +1069,7 @@ Figure&nbsp;6: 每个 tensor 包含 data, grad (y 对它的导数), 创建它的
 <img src="operator.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-operator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: 每个 operator 包含它所有的 operands (红色的算子含有红色区域的信息, etc.)
+Figure&nbsp;10: 每个 operator 包含它所有的 operands (红色的算子含有红色区域的信息, etc.)
 </figcaption>
 </figure>
 </div>
@@ -951,17 +1080,21 @@ Figure&nbsp;7: 每个 operator 包含它所有的 operands (红色的算子含�
 
 
 <div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-a2023_understanding" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline"><span>“Understanding memory formats.”</span> Intel, 2023. Available: <a href="https://www.intel.com/content/www/us/en/docs/onednn/developer-guide-reference/2023-1/understanding-memory-formats.html">https://www.intel.com/content/www/us/en/docs/onednn/developer-guide-reference/2023-1/understanding-memory-formats.html</a>. [Accessed: Jan. 03, 2026]</div>
+</div>
 <div id="ref-baydin2018automaticdifferentiationmachinelearning" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[1] </div><div class="csl-right-inline">A. G. Baydin, B. A. Pearlmutter, A. A. Radul, and J. M. Siskind, <span>“Automatic differentiation in machine learning: A survey.”</span> 2018. Available: <a href="https://arxiv.org/abs/1502.05767">https://arxiv.org/abs/1502.05767</a></div>
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">A. G. Baydin, B. A. Pearlmutter, A. A. Radul, and J. M. Siskind, <span>“Automatic differentiation in machine learning: A survey.”</span> 2018. Available: <a href="https://arxiv.org/abs/1502.05767">https://arxiv.org/abs/1502.05767</a></div>
 </div>
 <div id="ref-deep_thoughts_2021_derive" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[2] </div><div class="csl-right-inline">deep_thoughts, <span>“Derive autograd forward and reverse propagation from scratch.”</span> Bilibili.com, Nov. 2021. Available: <a href="https://www.bilibili.com/video/BV1PF411h7Ew?spm_id_from=333.788.videopod.sections&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">https://www.bilibili.com/video/BV1PF411h7Ew?spm_id_from=333.788.videopod.sections&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3</a>. [Accessed: Feb. 02, 2026]</div>
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">deep_thoughts, <span>“Derive autograd forward and reverse propagation from scratch.”</span> Bilibili.com, Nov. 2021. Available: <a href="https://www.bilibili.com/video/BV1PF411h7Ew?spm_id_from=333.788.videopod.sections&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">https://www.bilibili.com/video/BV1PF411h7Ew?spm_id_from=333.788.videopod.sections&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3</a>. [Accessed: Feb. 02, 2026]</div>
 </div>
 <div id="ref-eduardoleito_2024_documented" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[3] </div><div class="csl-right-inline">E. Leitão, <span>“Documented and unit tested educational deep learning framework with autograd from scratch.”</span> GitHub, Mar. 2024. Available: <a href="https://github.com/eduardoleao052/Autograd-from-scratch">https://github.com/eduardoleao052/Autograd-from-scratch</a>. [Accessed: Feb. 02, 2026]</div>
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">E. Leitão, <span>“Documented and unit tested educational deep learning framework with autograd from scratch.”</span> GitHub, Mar. 2024. Available: <a href="https://github.com/eduardoleao052/Autograd-from-scratch">https://github.com/eduardoleao052/Autograd-from-scratch</a>. [Accessed: Feb. 02, 2026]</div>
 </div>
 </div>
 </section>
+
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -1379,12 +1512,12 @@ Figure&nbsp;7: 每个 operator 包含它所有的 operands (红色的算子含�
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../coral-npu/coral-npu.html" class="pagination-link" aria-label="Google Coral NPU">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../cfu-proj-struct/cfu-proj-struct.html" class="pagination-link" aria-label="CFU-Playground 工程结构">
-        <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

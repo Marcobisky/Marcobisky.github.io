@@ -2,7 +2,115 @@
 title: "ML Infra 基础"
 ---
 
-## Tensor Broadcasting
+## Tensor 张量
+
+- **动机**: 很多**地位都相同**的数据可以用一维数组存储. 如果有很多不同「地位」的数据, 我们给没种地位分配一个维度来存储, 这就是张量.
+
+- 名字来源: 由于数学里 $(0,k)$-tensor $T: V^k \to \mathbb{F}$ 在选取一组 basis $\{\mathbf{e}_i\}_{i=1}^k$ 后的 representation 刚好是一个 $k$ 维数组 $T_{i_1i_2 \cdots i_k}$ (正如 linear functional 可以被一个 covector 描述, bilinear functional 可以被一个 matrix 描述).
+
+- 机器学习里 **training data**, **kernel**, **feature map** 等都用 tensor 来描述, Python 自带的 `list` 和 `np.array()`, 统统都要转化为 `torch.tensor` 来进行计算 (因为 `Tensor` 类提供了很多现成的方法可以调用).
+
+    ```python
+    import torch
+    import numpy as np
+    # python list to tensor
+    data_list = [[1, 2, 3], [4, 5, 6]]
+    list2tensor = torch.tensor(data_list)
+    # numpy array to tensor
+    data_array = np.array([[1, 2, 3], [4, 5, 6]])
+    array2tensor = torch.from_numpy(data_array)
+    ```
+
+### Tensor Memory Layout
+
+- **4D tensor**: 特别是在图像处理中, 4D 张量非常常见, 现在单独详细研究一下它:
+
+    - **H, W, C(D), N(B) 维度语义**: Height, Width, Channel(Depth), Batch size (见 @fig-tensor-layout 左图).
+
+    - **描述顺序和内存中的布局**[^data-layout]: (注意无论多少维度的张量, 在内存中显然都是以 (也只能以) 一维数组的形式连续存储).
+        - <u>HWC</u>**N**: Batch 在最后.
+        - **N**<u>HWC</u>: Batch 在最前, `numpy` 采用.
+        - **N**<u>CHW</u>: Batch 在最前, `pytorch` 采用 (个人感觉这是最符合直觉的顺序!)
+
+        ![三种 Data Layout Formats @a2023_understanding.](tensor-layout.png){#fig-tensor-layout width=80%}
+
+[^data-layout]: *记忆方法*: 反过来看, 如 NHWC, 先沿着 C 方向将数据拉直, 结束后跳到下一个 W, 然后换 H, 最后换 N.
+
+### Mental Picture of Tensors
+
+- **同一个中括号内用逗号分割**的元素一般被认为**地位相同**. 比如下面 `1`, `2`, `3` 地位相同, `[1,2,3]` 和 `[4,5,6]` 地位相同.
+
+- **Tensor size**: 笔者习惯从最内层中括号开始读起, 每层中括号相同地位的元素个数即为该维度的大小, **从右向左** 列出来即为 tensor shape.
+    - 比如:
+
+        ```python
+        torch.Size([2, 4])
+        ```
+        
+        应解读为两个 `[....]` 而不是 4 个 `[..]`. 
+
+    - 这里留两个练习, 给出下面两个 tensor 的 shape:
+
+        ```python
+        t = torch.tensor([
+            [ [1], [2],  [3],  [4]  ],
+            [ [5], [6],  [7],  [8]  ],
+            [ [9], [10], [11], [12] ]
+        ])
+        u = torch.tensor([
+            [ [ [ [1] ] ], [ [ [2] ] ] ]
+        ])
+
+        print(t.shape)  # 输出: torch.Size([3, 4, 1])
+        print(u.shape)  # 输出: torch.Size([1, 2, 1, 1, 1])
+        ```
+
+    - 每个维度看到的「元素」都是「**片面**」且「**抽象**」的.
+
+        ![每个维度即不能看到其元素内部 (「抽象」), 也无法看到外部 (「片面」).](tensor-abstract.png){#fig-tensor-abstract}
+
+
+### Tensor 形状改变 (`einops` 库)
+
+> `einops` 提供了方便的 API 来改变 tensor 的形状.
+
+- **所有 Tensor 形状变化构成群, 可由下面三个生成元 (Grouping, Transposition, Concatenation) 生成**:
+
+    ![Tensor 变形的三个生成元.](tensor-generator.png){#fig-tensor-generator width=50%}
+
+    ```python
+    import torch
+    from einops import rearrange
+
+    t = torch.tensor([1,2,3,4,5,6,7,8])
+    t = rearrange(t, '(b a) -> b a', a=2)   # Grouping, t.shape = [4,2], t = [[1,2],[3,4],[5,6],[7,8]]
+    t = rearrange(t, 'b a -> a b')          # Transposition, t.shape = [2,4], t = [[1,3,5,7],[2,4,6,8]]
+    t = rearrage(t, 'b a -> (b a)', a=4)    # Concatenation, t.shape = [8], t = [1,3,5,7,2,4,6,8]
+    ```
+
+- 小练习 (以 @fig-tensor-abstract 为例):
+
+    ```python
+    import torch
+    from einops import rearrange
+    t = torch.tensor([
+        [ [1], [2],  [3],  [4]  ],
+        [ [5], [6],  [7],  [8]  ],
+        [ [9], [10], [11], [12] ]
+    ])
+    t = rearrange(t, 'a (b1 b2) c -> (a c) (b2 b1)', b1=2)
+    print(t.shape)  # torch.Size([3, 4])
+    print(t) # tensor([[ 1,  3,  2,  4],
+                     # [ 5,  7,  6,  8],
+                     # [ 9, 11, 10, 12]])
+    ```
+    这里的变形可以拆成:
+
+    ```python
+    'a (b1 b2) c -> a (b2 b1) c -> a c (b2 b1) -> (a c) (b2 b1)'
+    ```
+
+### Tensor Broadcasting
 
 TODO
 

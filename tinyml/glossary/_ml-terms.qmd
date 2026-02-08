@@ -51,34 +51,6 @@
 
 ### CV 计算机视觉相关 {#sec-cv-terms}
 
-- **Tensor**: 多维数组.
-    - 名字来源: 由于数学里 $(0,k)$-tensor $T: V^k \to \mathbb{F}$ 在选取一组 basis $\{\mathbf{e}_i\}_{i=1}^k$ 后的 representation 刚好是一个 $k$ 维数组 $T_{i_1i_2 \cdots i_k}$ (正如 linear functional 可以被一个 covector 描述, bilinear functional 可以被一个 matrix 描述).
-    - 机器学习里 **training data**, **kernel**, **feature map** 等都用 tensor 来描述, Python 自带的 `list` 和 `np.array()`, 统统都要转化为 `torch.tensor`:
-
-        ```python
-        import torch
-        import numpy as np
-        # python list to tensor
-        data_list = [[1, 2, 3], [4, 5, 6]]
-        list2tensor = torch.tensor(data_list)
-        # numpy array to tensor
-        data_array = np.array([[1, 2, 3], [4, 5, 6]])
-        array2tensor = torch.from_numpy(data_array)
-        ```
-    - **Tensor Shape H, W, C(D), N**: Height, Width, Channel(Depth), Batch size, 含义见 @fig-data-layout. 描述有一定顺序, 默认有两种:
-        - **Batch 在后**: <u>HWC</u>**N**.
-        - **Batch 在前**: **N**<u>HWC</u>.
-
-
-- **Data Layout Formats 张量在内存中的布局**[^data-layout]:
-    - **NCHW**: `pytorch`
-    - **NHWC**: `numpy`
-    - TODO
-
-    ![三种 Data Layout Formats @a2023_understanding.](data-layout.png){#fig-data-layout width=80%}
-
-[^data-layout]: *记忆方法*: 反过来看, 如 NHWC, 先沿着 C 方向将数据拉直, 结束后跳到下一个 W, 然后换 H, 最后换 N.
-
 - **Feature Map 特征图**: CNN 中间层的一个 channel, 代表机器学习到的一种特征.
     - 注意不是 kernel! 
     - *Abuse of Terms:* 有时 Input 的每个 channel 也叫 feature map.
@@ -166,6 +138,8 @@
     - 相关概念: **PIM/PNM (Processing In/Near Memory)**.
 
 - **Tiling 分块/瓦片**: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.
+
+- **PTX (Parallel Thread eXecution)**: NVIDIA GPU 的汇编语言.
 
 ### Optimizer in ML
 
