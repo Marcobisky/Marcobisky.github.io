@@ -32,7 +32,7 @@ title: "ML Infra 基础"
         - **N**<u>HWC</u>: Batch 在最前, `numpy` 采用.
         - **N**<u>CHW</u>: Batch 在最前, `pytorch` 采用 (个人感觉这是最符合直觉的顺序!)
 
-        ![三种 Data Layout Formats @a2023_understanding.](tensor-layout.png){#fig-tensor-layout width=80%}
+        ![三种 Data Layout Formats @a2023_understanding.](tensor-layout.png){#fig-tensor-layout width=90%}
 
 [^data-layout]: *记忆方法*: 反过来看, 如 NHWC, 先沿着 C 方向将数据拉直, 结束后跳到下一个 W, 然后换 H, 最后换 N.
 
@@ -65,18 +65,22 @@ title: "ML Infra 基础"
         print(u.shape)  # 输出: torch.Size([1, 2, 1, 1, 1])
         ```
 
-    - 每个维度看到的「元素」都是「**片面**」且「**抽象**」的.
+- **当我们说一个「维度」时我们在谈论什么?**
+    - 每个维度看到的「元素」都是「**片面**」且「**抽象**」的. 比如下面的 `4` 这个维度看见的画面仅仅是蓝色的「**切片**」, 而且它无法分清三个蓝色条条的区别.
+    - 后文很多算子都有 `dim` 这个参数, 说明这个算子作用在这个「维度」上. 对维度 `4` 来说, 就是同时作用在所有的**蓝色切片**上!
 
         ![每个维度即不能看到其元素内部 (「抽象」), 也无法看到外部 (「片面」).](tensor-abstract.png){#fig-tensor-abstract}
 
 
-### Tensor 形状改变 (`einops` 库)
+### Tensor Operations
+
+#### Tensor 形状改变 (`einops` 库)
 
 > `einops` 提供了方便的 API 来改变 tensor 的形状.
 
 - **所有 Tensor 形状变化构成群, 可由下面三个生成元 (Grouping, Transposition, Concatenation) 生成**:
 
-    ![Tensor 变形的三个生成元.](tensor-generator.png){#fig-tensor-generator width=50%}
+    ![Tensor 变形的三个生成元.](tensor-generator.png){#fig-tensor-generator width=40%}
 
     ```python
     import torch
@@ -88,7 +92,14 @@ title: "ML Infra 基础"
     t = rearrage(t, 'b a -> (b a)', a=4)    # Concatenation, t.shape = [8], t = [1,3,5,7,2,4,6,8]
     ```
 
-- 小练习 (以 @fig-tensor-abstract 为例):
+    - Transposition 操作也可以用:
+
+        ```python
+        t.transpose(-1, -2)     # 将 t 的最后两个维度交换
+        ```
+        如果 `t` 是 `torch.Size([3, 4, 1])`, 则变成 `torch.Size([3, 1, 4])`.
+
+- 小练习: 给出下面 `t` 的操作过程和结果:
 
     ```python
     import torch
@@ -110,9 +121,86 @@ title: "ML Infra 基础"
     'a (b1 b2) c -> a (b2 b1) c -> a c (b2 b1) -> (a c) (b2 b1)'
     ```
 
-### Tensor Broadcasting
+#### Tensor 切分
 
-TODO
+- 下面代码 `chunk(num, dim)` 代表将维度 `dim` 的「切片」分成 `num` 份.
+
+    ```python
+    import torch
+    t = torch.tensor([
+        [ 1,1,4,4 ],
+        [ 2,2,5,5 ],
+        [ 3,3,6,6 ]
+    ])     # torch.Size([3, 4])
+
+    a, b = t.chunk(2, dim=1)
+    # a = tensor([[1., 1.],
+    #             [2., 2.],
+    #             [3., 3.]])
+    # b = tensor([[4., 4.],
+    #             [5., 5.],
+    #             [6., 6.]])
+    ```
+
+#### Tensor Softmax
+
+- 下面代码 `Softmax(dim=1)` 表示在 `t` 的第 2 个维度「切片」的整体做 softmax, 比如:
+
+    ```python
+    import torch
+    t = torch.tensor([
+        [ 1,1,1,1 ],
+        [ 2,2,2,2 ],
+        [ 3,3,3,3 ]
+    ], dtype=torch.float32)     # torch.Size([3, 4])
+
+    t = nn.Softmax(dim=1)(t)
+    print(t)    # tensor([[0.2500, 0.2500, 0.2500, 0.2500],
+                        # [0.2500, 0.2500, 0.2500, 0.2500],
+                        # [0.2500, 0.2500, 0.2500, 0.2500]])
+    ```
+
+#### Tensor 乘加
+
+- Tensor 的基础运算包括:
+    - **Element-wise multiplication**: `+`, `-`, `*`, `/` 都是逐点的.
+    - **Matrix-like multiplication**: `@` (等价于 `torch.matmul()` 函数).
+        - 注意当对高维张量进行矩阵乘法的时候, 只要求**最后两个维度**满足矩阵相乘的规定 (比如 ) 即可, 前面的维度一般要求相同好进行两两配对 (见 @fig-tensor-matmul).
+
+            ![`aa` 和 `bb` 矩阵乘法得到 `result` 的过程, 前面的维度 (`3`) 要求相同.](tensor-matmul.png){#fig-tensor-matmul}
+        - 思考张量矩阵乘法时**将最后两维度的一个「切片」想象出来即可**, 前面的维度只是这个过程的结构化重复.
+
+- **Tensor Broadcasting**: 上面两种运算都支持 broadcasting, 指 **左侧缺少的维度** 或者 **不匹配的相应维度是 `1`** 的维度都会自动复制成与另一个张量一样的:
+
+    ```python
+    import torch
+    aa = torch.randn(2,3,6,5,4)     # base tensor
+
+    bb = torch.randn(  3,6,5,4)
+    cc = torch.randn(2,3,6,5  )
+    dd = torch.randn(2,3,  5,4)
+    ee = torch.randn(2,3,1,5,4)
+    ff = torch.randn(2,3,2,5,4)
+
+    ## Element-wise operation (+ - * / 都是逐点的)
+    add1_ew = aa + bb        # 可以自动填充左侧维度, add1_ew 大小 [2,3,6,5,4]
+    # add2_ew = aa + cc      # 不能自动填充右侧维度!
+    # add3_ew = aa + dd      # 不能自动填充中间维度!
+    add4_ew = aa + ee        # 1 维度自动复制 6 份, add4_ew 大小 [2,3,6,5,4]
+    # add4_ew = aa + ff      # 中间的 2 维度不能自动复制 3 份! (虽然理论上是可以定义的)
+
+    gg = torch.randn(2,3,6,4,5)
+    hh = torch.randn(2,3,6,1,5)
+
+    ## Matrix multiplication (@ 与 torch.matmul() 函数效果一样)
+    matmul1 = aa @ gg        # 最后两个维度满足矩阵相乘要求就行, matmul1 大小 [2,3,6,5,5]
+    matmul2 = aa @ bb.transpose(-1,-2)      # 可以自动填充左侧维度, matmul2 大小 [2,3,6,5,5]
+    # matmul3 = aa @ dd.transpose(-1,-2)    # 不能自动填充中间维度!
+    matmul4 = aa @ ee.transpose(-1,-2)      # 1 维度自动复制 6 份, matmul4 大小 [2,3,6,5,5]
+    # matmul5 = aa @ ff.transpose(-1,-2)    # 中间的 2 维度不能自动复制 3 份! (虽然理论上是可以定义的)
+    # matmul6 = aa @ hh                     # 最后两个维度必须严格满足矩阵相乘规定, 没有 broadcasting 的说法.
+    ```
+
 
 ## Autograd 机制
 
