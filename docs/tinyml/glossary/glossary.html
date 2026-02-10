@@ -495,6 +495,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">GPU 原理速成</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-algo/cc-algo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Algorithm Notes 算法笔记</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -509,13 +515,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-arch/nn-arch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
   </div>
 </li>
       </ul>
@@ -532,13 +538,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../coral-npu/coral-npu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../ml-infra/ml-infra.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
   </div>
 </li>
       </ul>
@@ -555,7 +561,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
   </div>
 </li>
       </ul>
@@ -662,6 +668,7 @@ window.Quarto = {
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> lfs pull <span class="co"># 下载实际文件</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>然后原来的文件的格式就会从文本格式变为真正的 ZIP 文件, 可以通过下面的命令查看:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">file</span> test.zip <span class="co"># 返回 </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>FE/BE (Front/Back End)</strong>: 前端/后端. 要灵活理解它的意义 (TODO).</p></li>
 </ul>
 </section>
 <section id="fpga-terms" class="level2 page-columns page-full">
@@ -1184,45 +1191,9 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <li><p><strong>PINN (Physics-Informed Neural Networks)</strong>: 比如用神经网络来预测 Navier-Stokes 方程的解, 神经网络的输入为 <span class="math inline">\((x,y,z,t)\)</span>, 输出为 <span class="math inline">\((u,v,w,p)\)</span> (三个方向的速度和压强), 然后基于这些数据可以得到一些偏导数的信息, loss 函数由两个方面构成: 少量的数据点、以及 Navier-Stokes 方程本身的约束条件.</p></li>
 </ul>
 </section>
-<section id="sec-cv-terms" class="level3 page-columns page-full">
+<section id="sec-cv-terms" class="level3">
 <h3 class="anchored" data-anchor-id="sec-cv-terms">CV 计算机视觉相关</h3>
 <ul>
-<li><strong>Tensor</strong>: 多维数组.
-<ul>
-<li><p>名字来源: 由于数学里 <span class="math inline">\((0,k)\)</span>-tensor <span class="math inline">\(T: V^k \to \mathbb{F}\)</span> 在选取一组 basis <span class="math inline">\(\{\mathbf{e}_i\}_{i=1}^k\)</span> 后的 representation 刚好是一个 <span class="math inline">\(k\)</span> 维数组 <span class="math inline">\(T_{i_1i_2 \cdots i_k}\)</span> (正如 linear functional 可以被一个 covector 描述, bilinear functional 可以被一个 matrix 描述).</p></li>
-<li><p>机器学习里 <strong>training data</strong>, <strong>kernel</strong>, <strong>feature map</strong> 等都用 tensor 来描述, Python 自带的 <code>list</code> 和 <code>np.array()</code>, 统统都要转化为 <code>torch.tensor</code>:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># python list to tensor</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>data_list <span class="op">=</span> [[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]]</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>list2tensor <span class="op">=</span> torch.tensor(data_list)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co"># numpy array to tensor</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>data_array <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]])</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>array2tensor <span class="op">=</span> torch.from_numpy(data_array)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-<li><p><strong>Tensor Shape H, W, C(D), N</strong>: Height, Width, Channel(Depth), Batch size, 含义见 <a href="#fig-data-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-data-layout</span></a>. 描述有一定顺序, 默认有两种:</p>
-<ul>
-<li><strong>Batch 在后</strong>: <u>HWC</u><strong>N</strong>.</li>
-<li><strong>Batch 在前</strong>: <strong>N</strong><u>HWC</u>.</li>
-</ul></li>
-</ul></li>
-<li><strong>Data Layout Formats 张量在内存中的布局</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a>:
-<ul>
-<li><strong>NCHW</strong>: <code>pytorch</code></li>
-<li><strong>NHWC</strong>: <code>numpy</code></li>
-<li>TODO</li>
-</ul>
-<div id="fig-data-layout" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-data-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="data-layout.png" class="img-fluid figure-img" style="width:80.0%">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-data-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;14: 三种 Data Layout Formats <span class="citation" data-cites="a2023_understanding"><a href="#ref-a2023_understanding" role="doc-biblioref">[17]</a></span>.
-</figcaption>
-</figure>
-</div></li>
-</ul>
-<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;<em>记忆方法</em>: 反过来看, 如 NHWC, 先沿着 C 方向将数据拉直, 结束后跳到下一个 W, 然后换 H, 最后换 N.</p></div></div><ul>
 <li><strong>Feature Map 特征图</strong>: CNN 中间层的一个 channel, 代表机器学习到的一种特征.
 <ul>
 <li>注意不是 kernel!</li>
@@ -1234,7 +1205,7 @@ Figure&nbsp;14: 三种 Data Layout Formats <span class="citation" data-cites="a2
 <img src="feature-map.png" class="img-fluid figure-img" style="width:70.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-feature-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15: 每个 kernel (filter) 可以产生一张 Feature map <span class="citation" data-cites="anello_2022_visualizing"><a href="#ref-anello_2022_visualizing" role="doc-biblioref">[18]</a></span>.
+Figure&nbsp;14: 每个 kernel (filter) 可以产生一张 Feature map <span class="citation" data-cites="anello_2022_visualizing"><a href="#ref-anello_2022_visualizing" role="doc-biblioref">[17]</a></span>.
 </figcaption>
 </figure>
 </div></li>
@@ -1277,7 +1248,7 @@ Figure&nbsp;15: 每个 kernel (filter) 可以产生一张 Feature map <span clas
 <img src="agent-arch.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-agent-arch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16: Agent Framework.
+Figure&nbsp;15: Agent Framework.
 </figcaption>
 </figure>
 </div></li>
@@ -1290,9 +1261,9 @@ Figure&nbsp;16: Agent Framework.
 <ul>
 <li>Inference 比 Training 计算量小很多 (但是对大模型来说依然很大).</li>
 <li>训练成本: 主要来自 GPU, 比如 NVIDIA H100/B200 costs $30K per unit <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[16]</a></span>, OpenAI 计划 2025 年底部署 100w 台 GPU! Altman 说 GPT-4 训练成本一亿美元.</li>
-<li><strong>Decentralized/Distributed Training 分布式训练</strong>: Blockchain 的成功说明不同地方的算力可以 contribute to the same thing. 分布式训练目标是设计一个 blockchain-like system, 鼓励所有能联网的闲置设备贡献算力来训练大模型, 实现 <span class="math inline">\(0\)</span> GPU 成本. <span class="citation" data-cites="tcheyan_2025_decentralized dong2025singleaiclustersurvey"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[16]</a>, <a href="#ref-dong2025singleaiclustersurvey" role="doc-biblioref">[19]</a></span>.
+<li><strong>Decentralized/Distributed Training 分布式训练</strong>: Blockchain 的成功说明不同地方的算力可以 contribute to the same thing. 分布式训练目标是设计一个 blockchain-like system, 鼓励所有能联网的闲置设备贡献算力来训练大模型, 实现 <span class="math inline">\(0\)</span> GPU 成本. <span class="citation" data-cites="tcheyan_2025_decentralized dong2025singleaiclustersurvey"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[16]</a>, <a href="#ref-dong2025singleaiclustersurvey" role="doc-biblioref">[18]</a></span>.
 <ul>
-<li><a href="https://www.primeintellect.ai/blog/protocol"><strong>Prime Intellect’s “Protocol”</strong></a> <span class="citation" data-cites="_2025_introducing"><a href="#ref-_2025_introducing" role="doc-biblioref">[20]</a></span>.</li>
+<li><a href="https://www.primeintellect.ai/blog/protocol"><strong>Prime Intellect’s “Protocol”</strong></a> <span class="citation" data-cites="_2025_introducing"><a href="#ref-_2025_introducing" role="doc-biblioref">[19]</a></span>.</li>
 </ul>
 <div id="fig-third-epoch" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1300,7 +1271,7 @@ Figure&nbsp;16: Agent Framework.
 <img src="third-epoch.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-third-epoch-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17: 分布式训练: The Third Epoch of AI <span class="citation" data-cites="_2025_chakra"><a href="#ref-_2025_chakra" role="doc-biblioref">[21]</a></span>.
+Figure&nbsp;16: 分布式训练: The Third Epoch of AI <span class="citation" data-cites="_2025_chakra"><a href="#ref-_2025_chakra" role="doc-biblioref">[20]</a></span>.
 </figcaption>
 </figure>
 </div></li>
@@ -1328,27 +1299,27 @@ Figure&nbsp;17: 分布式训练: The Third Epoch of AI <span class="citation" da
 </ul></li>
 <li><p><strong>Spase DNN</strong>: 稀疏神经网络, 指网络中有大量的权重为零 (即不参与计算) 的神经网络.</p>
 <ul>
-<li><p>根据稀疏的结构不同, 可分为三类 (见 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a>). 其中 Semi-structured Sparsity 的意思是比如权重矩阵每 <span class="math inline">\(4\)</span> 个权重就有 <span class="math inline">\(2\)</span> 个权重为零 (记做 <span class="math inline">\(2:4\)</span> sparsity) <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[22]</a></span>.</p>
+<li><p>根据稀疏的结构不同, 可分为三类 (见 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a>). 其中 Semi-structured Sparsity 的意思是比如权重矩阵每 <span class="math inline">\(4\)</span> 个权重就有 <span class="math inline">\(2\)</span> 个权重为零 (记做 <span class="math inline">\(2:4\)</span> sparsity) <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[21]</a></span>.</p>
 <div id="fig-sparsity" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sparsity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="sparsity.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sparsity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;18: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[22]</a></span>, 蓝色的格子代表权重为 <span class="math inline">\(0\)</span>
+Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[21]</a></span>, 蓝色的格子代表权重为 <span class="math inline">\(0\)</span>
 </figcaption>
 </figure>
 </div></li>
 <li><p><strong>Pruning</strong>: 剪枝, 将神经网络中不重要的权重 (如接近零的权重) 设置为零.</p>
 <ul>
 <li><strong>Unstructured Pruning</strong>: 非结构化剪枝, 移除个别权重, 硬件控制复杂度大.</li>
-<li><strong>Structured Pruning</strong>: 结构化剪枝, 移除整个通道/滤波器/神经元等 <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[22]</a></span>, 更适合硬件加速. (比如 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a> (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).</li>
+<li><strong>Structured Pruning</strong>: 结构化剪枝, 移除整个通道/滤波器/神经元等 <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[21]</a></span>, 更适合硬件加速. (比如 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a> (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).</li>
 <li><strong>Semi-structured Pruning</strong>: 半结构化剪枝, 介于上述两者之间.</li>
 </ul></li>
 </ul></li>
 <li><p><strong>Quantization 量化</strong>: 跟模数转换一样, 将模拟 (高分辨率, 如 FP32) 的数据转换为低分辨率 (如 INT8) 的过程.</p>
 <ul>
-<li><strong>量化方法</strong> (注意下面的概念不是严格并列的, 比如 Adaptive 量化可以是 Uniform 也可以是 Non-uniform) <span class="citation" data-cites="skki_2025_quantization"><a href="#ref-skki_2025_quantization" role="doc-biblioref">[23]</a></span>:
+<li><strong>量化方法</strong> (注意下面的概念不是严格并列的, 比如 Adaptive 量化可以是 Uniform 也可以是 Non-uniform) <span class="citation" data-cites="skki_2025_quantization"><a href="#ref-skki_2025_quantization" role="doc-biblioref">[22]</a></span>:
 <ul>
 <li><strong>Uniform 量化</strong></li>
 <li><strong>Non-uniform 量化</strong></li>
@@ -1357,7 +1328,7 @@ Figure&nbsp;18: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <li><strong>Hybrid 混合量化</strong></li>
 <li><strong>Adaptive 自适应量化</strong></li>
 </ul></li>
-<li><strong>量化范式</strong> <span class="citation" data-cites="skki_2025_quantization"><a href="#ref-skki_2025_quantization" role="doc-biblioref">[23]</a></span>:
+<li><strong>量化范式</strong> <span class="citation" data-cites="skki_2025_quantization"><a href="#ref-skki_2025_quantization" role="doc-biblioref">[22]</a></span>:
 <ul>
 <li><strong>PTQ (PQ, Post-Training Quantization) 训练后量化</strong>: 先完全不管量化将神经网络训练完成 (比如在 FP32 下训练), 然后在将其参数量化为低精度格式 (比如 INT8), 后续也不再训练了. 常见方法:
 <ul>
@@ -1378,12 +1349,14 @@ Figure&nbsp;18: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <li>相关概念: <strong>PIM/PNM (Processing In/Near Memory)</strong>.</li>
 </ul></li>
 <li><p><strong>Tiling 分块/瓦片</strong>: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.</p></li>
+<li><p><strong>PTX (Parallel Thread eXecution)</strong>: NVIDIA GPU 的汇编语言.</p></li>
+<li><p><strong>TBE (Tensor Boost Engine)</strong>: 华为自研的、专门用于在昇腾AI处理器 (NPU) 上编写和运行高性能计算算子 (Operator) 的核心组件.</p></li>
 </ul>
 </section>
 <section id="optimizer-in-ml" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="optimizer-in-ml">Optimizer in ML</h3>
 <ul>
-<li><strong>Gradient Descent (GD) 梯度下降<a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a></strong>: 所有优化方法都从这个基础方法改进而来.
+<li><strong>Gradient Descent (GD) 梯度下降<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a></strong>: 所有优化方法都从这个基础方法改进而来.
 <ul>
 <li><strong>Batch Gradient Descent (BGD) 全批量梯度下降</strong>: 用整个训练集计算梯度并更新参数.</li>
 <li><strong>Stochastic Gradient Descent (SGD) 随机梯度下降</strong>: 每次用一个样本计算梯度并更新参数.</li>
@@ -1397,13 +1370,13 @@ Figure&nbsp;18: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 </ul></li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;<em>Abuse of Terms:</em> 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;<em>Abuse of Terms:</em> 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!</p></div></div><ul>
 <li><strong>Optimizer 优化器</strong>: 更新模型参数的算法.
 <ul>
-<li><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可<strong>加速</strong>和<strong>平滑</strong>收敛、避免<strong>陷入局部最优</strong><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>. 也有一些基于次改良的版本:
+<li><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可<strong>加速</strong>和<strong>平滑</strong>收敛、避免<strong>陷入局部最优</strong><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. 也有一些基于次改良的版本:
 <ul>
 <li><p><strong>Nesterov Accelerated Gradient (NAG)</strong>: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 <code>torch</code> 为例:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>optimizer_nag <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>, momentum<span class="op">=</span><span class="fl">0.9</span>, nesterov<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>optimizer_nag <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>, momentum<span class="op">=</span><span class="fl">0.9</span>, nesterov<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
 <li><strong>Adaptive Gradient (Adagrad) 自适应梯度优化器</strong>: 有利于 Sparse Features 的学习 (通过给每个参数分配不同的学习率! 或者理解为对参数进行归一化):</li>
 </ul>
@@ -1413,19 +1386,20 @@ Figure&nbsp;18: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <img src="adagrad.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adagrad-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;19: Adagrad 给梯度平缓方向对应的参数 (<span class="math inline">\(Y\)</span>) 更大的学习率 (<span class="math inline">\(\alpha_Y = 0.05\)</span>) 来加快这个方向的下降 <span class="citation" data-cites="tg_2020_why"><a href="#ref-tg_2020_why" role="doc-biblioref">[25]</a></span>. 也可以用 “Normalize” 的角度理解.
+Figure&nbsp;18: Adagrad 给梯度平缓方向对应的参数 (<span class="math inline">\(Y\)</span>) 更大的学习率 (<span class="math inline">\(\alpha_Y = 0.05\)</span>) 来加快这个方向的下降 <span class="citation" data-cites="tg_2020_why"><a href="#ref-tg_2020_why" role="doc-biblioref">[24]</a></span>. 也可以用 “Normalize” 的角度理解.
 </figcaption>
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn5"><p><sup>5</sup>&nbsp;“SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast.” <span class="citation" data-cites="maciejbalawejder_2022_optimizers"><a href="#ref-maciejbalawejder_2022_optimizers" role="doc-biblioref">[24]</a></span></p></div></div></section>
+<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;“SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast.” <span class="citation" data-cites="maciejbalawejder_2022_optimizers"><a href="#ref-maciejbalawejder_2022_optimizers" role="doc-biblioref">[23]</a></span></p></div></div></section>
 <section id="ml-frameworks" class="level3">
 <h3 class="anchored" data-anchor-id="ml-frameworks">ML Frameworks</h3>
 <ul>
-<li><p><strong>Tensorflow, JAX, PyTorch</strong>: 机器学习框架 <a href="#fig-mlsys" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-mlsys</span></a>. 其实就是一些 Python 库.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<li><p><strong>Tensorflow, JAX, PyTorch, MindSpore (华为)</strong>: 机器学习框架 <a href="#fig-mlsys" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-mlsys</span></a>. 其实就是一些 Python 库.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> tensorflow <span class="im">as</span> tf</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> jax.numpy <span class="im">as</span> jnp</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mindspore.nn <span class="im">as</span> nn</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li>Pytorch 是最主流的, Tensorflow 快死了好像.</li>
 <li>如何看待公司面试要求手写 transformer? 首先会背 Pytorch 函数并不 cool, Pytorch 只是复刻了主流论文里的框架, 如果你能写一个架构并且顶替 transformer, 你的库函数不久后也会出现在 Pytorch 里.</li>
@@ -1444,7 +1418,7 @@ Figure&nbsp;19: Adagrad 给梯度平缓方向对应的参数 (<span class="math 
 <img src="mlsys.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mlsys-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20: AI 编译栈和编程体系
+Figure&nbsp;19: AI 编译栈和编程体系
 </figcaption>
 </figure>
 </div>
@@ -1478,10 +1452,10 @@ Figure&nbsp;20: AI 编译栈和编程体系
 <ul>
 <li><strong>Symbol Grounded Problem</strong>: 符号嵌入 (接地) 问题. 探讨的是符号 (或词语) 是如何在一个系统中获得意义的. 比如 “猫” 是一个符号, 但它不仅仅是一个符号, 它还与其它符号有所关联 (Grounded “嵌入”), 这种关联是 “猫” 的意义. 关于符号是如何嵌入的, 有以下几种观点:
 <ul>
-<li><strong>具身认知</strong>: 意义必须通过一种感官、具身的方式与世界互动, 才能真正理解并嵌入符号. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[26]</a></span></li>
-<li><strong>联结主义</strong>: 符号的意义只取决于它与其它符号的关系 (有点范畴论的感觉哈哈). 符号可以通过网络中激活模式来进行嵌入. 这些模型并不明确地定义符号的意义, 而是通过训练大量数据, 学习感官输入与概念之间的关联. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[26]</a></span></li>
+<li><strong>具身认知</strong>: 意义必须通过一种感官、具身的方式与世界互动, 才能真正理解并嵌入符号. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[25]</a></span></li>
+<li><strong>联结主义</strong>: 符号的意义只取决于它与其它符号的关系 (有点范畴论的感觉哈哈). 符号可以通过网络中激活模式来进行嵌入. 这些模型并不明确地定义符号的意义, 而是通过训练大量数据, 学习感官输入与概念之间的关联. <span class="citation" data-cites="The_Human_Developers_2025_cnblogs"><a href="#ref-The_Human_Developers_2025_cnblogs" role="doc-biblioref">[25]</a></span></li>
 </ul></li>
-<li><strong>Inductive Bias (归纳偏见)</strong>: 人类通过先验知识和经验 (归纳) 来引导学习过程, 这个过程体现在: 给神经网络设计特定的结构、将自由度更大的模型的某些参数置 <span class="math inline">\(0\)</span> (将函数空间/参数空间减小, 比如 CNN 可以看作 FCNN 的子集 <a href="#fig-cnn-fcnn" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cnn-fcnn</span></a>), etc. 这样可以, 但是可能人为地丢弃了结构很好的函数空间 (bias) <span class="citation" data-cites="battaglia2018relationalinductivebiasesdeep"><a href="#ref-battaglia2018relationalinductivebiasesdeep" role="doc-biblioref">[27]</a></span>.
+<li><strong>Inductive Bias (归纳偏见)</strong>: 人类通过先验知识和经验 (归纳) 来引导学习过程, 这个过程体现在: 给神经网络设计特定的结构、将自由度更大的模型的某些参数置 <span class="math inline">\(0\)</span> (将函数空间/参数空间减小, 比如 CNN 可以看作 FCNN 的子集 <a href="#fig-cnn-fcnn" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-cnn-fcnn</span></a>), etc. 这样可以, 但是可能人为地丢弃了结构很好的函数空间 (bias) <span class="citation" data-cites="battaglia2018relationalinductivebiasesdeep"><a href="#ref-battaglia2018relationalinductivebiasesdeep" role="doc-biblioref">[26]</a></span>.
 <ul>
 <li>Weak Inductive Bias 的网络 (比如 ViT, compared with CNN) 需要的训练数据更多 (data-hungry).</li>
 <li>Advantage: 如果归纳地合适, 可以让模型更快地收敛到合理的解. 比如 <a href="#fig-different-ib" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-different-ib</span></a> 中我们用 <span class="math inline">\(5\)</span> 个参数的神经网络拟合两个<strong>斜抛运动</strong>的数据点. 如果事先告诉模型这是一个斜抛运动 (by setting weights <span class="math inline">\(w_1=w_2=w_5=0\)</span>), 而不是 exponential decay, 模型很容易就能拟合出很准确的结果 (棕色).</li>
@@ -1500,7 +1474,7 @@ Figure&nbsp;20: AI 编译栈和编程体系
 <img src="colored-cat.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-colored-cat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “金刚鹦鹉”, 而 ViT 分类为 “埃及猫” <span class="citation" data-cites="juliaturc_2025_why"><a href="#ref-juliaturc_2025_why" role="doc-biblioref">[28]</a></span>.
+Figure&nbsp;20: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “金刚鹦鹉”, 而 ViT 分类为 “埃及猫” <span class="citation" data-cites="juliaturc_2025_why"><a href="#ref-juliaturc_2025_why" role="doc-biblioref">[27]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -1513,7 +1487,7 @@ Figure&nbsp;21: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “
 <img src="cnn-fcnn.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cnn-fcnn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;22: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline">\(64\)</span> 个参数减小到了 <span class="math inline">\(4\)</span> 个参数).
+Figure&nbsp;21: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline">\(64\)</span> 个参数减小到了 <span class="math inline">\(4\)</span> 个参数).
 </figcaption>
 </figure>
 </div>
@@ -1525,7 +1499,7 @@ Figure&nbsp;22: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline"
 <img src="different-ib.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-different-ib-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;23: 不同的 Inductive Bias 带来完全不同的拟合效果 <span class="citation" data-cites="gerstnerlab_2023_rl36"><a href="#ref-gerstnerlab_2023_rl36" role="doc-biblioref">[29]</a></span>.
+Figure&nbsp;22: 不同的 Inductive Bias 带来完全不同的拟合效果 <span class="citation" data-cites="gerstnerlab_2023_rl36"><a href="#ref-gerstnerlab_2023_rl36" role="doc-biblioref">[28]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -1544,15 +1518,15 @@ Figure&nbsp;23: 不同的 Inductive Bias 带来完全不同的拟合效果 <span
 <li><p><strong>Benchmark</strong>: 基准测试. 用于测试系统或工具的功能/性能.</p></li>
 <li><p><strong>QEMU (Quick Emulator)</strong>: 开源的模拟器, 可模拟多种 CPU 架构 (如 ARM, x86, RISCV 等).</p></li>
 <li><p><strong>Renode</strong>: 开源的模拟器, 主要面向嵌入式系统.</p></li>
-<li><p><strong>Endianness</strong><a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>:</p>
+<li><p><strong>Endianness</strong><a href="#fn5" class="footnote-ref" id="fnref5" role="doc-noteref"><sup>5</sup></a>:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="endianness.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[30]</a></span></figcaption>
+<figcaption>大端与小端 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[29]</a></span></figcaption>
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn6"><p><sup>6</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn5"><p><sup>5</sup>&nbsp;记忆: 小端是自然的, 因为大部分人喜欢洗小头 (</p></div></div><ul>
 <li><p><strong>MMU (Memory Management Unit)</strong>: 内存管理单元, 负责虚拟内存和物理内存之间的映射. 结合 UEFI+PCIe, 使得虽然地址总线宽度固定, 但 CPU 能访问的 ROM 和 RAM 却可以自由扩展!</p>
 <ul>
 <li><strong>TLB (Translation Lookaside Buffer)</strong>: 很像 CPU 的 Cache, 用于加速虚拟地址到物理地址的转换. 也有 TLB miss, TLB hit, spacial locality, temporal locality, etc. 这些概念.</li>
@@ -1571,7 +1545,7 @@ Figure&nbsp;23: 不同的 Inductive Bias 带来完全不同的拟合效果 <span
 <img src="amd-gpu-2015.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-amd-gpu-2015-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
+Figure&nbsp;23: AMD GPU 2015 采用 2.5D 封装.
 </figcaption>
 </figure>
 </div>
@@ -1597,9 +1571,9 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 <li><strong>TCM (Tightly Coupled Memory)</strong> (物理介质: SRAM):
 <ul>
 <li><p>由于 Cache 访问时间是<strong>无法控制</strong>的 (因为 Cache 中的数据是动态更新的, 会根据一定算法 (如 tree-PLRU) 淘汰和保留, 可能会出现 Cache miss), 在很多实时系统中, 这种 miss 会带来<strong>不可预测</strong>的延迟. 如果有经常访问的数据 比如 <code>sensor_data</code>, TCM 允许程序员显式地将其放在 TCM 中 (假设 <code>.dtcm</code> 在 linker script 里面定义过) (这样访问时间是<strong>可预测</strong>的):</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sensor_data<span class="op">[</span><span class="dv">1024</span><span class="op">]</span> __attribute__<span class="op">((</span>section<span class="op">(</span><span class="st">".dtcm"</span><span class="op">)));</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb12"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> sensor_data<span class="op">[</span><span class="dv">1024</span><span class="op">]</span> __attribute__<span class="op">((</span>section<span class="op">(</span><span class="st">".dtcm"</span><span class="op">)));</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>TCM 会被分配固定独立的地址空间 (通过 linker file <code>.ld</code> 定义, 后续通过 memory map 访问!), 而且会有模块检测访存的地址是否在 TCM 范围内, 如果是则会通过专用的 TCM 总线访问!</p></li>
-<li><p><strong>DTCM, ITCM (Data TCM)</strong>: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 <span class="citation" data-cites="googlecoral_2025_github"><a href="#ref-googlecoral_2025_github" role="doc-biblioref">[31]</a></span>:</p>
+<li><p><strong>DTCM, ITCM (Data TCM)</strong>: 存放数据 Data 和 指令 Instruction 的 TCM. 它们在 Google Coral NPU 中被分配以下地址空间 <span class="citation" data-cites="googlecoral_2025_github"><a href="#ref-googlecoral_2025_github" role="doc-biblioref">[30]</a></span>:</p>
 <div class="code-with-filename">
 <div class="code-with-filename-file">
 <pre><strong>coralnpu_tcm.ld</strong></pre>
@@ -1614,10 +1588,10 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 <ul>
 <li>因与 “cash” 同音, 常记为 “$”.</li>
 <li>注意 Cache 没有分配独立的地址空间, 在 CPU 和 RAM 间是「透明」的!</li>
-<li><strong>L1D$, L1I$</strong>: 一级数据缓存和一级指令缓存<a href="#fn7" class="footnote-ref" id="fnref7" role="doc-noteref"><sup>7</sup></a>.</li>
+<li><strong>L1D$, L1I$</strong>: 一级数据缓存和一级指令缓存<a href="#fn6" class="footnote-ref" id="fnref6" role="doc-noteref"><sup>6</sup></a>.</li>
 </ul></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn7"><p><sup>7</sup>&nbsp;区分 D$/DTCM, I$/ITCM: 有没有独立地址空间 (是否「透明」)、访问是否可预测. 但有的地方会混用这两个概念!</p></div></div><ul>
+<div class="no-row-height column-margin column-container"><div id="fn6"><p><sup>6</sup>&nbsp;区分 D$/DTCM, I$/ITCM: 有没有独立地址空间 (是否「透明」)、访问是否可预测. 但有的地方会混用这两个概念!</p></div></div><ul>
 <li>RAM (物理介质: DRAM):
 <ul>
 <li>CPU RAM, 具体的技术包括:
@@ -1685,7 +1659,7 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="elf-format.png" class="img-fluid figure-img"></p>
-<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[30]</a></span></figcaption>
+<figcaption>ELF 文件格式 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[29]</a></span></figcaption>
 </figure>
 </div>
 </div></div><ul>
@@ -1706,7 +1680,7 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 </div>
 </div></div><ul>
 <li><p><strong>Intrinsic 内联</strong>: 将汇编代码嵌入到 <code>C/C++</code> 代码中. 比如在想在 <code>C++</code> 中嵌入 RVV 汇编代码, 可以先 <code>#include &lt;riscv_vector.h&gt;</code> 头文件, 然后就可以这样用:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb13"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="operating-system-terms" class="level2">
@@ -1714,7 +1688,7 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 <ul>
 <li><strong>RTOS (Real-Time Operating System)</strong>: 实时操作系统, 用于嵌入式系统.
 <ul>
-<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[30]</a></span>.</li>
+<li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[29]</a></span>.</li>
 <li><strong>RT-Thread</strong>: 也是一个 RTOS</li>
 </ul></li>
 </ul>
@@ -1745,7 +1719,7 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 <img src="ffsp.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ffsp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;25: FFSP
+Figure&nbsp;24: FFSP
 </figcaption>
 </figure>
 </div></li>
@@ -1837,50 +1811,47 @@ Figure&nbsp;25: FFSP
 <div id="ref-tcheyan_2025_decentralized" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[16] </div><div class="csl-right-inline">L. Tcheyan and A. Yenamandra, <span>“Decentralized AI training: Architectures, opportunities, and challenges.”</span> Galaxy, Sep. 2025. Available: <a href="https://www.galaxy.com/insights/research/decentralized-ai-training">https://www.galaxy.com/insights/research/decentralized-ai-training</a>. [Accessed: Jan. 01, 2026]</div>
 </div>
-<div id="ref-a2023_understanding" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[17] </div><div class="csl-right-inline"><span>“Understanding memory formats.”</span> Intel, 2023. Available: <a href="https://www.intel.com/content/www/us/en/docs/onednn/developer-guide-reference/2023-1/understanding-memory-formats.html">https://www.intel.com/content/www/us/en/docs/onednn/developer-guide-reference/2023-1/understanding-memory-formats.html</a>. [Accessed: Jan. 03, 2026]</div>
-</div>
 <div id="ref-anello_2022_visualizing" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[18] </div><div class="csl-right-inline">E. Anello, <span>“Visualizing the feature maps and filters by convolutional neural networks.”</span> DataSeries, Mar. 2022. Available: <a href="https://medium.com/dataseries/visualizing-the-feature-maps-and-filters-by-convolutional-neural-networks-e1462340518e">https://medium.com/dataseries/visualizing-the-feature-maps-and-filters-by-convolutional-neural-networks-e1462340518e</a>. [Accessed: Jan. 03, 2026]</div>
+<div class="csl-left-margin">[17] </div><div class="csl-right-inline">E. Anello, <span>“Visualizing the feature maps and filters by convolutional neural networks.”</span> DataSeries, Mar. 2022. Available: <a href="https://medium.com/dataseries/visualizing-the-feature-maps-and-filters-by-convolutional-neural-networks-e1462340518e">https://medium.com/dataseries/visualizing-the-feature-maps-and-filters-by-convolutional-neural-networks-e1462340518e</a>. [Accessed: Jan. 03, 2026]</div>
 </div>
 <div id="ref-dong2025singleaiclustersurvey" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[19] </div><div class="csl-right-inline">H. Dong <em>et al.</em>, <span>“Beyond a single AI cluster: A survey of decentralized LLM training.”</span> 2025. Available: <a href="https://arxiv.org/abs/2503.11023">https://arxiv.org/abs/2503.11023</a></div>
+<div class="csl-left-margin">[18] </div><div class="csl-right-inline">H. Dong <em>et al.</em>, <span>“Beyond a single AI cluster: A survey of decentralized LLM training.”</span> 2025. Available: <a href="https://arxiv.org/abs/2503.11023">https://arxiv.org/abs/2503.11023</a></div>
 </div>
 <div id="ref-_2025_introducing" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[20] </div><div class="csl-right-inline">Manveer, Matthew, Jannik, and Vincent, <span>“Introducing prime intellect’s protocol &amp; testnet: A peer-to-peer compute and intelligence network.”</span> Primeintellect.ai, Feb. 2025. Available: <a href="https://www.primeintellect.ai/blog/protocol">https://www.primeintellect.ai/blog/protocol</a>. [Accessed: Jan. 01, 2026]</div>
+<div class="csl-left-margin">[19] </div><div class="csl-right-inline">Manveer, Matthew, Jannik, and Vincent, <span>“Introducing prime intellect’s protocol &amp; testnet: A peer-to-peer compute and intelligence network.”</span> Primeintellect.ai, Feb. 2025. Available: <a href="https://www.primeintellect.ai/blog/protocol">https://www.primeintellect.ai/blog/protocol</a>. [Accessed: Jan. 01, 2026]</div>
 </div>
 <div id="ref-_2025_chakra" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[21] </div><div class="csl-right-inline">Chakra Team, <span>“Chakra labs.”</span> Chakra.dev, Jun. 2025. Available: <a href="https://www.chakra.dev/research/the-third-epoch-of-ai-decentralizing-the-training-stack">https://www.chakra.dev/research/the-third-epoch-of-ai-decentralizing-the-training-stack</a>. [Accessed: Jan. 01, 2026]</div>
+<div class="csl-left-margin">[20] </div><div class="csl-right-inline">Chakra Team, <span>“Chakra labs.”</span> Chakra.dev, Jun. 2025. Available: <a href="https://www.chakra.dev/research/the-third-epoch-of-ai-decentralizing-the-training-stack">https://www.chakra.dev/research/the-third-epoch-of-ai-decentralizing-the-training-stack</a>. [Accessed: Jan. 01, 2026]</div>
 </div>
 <div id="ref-sabih2025hardwaresoftwarecodesignriscvextensions" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[22] </div><div class="csl-right-inline">M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, <span>“Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.”</span> 2025. Available: <a href="https://arxiv.org/abs/2504.19659">https://arxiv.org/abs/2504.19659</a></div>
+<div class="csl-left-margin">[21] </div><div class="csl-right-inline">M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, <span>“Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.”</span> 2025. Available: <a href="https://arxiv.org/abs/2504.19659">https://arxiv.org/abs/2504.19659</a></div>
 </div>
 <div id="ref-skki_2025_quantization" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[23] </div><div class="csl-right-inline">SKki, <span>“Quantization methods explanation.”</span> Bilibili.com, Jun. 2025. Available: <a href="https://www.bilibili.com/video/BV1iyNmzxECP/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">https://www.bilibili.com/video/BV1iyNmzxECP/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3</a>. [Accessed: Jan. 03, 2026]</div>
+<div class="csl-left-margin">[22] </div><div class="csl-right-inline">SKki, <span>“Quantization methods explanation.”</span> Bilibili.com, Jun. 2025. Available: <a href="https://www.bilibili.com/video/BV1iyNmzxECP/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">https://www.bilibili.com/video/BV1iyNmzxECP/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3</a>. [Accessed: Jan. 03, 2026]</div>
 </div>
 <div id="ref-maciejbalawejder_2022_optimizers" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[24] </div><div class="csl-right-inline">M. Balawejder, <span>“Optimizers in machine learning - nerd for tech - medium.”</span> Medium; Nerd for Tech, Mar. 2022. Available: <a href="https://medium.com/nerd-for-tech/optimizers-in-machine-learning-f1a9c549f8b4">https://medium.com/nerd-for-tech/optimizers-in-machine-learning-f1a9c549f8b4</a>. [Accessed: Dec. 05, 2025]</div>
+<div class="csl-left-margin">[23] </div><div class="csl-right-inline">M. Balawejder, <span>“Optimizers in machine learning - nerd for tech - medium.”</span> Medium; Nerd for Tech, Mar. 2022. Available: <a href="https://medium.com/nerd-for-tech/optimizers-in-machine-learning-f1a9c549f8b4">https://medium.com/nerd-for-tech/optimizers-in-machine-learning-f1a9c549f8b4</a>. [Accessed: Dec. 05, 2025]</div>
 </div>
 <div id="ref-tg_2020_why" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[25] </div><div class="csl-right-inline">J. TG, <span>“Why sparse features should have bigger learning rates associated? And how adagrad achieves this?”</span> Data Science Stack Exchange, Sep. 2020. Available: <a href="https://datascience.stackexchange.com/questions/82240/why-sparse-features-should-have-bigger-learning-rates-associated-and-how-adagra">https://datascience.stackexchange.com/questions/82240/why-sparse-features-should-have-bigger-learning-rates-associated-and-how-adagra</a>. [Accessed: Dec. 03, 2025]</div>
+<div class="csl-left-margin">[24] </div><div class="csl-right-inline">J. TG, <span>“Why sparse features should have bigger learning rates associated? And how adagrad achieves this?”</span> Data Science Stack Exchange, Sep. 2020. Available: <a href="https://datascience.stackexchange.com/questions/82240/why-sparse-features-should-have-bigger-learning-rates-associated-and-how-adagra">https://datascience.stackexchange.com/questions/82240/why-sparse-features-should-have-bigger-learning-rates-associated-and-how-adagra</a>. [Accessed: Dec. 03, 2025]</div>
 </div>
 <div id="ref-The_Human_Developers_2025_cnblogs" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[26] </div><div class="csl-right-inline">S. Dai, <span>“Symbol grounding problem in artificial intelligence,”</span> 2025, Available: <a href="https://www.cnblogs.com/sddai/p/18670953">https://www.cnblogs.com/sddai/p/18670953</a></div>
+<div class="csl-left-margin">[25] </div><div class="csl-right-inline">S. Dai, <span>“Symbol grounding problem in artificial intelligence,”</span> 2025, Available: <a href="https://www.cnblogs.com/sddai/p/18670953">https://www.cnblogs.com/sddai/p/18670953</a></div>
 </div>
 <div id="ref-battaglia2018relationalinductivebiasesdeep" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[27] </div><div class="csl-right-inline">P. W. Battaglia <em>et al.</em>, <span>“Relational inductive biases, deep learning, and graph networks.”</span> 2018. Available: <a href="https://arxiv.org/abs/1806.01261">https://arxiv.org/abs/1806.01261</a></div>
+<div class="csl-left-margin">[26] </div><div class="csl-right-inline">P. W. Battaglia <em>et al.</em>, <span>“Relational inductive biases, deep learning, and graph networks.”</span> 2018. Available: <a href="https://arxiv.org/abs/1806.01261">https://arxiv.org/abs/1806.01261</a></div>
 </div>
 <div id="ref-juliaturc_2025_why" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[28] </div><div class="csl-right-inline">J. Turc, <span>“Why are transformers replacing CNNs?”</span> YouTube, Dec. 2025. Available: <a href="https://www.youtube.com/watch?v=KnCRTP11p5U">https://www.youtube.com/watch?v=KnCRTP11p5U</a>. [Accessed: Jan. 07, 2026]</div>
+<div class="csl-left-margin">[27] </div><div class="csl-right-inline">J. Turc, <span>“Why are transformers replacing CNNs?”</span> YouTube, Dec. 2025. Available: <a href="https://www.youtube.com/watch?v=KnCRTP11p5U">https://www.youtube.com/watch?v=KnCRTP11p5U</a>. [Accessed: Jan. 07, 2026]</div>
 </div>
 <div id="ref-gerstnerlab_2023_rl36" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[29] </div><div class="csl-right-inline">G. Lab, <span>“RL3.6 inductive bias in machine learning.”</span> YouTube, Mar. 2023. Available: <a href="https://www.youtube.com/watch?v=FhBMOqyMjYw">https://www.youtube.com/watch?v=FhBMOqyMjYw</a>. [Accessed: Jan. 07, 2026]</div>
+<div class="csl-left-margin">[28] </div><div class="csl-right-inline">G. Lab, <span>“RL3.6 inductive bias in machine learning.”</span> YouTube, Mar. 2023. Available: <a href="https://www.youtube.com/watch?v=FhBMOqyMjYw">https://www.youtube.com/watch?v=FhBMOqyMjYw</a>. [Accessed: Jan. 07, 2026]</div>
 </div>
 <div id="ref-Lazyparser_2025_bilibili" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[30] </div><div class="csl-right-inline">Lazyparser, <span>“Compilation and linker,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5</a></div>
+<div class="csl-left-margin">[29] </div><div class="csl-right-inline">Lazyparser, <span>“Compilation and linker,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5">https://www.bilibili.com/video/BV1Q5411w7z5?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=5</a></div>
 </div>
 <div id="ref-googlecoral_2025_github" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[31] </div><div class="csl-right-inline">google-coral, <span>“GitHub - google-coral/coralnpu: A machine learning accelerator core designed for energy-efficient AI at the edge.”</span> GitHub, Oct. 2025. Available: <a href="https://github.com/google-coral/coralnpu">https://github.com/google-coral/coralnpu</a>. [Accessed: Jan. 04, 2026]</div>
+<div class="csl-left-margin">[30] </div><div class="csl-right-inline">google-coral, <span>“GitHub - google-coral/coralnpu: A machine learning accelerator core designed for energy-efficient AI at the edge.”</span> GitHub, Oct. 2025. Available: <a href="https://github.com/google-coral/coralnpu">https://github.com/google-coral/coralnpu</a>. [Accessed: Jan. 04, 2026]</div>
 </div>
 </div>
 </section>

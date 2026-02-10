@@ -21,13 +21,13 @@ title: "ML Infra 基础"
     array2tensor = torch.from_numpy(data_array)
     ```
 
-### Tensor Memory Layout
+### Tensor Format
 
 - **4D tensor**: 特别是在图像处理中, 4D 张量非常常见, 现在单独详细研究一下它:
 
     - **H, W, C(D), N(B) 维度语义**: Height, Width, Channel(Depth), Batch size (见 @fig-tensor-layout 左图).
 
-    - **描述顺序和内存中的布局**[^data-layout]: (注意无论多少维度的张量, 在内存中显然都是以 (也只能以) 一维数组的形式连续存储).
+    - **Memory Layout**[^data-layout]: (注意无论多少维度的张量, 在内存中显然都是以 (也只能以) 一维数组的形式连续存储).
         - <u>HWC</u>**N**: Batch 在最后.
         - **N**<u>HWC</u>: Batch 在最前, `numpy` 采用.
         - **N**<u>CHW</u>: Batch 在最前, `pytorch` 采用 (个人感觉这是最符合直觉的顺序!)
@@ -35,6 +35,11 @@ title: "ML Infra 基础"
         ![三种 Data Layout Formats @a2023_understanding.](tensor-layout.png){#fig-tensor-layout width=90%}
 
 [^data-layout]: *记忆方法*: 反过来看, 如 NHWC, 先沿着 C 方向将数据拉直, 结束后跳到下一个 W, 然后换 H, 最后换 N.
+
+::: {.column-margin}
+![不同的算子在不同的模块执行可能涉及算子的 format 转换 @_2025_operator. `C0`, `C1` 由 `C` 拆分得来, FZ 是另一种 tensor format.](tensor-format-conversion.png){#fig-tensor-format-conversion}
+:::
+
 
 ### Mental Picture of Tensors
 
@@ -72,9 +77,9 @@ title: "ML Infra 基础"
         ![每个维度即不能看到其元素内部 (「抽象」), 也无法看到外部 (「片面」).](tensor-abstract.png){#fig-tensor-abstract}
 
 
-### Tensor Operations
+## Tensor Operations
 
-#### Tensor 形状改变 (`einops` 库)
+### Tensor 形状改变 (`einops` 库)
 
 > `einops` 提供了方便的 API 来改变 tensor 的形状.
 
@@ -121,46 +126,29 @@ title: "ML Infra 基础"
     'a (b1 b2) c -> a (b2 b1) c -> a c (b2 b1) -> (a c) (b2 b1)'
     ```
 
-#### Tensor 切分
+### Tensor 切分
 
-- 下面代码 `chunk(num, dim)` 代表将维度 `dim` 的「切片」分成 `num` 份.
+- `chunk()` 将一个 tensor 且成相等大小的多个 tensor.
+    - 下面代码 `chunk(num, dim)` 代表将维度 `dim` 的「切片」分成 `num` 份.
 
-    ```python
-    import torch
-    t = torch.tensor([
-        [ 1,1,4,4 ],
-        [ 2,2,5,5 ],
-        [ 3,3,6,6 ]
-    ])     # torch.Size([3, 4])
+        ```python
+        import torch
+        t = torch.tensor([
+            [ 1,1,4,4 ],
+            [ 2,2,5,5 ],
+            [ 3,3,6,6 ]
+        ])     # torch.Size([3, 4])
 
-    a, b = t.chunk(2, dim=1)
-    # a = tensor([[1., 1.],
-    #             [2., 2.],
-    #             [3., 3.]])
-    # b = tensor([[4., 4.],
-    #             [5., 5.],
-    #             [6., 6.]])
-    ```
+        a, b = t.chunk(2, dim=1)
+        # a = tensor([[1., 1.],
+        #             [2., 2.],
+        #             [3., 3.]])
+        # b = tensor([[4., 4.],
+        #             [5., 5.],
+        #             [6., 6.]])
+        ```
 
-#### Tensor Softmax
-
-- 下面代码 `Softmax(dim=1)` 表示在 `t` 的第 2 个维度「切片」的整体做 softmax, 比如:
-
-    ```python
-    import torch
-    t = torch.tensor([
-        [ 1,1,1,1 ],
-        [ 2,2,2,2 ],
-        [ 3,3,3,3 ]
-    ], dtype=torch.float32)     # torch.Size([3, 4])
-
-    t = nn.Softmax(dim=1)(t)
-    print(t)    # tensor([[0.2500, 0.2500, 0.2500, 0.2500],
-                        # [0.2500, 0.2500, 0.2500, 0.2500],
-                        # [0.2500, 0.2500, 0.2500, 0.2500]])
-    ```
-
-#### Tensor 乘加
+### Tensor 乘加
 
 - Tensor 的基础运算包括:
     - **Element-wise multiplication**: `+`, `-`, `*`, `/` 都是逐点的.
@@ -168,7 +156,8 @@ title: "ML Infra 基础"
         - 注意当对高维张量进行矩阵乘法的时候, 只要求**最后两个维度**满足矩阵相乘的规定 (比如 ) 即可, 前面的维度一般要求相同好进行两两配对 (见 @fig-tensor-matmul).
 
             ![`aa` 和 `bb` 矩阵乘法得到 `result` 的过程, 前面的维度 (`3`) 要求相同.](tensor-matmul.png){#fig-tensor-matmul}
-        - 思考张量矩阵乘法时**将最后两维度的一个「切片」想象出来即可**, 前面的维度只是这个过程的结构化重复.
+        - 思考张量矩阵乘法时**将最后两维度的一个「切片」想象出来即可**, 前面的维度只是这个过程的结构化重复
+            - 比如 @fig-tensor-matmul 中只需要将右下角的「切片」按照前面的维度 `3` 的结构放好就行, 这里很简单直接拼接即可; 如果 `aa` 和 `bb` 前面的维度不是 `3` 而是复杂点的比如 `(2,4,1)`, 思考方式没有任何变化.
 
 - **Tensor Broadcasting**: 上面两种运算都支持 broadcasting, 指 **左侧缺少的维度** 或者 **不匹配的相应维度是 `1`** 的维度都会自动复制成与另一个张量一样的:
 
@@ -200,6 +189,53 @@ title: "ML Infra 基础"
     # matmul5 = aa @ ff.transpose(-1,-2)    # 中间的 2 维度不能自动复制 3 份! (虽然理论上是可以定义的)
     # matmul6 = aa @ hh                     # 最后两个维度必须严格满足矩阵相乘规定, 没有 broadcasting 的说法.
     ```
+
+::: {.column-margin}
+![逐点运算之前要进行 tensor broadcasting.](tensor-broadcasting.png){#fig-tensor-broadcasting}
+:::
+
+
+## 神经网络的常见层
+
+> 下面我们列举一些神经网络中的一些层, 它们仅仅是对 tensor 的一些操作.
+
+### 带参数的层
+
+- **Convolution 卷积层**: 匹配 NCHW 中的 C.
+
+    ```python
+    t = torch.randn(2,3,5,4)
+    t1 = nn.Conv2d(in_channels=3, out_channels=6, kernel_size=3, padding=1)(t)
+    ```
+- **Linear 线性层**: 匹配最右边的维度.
+
+    ```python
+    t = torch.randn(2,10)
+    t1 = nn.Linear(in_features=10, out_features=5)(t)
+    ```
+
+### 无参数的层
+
+- **「切片」操作**: 对 tensor 某一维度的处理.
+    - **Softmax**: 下面代码 `Softmax(dim=1)` 表示在 `t` 的第 2 个维度「切片」的整体做 softmax.
+
+        ```python
+        t = torch.tensor([
+            [ 1,1,1,1 ],
+            [ 2,2,2,2 ],
+            [ 3,3,3,3 ]
+        ], dtype=torch.float32)     # torch.Size([3, 4])
+        t = nn.Softmax(dim=1)(t)    # tensor([[0.2500, 0.2500, 0.2500, 0.2500],
+                                            # [0.2500, 0.2500, 0.2500, 0.2500],
+                                            # [0.2500, 0.2500, 0.2500, 0.2500]])
+        ```
+
+- **其它操作**
+    - **激活函数**: `SiLU()`
+    - **恒等映射**: `Identity()`
+    - **Dropout**: 训练时随机置 0, 推理时自动关闭.
+    - **下采样**: `AvgPool2d()`
+    
 
 
 ## Autograd 机制
