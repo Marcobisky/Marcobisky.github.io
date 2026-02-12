@@ -547,7 +547,10 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#c-编译过程" id="toc-c-编译过程" class="nav-link active" data-scroll-target="#c-编译过程">C 编译过程</a></li>
+  <li><a href="#c-编译过程" id="toc-c-编译过程" class="nav-link active" data-scroll-target="#c-编译过程">C 编译过程</a>
+  <ul class="collapse">
+  <li><a href="#动态链接" id="toc-动态链接" class="nav-link" data-scroll-target="#动态链接">动态链接</a></li>
+  </ul></li>
   <li><a href="#riscv-汇编语言" id="toc-riscv-汇编语言" class="nav-link" data-scroll-target="#riscv-汇编语言">RISCV 汇编语言</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
@@ -751,12 +754,28 @@ Key to Flags:
 <span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">2a:</span>   <span class="dv">6105</span>                    addi    <span class="kw">sp</span><span class="op">,</span><span class="kw">sp</span><span class="op">,</span><span class="dv">32</span></span>
 <span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">2c:</span>   <span class="dv">8082</span>                    <span class="kw">ret</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<section id="动态链接" class="level3">
+<h3 class="anchored" data-anchor-id="动态链接">动态链接</h3>
+<ul>
+<li>动机: C 的库函数 (比如 <code>printf()</code>) 在很多代码里会重复用到, 如果将这些库编译出来的代码直接插入到每个使用它的程序里, 会造成可执行文件体积太大的问题. 于是我们单独编译每个库文件为 <code>.so</code> (shared object) 文件 (windows 下为 <code>.dll</code>), 程序<strong>运行时</strong>再动态地重定位到这些文件的真实地址处.
+<ul>
+<li><p>如果 <code>main.c</code> 需要用到 <code>mylib.c</code> 中的函数, 可以这样动态链接:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> <span class="at">-shared</span> <span class="at">-fPIC</span> mylib.c <span class="at">-o</span> libmylib.so    <span class="co"># 先单独编译 mylib.c 为动态链接库</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">gcc</span> main.c <span class="at">-lmylib</span> <span class="at">-L.</span> <span class="at">-o</span> main  <span class="co"># 编译 main.c 生成可执行文件 main</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">./main</span>  <span class="co"># 运行 main 可执行文件</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>其中 <code>-l</code> 表示指定动态库文件, 后面不要加空格, 而且省略前缀 <code>lib</code> 和后缀 <code>.so</code>; <code>-L</code> 后面接的是动态库文件所在的路径 (当前目录 <code>.</code>). 但是当运行 <code>./main</code> 时还是会提示找不到动态链接库, 因为 linux 默认去系统路径 <code>/usr/local/lib</code> 下找动态链接库, 可以:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">LD_LIBRARY_PATH</span><span class="op">=</span><span class="st">"</span><span class="va">$(</span><span class="bu">pwd</span><span class="va">)</span><span class="st">"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>这些繁琐的命令行可以用 CMake 避免.</p></li>
+</ul></li>
+<li>动态链接的另一个好处是: 在库变化时可以单独编译库文件而不用编译所有的可执行文件!</li>
+</ul>
+</section>
 </section>
 <section id="riscv-汇编语言" class="level2">
 <h2 class="anchored" data-anchor-id="riscv-汇编语言">RISCV 汇编语言</h2>
 <ul>
 <li><p>基本格式:</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>label<span class="op">&gt;</span><span class="fu">:</span> <span class="op">&lt;</span>operation<span class="op">&gt;</span> <span class="co"># &lt;comment&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>label<span class="op">&gt;</span><span class="fu">:</span> <span class="op">&lt;</span>operation<span class="op">&gt;</span> <span class="co"># &lt;comment&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <ul>
 <li><code>&lt;operation&gt;</code> 的类型 <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[1]</a></span>:
 <ul>
@@ -764,15 +783,15 @@ Key to Flags:
 <li><p>pseudo-instruction (伪指令): <code>li x6, 5</code>, <code>nop</code>, RISCV 中有定义</p></li>
 <li><p>directive (伪操作): <code>.macro ... .endm</code>, <code>.end</code>, <code>.text</code>, <code>.global _start</code> 告知汇编器的指示, 与 RISCV 规范无关.</p></li>
 <li><p>macro (宏):</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.macro</span> do_nothing</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">nop</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">.endm</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">_start:</span> do_nothing <span class="co"># 调用宏, 汇编器会将它展开</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb15"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">.macro</span> do_nothing</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">nop</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="kw">.endm</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">_start:</span> do_nothing <span class="co"># 调用宏, 汇编器会将它展开</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
 </ul></li>
 <li><p>标签其实表示地址:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">_start:</span> li x6<span class="op">,</span> <span class="dv">5</span> <span class="co"># _start 标签其实就是这条指令的地址</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb16"><pre class="sourceCode s code-with-copy"><code class="sourceCode gnuassembler"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">_start:</span> li x6<span class="op">,</span> <span class="dv">5</span> <span class="co"># _start 标签其实就是这条指令的地址</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul>
 </section>
 <section id="references" class="level2">

@@ -85,7 +85,7 @@ div.csl-indent {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../nn-essence/nn-essence.html" rel="next">
+<link href="../cc-algo/cc-algo.html" rel="next">
 <link href="../cc-cpu/cc-cpu.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -466,6 +466,12 @@ div.csl-indent {
  <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">GPU 原理速成</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-algo/cc-algo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Algorithm Notes 算法笔记</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -480,13 +486,13 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../nn-arch/nn-arch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
   </div>
 </li>
       </ul>
@@ -503,13 +509,13 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../coral-npu/coral-npu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../ml-infra/ml-infra.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
   </div>
 </li>
       </ul>
@@ -526,7 +532,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
   </div>
 </li>
       </ul>
@@ -553,9 +559,15 @@ div.csl-indent {
   </ul></li>
   <li><a href="#cuda" id="toc-cuda" class="nav-link" data-scroll-target="#cuda">CUDA</a>
   <ul class="collapse">
+  <li><a href="#数据迁移与内存开辟" id="toc-数据迁移与内存开辟" class="nav-link" data-scroll-target="#数据迁移与内存开辟">数据迁移与内存开辟</a></li>
+  <li><a href="#一些-utilities" id="toc-一些-utilities" class="nav-link" data-scroll-target="#一些-utilities">一些 utilities</a></li>
   <li><a href="#unified-memory-统一内存" id="toc-unified-memory-统一内存" class="nav-link" data-scroll-target="#unified-memory-统一内存">Unified Memory 统一内存</a></li>
   <li><a href="#synchronization-同步" id="toc-synchronization-同步" class="nav-link" data-scroll-target="#synchronization-同步">Synchronization 同步</a></li>
   <li><a href="#stream-流" id="toc-stream-流" class="nav-link" data-scroll-target="#stream-流">Stream 流</a></li>
+  </ul></li>
+  <li><a href="#hpc" id="toc-hpc" class="nav-link" data-scroll-target="#hpc">HPC</a>
+  <ul class="collapse">
+  <li><a href="#gemm" id="toc-gemm" class="nav-link" data-scroll-target="#gemm">GEMM</a></li>
   </ul></li>
   <li><a href="#cuda-的-pytorch-接口" id="toc-cuda-的-pytorch-接口" class="nav-link" data-scroll-target="#cuda-的-pytorch-接口">CUDA 的 Pytorch 接口</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
@@ -1121,11 +1133,13 @@ Figure&nbsp;6: <code>STR</code> 指令的 FSM.
 <ul>
 <li>每个 CUDA Core 都有自己的 PC.</li>
 <li>一个 CUDA Core 上面只能计算单精度/整数</li>
+<li>CUDA Core 之间共享 L1 cache.</li>
 </ul></li>
 <li><strong>SM (Streaming Multiprocessor)</strong>: 包括很多 CUDA Cores, SFU (Special Function Unit, 比如计算 <code>__cos()</code>), LD/ST 单元, Scheduler, etc.
 <ul>
 <li>Pascal 架构中一个 SM 有 128 个 CUDA 核心.</li>
 <li>一个 SM 里面只有一个大的 Reg File/shared memory/L1 cache, 而不是每个 CUDA Core 都有.</li>
+<li>SM 之间共享 L2 cache.</li>
 </ul></li>
 <li><strong>GPC (Graphics Processing Cluster)</strong>: 包括多个 SM.</li>
 </ul>
@@ -1172,6 +1186,7 @@ Figure&nbsp;8: 不参与 <code>if</code> 分支的 thread 也不能提前执行 
 <li><p><strong>Block</strong>: 一组 threads.</p>
 <ul>
 <li>Block 内的 threads 一定会在同一个 SM 上运行 (为什么?). 一个 SM 可以同时运行很多个 blocks.</li>
+<li>通常一个 block 最多有 1024 threads (32 warps), 即 <code>blockDim.x * blockDim.y * blockDim.z &lt;= 1024</code></li>
 </ul></li>
 <li><p><strong>Grid</strong>: 一组 blocks.</p>
 <ul>
@@ -1213,16 +1228,79 @@ Figure&nbsp;10: Seperate memory systems <span class="citation" data-cites="emory
 </div></li>
 <li><p><strong>Kernel functions</strong> <span class="citation" data-cites="emory"><a href="#ref-emory" role="doc-biblioref">[1]</a></span>:</p>
 <ul>
-<li><code>__host__</code>: 在 CPU 上运行, 只能被 CPU 调用的函数.</li>
-<li><code>__global__</code>: 在 GPU 上运行, 可被 CPU/GPU 调用的函数.</li>
-<li><code>__device__</code>: 在 GPU 上运行, 只能被 GPU 调用的函数.</li>
+<li><code>__host__</code>: CPU 调用, CPU 运行.</li>
+<li><code>__global__</code>: CPU 调用, GPU 运行. 不能有返回值.</li>
+<li><code>__device__</code>: GPU 调用, GPU 运行.</li>
 </ul></li>
 </ul>
+<section id="数据迁移与内存开辟" class="level3">
+<h3 class="anchored" data-anchor-id="数据迁移与内存开辟">数据迁移与内存开辟</h3>
+<blockquote class="blockquote">
+<p>一般来说这是 CUDA 编程 main 函数都会有的框架:</p>
+</blockquote>
+<ul>
+<li><p>CPU Data Preparation:</p>
+<ul>
+<li><code>hostA</code>, <code>hostB</code>, <code>hostC</code> 是指向三个数组的指针 (C 用来储存运算结果).</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> n <span class="op">=</span> <span class="dv">1024</span><span class="op">;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> <span class="op">*</span>hostA<span class="op">,</span> <span class="op">*</span>hostB<span class="op">,</span> <span class="op">*</span>hostC<span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>hostA <span class="op">=</span> <span class="op">(</span><span class="dt">float</span><span class="op">*)</span>malloc<span class="op">(</span>n<span class="op">*</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">float</span><span class="op">));</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>hostB <span class="op">=</span> <span class="op">(</span><span class="dt">float</span><span class="op">*)</span>malloc<span class="op">(</span>n<span class="op">*</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">float</span><span class="op">));</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>hostC <span class="op">=</span> <span class="op">(</span><span class="dt">float</span><span class="op">*)</span>malloc<span class="op">(</span>n<span class="op">*</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">float</span><span class="op">));</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>initCpu<span class="op">(</span>hostA<span class="op">,</span> hostB<span class="op">,</span> n<span class="op">);</span>   <span class="co">// 用提前定义好的函数来初始化输入数据</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>数据迁移到 GPU:</p>
+<ul>
+<li><code>deviceA</code> 里面的内容将是 GPU 上分配的地址.</li>
+<li>之所以 <code>&amp;deviceA</code> 仅仅是因为 <code>cudaMalloc()</code> 需要写 <code>deviceA</code>.</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> <span class="op">*</span>deviceA<span class="op">,</span> <span class="op">*</span>deviceB<span class="op">,</span> <span class="op">*</span>deviceC<span class="op">;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>cudaMalloc<span class="op">((</span><span class="dt">void</span><span class="op">**)&amp;</span>deviceA<span class="op">,</span> n<span class="op">*</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">float</span><span class="op">));</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>cudaMalloc<span class="op">((</span><span class="dt">void</span><span class="op">**)&amp;</span>deviceB<span class="op">,</span> n<span class="op">*</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">float</span><span class="op">));</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>cudaMalloc<span class="op">((</span><span class="dt">void</span><span class="op">**)&amp;</span>deviceC<span class="op">,</span> n<span class="op">*</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">float</span><span class="op">));</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>cudaMemcpy<span class="op">(</span>deviceA<span class="op">,</span> hostA<span class="op">,</span> n<span class="op">*</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">float</span><span class="op">),</span> cudaMemcpyHostToDevice<span class="op">);</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>cudaMemcpy<span class="op">(</span>deviceB<span class="op">,</span> hostB<span class="op">,</span> n<span class="op">*</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">float</span><span class="op">),</span> cudaMemcpyHostToDevice<span class="op">);</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>GPU 执行计算:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>myKernel<span class="op">&lt;&lt;&lt;</span>grid<span class="op">,</span> block<span class="op">&gt;&gt;&gt;(</span>deviceA<span class="op">,</span> deviceB<span class="op">,</span> deviceC<span class="op">,</span> n<span class="op">);</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>计算结果拷贝回 CPU</p>
+<ul>
+<li>也是 <code>cudaMemcpy()</code> 函数.</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cudaMemcpy<span class="op">(</span>hostC<span class="op">,</span> deviceC<span class="op">,</span> n<span class="op">*</span><span class="kw">sizeof</span><span class="op">(</span><span class="dt">float</span><span class="op">),</span> cudaMemcpyDeviceToHost<span class="op">);</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>释放内存:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cudaFree<span class="op">(</span>deviceA<span class="op">);</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>cudaFree<span class="op">(</span>deviceB<span class="op">);</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>cudaFree<span class="op">(</span>deviceC<span class="op">);</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>free<span class="op">(</span>hostA<span class="op">);</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>free<span class="op">(</span>hostB<span class="op">);</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>free<span class="op">(</span>hostC<span class="op">);</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+</section>
+<section id="一些-utilities" class="level3">
+<h3 class="anchored" data-anchor-id="一些-utilities">一些 utilities</h3>
+<ul>
+<li><p>计算 kernel 执行时间的模版:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">float</span> kernel_time_ms <span class="op">=</span> <span class="dv">0</span><span class="op">;</span>   <span class="co">// 用来存 kernel 执行时间, 必须是 float</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co">// 创建开始和结束 event</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="dt">cudaEvent_t</span> startEvent<span class="op">,</span> stopEvent<span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>cudaEventCreate<span class="op">(&amp;</span>startEvent<span class="op">);</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>cudaEventCreate<span class="op">(&amp;</span>stopEvent<span class="op">);</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="co">// "kernel sandwich"</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>cudaEventRecord<span class="op">(</span>startEvent<span class="op">);</span>    <span class="co">// on GPU</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>myKernel<span class="op">&lt;&lt;&lt;</span>grid<span class="op">,</span> block<span class="op">&gt;&gt;&gt;(</span>deviceA<span class="op">,</span> deviceB<span class="op">,</span> deviceC<span class="op">,</span> n<span class="op">);</span>    <span class="co">// on GPU</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>cudaEventRecord<span class="op">(</span>stopEvent<span class="op">);</span>     <span class="co">// on GPU</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>cudaEventSynchronize<span class="op">(</span>stopEvent<span class="op">);</span>    <span class="co">// CPU 等待 GPU 执行到 cudaEventRecord(stopEvent) 这个命令</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>cudaEventElapsedTime<span class="op">(&amp;</span>kernel_time_ms<span class="op">,</span> startEvent<span class="op">,</span> stopEvent<span class="op">);</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+</section>
 <section id="unified-memory-统一内存" class="level3">
 <h3 class="anchored" data-anchor-id="unified-memory-统一内存">Unified Memory 统一内存</h3>
 <ul>
 <li><p>全局变量: 可以被 CPU 和 GPU 访问的变量, <strong>不能用 local variable 的方式声明</strong>!</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>__managed__ <span class="dt">int</span> x<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<div class="sourceCode" id="cb8"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>__managed__ <span class="dt">int</span> x<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 <li><p>统一内存允许 CPU 和 GPU 共享同一块内存区域, 比如 <a href="#lst-managed" class="quarto-xref">Listing&nbsp;<span class="quarto-unresolved-ref">lst-managed</span></a> 中的 CPU 和 GPU 都能访问和改变 <code>x</code> 变量:</p></li>
 </ul>
 <div class="code-with-filename">
@@ -1251,21 +1329,49 @@ Figure&nbsp;10: Seperate memory systems <span class="citation" data-cites="emory
 <span id="lst-managed-20"><a href="#lst-managed-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>输出:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 0</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 0</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>注意是 CPU 先打印 (因为没有用 <code>cudaDeviceSynchronize()</code>)!</p>
 </section>
 <section id="synchronization-同步" class="level3">
 <h3 class="anchored" data-anchor-id="synchronization-同步">Synchronization 同步</h3>
 <p>CPU 将指令发到 GPU 之后<strong>不会等 GPU 执行完再继续往下执行</strong> (默认 async), 如果需要等 GPU 执行完再继续, 将 <code>my_kernel&lt;&lt;&lt;1,1&gt;&gt;&gt;(x_ptr);</code> 改为:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode cu code-with-copy"><code class="sourceCode isocpp"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>my_kernel<span class="op">&lt;&lt;&lt;</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span><span class="op">&gt;&gt;&gt;(</span>x_ptr<span class="op">);</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>cudaDeviceSynchronize<span class="op">();</span> <span class="co">// Wait for GPU to finish</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode cu code-with-copy"><code class="sourceCode isocpp"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>my_kernel<span class="op">&lt;&lt;&lt;</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span><span class="op">&gt;&gt;&gt;(</span>x_ptr<span class="op">);</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>cudaDeviceSynchronize<span class="op">();</span> <span class="co">// Wait for GPU to finish</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>输出:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">GPU</span> sees x = 1</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="ex">CPU</span> sees x = 1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="stream-流" class="level3">
 <h3 class="anchored" data-anchor-id="stream-流">Stream 流</h3>
+</section>
+</section>
+<section id="hpc" class="level2">
+<h2 class="anchored" data-anchor-id="hpc">HPC</h2>
+<section id="gemm" class="level3">
+<h3 class="anchored" data-anchor-id="gemm">GEMM</h3>
+<div class="sourceCode" id="cb12"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">void</span> matmulKernel1<span class="op">(</span><span class="at">const</span> <span class="dt">float</span> <span class="op">*</span>A<span class="op">,</span> <span class="at">const</span> <span class="dt">float</span> <span class="op">*</span>B<span class="op">,</span> <span class="dt">float</span> <span class="op">*</span>C<span class="op">,</span> <span class="dt">unsigned</span> M<span class="op">,</span> <span class="dt">unsigned</span> N<span class="op">,</span> <span class="dt">unsigned</span> K<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> m <span class="op">=</span> blockIdx<span class="op">.</span>y <span class="op">*</span> blockDim<span class="op">.</span>y <span class="op">+</span> threadIdx<span class="op">.</span>y<span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">int</span> n <span class="op">=</span> blockIdx<span class="op">.</span>x <span class="op">*</span> blockDim<span class="op">.</span>x <span class="op">+</span> threadIdx<span class="op">.</span>x<span class="op">;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>m <span class="op">&lt;</span> M <span class="op">&amp;&amp;</span> n <span class="op">&lt;</span> N<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">float</span> value <span class="op">=</span> <span class="fl">0.0</span><span class="bu">f</span><span class="op">;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> <span class="op">(</span><span class="dt">int</span> s <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> s <span class="op">&lt;</span> K<span class="op">;</span> <span class="op">++</span>s<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>            value <span class="op">+=</span> A<span class="op">[</span>m <span class="op">*</span> K <span class="op">+</span> s<span class="op">]</span> <span class="op">*</span> B<span class="op">[</span>s <span class="op">*</span> N <span class="op">+</span> n<span class="op">];</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>        C<span class="op">[</span>m <span class="op">*</span> N <span class="op">+</span> n<span class="op">]</span> <span class="op">=</span> value<span class="op">;</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="fig-gemm1" class="quarto-float quarto-figure quarto-figure-center anchored" width="80%">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gemm1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="gemm1.png" id="fig-gemm1" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-gemm1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11
+</figcaption>
+</figure>
+</div>
 </section>
 </section>
 <section id="cuda-的-pytorch-接口" class="level2">
@@ -1709,8 +1815,8 @@ Figure&nbsp;10: Seperate memory systems <span class="citation" data-cites="emory
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../nn-essence/nn-essence.html" class="pagination-link" aria-label="The Essence of NN 神经网络的本质">
-        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../cc-algo/cc-algo.html" class="pagination-link" aria-label="Algorithm Notes 算法笔记">
+        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Algorithm Notes 算法笔记</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

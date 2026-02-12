@@ -1343,7 +1343,6 @@ Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 </ul></li>
 </ul></li>
 </ul></li>
-<li><p><strong>GEMM (GEneral Matrix-Matrix Multiplication)</strong>: 通用矩阵乘法.</p></li>
 <li><p><strong>CIM (Compute In Memory)</strong>: 存内计算.</p>
 <ul>
 <li>相关概念: <strong>PIM/PNM (Processing In/Near Memory)</strong>.</li>
@@ -1351,6 +1350,30 @@ Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <li><p><strong>Tiling 分块/瓦片</strong>: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.</p></li>
 <li><p><strong>PTX (Parallel Thread eXecution)</strong>: NVIDIA GPU 的汇编语言.</p></li>
 <li><p><strong>TBE (Tensor Boost Engine)</strong>: 华为自研的、专门用于在昇腾AI处理器 (NPU) 上编写和运行高性能计算算子 (Operator) 的核心组件.</p></li>
+<li><p><strong>BLAS (Basic Linear Algebra Subproblems)</strong>: 计算机的几乎所有的数值计算 (QR 分解, 神经网络前向传播, etc.) 最终都会退化成以下三种形式 (当然前两种是第三种的特殊情况). BLAS 就是定义下面三个 level 的规范. (<em>cuBLAS</em> 是 NVIDIA 的 BLAS 实现, Apple 的 BLAS 实现是 <em>Accelerate</em>).</p>
+<ul>
+<li><strong>Level 1</strong>: 数据访问量 <span class="math inline">\(\mathcal{O}(N)\)</span> 的系列操作, 包括:</li>
+</ul>
+<p><span class="math display">\[
+  \begin{aligned}
+  \mathbf{v} \mathrel{{+}{=}}&amp; \alpha \mathbf{w} \\
+  a =&amp; \mathbf{v} \cdot \mathbf{w} \\
+  a =&amp; \lVert \mathbf{v} \rVert
+  \end{aligned}
+  \]</span></p>
+<ul>
+<li><strong>Level 2</strong>: 数据访问量 <span class="math inline">\(\mathcal{O}(N^2)\)</span> 的系列操作, 比如矩阵-向量乘法:</li>
+</ul>
+<p><span class="math display">\[
+  \mathbf{v} = \alpha \mathbf{A} \mathbf{w} + \beta \mathbf{v}
+  \]</span></p>
+<ul>
+<li><strong>Level 3</strong>: 数据访问量 <span class="math inline">\(\mathcal{O}(N^3)\)</span> 的系列操作, 比如 <strong>GEMM (GEneral Matrix-Matrix Multiplication, 通用矩阵乘法)</strong>:</li>
+</ul>
+<p><span class="math display">\[
+  \mathbf{C} = \alpha \mathbf{A} \mathbf{B} + \beta \mathbf{C}
+  \]</span></p></li>
+<li><p><strong>CUDA Toolkit</strong>: NV 发布的 CUDA 工具包, 包含了 CUDA 编译器 (NVCC)，CUDA线性代数库 (cuBLAS) 等组件. 按照 <a href="https://developer.nvidia.com/cuda-downloads">官方提示</a> 安装.</p></li>
 </ul>
 </section>
 <section id="optimizer-in-ml" class="level3 page-columns page-full">
@@ -1691,6 +1714,7 @@ Figure&nbsp;23: AMD GPU 2015 采用 2.5D 封装.
 <li><strong>FreeRTOS</strong>: 设计小巧, 核心代码只有 3 到 4 个 C 文件, 支持 ARM, x86, RISCV <span class="citation" data-cites="Lazyparser_2025_bilibili"><a href="#ref-Lazyparser_2025_bilibili" role="doc-biblioref">[29]</a></span>.</li>
 <li><strong>RT-Thread</strong>: 也是一个 RTOS</li>
 </ul></li>
+<li><strong>Primitive 原语</strong>: 一段不能被中断打断的程序 (属于原子操作).</li>
 </ul>
 </section>
 <section id="ysyx-terms" class="level2">

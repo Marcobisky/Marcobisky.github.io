@@ -132,8 +132,6 @@
             - **QLoRA**: 结合了 $4$-bit 量化和 LoRA 微调.
             - **AWQ (Activation-aware Weight Quantization)**: 关注低精度量化 (INT4/INT3) 分析激活值分布, 优先保护对模型输出影响较大的权重, 适合边缘设备.
 
-- **GEMM (GEneral Matrix-Matrix Multiplication)**: 通用矩阵乘法.
-
 - **CIM (Compute In Memory)**: 存内计算.
     - 相关概念: **PIM/PNM (Processing In/Near Memory)**.
 
@@ -142,6 +140,30 @@
 - **PTX (Parallel Thread eXecution)**: NVIDIA GPU 的汇编语言.
 
 - **TBE (Tensor Boost Engine)**: 华为自研的、专门用于在昇腾AI处理器 (NPU) 上编写和运行高性能计算算子 (Operator) 的核心组件.
+
+
+- **BLAS (Basic Linear Algebra Subproblems)**: 计算机的几乎所有的数值计算 (QR 分解, 神经网络前向传播, etc.) 最终都会退化成以下三种形式 (当然前两种是第三种的特殊情况). BLAS 就是定义下面三个 level 的规范. (*cuBLAS* 是 NVIDIA 的 BLAS 实现, Apple 的 BLAS 实现是 *Accelerate*).
+    - **Level 1**: 数据访问量 $\mathcal{O}(N)$ 的系列操作, 包括:
+    
+    $$
+    \begin{aligned}
+    \mathbf{v} \mathrel{{+}{=}}& \alpha \mathbf{w} \\
+    a =& \mathbf{v} \cdot \mathbf{w} \\
+    a =& \lVert \mathbf{v} \rVert
+    \end{aligned}
+    $$
+    - **Level 2**: 数据访问量 $\mathcal{O}(N^2)$ 的系列操作, 比如矩阵-向量乘法:
+
+    $$
+    \mathbf{v} = \alpha \mathbf{A} \mathbf{w} + \beta \mathbf{v}
+    $$
+    - **Level 3**: 数据访问量 $\mathcal{O}(N^3)$ 的系列操作, 比如 **GEMM (GEneral Matrix-Matrix Multiplication, 通用矩阵乘法)**:
+
+    $$
+    \mathbf{C} = \alpha \mathbf{A} \mathbf{B} + \beta \mathbf{C}
+    $$
+
+- **CUDA Toolkit**: NV 发布的 CUDA 工具包, 包含了 CUDA 编译器 (NVCC)，CUDA线性代数库 (cuBLAS) 等组件. 按照 [官方提示](https://developer.nvidia.com/cuda-downloads) 安装.
 
 ### Optimizer in ML
 

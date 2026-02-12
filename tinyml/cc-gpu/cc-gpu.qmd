@@ -168,10 +168,12 @@ title: "GPU 原理速成"
 - **CUDA Core/SP (Stream Processor)**
     - 每个 CUDA Core 都有自己的 PC.
     - 一个 CUDA Core 上面只能计算单精度/整数
+    - CUDA Core 之间共享 L1 cache.
 
 - **SM (Streaming Multiprocessor)**: 包括很多 CUDA Cores, SFU (Special Function Unit, 比如计算 `__cos()`), LD/ST 单元, Scheduler, etc.
     - Pascal 架构中一个 SM 有 128 个 CUDA 核心.
     - 一个 SM 里面只有一个大的 Reg File/shared memory/L1 cache, 而不是每个 CUDA Core 都有.
+    - SM 之间共享 L2 cache.
         
 - **GPC (Graphics Processing Cluster)**: 包括多个 SM.
 
@@ -195,6 +197,7 @@ title: "GPU 原理速成"
 
 - **Block**: 一组 threads.
     - Block 内的 threads 一定会在同一个 SM 上运行 (为什么?). 一个 SM 可以同时运行很多个 blocks.
+    - 通常一个 block 最多有 1024 threads (32 warps), 即 `blockDim.x * blockDim.y * blockDim.z <= 1024`
 
 - **Grid**: 一组 blocks.
     - 一个 kernel 函数一般会启动很多个 grid. 但一般是先决定 block 的大小 (一般是 256, 但不能太大, 不然放不进一个 SM 里), 再用 `N / 256` 来自动算出 grid 的大小.
@@ -218,9 +221,83 @@ title: "GPU 原理速成"
     ![Seperate memory systems @emory](seperate-memory.png){#fig-seperate-memory width=80%}
 
 - **Kernel functions** @emory:
-    - `__host__`: 在 CPU 上运行, 只能被 CPU 调用的函数.
-    - `__global__`: 在 GPU 上运行, 可被 CPU/GPU 调用的函数.
-    - `__device__`: 在 GPU 上运行, 只能被 GPU 调用的函数.
+    - `__host__`: CPU 调用, CPU 运行.
+    - `__global__`: CPU 调用, GPU 运行. 不能有返回值.
+    - `__device__`: GPU 调用, GPU 运行.
+
+### 数据迁移与内存开辟
+
+> 一般来说这是 CUDA 编程 main 函数都会有的框架:
+
+- CPU Data Preparation: 
+    - `hostA`, `hostB`, `hostC` 是指向三个数组的指针 (C 用来储存运算结果).
+
+    ```cpp
+    int n = 1024;
+    float *hostA, *hostB, *hostC;
+    hostA = (float*)malloc(n*sizeof(float));
+    hostB = (float*)malloc(n*sizeof(float));
+    hostC = (float*)malloc(n*sizeof(float));
+    initCpu(hostA, hostB, n);   // 用提前定义好的函数来初始化输入数据
+    ```
+
+- 数据迁移到 GPU: 
+    - `deviceA` 里面的内容将是 GPU 上分配的地址.
+    - 之所以 `&deviceA` 仅仅是因为 `cudaMalloc()` 需要写 `deviceA`.
+
+    ```cpp
+    float *deviceA, *deviceB, *deviceC;
+    cudaMalloc((void**)&deviceA, n*sizeof(float));
+    cudaMalloc((void**)&deviceB, n*sizeof(float));
+    cudaMalloc((void**)&deviceC, n*sizeof(float));
+    cudaMemcpy(deviceA, hostA, n*sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(deviceB, hostB, n*sizeof(float), cudaMemcpyHostToDevice);
+    ```
+
+- GPU 执行计算:
+
+    ```cpp
+    myKernel<<<grid, block>>>(deviceA, deviceB, deviceC, n);
+    ```
+
+- 计算结果拷贝回 CPU 
+    - 也是 `cudaMemcpy()` 函数.
+
+    ```cpp
+    cudaMemcpy(hostC, deviceC, n*sizeof(float), cudaMemcpyDeviceToHost);
+    ```
+
+- 释放内存:
+
+    ```cpp
+    cudaFree(deviceA);
+    cudaFree(deviceB);
+    cudaFree(deviceC);
+    free(hostA);
+    free(hostB);
+    free(hostC);
+    ```
+
+### 一些 utilities
+
+- 计算 kernel 执行时间的模版:
+
+    ```cpp
+    float kernel_time_ms = 0;   // 用来存 kernel 执行时间, 必须是 float
+
+    // 创建开始和结束 event
+    cudaEvent_t startEvent, stopEvent;
+    cudaEventCreate(&startEvent);
+    cudaEventCreate(&stopEvent);
+
+    // "kernel sandwich"
+    cudaEventRecord(startEvent);    // on GPU
+    myKernel<<<grid, block>>>(deviceA, deviceB, deviceC, n);    // on GPU
+    cudaEventRecord(stopEvent);     // on GPU
+
+    cudaEventSynchronize(stopEvent);    // CPU 等待 GPU 执行到 cudaEventRecord(stopEvent) 这个命令
+    cudaEventElapsedTime(&kernel_time_ms, startEvent, stopEvent);
+    ```
 
 ### Unified Memory 统一内存
 
@@ -263,6 +340,26 @@ CPU sees x = 1
 
 ### Stream 流
 
+## HPC
+
+### GEMM
+
+```cpp
+void matmulKernel1(const float *A, const float *B, float *C, unsigned M, unsigned N, unsigned K) {
+    int m = blockIdx.y * blockDim.y + threadIdx.y;
+    int n = blockIdx.x * blockDim.x + threadIdx.x;
+
+    if (m < M && n < N) {
+        float value = 0.0f;
+        for (int s = 0; s < K; ++s) {
+            value += A[m * K + s] * B[s * N + n];
+        }
+        C[m * N + n] = value;
+    }
+}
+```
+
+![](gemm1.png){#fig-gemm1 width=80%}
 
 ## CUDA 的 Pytorch 接口
 
