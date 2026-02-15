@@ -57,7 +57,7 @@ demo-proj/
     - **构建阶段**
     - **安装阶段**
 
-- 一些 **CMake built-in variables 内置变量**:
+- **CMake built-in variables 内置变量**: 不能看作普通的变量! CMake 中会自动利用和管理这些变量, 比如 `CMAKE_MODULE_PATH` 这个宏能告诉 CMake 去哪里找文件.
     - `CMAKE_SOURCE_DIR`: 顶层 `CMakeLists.txt` 所在目录, 比如 `demo-proj/`.
     - `CMAKE_BINARY_DIR`: `cmake ..` 命令运行的根目录, 一般是 `demo-proj/build/`.
     - `CMAKE_CURRENT_SOURCE_DIR`: **当前** `CMakeLists.txt` 所在目录, 可以是顶层也可以是非顶层 (比如 `demo-proj/math/`).
@@ -181,6 +181,19 @@ demo-proj/
         CC2 = src;test5
         ```
 
+- 引入 Macro/Function
+
+    ```cmake
+    include(cmake/utils.cmake)
+    # 可以使用 cmake/utils.cmake 里面定义的 Macro/Function
+    ```
+    - 告诉 CMake 去哪里找文件: 通过增加 `CMAKE_MODULE_PATH` 这个宏.
+
+        ```cmake
+        list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+        include(utils)  # 不是 utils.cmake!
+        # 可以使用 cmake/utils.cmake 里面定义的 Macro/Function
+        ```
 
 - 分支
 
@@ -355,6 +368,10 @@ demo-proj/
 
 - **安装依赖方便**
     - Bazel 有很多第三方库. 比如硬件开发要用的 `verilator`, 引用库后 `bazel build` 会自动下载这个工具链的可执行文件到当前目录下的比如 `./bazel-bin/external/verilator` 位置! 极其方便!
+
+#### 基本概念与设计哲学
+
+- **Rule 规则**: 
 
 #### Usage
 
