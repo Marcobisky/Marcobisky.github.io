@@ -615,7 +615,7 @@ window.Quarto = {
   <li><a href="#memory-存储器-terms" id="toc-memory-存储器-terms" class="nav-link" data-scroll-target="#memory-存储器-terms">Memory 存储器 Terms</a></li>
   </ul></li>
   <li><a href="#riscv" id="toc-riscv" class="nav-link" data-scroll-target="#riscv">RISCV</a></li>
-  <li><a href="#c-compile-terms" id="toc-c-compile-terms" class="nav-link" data-scroll-target="#c-compile-terms">C Compile Terms</a></li>
+  <li><a href="#compile-terms" id="toc-compile-terms" class="nav-link" data-scroll-target="#compile-terms">Compile Terms</a></li>
   <li><a href="#operating-system-terms" id="toc-operating-system-terms" class="nav-link" data-scroll-target="#operating-system-terms">Operating System Terms</a></li>
   <li><a href="#ysyx-terms" id="toc-ysyx-terms" class="nav-link" data-scroll-target="#ysyx-terms">YSYX Terms</a></li>
   <li><a href="#integrated-circuit-terms" id="toc-integrated-circuit-terms" class="nav-link" data-scroll-target="#integrated-circuit-terms">Integrated Circuit Terms</a></li>
@@ -699,7 +699,11 @@ window.Quarto = {
 <h3 class="anchored" data-anchor-id="interface">Interface</h3>
 <ul>
 <li><p><strong>PMOD (Peripheral Module) 接口</strong>: 一组 2*6 排针的引脚 PMOD. 定义了电源、地线、以及最多 8 条可用于通信的信号线. PMOD模块通常通过 SPI、I2C 或 GPIO (通用数字输入输出) 与主控通信. 你可以买到很多支持 PMOD 的模块, 如传感器、显示屏、存储器等.</p></li>
-<li><p><strong>JTAG 接口</strong>: 一种用于调试和编程的标准接口.</p></li>
+<li><p><strong>JTAG 接口</strong>: 一种用于调试和编程的标准接口 (TDI, TDO, TCK, TMS)</p>
+<ul>
+<li>JTAG 组件存在于一颗芯片 (比如 CPU) 内部, 对于芯片来说是透明的 (不知道 JTAG 的存在).</li>
+<li>JTAG 可用于读出所有引脚的值、向芯片内部的 flash 写入数据、甚至阻止 CPU 控制引脚的电平输出转而由 JTAG 来控制输出. 参考 <a href="https://medium.com/@aliaksandr.kavalchuk/diving-into-jtag-protocol-part-1-overview-fbdc428d3a16">这篇 Medium 博客</a>.</li>
+</ul></li>
 <li><p><strong>AXI (Advanced eXtensible Interface) 接口</strong>: CPU 与外设 (内存控制器, DMA, CFU, IP 核) 之间的通信协议.</p>
 <ul>
 <li>比如 ZYNQ 的 <strong>PS (Processing System)</strong> 和 <strong>PL (Programmable Logic)</strong> 之间的通信就是通过 AXI 接口 (见 <a href="../cc-fpga/cc-fpga.html#sec-ps-structure">FPGA 原理速成</a>).</li>
@@ -993,7 +997,7 @@ Figure&nbsp;6: Transistor architecture 的后续发展 <span class="citation" da
 </div>
 </div>
 <ul>
-<li><strong>Power delivery network (PDN)</strong>: 电源分配网络.
+<li><p><strong>Power delivery network (PDN)</strong>: 电源分配网络.</p>
 <ul>
 <li><strong>Power rail 电源线</strong>: 给晶体管上电的金属线.</li>
 <li><strong>Backside power delivery (BSPD)</strong>: 通过芯片背面供电 (而不是跟信号线在同一侧), Intel 独占的技术 (截止 2025)
@@ -1012,6 +1016,8 @@ Figure&nbsp;7: BSPD 示意图 <span class="citation" data-cites="Hossen2020Power
 </figcaption>
 </figure>
 </div></li>
+<li><p><strong>IR Drop</strong>: 芯片供电网络 供电引脚 和 内部晶体管 上的电压不是完全一样的 (因为 PDN 的 Current 和 Resistance), 可将最坏情况定义为 IR Drop. 如果 IR Drop 过大, 芯片逻辑会出错或无法工作.</p></li>
+<li><p><strong>Congestion 拥塞</strong>: 在芯片的某个局部区域 routing 时, 发现空间不够或很拥挤 (需要连接的金属线数量, 超过了该区域实际能容纳的金属线数量).</p></li>
 </ul>
 <section id="packaging-封装" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="packaging-封装">Packaging 封装</h3>
@@ -1445,6 +1451,9 @@ Figure&nbsp;19: AI 编译栈和编程体系
 </figcaption>
 </figure>
 </div>
+<ul>
+<li><strong>Triton related</strong>: Pass (Operation Pass, Function Pass, Module Pass, Loop Pass, Analysis Pass), Pass 管理器, <code>@triton.jit</code> 机制, MLIR 通用优化 (CSE, DCE, Inlining, etc.), Triton IR, Triton IR to TritonGPU, TritonGPU 优化 (Coalesce, Matmul acceleration, Pipeline, Prefetch, Remove layout, etc.), CTA, Linalg, Layout (CTA Layout, Shared Layout, Blocked Layout, NvidiaMma Layout, DotOperand Layout, Slice Layout), MLIR</li>
+</ul>
 </section>
 <section id="benchmarks-in-ml" class="level3">
 <h3 class="anchored" data-anchor-id="benchmarks-in-ml">Benchmarks in ML</h3>
@@ -1651,8 +1660,8 @@ Figure&nbsp;23: AMD GPU 2015 采用 2.5D 封装.
 <li><p><strong>RVV (RISCV Vector Extension)</strong>: RISCV 向量扩展.</p></li>
 </ul>
 </section>
-<section id="c-compile-terms" class="level2 page-columns page-full">
-<h2 class="anchored" data-anchor-id="c-compile-terms">C Compile Terms</h2>
+<section id="compile-terms" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="compile-terms">Compile Terms</h2>
 <ul>
 <li><p><strong>gcc (GNU Compiler Collection)</strong>: GNU 编译器集合, 包括 C、C++、Go 等编程语言的编译器.</p>
 <ul>
@@ -1704,6 +1713,23 @@ Figure&nbsp;23: AMD GPU 2015 采用 2.5D 封装.
 </div></div><ul>
 <li><p><strong>Intrinsic 内联</strong>: 将汇编代码嵌入到 <code>C/C++</code> 代码中. 比如在想在 <code>C++</code> 中嵌入 RVV 汇编代码, 可以先 <code>#include &lt;riscv_vector.h&gt;</code> 头文件, 然后就可以这样用:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode cpp code-with-copy"><code class="sourceCode cpp"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="dt">size_t</span> vl <span class="op">=</span> __riscv_vsetvlmax_e32m1<span class="op">();</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>JIT (Just-In-Time) Compiler</strong></p></li>
+<li><p><strong>CPython</strong>: 用 C 写的 Python 解释器.</p>
+<ul>
+<li><p>Python 的底层原理体现了「<strong>程序即数据</strong>」的思想, Python 代码 (仅仅是一段文本) 首先被解析为 <strong>AST</strong>, 然后被处理为 <strong>Bytecode</strong> (包含 <code>opcode</code>, <code>oprand</code> 等). CPython 逐条读取 Bytecode (相当于访问数据), 然后执行对应的操作.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> <span class="op">(;;)</span> <span class="op">{</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">switch</span><span class="op">(</span>opcode<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> LOAD_FAST<span class="op">:</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> BINARY_ADD<span class="op">:</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="op">...</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p>Question: 既然 Python 的底层是 C, 为什么在 RISCV 平台上移植 Python 有困难?</p>
+<ul>
+<li>首先运行纯 Python 没有困难.</li>
+<li>有困难的是 Python 的第三方库 (如 NumPy, SciPy, Pytorch), 因为它们的底层实现是 C++/CUDA 编译出来的二进制, RISCV 根本不认识这些指令.</li>
+</ul></li>
+</ul></li>
 </ul>
 </section>
 <section id="operating-system-terms" class="level2">

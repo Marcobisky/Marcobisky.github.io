@@ -191,4 +191,24 @@ TODO
 
     ![(a) Single Head Attention; (b) 3-head Attention. (`dim = 6`, `dim_head = 2`, `heads = 3`, `inner_dim = 2*3 = 6 = dim`)](mha.png){#fig-mha}
 
+## Fine-tuning
+
+### LoRA
+
+- 在 Pre-training 完成后, 需要针对特定的任务对神经网络的权重进行微调 (其实还是训练). 对于一个 $a \times b$ 的矩阵 $W$ (比如一个全连接层), 本来是要对它所有的 entry 找梯度 (即 $\Delta W$). 但是这样运算量非常大 (为 $a \cdot b$), 我们假设这个变化 $\Delta W$ 可以被两个矩阵 $A,B$ 的乘积近似表示: $$\Delta W = AB$$ 这样就只需要对 $A$ 和 $B$ 找梯度了 (大小分别为 $a \times r, r \times b$), 计算量大大减少 (为 $r \cdot (a+b)$).
+    - 注意是对 $\Delta W$ 低秩近似, 而不是 $W$ 低秩近似!
+    - 这样做参数变化的自由度减少了.
+
+- 一个示意的实现:
+
+```{.python filename="lora.py" #lst-lorapy}
+{{< include src/lora.py >}}
+```
+
+- 实际上微调不涉及模型源代码的修改, 大概是这样:
+
+```{.python filename="lora-in-practice.py" #lst-lorainpracticepy}
+{{< include src/lora-in-practice.py >}}
+```
+
 ## References

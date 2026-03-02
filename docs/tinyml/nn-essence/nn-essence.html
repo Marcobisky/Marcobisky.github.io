@@ -20,6 +20,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -555,6 +590,10 @@ window.Quarto = {
   <li><a href="#杂项" id="toc-杂项" class="nav-link" data-scroll-target="#杂项">杂项</a></li>
   <li><a href="#cnn" id="toc-cnn" class="nav-link" data-scroll-target="#cnn">CNN</a></li>
   <li><a href="#transformer" id="toc-transformer" class="nav-link" data-scroll-target="#transformer">Transformer</a></li>
+  <li><a href="#fine-tuning" id="toc-fine-tuning" class="nav-link" data-scroll-target="#fine-tuning">Fine-tuning</a>
+  <ul class="collapse">
+  <li><a href="#lora" id="toc-lora" class="nav-link" data-scroll-target="#lora">LoRA</a></li>
+  </ul></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -818,6 +857,108 @@ Figure&nbsp;3: (a) Single Head Attention; (b) 3-head Attention. (<code>dim = 6</
 </figure>
 </div></li>
 </ul>
+</section>
+<section id="fine-tuning" class="level2">
+<h2 class="anchored" data-anchor-id="fine-tuning">Fine-tuning</h2>
+<section id="lora" class="level3">
+<h3 class="anchored" data-anchor-id="lora">LoRA</h3>
+<ul>
+<li>在 Pre-training 完成后, 需要针对特定的任务对神经网络的权重进行微调 (其实还是训练). 对于一个 <span class="math inline">\(a \times b\)</span> 的矩阵 <span class="math inline">\(W\)</span> (比如一个全连接层), 本来是要对它所有的 entry 找梯度 (即 <span class="math inline">\(\Delta W\)</span>). 但是这样运算量非常大 (为 <span class="math inline">\(a \cdot b\)</span>), 我们假设这个变化 <span class="math inline">\(\Delta W\)</span> 可以被两个矩阵 <span class="math inline">\(A,B\)</span> 的乘积近似表示: <span class="math display">\[\Delta W = AB\]</span> 这样就只需要对 <span class="math inline">\(A\)</span> 和 <span class="math inline">\(B\)</span> 找梯度了 (大小分别为 <span class="math inline">\(a \times r, r \times b\)</span>), 计算量大大减少 (为 <span class="math inline">\(r \cdot (a+b)\)</span>).
+<ul>
+<li>注意是对 <span class="math inline">\(\Delta W\)</span> 低秩近似, 而不是 <span class="math inline">\(W\)</span> 低秩近似!</li>
+<li>这样做参数变化的自由度减少了.</li>
+</ul></li>
+<li>一个示意的实现:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>lora.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-lorapy" data-filename="lora.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-lorapy-1"><a href="#lst-lorapy-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 一个示意的 LoRA 实现.</span></span>
+<span id="lst-lorapy-2"><a href="#lst-lorapy-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 「示意」的原因是这里没有加载预训练权重, 也没有训练过程</span></span>
+<span id="lst-lorapy-3"><a href="#lst-lorapy-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-4"><a href="#lst-lorapy-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="lst-lorapy-5"><a href="#lst-lorapy-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="lst-lorapy-6"><a href="#lst-lorapy-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="lst-lorapy-7"><a href="#lst-lorapy-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-8"><a href="#lst-lorapy-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 一个带 LoRA 的线性层</span></span>
+<span id="lst-lorapy-9"><a href="#lst-lorapy-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LinearWithLoRA(nn.Module):</span>
+<span id="lst-lorapy-10"><a href="#lst-lorapy-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_dim, out_dim, r<span class="op">=</span><span class="dv">4</span>, scale<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="lst-lorapy-11"><a href="#lst-lorapy-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="lst-lorapy-12"><a href="#lst-lorapy-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 冻结基础权重</span></span>
+<span id="lst-lorapy-13"><a href="#lst-lorapy-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.base <span class="op">=</span> nn.Linear(in_dim, out_dim)</span>
+<span id="lst-lorapy-14"><a href="#lst-lorapy-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.base.weight.requires_grad <span class="op">=</span> <span class="va">False</span>  <span class="co"># 冻结 base 权重</span></span>
+<span id="lst-lorapy-15"><a href="#lst-lorapy-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-16"><a href="#lst-lorapy-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># LoRA 的低秩矩阵 A 和 B</span></span>
+<span id="lst-lorapy-17"><a href="#lst-lorapy-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.A <span class="op">=</span> nn.Parameter(torch.randn(r, in_dim) <span class="op">*</span> <span class="fl">0.01</span>)  <span class="co"># r×in_dim</span></span>
+<span id="lst-lorapy-18"><a href="#lst-lorapy-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.B <span class="op">=</span> nn.Parameter(torch.randn(out_dim, r) <span class="op">*</span> <span class="fl">0.01</span>) <span class="co"># out_dim×r</span></span>
+<span id="lst-lorapy-19"><a href="#lst-lorapy-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-20"><a href="#lst-lorapy-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.scale <span class="op">=</span> scale</span>
+<span id="lst-lorapy-21"><a href="#lst-lorapy-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-22"><a href="#lst-lorapy-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="lst-lorapy-23"><a href="#lst-lorapy-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 原始线性输出</span></span>
+<span id="lst-lorapy-24"><a href="#lst-lorapy-24" aria-hidden="true" tabindex="-1"></a>        out_base <span class="op">=</span> <span class="va">self</span>.base(x)</span>
+<span id="lst-lorapy-25"><a href="#lst-lorapy-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 计算 Delta W = B @ A</span></span>
+<span id="lst-lorapy-26"><a href="#lst-lorapy-26" aria-hidden="true" tabindex="-1"></a>        delta_W <span class="op">=</span> <span class="va">self</span>.B <span class="op">@</span> <span class="va">self</span>.A</span>
+<span id="lst-lorapy-27"><a href="#lst-lorapy-27" aria-hidden="true" tabindex="-1"></a>        out_lora <span class="op">=</span> F.linear(x, delta_W <span class="op">*</span> <span class="va">self</span>.scale)</span>
+<span id="lst-lorapy-28"><a href="#lst-lorapy-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 计算最终输出</span></span>
+<span id="lst-lorapy-29"><a href="#lst-lorapy-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out_base <span class="op">+</span> out_lora</span>
+<span id="lst-lorapy-30"><a href="#lst-lorapy-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-31"><a href="#lst-lorapy-31" aria-hidden="true" tabindex="-1"></a><span class="co"># 测试</span></span>
+<span id="lst-lorapy-32"><a href="#lst-lorapy-32" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearWithLoRA(<span class="dv">128</span>, <span class="dv">64</span>, r<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="lst-lorapy-33"><a href="#lst-lorapy-33" aria-hidden="true" tabindex="-1"></a><span class="bu">input</span> <span class="op">=</span> torch.randn(<span class="dv">16</span>, <span class="dv">128</span>)</span>
+<span id="lst-lorapy-34"><a href="#lst-lorapy-34" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> model(<span class="bu">input</span>)</span>
+<span id="lst-lorapy-35"><a href="#lst-lorapy-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(out.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>实际上微调不涉及模型源代码的修改, 大概是这样:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>lora-in-practice.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-lorainpracticepy" data-filename="lora-in-practice.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-lorainpracticepy-1"><a href="#lst-lorainpracticepy-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 导入模型和 tokenizer</span></span>
+<span id="lst-lorainpracticepy-2"><a href="#lst-lorainpracticepy-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer</span>
+<span id="lst-lorainpracticepy-3"><a href="#lst-lorainpracticepy-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-4"><a href="#lst-lorainpracticepy-4" aria-hidden="true" tabindex="-1"></a>model_name <span class="op">=</span> <span class="st">"meta-llama/Llama-2-7b"</span></span>
+<span id="lst-lorainpracticepy-5"><a href="#lst-lorainpracticepy-5" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_name)</span>
+<span id="lst-lorainpracticepy-6"><a href="#lst-lorainpracticepy-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(model_name)</span>
+<span id="lst-lorainpracticepy-7"><a href="#lst-lorainpracticepy-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-8"><a href="#lst-lorainpracticepy-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 生成 lora_model</span></span>
+<span id="lst-lorainpracticepy-9"><a href="#lst-lorainpracticepy-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peft <span class="im">import</span> LoraConfig, get_peft_model</span>
+<span id="lst-lorainpracticepy-10"><a href="#lst-lorainpracticepy-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-11"><a href="#lst-lorainpracticepy-11" aria-hidden="true" tabindex="-1"></a>lora_config <span class="op">=</span> LoraConfig(</span>
+<span id="lst-lorainpracticepy-12"><a href="#lst-lorainpracticepy-12" aria-hidden="true" tabindex="-1"></a>    r<span class="op">=</span><span class="dv">8</span>,                <span class="co"># 低秩近似的 rank</span></span>
+<span id="lst-lorainpracticepy-13"><a href="#lst-lorainpracticepy-13" aria-hidden="true" tabindex="-1"></a>    lora_alpha<span class="op">=</span><span class="dv">16</span>,      <span class="co"># 缩放因子</span></span>
+<span id="lst-lorainpracticepy-14"><a href="#lst-lorainpracticepy-14" aria-hidden="true" tabindex="-1"></a>    lora_dropout<span class="op">=</span><span class="fl">0.1</span>,   <span class="co"># dropout（正则化）</span></span>
+<span id="lst-lorainpracticepy-15"><a href="#lst-lorainpracticepy-15" aria-hidden="true" tabindex="-1"></a>    target_modules<span class="op">=</span>[<span class="st">"q_proj"</span>, <span class="st">"v_proj"</span>],</span>
+<span id="lst-lorainpracticepy-16"><a href="#lst-lorainpracticepy-16" aria-hidden="true" tabindex="-1"></a>    task_type<span class="op">=</span><span class="st">"CAUSAL_LM"</span>,</span>
+<span id="lst-lorainpracticepy-17"><a href="#lst-lorainpracticepy-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="lst-lorainpracticepy-18"><a href="#lst-lorainpracticepy-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-19"><a href="#lst-lorainpracticepy-19" aria-hidden="true" tabindex="-1"></a>lora_model <span class="op">=</span> get_peft_model(model, lora_config)</span>
+<span id="lst-lorainpracticepy-20"><a href="#lst-lorainpracticepy-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-21"><a href="#lst-lorainpracticepy-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 训练</span></span>
+<span id="lst-lorainpracticepy-22"><a href="#lst-lorainpracticepy-22" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> Trainer, TrainingArguments</span>
+<span id="lst-lorainpracticepy-23"><a href="#lst-lorainpracticepy-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-24"><a href="#lst-lorainpracticepy-24" aria-hidden="true" tabindex="-1"></a>training_args <span class="op">=</span> TrainingArguments(</span>
+<span id="lst-lorainpracticepy-25"><a href="#lst-lorainpracticepy-25" aria-hidden="true" tabindex="-1"></a>    output_dir<span class="op">=</span><span class="st">"./lora_finetuned"</span>,</span>
+<span id="lst-lorainpracticepy-26"><a href="#lst-lorainpracticepy-26" aria-hidden="true" tabindex="-1"></a>    learning_rate<span class="op">=</span><span class="fl">2e-4</span>,</span>
+<span id="lst-lorainpracticepy-27"><a href="#lst-lorainpracticepy-27" aria-hidden="true" tabindex="-1"></a>    num_train_epochs<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="lst-lorainpracticepy-28"><a href="#lst-lorainpracticepy-28" aria-hidden="true" tabindex="-1"></a>    per_device_train_batch_size<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="lst-lorainpracticepy-29"><a href="#lst-lorainpracticepy-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="lst-lorainpracticepy-30"><a href="#lst-lorainpracticepy-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-31"><a href="#lst-lorainpracticepy-31" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> Trainer(</span>
+<span id="lst-lorainpracticepy-32"><a href="#lst-lorainpracticepy-32" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>lora_model,</span>
+<span id="lst-lorainpracticepy-33"><a href="#lst-lorainpracticepy-33" aria-hidden="true" tabindex="-1"></a>    args<span class="op">=</span>training_args,</span>
+<span id="lst-lorainpracticepy-34"><a href="#lst-lorainpracticepy-34" aria-hidden="true" tabindex="-1"></a>    train_dataset<span class="op">=</span>my_dataset,</span>
+<span id="lst-lorainpracticepy-35"><a href="#lst-lorainpracticepy-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="lst-lorainpracticepy-36"><a href="#lst-lorainpracticepy-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-37"><a href="#lst-lorainpracticepy-37" aria-hidden="true" tabindex="-1"></a>trainer.train()</span>
+<span id="lst-lorainpracticepy-38"><a href="#lst-lorainpracticepy-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-39"><a href="#lst-lorainpracticepy-39" aria-hidden="true" tabindex="-1"></a><span class="co"># 保存微调后的模型</span></span>
+<span id="lst-lorainpracticepy-40"><a href="#lst-lorainpracticepy-40" aria-hidden="true" tabindex="-1"></a>lora_model.save_pretrained(<span class="st">"./my_lora_adapter"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
 </section>
 <section id="references" class="level2">
 <h2 class="anchored" data-anchor-id="references">References</h2>
