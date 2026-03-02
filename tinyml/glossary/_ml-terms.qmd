@@ -33,8 +33,8 @@
     - **Next Sentence Prediction (NSP)**: 以句子为单位的 MLM.
 
 - **Post-training/Fine-tuning 后训练/微调**: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论->情感标签, 提问->回答 (而不是续写提问)).
-    - **Full fine-tuning 全参数微调**: 会更新模型的**所有**参数. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).
-    - **Parameter-efficient fine-tuning (PEFT) 参数高效微调**: 主流, 冻结 $99\%$ 以上的模型参数, 只更新少量参数 (E.g., LoRA).
+    - **Full fine-tuning 全参数微调**: 更新模型的所有参数, 且每个参数的变化是**独立自由**的. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).
+    - **Parameter-efficient fine-tuning (PEFT) 参数高效微调**: 主流, 可以选择更新模型某些模块的参数 (从代码来看, 可以在 `target_modules` 上设置 `"q_proj", "k_proj", "v_proj"`), 而且需要更新的参数的自由度会小很多 (比如 **LoRA** 由 rank 超参数决定).
     - **Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)**: 用**指令-回答对**微调 @tcheyan_2025_decentralized, 如 "翻译成中文: How are you?" -> "你好吗?", 让模型会回答而只是文本补全.
     - **Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习**: SFT 微调后的模型不是最有帮助的/有害的/不符合价值观的, RLHF 不是喂给模型更多数据, 而是让模型给出多个回答, 然后让**人类**打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward @tcheyan_2025_decentralized.
     - **DPO (Direct Preference Optimization) 直接偏好优化**
@@ -111,26 +111,10 @@
         ![用权重矩阵展示 (a) Structured (b) unstructured (c) semi-structured sparsity @sabih2025hardwaresoftwarecodesignriscvextensions, 蓝色的格子代表权重为 $0$](sparsity.png){#fig-sparsity}
 
     - **Pruning**: 剪枝, 将神经网络中不重要的权重 (如接近零的权重) 设置为零.
-        - **Unstructured Pruning**: 非结构化剪枝, 移除个别权重, 硬件控制复杂度大.
+        - **Unstructured Pruning**: 非结构化剪枝, 移除个别权重, 硬件控制复杂度大, 很少用.
         - **Structured Pruning**: 结构化剪枝, 移除整个通道/滤波器/神经元等 @sabih2025hardwaresoftwarecodesignriscvextensions, 更适合硬件加速. (比如 @fig-sparsity (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).
+            - **L1-norm pruning**: 对每个 filter 的权重求 L1 范数, 然后直接丢弃 L1 范数最小的若干个 filter (对应的输出通道也丢弃).
         - **Semi-structured Pruning**: 半结构化剪枝, 介于上述两者之间.
-
-- **Quantization 量化**: 跟模数转换一样, 将模拟 (高分辨率, 如 FP32) 的数据转换为低分辨率 (如 INT8) 的过程.
-    - **量化方法** (注意下面的概念不是严格并列的, 比如 Adaptive 量化可以是 Uniform 也可以是 Non-uniform) @skki_2025_quantization:
-        - **Uniform 量化**
-        - **Non-uniform 量化**
-        - **Weight Clustering 权重聚类量化**
-        - **Integer-only 纯整数量化**: 将所有参数全部转化为整数 (而不是短的浮点如 DeepSeek 的 UE8M0 FP8), 如果有专门针对整数运算优化的硬件加速器就很适合.
-        - **Hybrid 混合量化**
-        - **Adaptive 自适应量化**
-    - **量化范式** @skki_2025_quantization:
-        - **PTQ (PQ, Post-Training Quantization) 训练后量化**: 先完全不管量化将神经网络训练完成 (比如在 FP32 下训练), 然后在将其参数量化为低精度格式 (比如 INT8), 后续也不再训练了. 常见方法:
-            - **ADPQ (ADaptive PQ)**: 通过自适应 LASSO 回归识别敏感权重, 无需 Caliberation Dataset.
-            - **GPTQ (GPT Quantization)**: 给 GPT 量化的, 基于 Hessian 矩阵优化量化误差来压缩模型.
-            - **SmoothQuant**: 通过平滑激活值分布来减少量化误差.
-        - **QAT (Quantization-Aware Training) 量化感知训练**: 在模型训练阶段就加入量化的训练让它学习到如何避免将来量化后精度损失 (比如前向传播时加入 fake quantization nodes 伪量化节点来模拟低精度的量化误差), 显然他肯定会比 PTQ 好, 但是训练成本很高. 常见方法:
-            - **QLoRA**: 结合了 $4$-bit 量化和 LoRA 微调.
-            - **AWQ (Activation-aware Weight Quantization)**: 关注低精度量化 (INT4/INT3) 分析激活值分布, 优先保护对模型输出影响较大的权重, 适合边缘设备.
 
 - **CIM (Compute In Memory)**: 存内计算.
     - 相关概念: **PIM/PNM (Processing In/Near Memory)**.
@@ -216,6 +200,31 @@
 ![AI 编译栈和编程体系](mlsys.png){#fig-mlsys width=80%}
 
 - **Triton related**: Pass (Operation Pass, Function Pass, Module Pass, Loop Pass, Analysis Pass), Pass 管理器, `@triton.jit` 机制, MLIR 通用优化 (CSE, DCE, Inlining, etc.), Triton IR, Triton IR to TritonGPU, TritonGPU 优化 (Coalesce, Matmul acceleration, Pipeline, Prefetch, Remove layout, etc.), CTA, Linalg, Layout (CTA Layout, Shared Layout, Blocked Layout, NvidiaMma Layout, DotOperand Layout, Slice Layout), MLIR
+
+### LLM
+
+- **Chat Template**
+
+    ![](chat-template.png){#fig-chat-template width=80%}
+
+- 模型压缩
+    - **Quantization 量化**: 跟模数转换一样, 将模拟 (高分辨率, 如 FP32) 的数据转换为低分辨率 (如 INT8) 的过程.
+        - **量化方法** (注意下面的概念不是严格并列的, 比如 Adaptive 量化可以是 Uniform 也可以是 Non-uniform) @skki_2025_quantization:
+            - **Uniform 量化**
+            - **Non-uniform 量化**
+            - **Weight Clustering 权重聚类量化**
+            - **Integer-only 纯整数量化**: 将所有参数全部转化为整数 (而不是短的浮点如 DeepSeek 的 UE8M0 FP8), 如果有专门针对整数运算优化的硬件加速器就很适合.
+            - **Hybrid 混合量化**
+            - **Adaptive 自适应量化**
+        - **量化范式** @skki_2025_quantization:
+            - **PTQ (PQ, Post-Training Quantization) 训练后量化**: 先完全不管量化将神经网络训练完成 (比如在 FP32 下训练), 然后在将其参数量化为低精度格式 (比如 INT8), 后续也不再训练了. 常见方法:
+                - **ADPQ (ADaptive PQ)**: 通过自适应 LASSO 回归识别敏感权重, 无需 Caliberation Dataset.
+                - **GPTQ (GPT Quantization)**: 给 GPT 量化的, 基于 Hessian 矩阵优化量化误差来压缩模型.
+                - **SmoothQuant**: 通过平滑激活值分布来减少量化误差.
+            - **QAT (Quantization-Aware Training) 量化感知训练**: 在模型训练阶段就加入量化的训练让它学习到如何避免将来量化后精度损失 (比如前向传播时加入 fake quantization nodes 伪量化节点来模拟低精度的量化误差), 显然他肯定会比 PTQ 好, 但是训练成本很高. 常见方法:
+                - **QLoRA**: 结合了 $4$-bit 量化和 LoRA 微调.
+                - **AWQ (Activation-aware Weight Quantization)**: 关注低精度量化 (INT4/INT3) 分析激活值分布, 优先保护对模型输出影响较大的权重, 适合边缘设备.
+
 
 ### Benchmarks in ML
 

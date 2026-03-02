@@ -605,6 +605,7 @@ window.Quarto = {
   <li><a href="#computing-in-ml" id="toc-computing-in-ml" class="nav-link" data-scroll-target="#computing-in-ml">Computing in ML</a></li>
   <li><a href="#optimizer-in-ml" id="toc-optimizer-in-ml" class="nav-link" data-scroll-target="#optimizer-in-ml">Optimizer in ML</a></li>
   <li><a href="#ml-frameworks" id="toc-ml-frameworks" class="nav-link" data-scroll-target="#ml-frameworks">ML Frameworks</a></li>
+  <li><a href="#llm" id="toc-llm" class="nav-link" data-scroll-target="#llm">LLM</a></li>
   <li><a href="#benchmarks-in-ml" id="toc-benchmarks-in-ml" class="nav-link" data-scroll-target="#benchmarks-in-ml">Benchmarks in ML</a></li>
   <li><a href="#related-philosophy" id="toc-related-philosophy" class="nav-link" data-scroll-target="#related-philosophy">Related Philosophy</a></li>
   </ul></li>
@@ -1184,8 +1185,8 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 </ul></li>
 <li><p><strong>Post-training/Fine-tuning 后训练/微调</strong>: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论-&gt;情感标签, 提问-&gt;回答 (而不是续写提问)).</p>
 <ul>
-<li><strong>Full fine-tuning 全参数微调</strong>: 会更新模型的<strong>所有</strong>参数. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).</li>
-<li><strong>Parameter-efficient fine-tuning (PEFT) 参数高效微调</strong>: 主流, 冻结 <span class="math inline">\(99\%\)</span> 以上的模型参数, 只更新少量参数 (E.g., LoRA).</li>
+<li><strong>Full fine-tuning 全参数微调</strong>: 更新模型的所有参数, 且每个参数的变化是<strong>独立自由</strong>的. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).</li>
+<li><strong>Parameter-efficient fine-tuning (PEFT) 参数高效微调</strong>: 主流, 可以选择更新模型某些模块的参数 (从代码来看, 可以在 <code>target_modules</code> 上设置 <code>"q_proj", "k_proj", "v_proj"</code>), 而且需要更新的参数的自由度会小很多 (比如 <strong>LoRA</strong> 由 rank 超参数决定).</li>
 <li><strong>Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)</strong>: 用<strong>指令-回答对</strong>微调 <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[16]</a></span>, 如 “翻译成中文: How are you?” -&gt; “你好吗?”, 让模型会回答而只是文本补全.</li>
 <li><strong>Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习</strong>: SFT 微调后的模型不是最有帮助的/有害的/不符合价值观的, RLHF 不是喂给模型更多数据, 而是让模型给出多个回答, 然后让<strong>人类</strong>打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[16]</a></span>.</li>
 <li><strong>DPO (Direct Preference Optimization) 直接偏好优化</strong></li>
@@ -1318,35 +1319,12 @@ Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 </div></li>
 <li><p><strong>Pruning</strong>: 剪枝, 将神经网络中不重要的权重 (如接近零的权重) 设置为零.</p>
 <ul>
-<li><strong>Unstructured Pruning</strong>: 非结构化剪枝, 移除个别权重, 硬件控制复杂度大.</li>
-<li><strong>Structured Pruning</strong>: 结构化剪枝, 移除整个通道/滤波器/神经元等 <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[21]</a></span>, 更适合硬件加速. (比如 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a> (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).</li>
+<li><strong>Unstructured Pruning</strong>: 非结构化剪枝, 移除个别权重, 硬件控制复杂度大, 很少用.</li>
+<li><strong>Structured Pruning</strong>: 结构化剪枝, 移除整个通道/滤波器/神经元等 <span class="citation" data-cites="sabih2025hardwaresoftwarecodesignriscvextensions"><a href="#ref-sabih2025hardwaresoftwarecodesignriscvextensions" role="doc-biblioref">[21]</a></span>, 更适合硬件加速. (比如 <a href="#fig-sparsity" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-sparsity</span></a> (a) 就可通过 pruning 移除输入的绿色神经元和输出的红色神经元).
+<ul>
+<li><strong>L1-norm pruning</strong>: 对每个 filter 的权重求 L1 范数, 然后直接丢弃 L1 范数最小的若干个 filter (对应的输出通道也丢弃).</li>
+</ul></li>
 <li><strong>Semi-structured Pruning</strong>: 半结构化剪枝, 介于上述两者之间.</li>
-</ul></li>
-</ul></li>
-<li><p><strong>Quantization 量化</strong>: 跟模数转换一样, 将模拟 (高分辨率, 如 FP32) 的数据转换为低分辨率 (如 INT8) 的过程.</p>
-<ul>
-<li><strong>量化方法</strong> (注意下面的概念不是严格并列的, 比如 Adaptive 量化可以是 Uniform 也可以是 Non-uniform) <span class="citation" data-cites="skki_2025_quantization"><a href="#ref-skki_2025_quantization" role="doc-biblioref">[22]</a></span>:
-<ul>
-<li><strong>Uniform 量化</strong></li>
-<li><strong>Non-uniform 量化</strong></li>
-<li><strong>Weight Clustering 权重聚类量化</strong></li>
-<li><strong>Integer-only 纯整数量化</strong>: 将所有参数全部转化为整数 (而不是短的浮点如 DeepSeek 的 UE8M0 FP8), 如果有专门针对整数运算优化的硬件加速器就很适合.</li>
-<li><strong>Hybrid 混合量化</strong></li>
-<li><strong>Adaptive 自适应量化</strong></li>
-</ul></li>
-<li><strong>量化范式</strong> <span class="citation" data-cites="skki_2025_quantization"><a href="#ref-skki_2025_quantization" role="doc-biblioref">[22]</a></span>:
-<ul>
-<li><strong>PTQ (PQ, Post-Training Quantization) 训练后量化</strong>: 先完全不管量化将神经网络训练完成 (比如在 FP32 下训练), 然后在将其参数量化为低精度格式 (比如 INT8), 后续也不再训练了. 常见方法:
-<ul>
-<li><strong>ADPQ (ADaptive PQ)</strong>: 通过自适应 LASSO 回归识别敏感权重, 无需 Caliberation Dataset.</li>
-<li><strong>GPTQ (GPT Quantization)</strong>: 给 GPT 量化的, 基于 Hessian 矩阵优化量化误差来压缩模型.</li>
-<li><strong>SmoothQuant</strong>: 通过平滑激活值分布来减少量化误差.</li>
-</ul></li>
-<li><strong>QAT (Quantization-Aware Training) 量化感知训练</strong>: 在模型训练阶段就加入量化的训练让它学习到如何避免将来量化后精度损失 (比如前向传播时加入 fake quantization nodes 伪量化节点来模拟低精度的量化误差), 显然他肯定会比 PTQ 好, 但是训练成本很高. 常见方法:
-<ul>
-<li><strong>QLoRA</strong>: 结合了 <span class="math inline">\(4\)</span>-bit 量化和 LoRA 微调.</li>
-<li><strong>AWQ (Activation-aware Weight Quantization)</strong>: 关注低精度量化 (INT4/INT3) 分析激活值分布, 优先保护对模型输出影响较大的权重, 适合边缘设备.</li>
-</ul></li>
 </ul></li>
 </ul></li>
 <li><p><strong>CIM (Compute In Memory)</strong>: 存内计算.</p>
@@ -1415,12 +1393,12 @@ Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <img src="adagrad.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adagrad-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;18: Adagrad 给梯度平缓方向对应的参数 (<span class="math inline">\(Y\)</span>) 更大的学习率 (<span class="math inline">\(\alpha_Y = 0.05\)</span>) 来加快这个方向的下降 <span class="citation" data-cites="tg_2020_why"><a href="#ref-tg_2020_why" role="doc-biblioref">[24]</a></span>. 也可以用 “Normalize” 的角度理解.
+Figure&nbsp;18: Adagrad 给梯度平缓方向对应的参数 (<span class="math inline">\(Y\)</span>) 更大的学习率 (<span class="math inline">\(\alpha_Y = 0.05\)</span>) 来加快这个方向的下降 <span class="citation" data-cites="tg_2020_why"><a href="#ref-tg_2020_why" role="doc-biblioref">[23]</a></span>. 也可以用 “Normalize” 的角度理解.
 </figcaption>
 </figure>
 </div></li>
 </ul>
-<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;“SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast.” <span class="citation" data-cites="maciejbalawejder_2022_optimizers"><a href="#ref-maciejbalawejder_2022_optimizers" role="doc-biblioref">[23]</a></span></p></div></div></section>
+<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;“SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast.” <span class="citation" data-cites="maciejbalawejder_2022_optimizers"><a href="#ref-maciejbalawejder_2022_optimizers" role="doc-biblioref">[22]</a></span></p></div></div></section>
 <section id="ml-frameworks" class="level3">
 <h3 class="anchored" data-anchor-id="ml-frameworks">ML Frameworks</h3>
 <ul>
@@ -1453,6 +1431,51 @@ Figure&nbsp;19: AI 编译栈和编程体系
 </div>
 <ul>
 <li><strong>Triton related</strong>: Pass (Operation Pass, Function Pass, Module Pass, Loop Pass, Analysis Pass), Pass 管理器, <code>@triton.jit</code> 机制, MLIR 通用优化 (CSE, DCE, Inlining, etc.), Triton IR, Triton IR to TritonGPU, TritonGPU 优化 (Coalesce, Matmul acceleration, Pipeline, Prefetch, Remove layout, etc.), CTA, Linalg, Layout (CTA Layout, Shared Layout, Blocked Layout, NvidiaMma Layout, DotOperand Layout, Slice Layout), MLIR</li>
+</ul>
+</section>
+<section id="llm" class="level3">
+<h3 class="anchored" data-anchor-id="llm">LLM</h3>
+<ul>
+<li><p><strong>Chat Template</strong></p>
+<div id="fig-chat-template" class="quarto-float quarto-figure quarto-figure-center anchored" width="80%">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chat-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="chat-template.png" id="fig-chat-template" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-chat-template-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20
+</figcaption>
+</figure>
+</div></li>
+<li><p>模型压缩</p>
+<ul>
+<li><strong>Quantization 量化</strong>: 跟模数转换一样, 将模拟 (高分辨率, 如 FP32) 的数据转换为低分辨率 (如 INT8) 的过程.
+<ul>
+<li><strong>量化方法</strong> (注意下面的概念不是严格并列的, 比如 Adaptive 量化可以是 Uniform 也可以是 Non-uniform) <span class="citation" data-cites="skki_2025_quantization"><a href="#ref-skki_2025_quantization" role="doc-biblioref">[24]</a></span>:
+<ul>
+<li><strong>Uniform 量化</strong></li>
+<li><strong>Non-uniform 量化</strong></li>
+<li><strong>Weight Clustering 权重聚类量化</strong></li>
+<li><strong>Integer-only 纯整数量化</strong>: 将所有参数全部转化为整数 (而不是短的浮点如 DeepSeek 的 UE8M0 FP8), 如果有专门针对整数运算优化的硬件加速器就很适合.</li>
+<li><strong>Hybrid 混合量化</strong></li>
+<li><strong>Adaptive 自适应量化</strong></li>
+</ul></li>
+<li><strong>量化范式</strong> <span class="citation" data-cites="skki_2025_quantization"><a href="#ref-skki_2025_quantization" role="doc-biblioref">[24]</a></span>:
+<ul>
+<li><strong>PTQ (PQ, Post-Training Quantization) 训练后量化</strong>: 先完全不管量化将神经网络训练完成 (比如在 FP32 下训练), 然后在将其参数量化为低精度格式 (比如 INT8), 后续也不再训练了. 常见方法:
+<ul>
+<li><strong>ADPQ (ADaptive PQ)</strong>: 通过自适应 LASSO 回归识别敏感权重, 无需 Caliberation Dataset.</li>
+<li><strong>GPTQ (GPT Quantization)</strong>: 给 GPT 量化的, 基于 Hessian 矩阵优化量化误差来压缩模型.</li>
+<li><strong>SmoothQuant</strong>: 通过平滑激活值分布来减少量化误差.</li>
+</ul></li>
+<li><strong>QAT (Quantization-Aware Training) 量化感知训练</strong>: 在模型训练阶段就加入量化的训练让它学习到如何避免将来量化后精度损失 (比如前向传播时加入 fake quantization nodes 伪量化节点来模拟低精度的量化误差), 显然他肯定会比 PTQ 好, 但是训练成本很高. 常见方法:
+<ul>
+<li><strong>QLoRA</strong>: 结合了 <span class="math inline">\(4\)</span>-bit 量化和 LoRA 微调.</li>
+<li><strong>AWQ (Activation-aware Weight Quantization)</strong>: 关注低精度量化 (INT4/INT3) 分析激活值分布, 优先保护对模型输出影响较大的权重, 适合边缘设备.</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
 </ul>
 </section>
 <section id="benchmarks-in-ml" class="level3">
@@ -1506,7 +1529,7 @@ Figure&nbsp;19: AI 编译栈和编程体系
 <img src="colored-cat.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-colored-cat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;20: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “金刚鹦鹉”, 而 ViT 分类为 “埃及猫” <span class="citation" data-cites="juliaturc_2025_why"><a href="#ref-juliaturc_2025_why" role="doc-biblioref">[27]</a></span>.
+Figure&nbsp;21: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “金刚鹦鹉”, 而 ViT 分类为 “埃及猫” <span class="citation" data-cites="juliaturc_2025_why"><a href="#ref-juliaturc_2025_why" role="doc-biblioref">[27]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -1519,7 +1542,7 @@ Figure&nbsp;20: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “
 <img src="cnn-fcnn.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cnn-fcnn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline">\(64\)</span> 个参数减小到了 <span class="math inline">\(4\)</span> 个参数).
+Figure&nbsp;22: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline">\(64\)</span> 个参数减小到了 <span class="math inline">\(4\)</span> 个参数).
 </figcaption>
 </figure>
 </div>
@@ -1531,7 +1554,7 @@ Figure&nbsp;21: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline"
 <img src="different-ib.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-different-ib-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;22: 不同的 Inductive Bias 带来完全不同的拟合效果 <span class="citation" data-cites="gerstnerlab_2023_rl36"><a href="#ref-gerstnerlab_2023_rl36" role="doc-biblioref">[28]</a></span>.
+Figure&nbsp;23: 不同的 Inductive Bias 带来完全不同的拟合效果 <span class="citation" data-cites="gerstnerlab_2023_rl36"><a href="#ref-gerstnerlab_2023_rl36" role="doc-biblioref">[28]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -1577,7 +1600,7 @@ Figure&nbsp;22: 不同的 Inductive Bias 带来完全不同的拟合效果 <span
 <img src="amd-gpu-2015.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-amd-gpu-2015-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;23: AMD GPU 2015 采用 2.5D 封装.
+Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 </figcaption>
 </figure>
 </div>
@@ -1769,7 +1792,7 @@ Figure&nbsp;23: AMD GPU 2015 采用 2.5D 封装.
 <img src="ffsp.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ffsp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;24: FFSP
+Figure&nbsp;25: FFSP
 </figcaption>
 </figure>
 </div></li>
@@ -1876,14 +1899,14 @@ Figure&nbsp;24: FFSP
 <div id="ref-sabih2025hardwaresoftwarecodesignriscvextensions" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[21] </div><div class="csl-right-inline">M. Sabih, A. Karim, J. Wittmann, F. Hannig, and J. Teich, <span>“Hardware/software co-design of RISC-v extensions for accelerating sparse DNNs on FPGAs.”</span> 2025. Available: <a href="https://arxiv.org/abs/2504.19659">https://arxiv.org/abs/2504.19659</a></div>
 </div>
-<div id="ref-skki_2025_quantization" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[22] </div><div class="csl-right-inline">SKki, <span>“Quantization methods explanation.”</span> Bilibili.com, Jun. 2025. Available: <a href="https://www.bilibili.com/video/BV1iyNmzxECP/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">https://www.bilibili.com/video/BV1iyNmzxECP/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3</a>. [Accessed: Jan. 03, 2026]</div>
-</div>
 <div id="ref-maciejbalawejder_2022_optimizers" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[23] </div><div class="csl-right-inline">M. Balawejder, <span>“Optimizers in machine learning - nerd for tech - medium.”</span> Medium; Nerd for Tech, Mar. 2022. Available: <a href="https://medium.com/nerd-for-tech/optimizers-in-machine-learning-f1a9c549f8b4">https://medium.com/nerd-for-tech/optimizers-in-machine-learning-f1a9c549f8b4</a>. [Accessed: Dec. 05, 2025]</div>
+<div class="csl-left-margin">[22] </div><div class="csl-right-inline">M. Balawejder, <span>“Optimizers in machine learning - nerd for tech - medium.”</span> Medium; Nerd for Tech, Mar. 2022. Available: <a href="https://medium.com/nerd-for-tech/optimizers-in-machine-learning-f1a9c549f8b4">https://medium.com/nerd-for-tech/optimizers-in-machine-learning-f1a9c549f8b4</a>. [Accessed: Dec. 05, 2025]</div>
 </div>
 <div id="ref-tg_2020_why" class="csl-entry" role="listitem">
-<div class="csl-left-margin">[24] </div><div class="csl-right-inline">J. TG, <span>“Why sparse features should have bigger learning rates associated? And how adagrad achieves this?”</span> Data Science Stack Exchange, Sep. 2020. Available: <a href="https://datascience.stackexchange.com/questions/82240/why-sparse-features-should-have-bigger-learning-rates-associated-and-how-adagra">https://datascience.stackexchange.com/questions/82240/why-sparse-features-should-have-bigger-learning-rates-associated-and-how-adagra</a>. [Accessed: Dec. 03, 2025]</div>
+<div class="csl-left-margin">[23] </div><div class="csl-right-inline">J. TG, <span>“Why sparse features should have bigger learning rates associated? And how adagrad achieves this?”</span> Data Science Stack Exchange, Sep. 2020. Available: <a href="https://datascience.stackexchange.com/questions/82240/why-sparse-features-should-have-bigger-learning-rates-associated-and-how-adagra">https://datascience.stackexchange.com/questions/82240/why-sparse-features-should-have-bigger-learning-rates-associated-and-how-adagra</a>. [Accessed: Dec. 03, 2025]</div>
+</div>
+<div id="ref-skki_2025_quantization" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[24] </div><div class="csl-right-inline">SKki, <span>“Quantization methods explanation.”</span> Bilibili.com, Jun. 2025. Available: <a href="https://www.bilibili.com/video/BV1iyNmzxECP/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">https://www.bilibili.com/video/BV1iyNmzxECP/?spm_id_from=333.1391.0.0&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3</a>. [Accessed: Jan. 03, 2026]</div>
 </div>
 <div id="ref-The_Human_Developers_2025_cnblogs" class="csl-entry" role="listitem">
 <div class="csl-left-margin">[25] </div><div class="csl-right-inline">S. Dai, <span>“Symbol grounding problem in artificial intelligence,”</span> 2025, Available: <a href="https://www.cnblogs.com/sddai/p/18670953">https://www.cnblogs.com/sddai/p/18670953</a></div>
