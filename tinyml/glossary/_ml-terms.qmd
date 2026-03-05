@@ -49,6 +49,8 @@
 
 - **PINN (Physics-Informed Neural Networks)**: 比如用神经网络来预测 Navier-Stokes 方程的解, 神经网络的输入为 $(x,y,z,t)$, 输出为 $(u,v,w,p)$ (三个方向的速度和压强), 然后基于这些数据可以得到一些偏导数的信息, loss 函数由两个方面构成: 少量的数据点、以及 Navier-Stokes 方程本身的约束条件.
 
+- **End-to-end model 端到端模型**: 不拆解问题而是直接用一个步骤来解决. 比如同声传译, 标准化流程需要设计 3 个网络 (ZNspeech -> Chinese -> English -> ENspeech); 而端到端模型直接是 ZNspeech -> ENspeech.
+
 ### CV 计算机视觉相关 {#sec-cv-terms}
 
 - **Feature Map 特征图**: CNN 中间层的一个 channel, 代表机器学习到的一种特征.
@@ -162,7 +164,7 @@
 [^gd]: *Abuse of Terms:* 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!
 
 - **Optimizer 优化器**: 更新模型参数的算法.
-    - **Momentum-based 动量优化器**: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可**加速**和**平滑**收敛、避免**陷入局部最优**[^momentum]. 也有一些基于次改良的版本:
+    - **Momentum-based 动量优化器**: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可**加速**和**平滑**收敛、避免**陷入局部最优**[^momentum]. 也有一些基于此改良的版本:
         - **Nesterov Accelerated Gradient (NAG)**: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 `torch` 为例:
 
             ```python
@@ -171,7 +173,9 @@
 
     - **Adaptive Gradient (Adagrad) 自适应梯度优化器**: 有利于 Sparse Features 的学习 (通过给每个参数分配不同的学习率! 或者理解为对参数进行归一化):
 
-    ![Adagrad 给梯度平缓方向对应的参数 ($Y$) 更大的学习率 ($\alpha_Y = 0.05$) 来加快这个方向的下降 @tg_2020_why. 也可以用 "Normalize" 的角度理解.](adagrad.png){#fig-adagrad}
+        ![Adagrad 给梯度平缓方向对应的参数 ($Y$) 更大的学习率 ($\alpha_Y = 0.05$) 来加快这个方向的下降 @tg_2020_why. 也可以用 "Normalize" 的角度理解.](adagrad.png){#fig-adagrad}
+
+    - **Adam 优化器**: Momentum 和 Adagrad 的结合 (用过去梯度决定方向, 用梯度方差决定 lr).
 
 
 [^momentum]: "SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast." @maciejbalawejder_2022_optimizers
@@ -207,6 +211,8 @@
 
     ![](chat-template.png){#fig-chat-template width=80%}
 
+- **Logits**: Logits 经过 softmax 得到 probability.
+
 - 模型压缩
     - **Quantization 量化**: 跟模数转换一样, 将模拟 (高分辨率, 如 FP32) 的数据转换为低分辨率 (如 INT8) 的过程.
         - **量化方法** (注意下面的概念不是严格并列的, 比如 Adaptive 量化可以是 Uniform 也可以是 Non-uniform) @skki_2025_quantization:
@@ -224,6 +230,8 @@
             - **QAT (Quantization-Aware Training) 量化感知训练**: 在模型训练阶段就加入量化的训练让它学习到如何避免将来量化后精度损失 (比如前向传播时加入 fake quantization nodes 伪量化节点来模拟低精度的量化误差), 显然他肯定会比 PTQ 好, 但是训练成本很高. 常见方法:
                 - **QLoRA**: 结合了 $4$-bit 量化和 LoRA 微调.
                 - **AWQ (Activation-aware Weight Quantization)**: 关注低精度量化 (INT4/INT3) 分析激活值分布, 优先保护对模型输出影响较大的权重, 适合边缘设备.
+
+    - **NK (Knowledge Distillation 知识蒸馏)**: 通过训练一个小模型 (student, Net-S) 来模仿一个大模型 (teacher, Net-T) 的行为, 从而达到压缩模型的目的. 
 
 
 ### Benchmarks in ML

@@ -1196,6 +1196,7 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <li><p><strong>ViT (Vision Transformer)</strong>: 一种基于 Transformer 架构的计算机视觉模型.</p></li>
 <li><p><strong>AIGC (AI-Generated Content)</strong>: 生成式 AI.</p></li>
 <li><p><strong>PINN (Physics-Informed Neural Networks)</strong>: 比如用神经网络来预测 Navier-Stokes 方程的解, 神经网络的输入为 <span class="math inline">\((x,y,z,t)\)</span>, 输出为 <span class="math inline">\((u,v,w,p)\)</span> (三个方向的速度和压强), 然后基于这些数据可以得到一些偏导数的信息, loss 函数由两个方面构成: 少量的数据点、以及 Navier-Stokes 方程本身的约束条件.</p></li>
+<li><p><strong>End-to-end model 端到端模型</strong>: 不拆解问题而是直接用一个步骤来解决. 比如同声传译, 标准化流程需要设计 3 个网络 (ZNspeech -&gt; Chinese -&gt; English -&gt; ENspeech); 而端到端模型直接是 ZNspeech -&gt; ENspeech.</p></li>
 </ul>
 </section>
 <section id="sec-cv-terms" class="level3">
@@ -1380,13 +1381,12 @@ Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 <div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;<em>Abuse of Terms:</em> 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!</p></div></div><ul>
 <li><strong>Optimizer 优化器</strong>: 更新模型参数的算法.
 <ul>
-<li><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可<strong>加速</strong>和<strong>平滑</strong>收敛、避免<strong>陷入局部最优</strong><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. 也有一些基于次改良的版本:
+<li><p><strong>Momentum-based 动量优化器</strong>: 引入历史项的加权平均 (等价于指数加权), 相当于给参数中的点赋予质量和惯性 (而不是没有质量), 不易受噪声影响, 可<strong>加速</strong>和<strong>平滑</strong>收敛、避免<strong>陷入局部最优</strong><a href="#fn4" class="footnote-ref" id="fnref4" role="doc-noteref"><sup>4</sup></a>. 也有一些基于此改良的版本:</p>
 <ul>
 <li><p><strong>Nesterov Accelerated Gradient (NAG)</strong>: 将未来的参数点的梯度也参与计算, 避免 overshoot. 开启这个功能无需设置额外的超参数, 以 <code>torch</code> 为例:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>optimizer_nag <span class="op">=</span> optim.SGD(model.parameters(), lr<span class="op">=</span><span class="fl">0.01</span>, momentum<span class="op">=</span><span class="fl">0.9</span>, nesterov<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
 </ul></li>
-<li><strong>Adaptive Gradient (Adagrad) 自适应梯度优化器</strong>: 有利于 Sparse Features 的学习 (通过给每个参数分配不同的学习率! 或者理解为对参数进行归一化):</li>
-</ul>
+<li><p><strong>Adaptive Gradient (Adagrad) 自适应梯度优化器</strong>: 有利于 Sparse Features 的学习 (通过给每个参数分配不同的学习率! 或者理解为对参数进行归一化):</p>
 <div id="fig-adagrad" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-adagrad-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1397,6 +1397,8 @@ Figure&nbsp;18: Adagrad 给梯度平缓方向对应的参数 (<span class="math 
 </figcaption>
 </figure>
 </div></li>
+<li><p><strong>Adam 优化器</strong>: Momentum 和 Adagrad 的结合 (用过去梯度决定方向, 用梯度方差决定 lr).</p></li>
+</ul></li>
 </ul>
 <div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;“SGD is a walking man downhill, slowly but steady. Momentum is a heavy ball running downhill, smooth and fast.” <span class="citation" data-cites="maciejbalawejder_2022_optimizers"><a href="#ref-maciejbalawejder_2022_optimizers" role="doc-biblioref">[22]</a></span></p></div></div></section>
 <section id="ml-frameworks" class="level3">
@@ -1447,6 +1449,7 @@ Figure&nbsp;20
 </figcaption>
 </figure>
 </div></li>
+<li><p><strong>Logits</strong>: Logits 经过 softmax 得到 probability.</p></li>
 <li><p>模型压缩</p>
 <ul>
 <li><strong>Quantization 量化</strong>: 跟模数转换一样, 将模拟 (高分辨率, 如 FP32) 的数据转换为低分辨率 (如 INT8) 的过程.
@@ -1475,6 +1478,7 @@ Figure&nbsp;20
 </ul></li>
 </ul></li>
 </ul></li>
+<li><strong>NK (Knowledge Distillation 知识蒸馏)</strong>: 通过训练一个小模型 (student, Net-S) 来模仿一个大模型 (teacher, Net-T) 的行为, 从而达到压缩模型的目的.</li>
 </ul></li>
 </ul>
 </section>

@@ -118,6 +118,35 @@ All tasks completed in 10.0 seconds
 {{< include src/python/class-instance-attr.py >}}
 ```
 
+- **实例属性可以动态访问和创建!** Surprise!
+    - **动态访问实例属性 `getattr()`**: 若**访问**的属性名在运行时才能决定, 比如:
+
+        ```python
+        class Order():
+            def __init__(self):
+                self.price = 100
+                self.qty = 5
+
+        order = Order()
+        attr_name = "price"
+        print(order.attr_name)              # 这样是不行的!
+        print(getattr(order, attr_name))    # 这样才行!
+        ```
+    - **动态创建实例属性 `setattr()`**: 若**创建**的属性名在运行时才能决定, 比如:
+
+        ```python
+        class Order():
+            def __init__(self):
+                self.price = 100
+                self.qty = 5
+
+        order = Order()
+        attr_name = "discount"
+        setattr(order, attr_name, 0.1)      # 给 order 实例创建一个 discount 属性
+        order.discount = 0.1                # 这样也可以!!
+        print(order.discount)               # 输出: 0.1
+        ```
+
 #### 特殊方法 `@classmethod`、`@staticmethod`
 
 - `@classmethod` 仅仅是允许我们**不创建实例**就能调用该方法. 用途:
@@ -139,21 +168,6 @@ All tasks completed in 10.0 seconds
 :::
 <!-- ----------------------------------------- -->
 
-#### 动态访问实例属性 `getattr()`
-
-- 如果你想访问的属性名在运行时才能决定, 比如:
-
-    ```python
-    class Order():
-        def __init__(self):
-            self.price = 100
-            self.qty = 5
-
-    order = Order()
-    attr_name = "price"
-    print(order.attr_name)              # 这样是不行的!
-    print(getattr(order, attr_name))    # 这样才行!
-    ```
 
 #### Python 类继承
 

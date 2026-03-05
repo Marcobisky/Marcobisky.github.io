@@ -31,6 +31,11 @@ class Tensor:
         if self.operation:
             if not self.children:   # Received grad_ from all children, ready to pass grad upstream
                 self.operation.backward(self.grad, self)
+
+    def zero_grad(self):
+        ''' Sets the gradient of this tensor to zero. '''
+        if self.requires_grad:
+            self.grad = np.zeros_like(self.data)
             
     # Some basic operators, more operators must be called via their classes below
     def __add__(self, other: Tensor) -> Tensor:
@@ -48,6 +53,12 @@ class Tensor:
         op = Mul()
         return op.forward(self, other)
     
+# Paramaters are exact the same as Tensors except they always require gradients to be updated.
+class Parameter(Tensor):
+    ''' Subclass of Tensor which always tracks gradients. '''
+    def __init__(self, data, requires_grad = True, operation = None) -> None:
+        super().__init__(data, requires_grad=requires_grad, operation=operation)
+
 
 # These are just operators
 class Add:
