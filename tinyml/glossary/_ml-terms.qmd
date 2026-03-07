@@ -32,12 +32,16 @@
     - **Masked Language Modeling (MLM)**: 随机挖空, 然后预测挖空的词语.
     - **Next Sentence Prediction (NSP)**: 以句子为单位的 MLM.
 
-- **Post-training/Fine-tuning 后训练/微调**: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论->情感标签, 提问->回答 (而不是续写提问)).
+- **Post-training/Fine-tuning 后训练/微调**: 预训练模型只会续写不会回答问题, 在预训练模型的基础上, 用相对少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论->情感标签, 提问->回答).
     - **Full fine-tuning 全参数微调**: 更新模型的所有参数, 且每个参数的变化是**独立自由**的. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).
     - **Parameter-efficient fine-tuning (PEFT) 参数高效微调**: 主流, 可以选择更新模型某些模块的参数 (从代码来看, 可以在 `target_modules` 上设置 `"q_proj", "k_proj", "v_proj"`), 而且需要更新的参数的自由度会小很多 (比如 **LoRA** 由 rank 超参数决定).
-    - **Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)**: 用**指令-回答对**微调 @tcheyan_2025_decentralized, 如 "翻译成中文: How are you?" -> "你好吗?", 让模型会回答而只是文本补全.
-    - **Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习**: SFT 微调后的模型不是最有帮助的/有害的/不符合价值观的, RLHF 不是喂给模型更多数据, 而是让模型给出多个回答, 然后让**人类**打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward @tcheyan_2025_decentralized.
+    - **Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)**: 用**指令-回答对数据集**微调 @tcheyan_2025_decentralized, 如 "翻译成中文: How are you?" -> "你好吗?", 让模型会回答而只是文本补全. 但是这样的数据集太小了, 因为让人写回答太慢了, 但是**让人判断哪种回答更好很简单**, 于是有了 RLHF:
+    - **Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习**: RLHF 让模型给出多个回答, 然后让**人类**打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward @tcheyan_2025_decentralized.
+        - **Reward Model**: 甚至不用人类来打分, 为了创造更大的 “数据集”, 可以用人类打过分的数据集训练一个会打分的模型 (Reward Model), 然后这个模型就能给新的指令-回答对打分了 (而不用人类了).
     - **DPO (Direct Preference Optimization) 直接偏好优化**
+
+- **Alignment 对齐**: 不仅让模型会回答问题/生成满足 prompt 的图片, 还要让它的回答更好.
+    - 但是和 Post-training 有交叉, 不是完全功能独立的.
 
 - **VLA (Vision Language Action)**: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.
 
@@ -50,6 +54,10 @@
 - **PINN (Physics-Informed Neural Networks)**: 比如用神经网络来预测 Navier-Stokes 方程的解, 神经网络的输入为 $(x,y,z,t)$, 输出为 $(u,v,w,p)$ (三个方向的速度和压强), 然后基于这些数据可以得到一些偏导数的信息, loss 函数由两个方面构成: 少量的数据点、以及 Navier-Stokes 方程本身的约束条件.
 
 - **End-to-end model 端到端模型**: 不拆解问题而是直接用一个步骤来解决. 比如同声传译, 标准化流程需要设计 3 个网络 (ZNspeech -> Chinese -> English -> ENspeech); 而端到端模型直接是 ZNspeech -> ENspeech.
+
+### RL 相关
+
+- **Reinforcement Learning (RL) 强化学习**: 
 
 ### CV 计算机视觉相关 {#sec-cv-terms}
 

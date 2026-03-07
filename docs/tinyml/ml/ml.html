@@ -1,0 +1,2224 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Hodge Podge of ML – TinyML</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../coral-npu/coral-npu.html" rel="next">
+<link href="../cc-algo/cc-algo.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-6353c5142b84b22f6683470407aecb9b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-5549b3ede58740172b4e45471f64731a.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../site_libs/bootstrap/bootstrap-6353c5142b84b22f6683470407aecb9b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating slimcontent quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../ml/ml.html">Neural Network</a></li><li class="breadcrumb-item"><a href="../ml/ml.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Hodge Podge of ML</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">TinyML</a> 
+        <div class="sidebar-tools-main">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Prologue</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction 引入</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../resources/resources.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Resources 学习资料汇总</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary/glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Glossary 名词解释</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../research-proposal/research-proposal.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Research Proposal: New Inference Paradigms for ML at the Edge</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Environment Setup</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../env-setup/env-setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">FPGA 开发环境配置</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">EDA</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../eda-notes/eda-notes.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">EDA Notes 笔记</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Crash Courses</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../c-riscv-asm/c-riscv-asm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">C 和 RISCV 汇编</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../riscv/riscv.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">RISCV ISA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-os/cc-os.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">OS 操作系统原理</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-coding/cc-coding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Random Notes on Coding</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-cli/cc-cli.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Basic Linux CLI</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-fpga/cc-fpga.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">FPGA 原理速成</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-cpu/cc-cpu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">CPU 原理速成</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-gpu/cc-gpu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">GPU 原理速成</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cc-algo/cc-algo.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Algorithm Notes 算法笔记</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Neural Network</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../ml/ml.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Hodge Podge of ML</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">ML Accelerators</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../coral-npu/coral-npu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true">
+ <span class="menu-text">CFU Playground</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#intro" id="toc-intro" class="nav-link active" data-scroll-target="#intro">Intro</a></li>
+  <li><a href="#tensor-张量" id="toc-tensor-张量" class="nav-link" data-scroll-target="#tensor-张量">Tensor 张量</a>
+  <ul class="collapse">
+  <li><a href="#tensor-format" id="toc-tensor-format" class="nav-link" data-scroll-target="#tensor-format">Tensor Format</a></li>
+  <li><a href="#mental-picture-of-tensors" id="toc-mental-picture-of-tensors" class="nav-link" data-scroll-target="#mental-picture-of-tensors">Mental Picture of Tensors</a></li>
+  <li><a href="#tensor-operations" id="toc-tensor-operations" class="nav-link" data-scroll-target="#tensor-operations">Tensor Operations</a></li>
+  </ul></li>
+  <li><a href="#layers-in-nn" id="toc-layers-in-nn" class="nav-link" data-scroll-target="#layers-in-nn">Layers in NN</a>
+  <ul class="collapse">
+  <li><a href="#带参数的层" id="toc-带参数的层" class="nav-link" data-scroll-target="#带参数的层">带参数的层</a></li>
+  <li><a href="#无参数的层" id="toc-无参数的层" class="nav-link" data-scroll-target="#无参数的层">无参数的层</a></li>
+  <li><a href="#其它" id="toc-其它" class="nav-link" data-scroll-target="#其它">其它</a></li>
+  </ul></li>
+  <li><a href="#autograd-机制" id="toc-autograd-机制" class="nav-link" data-scroll-target="#autograd-机制">Autograd 机制</a>
+  <ul class="collapse">
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation">Motivation</a></li>
+  <li><a href="#minimal-implementation" id="toc-minimal-implementation" class="nav-link" data-scroll-target="#minimal-implementation">Minimal Implementation</a></li>
+  </ul></li>
+  <li><a href="#fine-tuning-微调" id="toc-fine-tuning-微调" class="nav-link" data-scroll-target="#fine-tuning-微调">Fine-tuning 微调</a>
+  <ul class="collapse">
+  <li><a href="#lora" id="toc-lora" class="nav-link" data-scroll-target="#lora">LoRA</a></li>
+  </ul></li>
+  <li><a href="#yolo" id="toc-yolo" class="nav-link" data-scroll-target="#yolo">YOLO</a>
+  <ul class="collapse">
+  <li><a href="#task-objective-任务目标" id="toc-task-objective-任务目标" class="nav-link" data-scroll-target="#task-objective-任务目标">Task Objective 任务目标</a></li>
+  <li><a href="#yolo-v1" id="toc-yolo-v1" class="nav-link" data-scroll-target="#yolo-v1">YOLO V1</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../ml/ml.html">Neural Network</a></li><li class="breadcrumb-item"><a href="../ml/ml.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Hodge Podge of ML</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Hodge Podge of ML</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="intro" class="level2">
+<h2 class="anchored" data-anchor-id="intro">Intro</h2>
+<blockquote class="blockquote">
+<p>In progress.</p>
+</blockquote>
+<!-- {{< include _intro.qmd >}} -->
+</section>
+<section id="tensor-张量" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="tensor-张量">Tensor 张量</h2>
+<ul>
+<li><p><strong>动机</strong>: 很多<strong>地位都相同</strong>的数据可以用一维数组存储. 如果有很多不同「地位」的数据, 我们给没种地位分配一个维度来存储, 这就是张量.</p></li>
+<li><p>名字来源: 由于数学里 <span class="math inline">\((0,k)\)</span>-tensor <span class="math inline">\(T: V^k \to \mathbb{F}\)</span> 在选取一组 basis <span class="math inline">\(\{\mathbf{e}_i\}_{i=1}^k\)</span> 后的 representation 刚好是一个 <span class="math inline">\(k\)</span> 维数组 <span class="math inline">\(T_{i_1i_2 \cdots i_k}\)</span> (正如 linear functional 可以被一个 covector 描述, bilinear functional 可以被一个 matrix 描述).</p></li>
+<li><p>机器学习里 <strong>training data</strong>, <strong>kernel</strong>, <strong>feature map</strong> 等都用 tensor 来描述, Python 自带的 <code>list</code> 和 <code>np.array()</code>, 统统都要转化为 <code>torch.tensor</code> 来进行计算 (因为 <code>Tensor</code> 类提供了很多现成的方法可以调用).</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># python list to tensor</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>data_list <span class="op">=</span> [[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>list2tensor <span class="op">=</span> torch.tensor(data_list)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># numpy array to tensor</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>data_array <span class="op">=</span> np.array([[<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>], [<span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>]])</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>array2tensor <span class="op">=</span> torch.from_numpy(data_array)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+<section id="tensor-format" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="tensor-format">Tensor Format</h3>
+<ul>
+<li><strong>2D tensor</strong>: (就是矩阵)
+<ul>
+<li><strong>Row, Col (R, C)</strong>: 两个维度.</li>
+<li><strong>Memory Layout</strong>: 见 <a href="#fig-tensor2d-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-tensor2d-layout</span></a>.
+<ul>
+<li><strong>Row-major (RC)</strong>: 先沿着行方向将数据拉直, <code>numpy</code> 采用.</li>
+<li><strong>Column-major (CR)</strong>: 先沿着列方向将数据拉直, <code>Eigen</code> 采用.</li>
+</ul></li>
+</ul></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-tensor2d-layout" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor2d-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor2d-layout.png" id="fig-tensor2d-layout" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-tensor2d-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+</div></div><ul>
+<li><p><strong>4D tensor</strong>: 特别是在图像处理中, 4D 张量非常常见, 现在单独详细研究一下它:</p>
+<ul>
+<li><p><strong>H, W, C(D), N(B) 维度语义</strong>: Height, Width, Channel(Depth), Batch size (见 <a href="#fig-tensor-layout" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-tensor-layout</span></a> 左图).</p></li>
+<li><p><strong>Memory Layout</strong><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>: (注意无论多少维度的张量, 在内存中显然都是以 (也只能以) 一维数组的形式连续存储).</p>
+<ul>
+<li><u>HWC</u><strong>N</strong>: Batch 在最后.</li>
+<li><strong>N</strong><u>HWC</u>: Batch 在最前, <code>numpy</code> 采用.</li>
+<li><strong>N</strong><u>CHW</u>: Batch 在最前, <code>pytorch</code> 采用 (个人感觉这是最符合直觉的顺序!)</li>
+</ul>
+<div id="fig-tensor-layout" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor-layout.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-layout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 三种 Data Layout Formats <span class="citation" data-cites="a2023_understanding"><a href="#ref-a2023_understanding" role="doc-biblioref">[1]</a></span>.
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;<em>记忆方法</em>: 反过来看, 如 NHWC, 先沿着 C 方向将数据拉直, 结束后跳到下一个 W, 然后换 H, 最后换 N.</p></div><div class="">
+<div id="fig-tensor-format-conversion" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-format-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor-format-conversion.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-format-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: 不同的算子在不同的模块执行可能涉及算子的 format 转换 <span class="citation" data-cites="_2025_operator"><a href="#ref-_2025_operator" role="doc-biblioref">[2]</a></span>. <code>C0</code>, <code>C1</code> 由 <code>C</code> 拆分得来, FZ 是另一种 tensor format.
+</figcaption>
+</figure>
+</div>
+</div></div>
+</section>
+<section id="mental-picture-of-tensors" class="level3">
+<h3 class="anchored" data-anchor-id="mental-picture-of-tensors">Mental Picture of Tensors</h3>
+<ul>
+<li><p><strong>同一个中括号内用逗号分割</strong>的元素一般被认为<strong>地位相同</strong>. 比如下面 <code>1</code>, <code>2</code>, <code>3</code> 地位相同, <code>[1,2,3]</code> 和 <code>[4,5,6]</code> 地位相同.</p></li>
+<li><p><strong>Tensor size</strong>: 笔者习惯从最内层中括号开始读起, 每层中括号相同地位的元素个数即为该维度的大小, <strong>从右向左</strong> 列出来即为 tensor shape.</p>
+<ul>
+<li><p>比如:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>torch.Size([<span class="dv">2</span>, <span class="dv">4</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>应解读为两个 <code>[....]</code> 而不是 4 个 <code>[..]</code>.</p></li>
+<li><p>这里留两个练习, 给出下面两个 tensor 的 shape:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.tensor([</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">1</span>], [<span class="dv">2</span>],  [<span class="dv">3</span>],  [<span class="dv">4</span>]  ],</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">5</span>], [<span class="dv">6</span>],  [<span class="dv">7</span>],  [<span class="dv">8</span>]  ],</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">9</span>], [<span class="dv">10</span>], [<span class="dv">11</span>], [<span class="dv">12</span>] ]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> torch.tensor([</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    [ [ [ [<span class="dv">1</span>] ] ], [ [ [<span class="dv">2</span>] ] ] ]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(t.shape)  <span class="co"># 输出: torch.Size([3, 4, 1])</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(u.shape)  <span class="co"># 输出: torch.Size([1, 2, 1, 1, 1])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul></li>
+<li><p><strong>当我们说一个「维度」时我们在谈论什么?</strong></p>
+<ul>
+<li><p>每个维度看到的「元素」都是「<strong>片面</strong>」且「<strong>抽象</strong>」的. 比如下面的 <code>4</code> 这个维度看见的画面仅仅是蓝色的「<strong>切片</strong>」, 而且它无法分清三个蓝色条条的区别.</p></li>
+<li><p>后文很多算子都有 <code>dim</code> 这个参数, 说明这个算子作用在这个「维度」上. 对维度 <code>4</code> 来说, 就是同时作用在所有的<strong>蓝色切片</strong>上!</p>
+<div id="fig-tensor-abstract" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-abstract-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor-abstract.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-abstract-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: 每个维度即不能看到其元素内部 (「抽象」), 也无法看到外部 (「片面」).
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+</ul>
+</section>
+<section id="tensor-operations" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="tensor-operations">Tensor Operations</h3>
+<section id="tensor-形状改变-einops-库" class="level4">
+<h4 class="anchored" data-anchor-id="tensor-形状改变-einops-库">Tensor 形状改变 (<code>einops</code> 库)</h4>
+<blockquote class="blockquote">
+<p><code>einops</code> 提供了方便的 API 来改变 tensor 的形状.</p>
+</blockquote>
+<ul>
+<li><p><strong>所有 Tensor 形状变化构成群, 可由下面三个生成元 (Grouping, Transposition, Concatenation) 生成</strong>:</p>
+<div id="fig-tensor-generator" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-generator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor-generator.png" class="img-fluid figure-img" style="width:35.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-generator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Tensor 变形的三个生成元.
+</figcaption>
+</figure>
+</div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> einops <span class="im">import</span> rearrange</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.tensor([<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>])</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> rearrange(t, <span class="st">'(b a) -&gt; b a'</span>, a<span class="op">=</span><span class="dv">2</span>)   <span class="co"># Grouping, t.shape = [4,2], t = [[1,2],[3,4],[5,6],[7,8]]</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> rearrange(t, <span class="st">'b a -&gt; a b'</span>)          <span class="co"># Transposition, t.shape = [2,4], t = [[1,3,5,7],[2,4,6,8]]</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> rearrage(t, <span class="st">'b a -&gt; (b a)'</span>, a<span class="op">=</span><span class="dv">4</span>)    <span class="co"># Concatenation, t.shape = [8], t = [1,3,5,7,2,4,6,8]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><p>Transposition 操作也可以用:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>t.transpose(<span class="op">-</span><span class="dv">1</span>, <span class="op">-</span><span class="dv">2</span>)     <span class="co"># 将 t 的最后两个维度交换</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>如果 <code>t</code> 是 <code>torch.Size([3, 4, 1])</code>, 则变成 <code>torch.Size([3, 1, 4])</code>.</p></li>
+</ul></li>
+<li><p>小练习: 给出下面 <code>t</code> 的操作过程和结果:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> einops <span class="im">import</span> rearrange</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.tensor([</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">1</span>], [<span class="dv">2</span>],  [<span class="dv">3</span>],  [<span class="dv">4</span>]  ],</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">5</span>], [<span class="dv">6</span>],  [<span class="dv">7</span>],  [<span class="dv">8</span>]  ],</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    [ [<span class="dv">9</span>], [<span class="dv">10</span>], [<span class="dv">11</span>], [<span class="dv">12</span>] ]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> rearrange(t, <span class="st">'a (b1 b2) c -&gt; (a c) (b2 b1)'</span>, b1<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(t.shape)  <span class="co"># torch.Size([3, 4])</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(t) <span class="co"># tensor([[ 1,  3,  2,  4],</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>                 <span class="co"># [ 5,  7,  6,  8],</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                 <span class="co"># [ 9, 11, 10, 12]])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>这里的变形可以拆成:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">'a (b1 b2) c -&gt; a (b2 b1) c -&gt; a c (b2 b1) -&gt; (a c) (b2 b1)'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+</section>
+<section id="tensor-切分" class="level4">
+<h4 class="anchored" data-anchor-id="tensor-切分">Tensor 切分</h4>
+<ul>
+<li><code>chunk()</code> 将一个 tensor 且成相等大小的多个 tensor.
+<ul>
+<li><p>下面代码 <code>chunk(num, dim)</code> 代表将维度 <code>dim</code> 的「切片」分成 <code>num</code> 份.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.tensor([</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    [ <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">4</span> ],</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    [ <span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">5</span> ],</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    [ <span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">6</span> ]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>])     <span class="co"># torch.Size([3, 4])</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>a, b <span class="op">=</span> t.chunk(<span class="dv">2</span>, dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># a = tensor([[1., 1.],</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#             [2., 2.],</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#             [3., 3.]])</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># b = tensor([[4., 4.],</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#             [5., 5.],</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#             [6., 6.]])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul></li>
+</ul>
+</section>
+<section id="tensor-乘加" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="tensor-乘加">Tensor 乘加</h4>
+<ul>
+<li><p>Tensor 的基础运算包括:</p>
+<ul>
+<li><strong>Element-wise multiplication</strong>: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code> 都是逐点的.</li>
+<li><strong>Matrix-like multiplication</strong>: <code>@</code> (等价于 <code>torch.matmul()</code> 函数).
+<ul>
+<li><p>注意当对高维张量进行矩阵乘法的时候, 只要求<strong>最后两个维度</strong>满足矩阵相乘的规定 (比如 ) 即可, 前面的维度一般要求相同好进行两两配对 (见 <a href="#fig-tensor-matmul" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-tensor-matmul</span></a>).</p>
+<div id="fig-tensor-matmul" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-matmul-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor-matmul.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-matmul-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: <code>aa</code> 和 <code>bb</code> 矩阵乘法得到 <code>result</code> 的过程, 前面的维度 (<code>3</code>) 要求相同.
+</figcaption>
+</figure>
+</div></li>
+<li><p>思考张量矩阵乘法时<strong>将最后两维度的一个「切片」想象出来即可</strong>, 前面的维度只是这个过程的结构化重复</p>
+<ul>
+<li>比如 <a href="#fig-tensor-matmul" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-tensor-matmul</span></a> 中只需要将右下角的「切片」按照前面的维度 <code>3</code> 的结构放好就行, 这里很简单直接拼接即可; 如果 <code>aa</code> 和 <code>bb</code> 前面的维度不是 <code>3</code> 而是复杂点的比如 <code>(2,4,1)</code>, 思考方式没有任何变化.</li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li><p><strong>Tensor Broadcasting</strong>: 上面两种运算都支持 broadcasting, 指 <strong>左侧缺少的维度</strong> 或者 <strong>不匹配的相应维度是 <code>1</code></strong> 的维度都会自动复制成与另一个张量一样的:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>aa <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">5</span>,<span class="dv">4</span>)     <span class="co"># base tensor</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>bb <span class="op">=</span> torch.randn(  <span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">5</span>,<span class="dv">4</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>cc <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">5</span>  )</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>dd <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,  <span class="dv">5</span>,<span class="dv">4</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>ee <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">4</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>ff <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">4</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">## Element-wise operation (+ - * / 都是逐点的)</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>add1_ew <span class="op">=</span> aa <span class="op">+</span> bb        <span class="co"># 可以自动填充左侧维度, add1_ew 大小 [2,3,6,5,4]</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># add2_ew = aa + cc      # 不能自动填充右侧维度!</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co"># add3_ew = aa + dd      # 不能自动填充中间维度!</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>add4_ew <span class="op">=</span> aa <span class="op">+</span> ee        <span class="co"># 1 维度自动复制 6 份, add4_ew 大小 [2,3,6,5,4]</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co"># add4_ew = aa + ff      # 中间的 2 维度不能自动复制 3 份! (虽然理论上是可以定义的)</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>gg <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">5</span>)</span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>hh <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">1</span>,<span class="dv">5</span>)</span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co">## Matrix multiplication (@ 与 torch.matmul() 函数效果一样)</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>matmul1 <span class="op">=</span> aa <span class="op">@</span> gg        <span class="co"># 最后两个维度满足矩阵相乘要求就行, matmul1 大小 [2,3,6,5,5]</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>matmul2 <span class="op">=</span> aa <span class="op">@</span> bb.transpose(<span class="op">-</span><span class="dv">1</span>,<span class="op">-</span><span class="dv">2</span>)      <span class="co"># 可以自动填充左侧维度, matmul2 大小 [2,3,6,5,5]</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># matmul3 = aa @ dd.transpose(-1,-2)    # 不能自动填充中间维度!</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>matmul4 <span class="op">=</span> aa <span class="op">@</span> ee.transpose(<span class="op">-</span><span class="dv">1</span>,<span class="op">-</span><span class="dv">2</span>)      <span class="co"># 1 维度自动复制 6 份, matmul4 大小 [2,3,6,5,5]</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a><span class="co"># matmul5 = aa @ ff.transpose(-1,-2)    # 中间的 2 维度不能自动复制 3 份! (虽然理论上是可以定义的)</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="co"># matmul6 = aa @ hh                     # 最后两个维度必须严格满足矩阵相乘规定, 没有 broadcasting 的说法.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-tensor-broadcasting" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-broadcasting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor-broadcasting.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-broadcasting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: 逐点运算之前要进行 tensor broadcasting.
+</figcaption>
+</figure>
+</div>
+</div></div></section>
+</section>
+</section>
+<section id="layers-in-nn" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="layers-in-nn">Layers in NN</h2>
+<blockquote class="blockquote">
+<p>下面我们列举一些神经网络中的一些层, 它们仅仅是对 tensor 的一些操作.</p>
+</blockquote>
+<section id="带参数的层" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="带参数的层">带参数的层</h3>
+<section id="convolution-卷积层" class="level4">
+<h4 class="anchored" data-anchor-id="convolution-卷积层">Convolution 卷积层</h4>
+<blockquote class="blockquote">
+<p>匹配 NCL 或 NCHW 中的 C.</p>
+</blockquote>
+<ul>
+<li><p><code>Conv1d</code> 和 <code>Conv2d</code> 输入张量必须为 <code>NCL</code> 和 <code>NCHW</code> 格式且维度正确, 左边缺少维度自动补 1, 左边多了维度会报错.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>photos1d <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">20</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>photos1d_ <span class="op">=</span> torch.randn(<span class="dv">3</span>,<span class="dv">20</span>)  <span class="co"># 也可以</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># photo1d = torch.randn(2,4,20)  # 报错: 维度不匹配</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># photo1d = torch.randn(2,3,20,5)  # 报错: 维度多了</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>t1 <span class="op">=</span> nn.Conv1d(in_channels<span class="op">=</span><span class="dv">3</span>, out_channels<span class="op">=</span><span class="dv">6</span>, kernel_size<span class="op">=</span><span class="dv">3</span>, padding<span class="op">=</span><span class="dv">1</span>)(photos1d)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>photos <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">4</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>photos_ <span class="op">=</span> torch.randn(<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">4</span>)  <span class="co"># 也可以</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="co"># photo = torch.randn(2,6,5,4)  # 报错: 维度不匹配</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="co"># photo = torch.randn(1,2,3,5,1)  # 报错: 维度多了</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> nn.Conv2d(in_channels<span class="op">=</span><span class="dv">3</span>, out_channels<span class="op">=</span><span class="dv">6</span>, kernel_size<span class="op">=</span><span class="dv">3</span>, padding<span class="op">=</span><span class="dv">1</span>)(photos)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+</ul>
+</section>
+<section id="linear-线性层" class="level4">
+<h4 class="anchored" data-anchor-id="linear-线性层">Linear 线性层</h4>
+<blockquote class="blockquote">
+<p>只要匹配最右边的维度即可, 左边可以随便加多少 (按相同操作处理).</p>
+</blockquote>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">10</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>t_ <span class="op">=</span> torch.randn(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">10</span>)  <span class="co"># 也可以</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>t1 <span class="op">=</span> nn.Linear(in_features<span class="op">=</span><span class="dv">10</span>, out_features<span class="op">=</span><span class="dv">5</span>)(t)   <span class="co"># t1.shape = [2,5]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="normalization-归一化层" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="normalization-归一化层">Normalization 归一化层</h4>
+<blockquote class="blockquote">
+<p>选择 tensor 的<strong>某些维度</strong>的元素作为整体进行归一化, 传入的参数非常恼火, 理解不了就忽略吧.</p>
+</blockquote>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>photos <span class="op">=</span> torch.randn(<span class="dv">10</span>, <span class="dv">3</span>, <span class="dv">224</span>, <span class="dv">224</span>)               <span class="co"># [N,C,H,W]</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>bn <span class="op">=</span> nn.BatchNorm2d(num_features<span class="op">=</span><span class="dv">3</span>)                 <span class="co"># 参数填写 C 的数值</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>ln <span class="op">=</span> nn.LayerNorm(normalized_shape<span class="op">=</span>[<span class="dv">3</span>,<span class="dv">224</span>,<span class="dv">224</span>])     <span class="co"># 参数填写 [C,H,W], 为什么要这样, 我真佛了</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>my_norm <span class="op">=</span> nn.LayerNorm(normalized_shape<span class="op">=</span>[<span class="dv">224</span>,<span class="dv">224</span>])  <span class="co"># 也可以定制, 即将最后两个维度视为求均值和方差的整体.</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<ul>
+<li><p><strong>Post-norm 和 Pre-norm</strong></p>
+<div id="fig-pre-post" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pre-post-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="norm-pre-post.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pre-post-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Norm 层可以放在重要的模块 (Attention/FFN) 前面 (Pre), 后面 (Post) 或混合来
+</figcaption>
+</figure>
+</div></li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+图片处理中的 Normalization
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li><p>Normalization 指对 tensor 的<strong>某些数据当作整体</strong> (<a href="#fig-norm" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-norm</span></a> 的蓝色区域), 算 <span class="math inline">\(\mu\)</span> 和 <span class="math inline">\(\sigma^2\)</span>, 然后对该区域的每个元素 <span class="math inline">\(x_i\)</span>:</p>
+<p><span class="math display">\[
+  \hat{x}_i = \frac{x_i - \mu}{\sigma}
+  \]</span></p>
+<p>最后这个区域内的所有元素 <span class="math inline">\(\hat{x}_i\)</span> 还会被<strong>统一处理</strong>为:</p>
+<p><span class="math display">\[
+  y_i = \gamma \hat{x}_i + \beta
+  \]</span></p>
+<p>这就是 Norm 层参数的来源, 可以算算参数量如何决定.</p></li>
+<li><p>Norm 层会加入神经网络的很多地方, <strong>本质上是在给神经网络加入 Inductive Bias</strong>! 即告诉神经网络哪些数据是类似的 (满足同一个分布, 从而将他们等地位化 (即归一化)).</p></li>
+<li><p>由于 Norm 层经常用于处理图片的 4 维张量 <span class="math inline">\([N,C,H,W]\)</span> <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> (<span class="math inline">\([10, 3, 224, 224]\)</span> 表示 <span class="math inline">\(10\)</span> 张 <span class="math inline">\(224\times 224\)</span> RGB 图片), 所以会用图片处理的维度来描述不同蓝色区域的选择, 分为:</p>
+<ul>
+<li><strong>BN (Batch Normalization)</strong>: 对 output tensor 中相同 Channel 的元素进行归一化.
+<ul>
+<li>之所以叫 Batch Norm 是因为图像处理中 <strong>output tensor</strong> 的一个 channel 对应 <strong>parameter tensor</strong> 的一个 batch. 为什么不叫 Channel Norm!? SB.</li>
+</ul></li>
+<li><strong>LN (Layer Normalization)</strong>: 对 output tensor 的一个 batch 中所有元素进行归一化.
+<ul>
+<li>LLM 常用.</li>
+</ul></li>
+<li><strong>IN (Instance Normalization)</strong></li>
+<li><strong>GN (Group Normalization)</strong></li>
+</ul></li>
+</ul>
+<div id="fig-norm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-norm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="norm.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-norm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: 四种 normalization 的示意图, 蓝色的元素会被统一归一化 (由于归一化之后还需要引入两个可学习参数, 所以每一整块蓝色区域对应一组 <span class="math inline">\(\gamma, \beta\)</span>). 注意这里 H, W 被展平了. <span class="citation" data-cites="wu2018groupnormalization"><a href="#ref-wu2018groupnormalization" role="doc-biblioref">[3]</a></span>
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;<span class="math inline">\(N\)</span> 表示 batch.</p></div></div></section>
+<section id="attention-注意力层" class="level4">
+<h4 class="anchored" data-anchor-id="attention-注意力层">Attention 注意力层</h4>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Attention 的理解
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ul>
+<li>一个 Attention head 里面的 Inductive Bias 分析:
+<ul>
+<li>Query <span class="math inline">\(Q\)</span>: Hey, do you all have anything relevant in terms of <strong>&lt;syntax&gt;</strong> for me?</li>
+<li>Key <span class="math inline">\(K\)</span>: Here is what I can offer in terms of <strong>&lt;syntax&gt;</strong>.</li>
+<li>Score: How relevant is what you guys offer in terms of <strong>&lt;syntax&gt;</strong>?</li>
+<li>Value <span class="math inline">\(V\)</span>: What direction in the embedding space should I move to capture <strong>&lt;syntax&gt;</strong> information?</li>
+</ul></li>
+<li>Multi-head: 相当于问很多个不同的问题, 即改变 “<strong>&lt;&gt;</strong>” 里面的内容, 比如 <strong>&lt;meaning&gt;</strong>, <strong>&lt;irrelevance&gt;</strong>, <strong>&lt;description&gt;</strong>, etc.
+<ul>
+<li><p>合并多个 head 输出的向量可以用相加或者拼接.</p>
+<div id="fig-mha" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mha-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="mha.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mha-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: (a) Single Head Attention; (b) 3-head Attention. (<code>dim = 6</code>, <code>dim_head = 2</code>, <code>heads = 3</code>, <code>inner_dim = 2*3 = 6 = dim</code>)
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-sha-compute" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sha-compute-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="sha-compute.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sha-compute-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: (a) Computationally.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-mha-compute" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mha-compute-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="mha-compute.png" class="img-fluid figure-img" style="width:120.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mha-compute-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: (b) Computationally.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+</section>
+<section id="无参数的层" class="level3">
+<h3 class="anchored" data-anchor-id="无参数的层">无参数的层</h3>
+<ul>
+<li><p><strong>「切片」操作</strong>: 对 tensor 某一维度的处理.</p></li>
+<li><p><strong>Softmax</strong>: 下面代码 <code>Softmax(dim=1)</code> 表示在 <code>t</code> 的第 2 个维度「切片」的整体做 softmax.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.tensor([</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    [ <span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">1</span> ],</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    [ <span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">2</span> ],</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    [ <span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">3</span> ]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>], dtype<span class="op">=</span>torch.float32)     <span class="co"># torch.Size([3, 4])</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> nn.Softmax(dim<span class="op">=</span><span class="dv">1</span>)(t)    <span class="co"># tensor([[0.2500, 0.2500, 0.2500, 0.2500],</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>                                    <span class="co"># [0.2500, 0.2500, 0.2500, 0.2500],</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>                                    <span class="co"># [0.2500, 0.2500, 0.2500, 0.2500]])</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
+<li><p><strong>其它操作</strong></p>
+<ul>
+<li><strong>激活函数</strong>: <code>SiLU()</code></li>
+<li><strong>恒等映射</strong>: <code>Identity()</code></li>
+<li><strong>Dropout</strong>: 训练时随机置 0, 推理时自动关闭.</li>
+<li><strong>下采样</strong>: <code>AvgPool2d()</code></li>
+</ul></li>
+</ul>
+</section>
+<section id="其它" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="其它">其它</h3>
+<section id="dsc-深度可分离卷积" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="dsc-深度可分离卷积">DSC 深度可分离卷积</h4>
+<p>我们直接举例说明 DSC (Depthwise Separable Convolution) 如何减少计算量:</p>
+<ul>
+<li>参数:
+<ul>
+<li>Input 输入信息: <span class="math inline">\((7\times 7) \times 8 = 392\)</span> (<span class="math inline">\(8\)</span> 个 channel).</li>
+<li>Output 输出信息: 同上.</li>
+<li>Filter 卷积核:
+<ul>
+<li><strong>平面 (2D) 大小</strong>: <span class="math inline">\(3 \times 3 = 9\)</span>.</li>
+<li><strong>立体 (3D) 大小</strong>: <span class="math inline">\((3\times 3) \times 8 = 72\)</span>.</li>
+<li><strong>张量 (4D) 大小</strong>: <span class="math inline">\((3\times 3) \times 8 \times 8 = 576\)</span>. (最后的 <span class="math inline">\(8\)</span> 是卷积核个数 (= 输出通道数), 注意 <a href="../glossary/glossary.html#sec-cv-terms">HWCN 规范</a>).</li>
+<li><a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> 中每个「立体核」都会对 Input 进行扫描, 姑且将「闪」一下称为一次「快照」.</li>
+</ul></li>
+<li>Stride = 1 (<code>s1</code>).</li>
+<li>Padding = 1 (<a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> 的灰色部分).</li>
+</ul></li>
+<li><strong>常规卷积层</strong> (见 <a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a>):
+<ul>
+<li><strong>参数量</strong> = 一个立体核参数量 + 有几个立体核 <span class="math inline">\(= (72+1) \times 8 = 584\)</span> (别忘了每个卷积核还有有一个 bias 参数).</li>
+<li><strong>MAC</strong><a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> = 「闪」一次的 MAC <span class="math inline">\(\times\)</span>「闪」的总次数 <span class="math inline">\(= 72 \times 392 = 28224\)</span>.
+<ul>
+<li><strong>FLOPs</strong> = MAC <span class="math inline">\(\times 2 = 56448\)</span>.</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;算 MAC 的时候这样思考: 每「闪」一下都算了 <span class="math inline">\(72\)</span> 次乘法和 <span class="math inline">\(71\)</span> 次加法, 哦不对! <strong>最后还要加 bias</strong>, 所以加法也是 <span class="math inline">\(72\)</span> 次 (即 MAC=72); 而输出的每个「小方块」都对应一次「快照」! 这两个数乘一下就是总 MAC 数了.</p></div></div><ul>
+<li><strong>DSC</strong> (见 <a href="#fig-dsc" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-dsc</span></a>):
+<ul>
+<li><strong>参数量</strong>
+<ul>
+<li>Depthwise 部分 <span class="math inline">\(= (9+1) \times 8 = 80\)</span>.</li>
+<li>Pointwise 部分 <span class="math inline">\(= (8+1) \times 8 = 72\)</span>.</li>
+<li>总共 <span class="math inline">\(80 + 72 = 152\)</span>.</li>
+</ul></li>
+<li><strong>MAC</strong>
+<ul>
+<li>Depthwise 部分 <span class="math inline">\(= 9 \times 392 = 3528\)</span>.</li>
+<li>Pointwise 部分 <span class="math inline">\(= 8 \times 392 = 3136\)</span>.</li>
+<li>总共 <span class="math inline">\(3528 + 3136 = 6664\)</span> (比常规卷积小了 <span class="math inline">\(4\)</span> 倍多!).</li>
+<li><strong>FLOPs</strong> = MAC <span class="math inline">\(\times 2 = 13328\)</span>.</li>
+</ul></li>
+<li>DSC 相当于将 channel 之间和 spatial 之间的信息混合方式分开训练.</li>
+<li>DSC 还可以有 <strong>Depth multiplier 深度乘子</strong> 和 <strong>Group</strong> 的概念. <strong>Depth multiplier</strong> 指每个输出通道不一定要对应一个卷积核, 也可以对应两个卷积核 (深度乘子 <span class="math inline">\(=2\)</span>), 并产生两个输出通道. <strong>Group</strong> 见 <a href="#fig-dsc-group" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-dsc-group</span></a>.</li>
+</ul></li>
+</ul>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-normal-conv" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-normal-conv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://animatedai.github.io/media/convolution-animation-3x3-kernel-same-padding.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-normal-conv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: 常规卷积操作 (加 bias 的操作没有展示出来), 参数量 <span class="math inline">\(584\)</span>, MAC <span class="math inline">\(=28224\)</span> <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[4]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-dsc" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dsc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://animatedai.github.io/media/depthwise-separable-convolution-animation-3x3-kernel.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dsc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: DSC (分为 <strong>Depthwise (<code>dw</code>) 逐通道</strong> 和 <strong>Pointwise 逐点</strong> 两部分, 加 bias 的操作没有展示出来), 参数量 <span class="math inline">\(152\)</span>, MAC <span class="math inline">\(=6664\)</span> <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[4]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-dsc-group" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dsc-group-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://animatedai.github.io/media/convolution-animation-3x3-kernel-2-groups.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dsc-group-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: 也可以不用将 channel 和 spatial 的信息完全分开训练, 可以引入 <strong>Group</strong> 的概念, 比如这里将 Input 拆成了 <span class="math inline">\(2\)</span> 个 group. <a href="#fig-normal-conv" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-normal-conv</span></a> (<span class="math inline">\(1\)</span> 个 group) 和 <a href="#fig-dsc" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-dsc</span></a> (<span class="math inline">\(8\)</span> 个 group) 是两个极端 <span class="citation" data-cites="ai_2023_fundamental"><a href="#ref-ai_2023_fundamental" role="doc-biblioref">[4]</a></span>.
+</figcaption>
+</figure>
+</div>
+</div></div></section>
+</section>
+</section>
+<section id="autograd-机制" class="level2">
+<h2 class="anchored" data-anchor-id="autograd-机制">Autograd 机制</h2>
+<section id="motivation" class="level3">
+<h3 class="anchored" data-anchor-id="motivation">Motivation</h3>
+<ul>
+<li>如何在计算机中进行微分?
+<ul>
+<li><p><strong>Manual Differentiation</strong>: 人工推导导数公式, 然后写进代码.</p></li>
+<li><p><strong>Symbolic Differentiation</strong>: 计算机符号化地推导导数公式, 然后生成代码 (Mathematica 就是这么干的)</p></li>
+<li><p><strong>Numerical Differentiation</strong>: 用数值方法近似地计算导数.</p></li>
+<li><p><strong>Automatic Differentiation</strong>: 通过链式法则和计算图, 自动地计算导数.</p>
+<div id="fig-diff-computer" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-diff-computer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="diff-computer.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-diff-computer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16: 计算机中微分的 4 种方式 <span class="citation" data-cites="baydin2018automaticdifferentiationmachinelearning"><a href="#ref-baydin2018automaticdifferentiationmachinelearning" role="doc-biblioref">[5]</a></span>.
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+<li>放在 ML 的场景下, 一个神经网络可能有几十亿的参数, 每个参数都要求梯度, 手动推导不可能完成! 符号化推导也会导致表达式爆炸, 数值方法精度又不够好. 但是神经网络的函数不是随意的函数, 它是<strong>高度算子化和分层的</strong>. 我们希望导数的信息能自动沿着计算的路径 (<strong>Computational Graph</strong>) 反向传播!
+<ul>
+<li>用「传播」这个词是因为神经网络是高度分层的结构, 数据之间有明显的依赖关系 (partially-ordered).</li>
+<li>用「自动」这个词是因为我们希望一句 <code>loss.backward()</code> 就能像遍历一个树一样完成所有的梯度计算.</li>
+<li>而且我们希望在程序看来每个梯度计算都是「局部」的, 运行的函数并不知道自己在传播一个大计算图.
+<ul>
+<li>这个理论基础是 <strong>Chain Rule 链式法则</strong>! 我们这样解读链式法则: 要求 <span class="math inline">\(y\)</span> 关于变量 <span class="math inline">\(v\)</span> 的导数, 只要知道下面三类信息 (在 <a href="#fig-chain-rule" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-chain-rule</span></a> 标为蓝色):
+<ul>
+<li><span class="math inline">\(v\)</span> 参与了<strong>哪些算子的运算</strong>;</li>
+<li>这些<strong>算子的输出</strong> (当然每个算子只有一个) <strong>分别对 <span class="math inline">\(y\)</span> 的导数</strong>;</li>
+<li>这些算子的<strong>其它输入的值</strong>.</li>
+</ul>
+<div id="fig-chain-rule" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chain-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="chain-rule.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chain-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17: Chain Rule 的局部视角, 求 <span class="math inline">\(\partial_v y\)</span> 只需要知道蓝色的信息, 对于 <span class="math inline">\(a,b, \ldots, c\)</span> 与 <span class="math inline">\(y\)</span> 的关系不需要知道!
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+</ul></li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+EXAMPLE: A scalar computational graph
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>考虑式子 <span class="citation" data-cites="deep_thoughts_2021_derive"><a href="#ref-deep_thoughts_2021_derive" role="doc-biblioref">[6]</a></span>: <span id="eq-example"><span class="math display">\[
+y := \ln x_1 + x_1 x_2 - e^{x_2}
+\tag{1}\]</span></span></p>
+<p>可以由以下图表示:</p>
+<div id="fig-example-plain" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-example-plain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="example-plain.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-example-plain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18: Computational graph demo.
+</figcaption>
+</figure>
+</div>
+<p>我们希望计算 <span class="math inline">\(y\)</span> 关于 <span class="math inline">\(x_1, x_2\)</span> 在 <span class="math inline">\((x_1, x_2) = (2, 5)\)</span> 处的梯度.</p>
+<ul>
+<li><p><strong>Forward propagation</strong>: 首先进行前向传播, 目的是计算出中间变量的数值 (为什么要算呢, 因为链式法则需要知道中间变量的值!):</p>
+<div id="fig-ex-forward" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ex-forward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ex-forward.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ex-forward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;19: Forward propagation.
+</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Backward propagation</strong>: 如 <a href="#fig-ex-backward" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-ex-backward</span></a>, 蓝色数值代表 <span class="math inline">\(y\)</span> 对该节点的导数.</p>
+<div id="fig-ex-backward" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ex-backward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ex-backward.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ex-backward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20: Backward propagation.
+</figcaption>
+</figure>
+</div></li>
+</ul>
+<p>可知:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\partial_{x_1} y &amp;= 5.5 \\
+\partial_{x_2} y &amp;= -146.4
+\end{aligned}
+\]</span></p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+<section id="minimal-implementation" class="level3">
+<h3 class="anchored" data-anchor-id="minimal-implementation">Minimal Implementation</h3>
+<p>我们将 <a href="#fig-ex-forward" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-ex-forward</span></a> 的棕色方块建模为 <code>Tensor</code> 类, 青色圆形建模为算子比如 <code>Add</code>. 这是 autograd 重点关注的两个结构. 现在我们实现 <a href="#eq-example" class="quarto-xref">Equation&nbsp;<span class="quarto-unresolved-ref">eq-example</span></a> 的 autograd 库 (只实现了必要的算子, adapted from <span class="citation" data-cites="eduardoleito_2024_documented"><a href="#ref-eduardoleito_2024_documented" role="doc-biblioref">[7]</a></span>). <strong>主要关注 <code>Tensor</code> 类的 <code>backward()</code> 方法和各个算子的 <code>backward()</code> 方法的相互调用!</strong></p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>mytorch/tensor.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-tensorpy" data-filename="mytorch/tensor.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-tensorpy-1"><a href="#lst-tensorpy-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> __future__ <span class="im">import</span> annotations</span>
+<span id="lst-tensorpy-2"><a href="#lst-tensorpy-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
+<span id="lst-tensorpy-3"><a href="#lst-tensorpy-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="lst-tensorpy-4"><a href="#lst-tensorpy-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-5"><a href="#lst-tensorpy-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Tensor:</span>
+<span id="lst-tensorpy-6"><a href="#lst-tensorpy-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, data: np.ndarray, requires_grad<span class="op">=</span><span class="va">False</span>, operation<span class="op">=</span><span class="va">None</span>):</span>
+<span id="lst-tensorpy-7"><a href="#lst-tensorpy-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Payload</span></span>
+<span id="lst-tensorpy-8"><a href="#lst-tensorpy-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.data <span class="op">=</span> data</span>
+<span id="lst-tensorpy-9"><a href="#lst-tensorpy-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Metadata</span></span>
+<span id="lst-tensorpy-10"><a href="#lst-tensorpy-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.requires_grad <span class="op">=</span> requires_grad</span>
+<span id="lst-tensorpy-11"><a href="#lst-tensorpy-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.requires_grad:</span>
+<span id="lst-tensorpy-12"><a href="#lst-tensorpy-12" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.grad <span class="op">=</span> np.zeros_like(data, dtype<span class="op">=</span>np.float32)</span>
+<span id="lst-tensorpy-13"><a href="#lst-tensorpy-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.operation <span class="op">=</span> operation  <span class="co"># What operation cls created this tensor</span></span>
+<span id="lst-tensorpy-14"><a href="#lst-tensorpy-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.children <span class="op">=</span> []          <span class="co"># What other tensors are created from this tensor</span></span>
+<span id="lst-tensorpy-15"><a href="#lst-tensorpy-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-16"><a href="#lst-tensorpy-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># This method is called by the operation backward()</span></span>
+<span id="lst-tensorpy-17"><a href="#lst-tensorpy-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> backward(<span class="va">self</span>, </span>
+<span id="lst-tensorpy-18"><a href="#lst-tensorpy-18" aria-hidden="true" tabindex="-1"></a>                 grad_: Optional[np.ndarray] <span class="op">=</span> <span class="va">None</span>,    <span class="co"># The downstream operator pass this gradient for you</span></span>
+<span id="lst-tensorpy-19"><a href="#lst-tensorpy-19" aria-hidden="true" tabindex="-1"></a>                 z: Optional[Tensor] <span class="op">=</span> <span class="va">None</span>):           <span class="co"># Which child tensor is passing the gradient</span></span>
+<span id="lst-tensorpy-20"><a href="#lst-tensorpy-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="va">self</span>.requires_grad:</span>
+<span id="lst-tensorpy-21"><a href="#lst-tensorpy-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="st">"Cannot backpropagate on a tensor that does not require gradients."</span></span>
+<span id="lst-tensorpy-22"><a href="#lst-tensorpy-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-23"><a href="#lst-tensorpy-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> grad_ <span class="kw">is</span> <span class="va">None</span>:           <span class="co"># Called only the first time from loss.backward()</span></span>
+<span id="lst-tensorpy-24"><a href="#lst-tensorpy-24" aria-hidden="true" tabindex="-1"></a>            grad_ <span class="op">=</span> np.ones_like(<span class="va">self</span>.data, dtype<span class="op">=</span>np.float32)   <span class="co"># Set a tiny nudge of ones</span></span>
+<span id="lst-tensorpy-25"><a href="#lst-tensorpy-25" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="lst-tensorpy-26"><a href="#lst-tensorpy-26" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.grad <span class="op">+=</span> grad_          <span class="co"># Aggregate gradients from that children (but possibly not all yet)</span></span>
+<span id="lst-tensorpy-27"><a href="#lst-tensorpy-27" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-28"><a href="#lst-tensorpy-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> z <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:           <span class="co"># NOT called only the first time</span></span>
+<span id="lst-tensorpy-29"><a href="#lst-tensorpy-29" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.children.remove(z) <span class="co"># I heard the gradient from you, no need to wait for you anymore</span></span>
+<span id="lst-tensorpy-30"><a href="#lst-tensorpy-30" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-31"><a href="#lst-tensorpy-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.operation:</span>
+<span id="lst-tensorpy-32"><a href="#lst-tensorpy-32" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> <span class="va">self</span>.children:   <span class="co"># Received grad_ from all children, ready to pass grad upstream</span></span>
+<span id="lst-tensorpy-33"><a href="#lst-tensorpy-33" aria-hidden="true" tabindex="-1"></a>                <span class="va">self</span>.operation.backward(<span class="va">self</span>.grad, <span class="va">self</span>)</span>
+<span id="lst-tensorpy-34"><a href="#lst-tensorpy-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-35"><a href="#lst-tensorpy-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> zero_grad(<span class="va">self</span>):</span>
+<span id="lst-tensorpy-36"><a href="#lst-tensorpy-36" aria-hidden="true" tabindex="-1"></a>        <span class="co">''' Sets the gradient of this tensor to zero. '''</span></span>
+<span id="lst-tensorpy-37"><a href="#lst-tensorpy-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.requires_grad:</span>
+<span id="lst-tensorpy-38"><a href="#lst-tensorpy-38" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.grad <span class="op">=</span> np.zeros_like(<span class="va">self</span>.data)</span>
+<span id="lst-tensorpy-39"><a href="#lst-tensorpy-39" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="lst-tensorpy-40"><a href="#lst-tensorpy-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Some basic operators, more operators must be called via their classes below</span></span>
+<span id="lst-tensorpy-41"><a href="#lst-tensorpy-41" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__add__</span>(<span class="va">self</span>, other: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-42"><a href="#lst-tensorpy-42" aria-hidden="true" tabindex="-1"></a>        op <span class="op">=</span> Add()</span>
+<span id="lst-tensorpy-43"><a href="#lst-tensorpy-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> op.forward(<span class="va">self</span>, other)</span>
+<span id="lst-tensorpy-44"><a href="#lst-tensorpy-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-45"><a href="#lst-tensorpy-45" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__neg__</span>(<span class="va">self</span>) <span class="op">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-46"><a href="#lst-tensorpy-46" aria-hidden="true" tabindex="-1"></a>        op <span class="op">=</span> Neg()</span>
+<span id="lst-tensorpy-47"><a href="#lst-tensorpy-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> op.forward(<span class="va">self</span>)</span>
+<span id="lst-tensorpy-48"><a href="#lst-tensorpy-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-49"><a href="#lst-tensorpy-49" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__sub__</span>(<span class="va">self</span>, other: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-50"><a href="#lst-tensorpy-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span> <span class="op">+</span> (<span class="op">-</span>other)</span>
+<span id="lst-tensorpy-51"><a href="#lst-tensorpy-51" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="lst-tensorpy-52"><a href="#lst-tensorpy-52" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__mul__</span>(<span class="va">self</span>, other: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-53"><a href="#lst-tensorpy-53" aria-hidden="true" tabindex="-1"></a>        op <span class="op">=</span> Mul()</span>
+<span id="lst-tensorpy-54"><a href="#lst-tensorpy-54" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> op.forward(<span class="va">self</span>, other)</span>
+<span id="lst-tensorpy-55"><a href="#lst-tensorpy-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="lst-tensorpy-56"><a href="#lst-tensorpy-56" aria-hidden="true" tabindex="-1"></a><span class="co"># Paramaters are exact the same as Tensors except they always require gradients to be updated.</span></span>
+<span id="lst-tensorpy-57"><a href="#lst-tensorpy-57" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Parameter(Tensor):</span>
+<span id="lst-tensorpy-58"><a href="#lst-tensorpy-58" aria-hidden="true" tabindex="-1"></a>    <span class="co">''' Subclass of Tensor which always tracks gradients. '''</span></span>
+<span id="lst-tensorpy-59"><a href="#lst-tensorpy-59" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, data, requires_grad <span class="op">=</span> <span class="va">True</span>, operation <span class="op">=</span> <span class="va">None</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="lst-tensorpy-60"><a href="#lst-tensorpy-60" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>(data, requires_grad<span class="op">=</span>requires_grad, operation<span class="op">=</span>operation)</span>
+<span id="lst-tensorpy-61"><a href="#lst-tensorpy-61" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-62"><a href="#lst-tensorpy-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-63"><a href="#lst-tensorpy-63" aria-hidden="true" tabindex="-1"></a><span class="co"># These are just operators</span></span>
+<span id="lst-tensorpy-64"><a href="#lst-tensorpy-64" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Add:</span>
+<span id="lst-tensorpy-65"><a href="#lst-tensorpy-65" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, a: Tensor, b: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-66"><a href="#lst-tensorpy-66" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Record which two tensors were added</span></span>
+<span id="lst-tensorpy-67"><a href="#lst-tensorpy-67" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.parents <span class="op">=</span> (a, b)</span>
+<span id="lst-tensorpy-68"><a href="#lst-tensorpy-68" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-69"><a href="#lst-tensorpy-69" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create result tensor z</span></span>
+<span id="lst-tensorpy-70"><a href="#lst-tensorpy-70" aria-hidden="true" tabindex="-1"></a>        requires_grad <span class="op">=</span> a.requires_grad <span class="kw">or</span> b.requires_grad</span>
+<span id="lst-tensorpy-71"><a href="#lst-tensorpy-71" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> a.data <span class="op">+</span> b.data</span>
+<span id="lst-tensorpy-72"><a href="#lst-tensorpy-72" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> Tensor(data, requires_grad<span class="op">=</span>requires_grad, operation<span class="op">=</span><span class="va">self</span>) </span>
+<span id="lst-tensorpy-73"><a href="#lst-tensorpy-73" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-74"><a href="#lst-tensorpy-74" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Side effects to a, b</span></span>
+<span id="lst-tensorpy-75"><a href="#lst-tensorpy-75" aria-hidden="true" tabindex="-1"></a>        a.children.append(z)</span>
+<span id="lst-tensorpy-76"><a href="#lst-tensorpy-76" aria-hidden="true" tabindex="-1"></a>        b.children.append(z)</span>
+<span id="lst-tensorpy-77"><a href="#lst-tensorpy-77" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-78"><a href="#lst-tensorpy-78" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> z</span>
+<span id="lst-tensorpy-79"><a href="#lst-tensorpy-79" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-80"><a href="#lst-tensorpy-80" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> backward(<span class="va">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-81"><a href="#lst-tensorpy-81" aria-hidden="true" tabindex="-1"></a>        a, b <span class="op">=</span> <span class="va">self</span>.parents</span>
+<span id="lst-tensorpy-82"><a href="#lst-tensorpy-82" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-83"><a href="#lst-tensorpy-83" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-84"><a href="#lst-tensorpy-84" aria-hidden="true" tabindex="-1"></a>            da_ <span class="op">=</span> dz</span>
+<span id="lst-tensorpy-85"><a href="#lst-tensorpy-85" aria-hidden="true" tabindex="-1"></a>            a.backward(da_, z)</span>
+<span id="lst-tensorpy-86"><a href="#lst-tensorpy-86" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> b.requires_grad:</span>
+<span id="lst-tensorpy-87"><a href="#lst-tensorpy-87" aria-hidden="true" tabindex="-1"></a>            db_ <span class="op">=</span> dz</span>
+<span id="lst-tensorpy-88"><a href="#lst-tensorpy-88" aria-hidden="true" tabindex="-1"></a>            b.backward(db_, z)</span>
+<span id="lst-tensorpy-89"><a href="#lst-tensorpy-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-90"><a href="#lst-tensorpy-90" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Neg:</span>
+<span id="lst-tensorpy-91"><a href="#lst-tensorpy-91" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, a: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-92"><a href="#lst-tensorpy-92" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Record which tensor was negated</span></span>
+<span id="lst-tensorpy-93"><a href="#lst-tensorpy-93" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.parent <span class="op">=</span> a</span>
+<span id="lst-tensorpy-94"><a href="#lst-tensorpy-94" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-95"><a href="#lst-tensorpy-95" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create result tensor z</span></span>
+<span id="lst-tensorpy-96"><a href="#lst-tensorpy-96" aria-hidden="true" tabindex="-1"></a>        requires_grad <span class="op">=</span> a.requires_grad</span>
+<span id="lst-tensorpy-97"><a href="#lst-tensorpy-97" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> <span class="op">-</span>a.data</span>
+<span id="lst-tensorpy-98"><a href="#lst-tensorpy-98" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> Tensor(data, requires_grad<span class="op">=</span>requires_grad, operation<span class="op">=</span><span class="va">self</span>) </span>
+<span id="lst-tensorpy-99"><a href="#lst-tensorpy-99" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-100"><a href="#lst-tensorpy-100" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Side effects to a</span></span>
+<span id="lst-tensorpy-101"><a href="#lst-tensorpy-101" aria-hidden="true" tabindex="-1"></a>        a.children.append(z)</span>
+<span id="lst-tensorpy-102"><a href="#lst-tensorpy-102" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-103"><a href="#lst-tensorpy-103" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> z</span>
+<span id="lst-tensorpy-104"><a href="#lst-tensorpy-104" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-105"><a href="#lst-tensorpy-105" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> backward(<span class="va">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-106"><a href="#lst-tensorpy-106" aria-hidden="true" tabindex="-1"></a>        a <span class="op">=</span> <span class="va">self</span>.parent</span>
+<span id="lst-tensorpy-107"><a href="#lst-tensorpy-107" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-108"><a href="#lst-tensorpy-108" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-109"><a href="#lst-tensorpy-109" aria-hidden="true" tabindex="-1"></a>            da_ <span class="op">=</span> <span class="op">-</span>dz</span>
+<span id="lst-tensorpy-110"><a href="#lst-tensorpy-110" aria-hidden="true" tabindex="-1"></a>            a.backward(da_, z)</span>
+<span id="lst-tensorpy-111"><a href="#lst-tensorpy-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-112"><a href="#lst-tensorpy-112" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Mul:</span>
+<span id="lst-tensorpy-113"><a href="#lst-tensorpy-113" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, a: Tensor, b: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-114"><a href="#lst-tensorpy-114" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Record which two tensors were multiplied</span></span>
+<span id="lst-tensorpy-115"><a href="#lst-tensorpy-115" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.parents <span class="op">=</span> (a, b)</span>
+<span id="lst-tensorpy-116"><a href="#lst-tensorpy-116" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-117"><a href="#lst-tensorpy-117" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create result tensor z</span></span>
+<span id="lst-tensorpy-118"><a href="#lst-tensorpy-118" aria-hidden="true" tabindex="-1"></a>        requires_grad <span class="op">=</span> a.requires_grad <span class="kw">or</span> b.requires_grad</span>
+<span id="lst-tensorpy-119"><a href="#lst-tensorpy-119" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> a.data <span class="op">*</span> b.data</span>
+<span id="lst-tensorpy-120"><a href="#lst-tensorpy-120" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> Tensor(data, requires_grad<span class="op">=</span>requires_grad, operation<span class="op">=</span><span class="va">self</span>) </span>
+<span id="lst-tensorpy-121"><a href="#lst-tensorpy-121" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-122"><a href="#lst-tensorpy-122" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Side effects to a, b</span></span>
+<span id="lst-tensorpy-123"><a href="#lst-tensorpy-123" aria-hidden="true" tabindex="-1"></a>        a.children.append(z)</span>
+<span id="lst-tensorpy-124"><a href="#lst-tensorpy-124" aria-hidden="true" tabindex="-1"></a>        b.children.append(z)</span>
+<span id="lst-tensorpy-125"><a href="#lst-tensorpy-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-126"><a href="#lst-tensorpy-126" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> z</span>
+<span id="lst-tensorpy-127"><a href="#lst-tensorpy-127" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-128"><a href="#lst-tensorpy-128" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> backward(<span class="va">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-129"><a href="#lst-tensorpy-129" aria-hidden="true" tabindex="-1"></a>        a, b <span class="op">=</span> <span class="va">self</span>.parents</span>
+<span id="lst-tensorpy-130"><a href="#lst-tensorpy-130" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-131"><a href="#lst-tensorpy-131" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-132"><a href="#lst-tensorpy-132" aria-hidden="true" tabindex="-1"></a>            da_ <span class="op">=</span> dz <span class="op">*</span> b.data</span>
+<span id="lst-tensorpy-133"><a href="#lst-tensorpy-133" aria-hidden="true" tabindex="-1"></a>            a.backward(da_, z)</span>
+<span id="lst-tensorpy-134"><a href="#lst-tensorpy-134" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> b.requires_grad:</span>
+<span id="lst-tensorpy-135"><a href="#lst-tensorpy-135" aria-hidden="true" tabindex="-1"></a>            db_ <span class="op">=</span> dz <span class="op">*</span> a.data</span>
+<span id="lst-tensorpy-136"><a href="#lst-tensorpy-136" aria-hidden="true" tabindex="-1"></a>            b.backward(db_, z)</span>
+<span id="lst-tensorpy-137"><a href="#lst-tensorpy-137" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="lst-tensorpy-138"><a href="#lst-tensorpy-138" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Exp:</span>
+<span id="lst-tensorpy-139"><a href="#lst-tensorpy-139" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, a: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-140"><a href="#lst-tensorpy-140" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Record which tensor was exponentiated</span></span>
+<span id="lst-tensorpy-141"><a href="#lst-tensorpy-141" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.parent <span class="op">=</span> a</span>
+<span id="lst-tensorpy-142"><a href="#lst-tensorpy-142" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-143"><a href="#lst-tensorpy-143" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create result tensor z</span></span>
+<span id="lst-tensorpy-144"><a href="#lst-tensorpy-144" aria-hidden="true" tabindex="-1"></a>        requires_grad <span class="op">=</span> a.requires_grad</span>
+<span id="lst-tensorpy-145"><a href="#lst-tensorpy-145" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> np.exp(a.data)</span>
+<span id="lst-tensorpy-146"><a href="#lst-tensorpy-146" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> Tensor(data, requires_grad<span class="op">=</span>requires_grad, operation<span class="op">=</span><span class="va">self</span>) </span>
+<span id="lst-tensorpy-147"><a href="#lst-tensorpy-147" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-148"><a href="#lst-tensorpy-148" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Side effects to a</span></span>
+<span id="lst-tensorpy-149"><a href="#lst-tensorpy-149" aria-hidden="true" tabindex="-1"></a>        a.children.append(z)</span>
+<span id="lst-tensorpy-150"><a href="#lst-tensorpy-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-151"><a href="#lst-tensorpy-151" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> z</span>
+<span id="lst-tensorpy-152"><a href="#lst-tensorpy-152" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-153"><a href="#lst-tensorpy-153" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> backward(<span class="va">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-154"><a href="#lst-tensorpy-154" aria-hidden="true" tabindex="-1"></a>        a <span class="op">=</span> <span class="va">self</span>.parent</span>
+<span id="lst-tensorpy-155"><a href="#lst-tensorpy-155" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-156"><a href="#lst-tensorpy-156" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-157"><a href="#lst-tensorpy-157" aria-hidden="true" tabindex="-1"></a>            da_ <span class="op">=</span> dz <span class="op">*</span> z.data   <span class="co"># since d(exp(a))/da = exp(a)</span></span>
+<span id="lst-tensorpy-158"><a href="#lst-tensorpy-158" aria-hidden="true" tabindex="-1"></a>            a.backward(da_, z)</span>
+<span id="lst-tensorpy-159"><a href="#lst-tensorpy-159" aria-hidden="true" tabindex="-1"></a>            </span>
+<span id="lst-tensorpy-160"><a href="#lst-tensorpy-160" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Log:</span>
+<span id="lst-tensorpy-161"><a href="#lst-tensorpy-161" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, a: Tensor) <span class="op">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-162"><a href="#lst-tensorpy-162" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Record which tensor was logged</span></span>
+<span id="lst-tensorpy-163"><a href="#lst-tensorpy-163" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.parent <span class="op">=</span> a</span>
+<span id="lst-tensorpy-164"><a href="#lst-tensorpy-164" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-165"><a href="#lst-tensorpy-165" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Create result tensor z</span></span>
+<span id="lst-tensorpy-166"><a href="#lst-tensorpy-166" aria-hidden="true" tabindex="-1"></a>        requires_grad <span class="op">=</span> a.requires_grad</span>
+<span id="lst-tensorpy-167"><a href="#lst-tensorpy-167" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> np.log(a.data)</span>
+<span id="lst-tensorpy-168"><a href="#lst-tensorpy-168" aria-hidden="true" tabindex="-1"></a>        z <span class="op">=</span> Tensor(data, requires_grad<span class="op">=</span>requires_grad, operation<span class="op">=</span><span class="va">self</span>) </span>
+<span id="lst-tensorpy-169"><a href="#lst-tensorpy-169" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-170"><a href="#lst-tensorpy-170" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Side effects to a</span></span>
+<span id="lst-tensorpy-171"><a href="#lst-tensorpy-171" aria-hidden="true" tabindex="-1"></a>        a.children.append(z)</span>
+<span id="lst-tensorpy-172"><a href="#lst-tensorpy-172" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensorpy-173"><a href="#lst-tensorpy-173" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> z</span>
+<span id="lst-tensorpy-174"><a href="#lst-tensorpy-174" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-175"><a href="#lst-tensorpy-175" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> backward(<span class="va">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-176"><a href="#lst-tensorpy-176" aria-hidden="true" tabindex="-1"></a>        a <span class="op">=</span> <span class="va">self</span>.parent</span>
+<span id="lst-tensorpy-177"><a href="#lst-tensorpy-177" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="lst-tensorpy-178"><a href="#lst-tensorpy-178" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-179"><a href="#lst-tensorpy-179" aria-hidden="true" tabindex="-1"></a>            da_ <span class="op">=</span> dz <span class="op">/</span> a.data   <span class="co"># since d(log(a))/da = 1/a</span></span>
+<span id="lst-tensorpy-180"><a href="#lst-tensorpy-180" aria-hidden="true" tabindex="-1"></a>            a.backward(da_, z)</span>
+<span id="lst-tensorpy-181"><a href="#lst-tensorpy-181" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>写一个测试程序:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tensor-backward.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-tensor-backwardpy" data-filename="tensor-backward.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-tensor-backwardpy-1"><a href="#lst-tensor-backwardpy-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mytorch <span class="im">as</span> torch</span>
+<span id="lst-tensor-backwardpy-2"><a href="#lst-tensor-backwardpy-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="lst-tensor-backwardpy-3"><a href="#lst-tensor-backwardpy-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensor-backwardpy-4"><a href="#lst-tensor-backwardpy-4" aria-hidden="true" tabindex="-1"></a>x1 <span class="op">=</span> torch.Tensor(np.array([<span class="dv">2</span>]), requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="lst-tensor-backwardpy-5"><a href="#lst-tensor-backwardpy-5" aria-hidden="true" tabindex="-1"></a>x2 <span class="op">=</span> torch.Tensor(np.array([<span class="dv">5</span>]), requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="lst-tensor-backwardpy-6"><a href="#lst-tensor-backwardpy-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensor-backwardpy-7"><a href="#lst-tensor-backwardpy-7" aria-hidden="true" tabindex="-1"></a>v1 <span class="op">=</span> torch.Log().forward(x1)</span>
+<span id="lst-tensor-backwardpy-8"><a href="#lst-tensor-backwardpy-8" aria-hidden="true" tabindex="-1"></a>v2 <span class="op">=</span> x1 <span class="op">*</span> x2</span>
+<span id="lst-tensor-backwardpy-9"><a href="#lst-tensor-backwardpy-9" aria-hidden="true" tabindex="-1"></a>v3 <span class="op">=</span> torch.Exp().forward(x2)</span>
+<span id="lst-tensor-backwardpy-10"><a href="#lst-tensor-backwardpy-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensor-backwardpy-11"><a href="#lst-tensor-backwardpy-11" aria-hidden="true" tabindex="-1"></a>v4 <span class="op">=</span> v1 <span class="op">+</span> v2</span>
+<span id="lst-tensor-backwardpy-12"><a href="#lst-tensor-backwardpy-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensor-backwardpy-13"><a href="#lst-tensor-backwardpy-13" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> v4 <span class="op">-</span> v3</span>
+<span id="lst-tensor-backwardpy-14"><a href="#lst-tensor-backwardpy-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"loss ="</span>, loss.data)</span>
+<span id="lst-tensor-backwardpy-15"><a href="#lst-tensor-backwardpy-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensor-backwardpy-16"><a href="#lst-tensor-backwardpy-16" aria-hidden="true" tabindex="-1"></a>loss.backward()</span>
+<span id="lst-tensor-backwardpy-17"><a href="#lst-tensor-backwardpy-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-tensor-backwardpy-18"><a href="#lst-tensor-backwardpy-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"x1.grad ="</span>, x1.grad)</span>
+<span id="lst-tensor-backwardpy-19"><a href="#lst-tensor-backwardpy-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"x2.grad ="</span>, x2.grad)</span>
+<span id="lst-tensor-backwardpy-20"><a href="#lst-tensor-backwardpy-20" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>运行结果:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ex">loss</span> = <span class="pp">[-</span><span class="ss">137.72001192</span><span class="pp">]</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="ex">x1.grad</span> = <span class="pp">[</span><span class="ss">5.5</span><span class="pp">]</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="ex">x2.grad</span> = <span class="pp">[-</span><span class="ss">146.41316</span><span class="pp">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="fig-tensor" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="tensor.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21: 每个 tensor 包含 data, grad (y 对它的导数), 创建它的 operator 和依赖它的 tensors (红色的 tensor 含有红色区域的信息, etc.)
+</figcaption>
+</figure>
+</div>
+<div id="fig-operator" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-operator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="operator.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-operator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22: 每个 operator 包含它所有的 operands (红色的算子含有红色区域的信息, etc.)
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="fine-tuning-微调" class="level2">
+<h2 class="anchored" data-anchor-id="fine-tuning-微调">Fine-tuning 微调</h2>
+<section id="lora" class="level3">
+<h3 class="anchored" data-anchor-id="lora">LoRA</h3>
+<ul>
+<li>在 Pre-training 完成后, 需要针对特定的任务对神经网络的权重进行微调 (其实还是训练). 对于一个 <span class="math inline">\(a \times b\)</span> 的矩阵 <span class="math inline">\(W\)</span> (比如一个全连接层), 本来是要对它所有的 entry 找梯度 (即 <span class="math inline">\(\Delta W\)</span>). 但是这样运算量非常大 (为 <span class="math inline">\(a \cdot b\)</span>), 我们假设这个变化 <span class="math inline">\(\Delta W\)</span> 可以被两个矩阵 <span class="math inline">\(A,B\)</span> 的乘积近似表示: <span class="math display">\[\Delta W = AB\]</span> 这样就只需要对 <span class="math inline">\(A\)</span> 和 <span class="math inline">\(B\)</span> 找梯度了 (大小分别为 <span class="math inline">\(a \times r, r \times b\)</span>), 计算量大大减少 (为 <span class="math inline">\(r \cdot (a+b)\)</span>).
+<ul>
+<li>注意是对 <span class="math inline">\(\Delta W\)</span> 低秩近似, 而不是 <span class="math inline">\(W\)</span> 低秩近似!</li>
+<li>这样做参数变化的自由度减少了.</li>
+</ul></li>
+<li>一个示意的实现:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>lora.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-lorapy" data-filename="lora.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-lorapy-1"><a href="#lst-lorapy-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 一个示意的 LoRA 实现.</span></span>
+<span id="lst-lorapy-2"><a href="#lst-lorapy-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 「示意」的原因是这里没有加载预训练权重, 也没有训练过程</span></span>
+<span id="lst-lorapy-3"><a href="#lst-lorapy-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-4"><a href="#lst-lorapy-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="lst-lorapy-5"><a href="#lst-lorapy-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="lst-lorapy-6"><a href="#lst-lorapy-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn.functional <span class="im">as</span> F</span>
+<span id="lst-lorapy-7"><a href="#lst-lorapy-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-8"><a href="#lst-lorapy-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 一个带 LoRA 的线性层</span></span>
+<span id="lst-lorapy-9"><a href="#lst-lorapy-9" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LinearWithLoRA(nn.Module):</span>
+<span id="lst-lorapy-10"><a href="#lst-lorapy-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_dim, out_dim, r<span class="op">=</span><span class="dv">4</span>, scale<span class="op">=</span><span class="fl">1.0</span>):</span>
+<span id="lst-lorapy-11"><a href="#lst-lorapy-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="lst-lorapy-12"><a href="#lst-lorapy-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 冻结基础权重</span></span>
+<span id="lst-lorapy-13"><a href="#lst-lorapy-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.base <span class="op">=</span> nn.Linear(in_dim, out_dim)</span>
+<span id="lst-lorapy-14"><a href="#lst-lorapy-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.base.weight.requires_grad <span class="op">=</span> <span class="va">False</span>  <span class="co"># 冻结 base 权重</span></span>
+<span id="lst-lorapy-15"><a href="#lst-lorapy-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-16"><a href="#lst-lorapy-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># LoRA 的低秩矩阵 A 和 B</span></span>
+<span id="lst-lorapy-17"><a href="#lst-lorapy-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.A <span class="op">=</span> nn.Parameter(torch.randn(r, in_dim) <span class="op">*</span> <span class="fl">0.01</span>)  <span class="co"># r×in_dim</span></span>
+<span id="lst-lorapy-18"><a href="#lst-lorapy-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.B <span class="op">=</span> nn.Parameter(torch.randn(out_dim, r) <span class="op">*</span> <span class="fl">0.01</span>) <span class="co"># out_dim×r</span></span>
+<span id="lst-lorapy-19"><a href="#lst-lorapy-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-20"><a href="#lst-lorapy-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.scale <span class="op">=</span> scale</span>
+<span id="lst-lorapy-21"><a href="#lst-lorapy-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-22"><a href="#lst-lorapy-22" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="lst-lorapy-23"><a href="#lst-lorapy-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 原始线性输出</span></span>
+<span id="lst-lorapy-24"><a href="#lst-lorapy-24" aria-hidden="true" tabindex="-1"></a>        out_base <span class="op">=</span> <span class="va">self</span>.base(x)</span>
+<span id="lst-lorapy-25"><a href="#lst-lorapy-25" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 计算 Delta W = B @ A</span></span>
+<span id="lst-lorapy-26"><a href="#lst-lorapy-26" aria-hidden="true" tabindex="-1"></a>        delta_W <span class="op">=</span> <span class="va">self</span>.B <span class="op">@</span> <span class="va">self</span>.A</span>
+<span id="lst-lorapy-27"><a href="#lst-lorapy-27" aria-hidden="true" tabindex="-1"></a>        out_lora <span class="op">=</span> F.linear(x, delta_W <span class="op">*</span> <span class="va">self</span>.scale)</span>
+<span id="lst-lorapy-28"><a href="#lst-lorapy-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 计算最终输出</span></span>
+<span id="lst-lorapy-29"><a href="#lst-lorapy-29" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> out_base <span class="op">+</span> out_lora</span>
+<span id="lst-lorapy-30"><a href="#lst-lorapy-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorapy-31"><a href="#lst-lorapy-31" aria-hidden="true" tabindex="-1"></a><span class="co"># 测试</span></span>
+<span id="lst-lorapy-32"><a href="#lst-lorapy-32" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> LinearWithLoRA(<span class="dv">128</span>, <span class="dv">64</span>, r<span class="op">=</span><span class="dv">8</span>)</span>
+<span id="lst-lorapy-33"><a href="#lst-lorapy-33" aria-hidden="true" tabindex="-1"></a><span class="bu">input</span> <span class="op">=</span> torch.randn(<span class="dv">16</span>, <span class="dv">128</span>)</span>
+<span id="lst-lorapy-34"><a href="#lst-lorapy-34" aria-hidden="true" tabindex="-1"></a>out <span class="op">=</span> model(<span class="bu">input</span>)</span>
+<span id="lst-lorapy-35"><a href="#lst-lorapy-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(out.shape)</span>
+<span id="lst-lorapy-36"><a href="#lst-lorapy-36" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>实际上微调不涉及模型源代码的修改, 大概是这样:</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>lora-in-practice.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-lorainpracticepy" data-filename="lora-in-practice.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-lorainpracticepy-1"><a href="#lst-lorainpracticepy-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 导入模型和 tokenizer</span></span>
+<span id="lst-lorainpracticepy-2"><a href="#lst-lorainpracticepy-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer</span>
+<span id="lst-lorainpracticepy-3"><a href="#lst-lorainpracticepy-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-4"><a href="#lst-lorainpracticepy-4" aria-hidden="true" tabindex="-1"></a>model_name <span class="op">=</span> <span class="st">"meta-llama/Llama-2-7b"</span></span>
+<span id="lst-lorainpracticepy-5"><a href="#lst-lorainpracticepy-5" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_name)</span>
+<span id="lst-lorainpracticepy-6"><a href="#lst-lorainpracticepy-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(model_name)</span>
+<span id="lst-lorainpracticepy-7"><a href="#lst-lorainpracticepy-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-8"><a href="#lst-lorainpracticepy-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 生成 lora_model</span></span>
+<span id="lst-lorainpracticepy-9"><a href="#lst-lorainpracticepy-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peft <span class="im">import</span> LoraConfig, get_peft_model</span>
+<span id="lst-lorainpracticepy-10"><a href="#lst-lorainpracticepy-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-11"><a href="#lst-lorainpracticepy-11" aria-hidden="true" tabindex="-1"></a>lora_config <span class="op">=</span> LoraConfig(</span>
+<span id="lst-lorainpracticepy-12"><a href="#lst-lorainpracticepy-12" aria-hidden="true" tabindex="-1"></a>    r<span class="op">=</span><span class="dv">8</span>,                <span class="co"># 低秩近似的 rank</span></span>
+<span id="lst-lorainpracticepy-13"><a href="#lst-lorainpracticepy-13" aria-hidden="true" tabindex="-1"></a>    lora_alpha<span class="op">=</span><span class="dv">16</span>,      <span class="co"># 缩放因子</span></span>
+<span id="lst-lorainpracticepy-14"><a href="#lst-lorainpracticepy-14" aria-hidden="true" tabindex="-1"></a>    lora_dropout<span class="op">=</span><span class="fl">0.1</span>,   <span class="co"># dropout（正则化）</span></span>
+<span id="lst-lorainpracticepy-15"><a href="#lst-lorainpracticepy-15" aria-hidden="true" tabindex="-1"></a>    target_modules<span class="op">=</span>[<span class="st">"q_proj"</span>, <span class="st">"v_proj"</span>],</span>
+<span id="lst-lorainpracticepy-16"><a href="#lst-lorainpracticepy-16" aria-hidden="true" tabindex="-1"></a>    task_type<span class="op">=</span><span class="st">"CAUSAL_LM"</span>,</span>
+<span id="lst-lorainpracticepy-17"><a href="#lst-lorainpracticepy-17" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="lst-lorainpracticepy-18"><a href="#lst-lorainpracticepy-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-19"><a href="#lst-lorainpracticepy-19" aria-hidden="true" tabindex="-1"></a>lora_model <span class="op">=</span> get_peft_model(model, lora_config)</span>
+<span id="lst-lorainpracticepy-20"><a href="#lst-lorainpracticepy-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-21"><a href="#lst-lorainpracticepy-21" aria-hidden="true" tabindex="-1"></a><span class="co"># 训练</span></span>
+<span id="lst-lorainpracticepy-22"><a href="#lst-lorainpracticepy-22" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> Trainer, TrainingArguments</span>
+<span id="lst-lorainpracticepy-23"><a href="#lst-lorainpracticepy-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-24"><a href="#lst-lorainpracticepy-24" aria-hidden="true" tabindex="-1"></a>training_args <span class="op">=</span> TrainingArguments(</span>
+<span id="lst-lorainpracticepy-25"><a href="#lst-lorainpracticepy-25" aria-hidden="true" tabindex="-1"></a>    output_dir<span class="op">=</span><span class="st">"./lora_finetuned"</span>,</span>
+<span id="lst-lorainpracticepy-26"><a href="#lst-lorainpracticepy-26" aria-hidden="true" tabindex="-1"></a>    learning_rate<span class="op">=</span><span class="fl">2e-4</span>,</span>
+<span id="lst-lorainpracticepy-27"><a href="#lst-lorainpracticepy-27" aria-hidden="true" tabindex="-1"></a>    num_train_epochs<span class="op">=</span><span class="dv">3</span>,</span>
+<span id="lst-lorainpracticepy-28"><a href="#lst-lorainpracticepy-28" aria-hidden="true" tabindex="-1"></a>    per_device_train_batch_size<span class="op">=</span><span class="dv">8</span>,</span>
+<span id="lst-lorainpracticepy-29"><a href="#lst-lorainpracticepy-29" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="lst-lorainpracticepy-30"><a href="#lst-lorainpracticepy-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-31"><a href="#lst-lorainpracticepy-31" aria-hidden="true" tabindex="-1"></a>trainer <span class="op">=</span> Trainer(</span>
+<span id="lst-lorainpracticepy-32"><a href="#lst-lorainpracticepy-32" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span>lora_model,</span>
+<span id="lst-lorainpracticepy-33"><a href="#lst-lorainpracticepy-33" aria-hidden="true" tabindex="-1"></a>    args<span class="op">=</span>training_args,</span>
+<span id="lst-lorainpracticepy-34"><a href="#lst-lorainpracticepy-34" aria-hidden="true" tabindex="-1"></a>    train_dataset<span class="op">=</span>my_dataset,</span>
+<span id="lst-lorainpracticepy-35"><a href="#lst-lorainpracticepy-35" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="lst-lorainpracticepy-36"><a href="#lst-lorainpracticepy-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-37"><a href="#lst-lorainpracticepy-37" aria-hidden="true" tabindex="-1"></a>trainer.train()</span>
+<span id="lst-lorainpracticepy-38"><a href="#lst-lorainpracticepy-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-lorainpracticepy-39"><a href="#lst-lorainpracticepy-39" aria-hidden="true" tabindex="-1"></a><span class="co"># 保存微调后的模型</span></span>
+<span id="lst-lorainpracticepy-40"><a href="#lst-lorainpracticepy-40" aria-hidden="true" tabindex="-1"></a>lora_model.save_pretrained(<span class="st">"./my_lora_adapter"</span>)</span>
+<span id="lst-lorainpracticepy-41"><a href="#lst-lorainpracticepy-41" aria-hidden="true" tabindex="-1"></a></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="yolo" class="level2 page-columns page-full">
+<h2 class="anchored" data-anchor-id="yolo">YOLO</h2>
+<blockquote class="blockquote">
+<p>本章基本上是 <a href="https://www.bilibili.com/video/BV1gKwAeWEo4?spm_id_from=333.788.videopod.episodes&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3"><strong>YOLO V1 Bilibili 讲解</strong></a> 的笔记, 可以直接看视频学习.</p>
+</blockquote>
+<section id="task-objective-任务目标" class="level3 page-columns page-full">
+<h3 class="anchored" data-anchor-id="task-objective-任务目标">Task Objective 任务目标</h3>
+<ul>
+<li>识别东西是什么</li>
+<li>将东西的位置框起来</li>
+</ul>
+<section id="两类方法" class="level4 page-columns page-full">
+<h4 class="anchored" data-anchor-id="两类方法">两类方法</h4>
+<p>解决这个问题的方法有两类:</p>
+<ul>
+<li>One-stage: 推理速度快, 可实时
+<ul>
+<li>E.g., YOLO, SSD, RetinaNet</li>
+</ul></li>
+<li>Two-stage: 准确率高
+<ul>
+<li>Region Proposal 候选区: 先从图片中提取出可能包含目标的 1000-2000 个区域, 然后对每个候选区进行目标对象识别操作.</li>
+<li>E.g., Faster R-CNN, Mask R-CNN, Cascade R-CNN</li>
+</ul></li>
+</ul>
+<div id="fig-yolo-one-two-stage" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-yolo-one-two-stage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="yolo-one-two-stage.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-one-two-stage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23: One stage 和 Two stage 流程框图对比
+</figcaption>
+</figure>
+</div>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-yolo-mscoco" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-yolo-mscoco-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="yolo-mscoco.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-mscoco-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;24: MSCOCO 数据集有物体名字和位置标注
+</figcaption>
+</figure>
+</div>
+</div></div></section>
+<section id="损失函数" class="level4">
+<h4 class="anchored" data-anchor-id="损失函数">损失函数</h4>
+<div id="fig-yolo-IoU" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-yolo-IoU-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="yolo-IoU.png" class="img-fluid figure-img" style="width:50.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-IoU-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;25: 交并比用来衡量预测地好不好
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="yolo-v1" class="level3">
+<h3 class="anchored" data-anchor-id="yolo-v1">YOLO V1</h3>
+<section id="network-structure-网络结构" class="level4">
+<h4 class="anchored" data-anchor-id="network-structure-网络结构">Network Structure 网络结构</h4>
+<div id="fig-yolo-v1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-yolo-v1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="yolo-v1.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-v1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;26: YOLO V1 的网络结构 <span class="citation" data-cites="Er_2025_bilibili"><a href="#ref-Er_2025_bilibili" role="doc-biblioref">[8]</a></span>
+</figcaption>
+</figure>
+</div>
+<div id="fig-yolov1-back-bone" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-yolov1-back-bone-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="yolov1-back-bone.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolov1-back-bone-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;27: <a href="#fig-yolo-v1" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-yolo-v1</span></a> 的 Back-Bone 网络其实是若干的卷积网络 <span class="citation" data-cites="redmon2016lookonceunifiedrealtime"><a href="#ref-redmon2016lookonceunifiedrealtime" role="doc-biblioref">[9]</a></span>
+</figcaption>
+</figure>
+</div>
+<p>说明:</p>
+<ul>
+<li><p><a href="#fig-yolov1-back-bone" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-yolov1-back-bone</span></a>: <code>-s-2</code> 表示 stride 步长为 2.</p></li>
+<li><p>输入输出:</p>
+<ul>
+<li>输入是一张正方形的图片 (长宽像素各为 <span class="math inline">\(448\)</span>, 有 3 个通道: RGB).</li>
+<li>输出的 tensor 大小为 <span class="math inline">\(7 \times 7 \times 30\)</span></li>
+</ul></li>
+</ul>
+</section>
+<section id="label-tensor-标签张量" class="level4">
+<h4 class="anchored" data-anchor-id="label-tensor-标签张量">Label Tensor 标签张量</h4>
+<ul>
+<li><p>MSCOCO 数据集需要先转换成另外一种形式 (<a href="#fig-yolo-v1-data-labeling" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-yolo-v1-data-labeling</span></a>) 再喂给 TOLO V1 神经网络 (即换一种形式打标签而已).</p>
+<div id="fig-yolo-v1-data-labeling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-yolo-v1-data-labeling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="yolo-v1-data-labeling.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-yolo-v1-data-labeling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28: YOLO V1: <span class="math inline">\(S = 7\)</span>, 总共
+</figcaption>
+</figure>
+</div></li>
+<li><p>每张图片都有 <span class="math inline">\(S \times S = 49\)</span> 个 grid cell, <strong>每一个 grid cell</strong> 都被一个 <span class="math inline">\(30 \times 1\)</span> 的向量描述, 相当于一张图片都对应了一个 <span class="math inline">\(7 \times 7 \times 30\)</span> 的 label tensor.</p>
+<ul>
+<li><a href="#fig-yolov1-back-bone" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-yolov1-back-bone</span></a> 中网络的输出也是一个 <span class="math inline">\(7 \times 7 \times 30\)</span> 的 tensor, 但这是 <strong>Prediction Tensor 预测张量</strong> (<a href="#sec-prediction-tensor" class="quarto-xref"><span class="quarto-unresolved-ref">sec-prediction-tensor</span></a>), 不能混为一谈.</li>
+</ul></li>
+<li><p>如果有两个物体的中心点都落在同一个 grid cell 中, YOLO V1 只会保留其中一个.</p></li>
+</ul>
+</section>
+<section id="sec-prediction-tensor" class="level4">
+<h4 class="anchored" data-anchor-id="sec-prediction-tensor">Prediction Tensor 预测张量</h4>
+<p>TODO</p>
+</section>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+
+
+<div id="refs" class="references csl-bib-body" data-entry-spacing="0" role="list">
+<div id="ref-a2023_understanding" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[1] </div><div class="csl-right-inline"><span>“Understanding memory formats.”</span> Intel, 2023. Available: <a href="https://www.intel.com/content/www/us/en/docs/onednn/developer-guide-reference/2023-1/understanding-memory-formats.html">https://www.intel.com/content/www/us/en/docs/onednn/developer-guide-reference/2023-1/understanding-memory-formats.html</a>. [Accessed: Jan. 03, 2026]</div>
+</div>
+<div id="ref-_2025_operator" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[2] </div><div class="csl-right-inline">Ascend Community, <span>“Operator basics.”</span> Hiascend.com, Sep. 2025. Available: <a href="https://www.hiascend.com/document/detail/en/canncommercial/800/opdevg/tbeaicpudevg/atlasopdev_10_0006.html">https://www.hiascend.com/document/detail/en/canncommercial/800/opdevg/tbeaicpudevg/atlasopdev_10_0006.html</a>. [Accessed: Feb. 09, 2026]</div>
+</div>
+<div id="ref-wu2018groupnormalization" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[3] </div><div class="csl-right-inline">Y. Wu and K. He, <span>“Group normalization.”</span> 2018. Available: <a href="https://arxiv.org/abs/1803.08494">https://arxiv.org/abs/1803.08494</a></div>
+</div>
+<div id="ref-ai_2023_fundamental" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[4] </div><div class="csl-right-inline">A. AI, <span>“Fundamental algorithm of convolution in neural networks.”</span> Github.io, Feb. 2023. Available: <a href="https://animatedai.github.io">https://animatedai.github.io</a>. [Accessed: Jan. 03, 2026]</div>
+</div>
+<div id="ref-baydin2018automaticdifferentiationmachinelearning" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[5] </div><div class="csl-right-inline">A. G. Baydin, B. A. Pearlmutter, A. A. Radul, and J. M. Siskind, <span>“Automatic differentiation in machine learning: A survey.”</span> 2018. Available: <a href="https://arxiv.org/abs/1502.05767">https://arxiv.org/abs/1502.05767</a></div>
+</div>
+<div id="ref-deep_thoughts_2021_derive" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[6] </div><div class="csl-right-inline">deep_thoughts, <span>“Derive autograd forward and reverse propagation from scratch.”</span> Bilibili.com, Nov. 2021. Available: <a href="https://www.bilibili.com/video/BV1PF411h7Ew?spm_id_from=333.788.videopod.sections&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">https://www.bilibili.com/video/BV1PF411h7Ew?spm_id_from=333.788.videopod.sections&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3</a>. [Accessed: Feb. 02, 2026]</div>
+</div>
+<div id="ref-eduardoleito_2024_documented" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[7] </div><div class="csl-right-inline">E. Leitão, <span>“Documented and unit tested educational deep learning framework with autograd from scratch.”</span> GitHub, Mar. 2024. Available: <a href="https://github.com/eduardoleao052/Autograd-from-scratch">https://github.com/eduardoleao052/Autograd-from-scratch</a>. [Accessed: Feb. 02, 2026]</div>
+</div>
+<div id="ref-Er_2025_bilibili" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[8] </div><div class="csl-right-inline">上下求索电子Er, <span>“[YOLO V1] 数据标注和输出张量_哔哩哔哩_bilibili,”</span> 2025, Available: <a href="https://www.bilibili.com/video/BV1gKwAeWEo4/?spm_id_from=333.788.player.switch&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=3">https://www.bilibili.com/video/BV1gKwAeWEo4/?spm_id_from=333.788.player.switch&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3&amp;p=3</a></div>
+</div>
+<div id="ref-redmon2016lookonceunifiedrealtime" class="csl-entry" role="listitem">
+<div class="csl-left-margin">[9] </div><div class="csl-right-inline">J. Redmon, S. Divvala, R. Girshick, and A. Farhadi, <span>“You only look once: Unified, real-time object detection.”</span> 2016. Available: <a href="https://arxiv.org/abs/1506.02640">https://arxiv.org/abs/1506.02640</a></div>
+</div>
+</div>
+</section>
+
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../cc-algo/cc-algo.html" class="pagination-link" aria-label="Algorithm Notes 算法笔记">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Algorithm Notes 算法笔记</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../coral-npu/coral-npu.html" class="pagination-link" aria-label="Google Coral NPU">
+        <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
