@@ -1,3 +1,4 @@
+# From: https://github.com/RethinkFun/VAE/blob/main/vae.py
 import os
 from datetime import datetime
 import glob

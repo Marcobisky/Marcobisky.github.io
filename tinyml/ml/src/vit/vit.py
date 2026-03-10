@@ -1,5 +1,27 @@
+# From: https://uvadlc-notebooks.readthedocs.io/en/latest/tutorial_notebooks/tutorial15/Vision_Transformer.html?utm_source=chatgpt.com
+# This following code is not complete though.
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+import pytorch_lightning as pl
+
+def img_to_patch(x, patch_size, flatten_channels=True):
+    """
+    Inputs:
+        x - torch.Tensor representing the image of shape [B, C, H, W]
+        patch_size - Number of pixels per dimension of the patches (integer)
+        flatten_channels - If True, the patches will be returned in a flattened format
+                           as a feature vector instead of a image grid.
+    """
+    B, C, H, W = x.shape
+    x = x.reshape(B, C, H//patch_size, patch_size, W//patch_size, patch_size)
+    x = x.permute(0, 2, 4, 1, 3, 5) # [B, H', W', C, p_H, p_W]
+    x = x.flatten(1,2)              # [B, H'*W', C, p_H, p_W]
+    if flatten_channels:
+        x = x.flatten(2,4)          # [B, H'*W', C*p_H*p_W]
+    return x
+
 
 class AttentionBlock(nn.Module):
 
@@ -28,9 +50,10 @@ class AttentionBlock(nn.Module):
 
 
     def forward(self, x):
-        inp_x = self.layer_norm_1(x)
-        x = x + self.attn(inp_x, inp_x, inp_x)[0]
-        x = x + self.linear(self.layer_norm_2(x))
+        x = self.layer_norm_1(x)
+        x += self.attn(x, x, x)[0]  # Residual Connection
+        x = self.layer_norm_2(x)
+        x += self.linear(x)         # Residual Connection
         return x
 
         
@@ -66,21 +89,21 @@ class VisionTransformer(nn.Module):
 
         # Parameters/Embeddings
         self.cls_token = nn.Parameter(torch.randn(1,1,embed_dim))
-        self.pos_embedding = nn.Parameter(torch.randn(1,1+num_patches,embed_dim))
+        self.pos_embedding = nn.Parameter(torch.randn(1,1+num_patches,embed_dim))   # 加 1 原因是 CLS 也占一个 token
 
 
     def forward(self, x):
         # Preprocess input
         x = img_to_patch(x, self.patch_size)
-        B, T, _ = x.shape
+        B, T, _ = x.shape   # B 张图片, 每张 T 个 patch
         x = self.input_layer(x)
 
-        # Add CLS token and positional encoding
+        # Add CLS token and positional encoding, important!
         cls_token = self.cls_token.repeat(B, 1, 1)
         x = torch.cat([cls_token, x], dim=1)
         x = x + self.pos_embedding[:,:T+1]
 
-        # Apply Transforrmer
+        # Apply Transformer
         x = self.dropout(x)
         x = x.transpose(0, 1)
         x = self.transformer(x)
@@ -89,3 +112,70 @@ class VisionTransformer(nn.Module):
         cls = x[0]
         out = self.mlp_head(cls)
         return out
+    
+
+class ViT(pl.LightningModule):
+
+    def __init__(self, model_kwargs, lr):
+        super().__init__()
+        self.save_hyperparameters()
+        self.model = VisionTransformer(**model_kwargs)
+        self.example_input_array = next(iter(train_loader))[0]
+
+    def forward(self, x):
+        return self.model(x)
+
+    def configure_optimizers(self):
+        optimizer = optim.AdamW(self.parameters(), lr=self.hparams.lr)
+        lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[100,150], gamma=0.1)
+        return [optimizer], [lr_scheduler]
+
+    def _calculate_loss(self, batch, mode="train"):
+        imgs, labels = batch
+        preds = self.model(imgs)
+        loss = F.cross_entropy(preds, labels)
+        acc = (preds.argmax(dim=-1) == labels).float().mean()
+
+        self.log(f'{mode}_loss', loss)
+        self.log(f'{mode}_acc', acc)
+        return loss
+
+    def training_step(self, batch, batch_idx):
+        loss = self._calculate_loss(batch, mode="train")
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        self._calculate_loss(batch, mode="val")
+
+    def test_step(self, batch, batch_idx):
+        self._calculate_loss(batch, mode="test")
+        
+
+        
+def train_model(**kwargs):
+    trainer = pl.Trainer(default_root_dir=os.path.join(CHECKPOINT_PATH, "ViT"),
+                         accelerator="gpu" if str(device).startswith("cuda") else "cpu",
+                         devices=1,
+                         max_epochs=180,
+                         callbacks=[ModelCheckpoint(save_weights_only=True, mode="max", monitor="val_acc"),
+                                    LearningRateMonitor("epoch")])
+    trainer.logger._log_graph = True         # If True, we plot the computation graph in tensorboard
+    trainer.logger._default_hp_metric = None # Optional logging argument that we don't need
+
+    # Check whether pretrained model exists. If yes, load it and skip training
+    pretrained_filename = os.path.join(CHECKPOINT_PATH, "ViT.ckpt")
+    if os.path.isfile(pretrained_filename):
+        print(f"Found pretrained model at {pretrained_filename}, loading...")
+        model = ViT.load_from_checkpoint(pretrained_filename) # Automatically loads the model with the saved hyperparameters
+    else:
+        pl.seed_everything(42) # To be reproducable
+        model = ViT(**kwargs)
+        trainer.fit(model, train_loader, val_loader)
+        model = ViT.load_from_checkpoint(trainer.checkpoint_callback.best_model_path) # Load best checkpoint after training
+
+    # Test best model on validation and test set
+    val_result = trainer.test(model, val_loader, verbose=False)
+    test_result = trainer.test(model, test_loader, verbose=False)
+    result = {"test": test_result[0]["test_acc"], "val": val_result[0]["test_acc"]}
+
+    return model, result

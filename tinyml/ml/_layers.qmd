@@ -33,6 +33,19 @@ t_ = torch.randn(2,3,5,1,2,10)  # 也可以
 t1 = nn.Linear(in_features=10, out_features=5)(t)   # t1.shape = [2,5]
 ```
 
+<!-- ----------------------------------------- -->
+::: {.callout-note icon=true collapse=true}
+## Linear, MLP (FCN), FFN 区别
+
+- **Linear**: 没有非线性. $y = Wx+b.$
+- **MLP/FCN**: 多层 Linear **中间夹非线性**.
+- **FFN**: 与 RNN 相对, 数据流动单项的所有网络都可以叫 FFN, 但通常指 Transformer 中 Attention 后面的 MLP.
+
+:::
+<!-- ----------------------------------------- -->
+
+
+
 #### Normalization 归一化层
 
 > 选择 tensor 的**某些维度**的元素作为整体进行归一化, 传入的参数非常恼火, 理解不了就忽略吧.
@@ -87,9 +100,18 @@ my_norm = nn.LayerNorm(normalized_shape=[224,224])  # 也可以定制, 即将最
 
 #### Attention 注意力层
 
+- `torch` 中自带的 `MultiheadAttention` 要求输入必须为 `NLE` 格式, 其中 `N` 是 batch (可以同时处理多个句子!), `L` 是句子长度, `E` 是 embedding 维度. 下面的例子由 @fig-mha-compute 诠释:
+
+    ```python
+    t = torch.randn(1, 4, 6)
+    attn = nn.MultiheadAttention(embed_dim=6, num_heads=3)
+    output, _ = attn(t, t, t)  # Self-attention
+    print(output)
+    ```
+
 <!-- ----------------------------------------- -->
 ::: {.callout-note icon=true collapse=true}
-## Attention 的理解
+## Attention 的理解与注意点
 
 - 一个 Attention head 里面的 Inductive Bias 分析:
     - Query $Q$: Hey, do you all have anything relevant in terms of **\<syntax\>** for me?
@@ -109,6 +131,33 @@ my_norm = nn.LayerNorm(normalized_shape=[224,224])  # 也可以定制, 即将最
 ![(b) Computationally.](mha-compute.png){#fig-mha-compute width=120%}
 :::
 
+- 注意 `MultiheadAttention` 里面自带了一个不改变维度的全连接层, 这个并不是 3b1b 视频中的 FFL, 真正的 attention block 还包括 `LayerNorm`, `Dropout`, Residual Connection. 下面的代码对应 @fig-pre-post (b).
+
+    ```python
+    class AttentionBlock(nn.Module):
+
+        def __init__(self, embed_dim, hidden_dim, num_heads, dropout=0.0):
+            super().__init__()
+
+            self.layer_norm_1 = nn.LayerNorm(embed_dim)
+            self.attn = nn.MultiheadAttention(embed_dim, num_heads,
+                                            dropout=dropout)
+            self.layer_norm_2 = nn.LayerNorm(embed_dim)
+            self.linear = nn.Sequential(
+                nn.Linear(embed_dim, hidden_dim),
+                nn.GELU(),
+                nn.Dropout(dropout),
+                nn.Linear(hidden_dim, embed_dim),
+                nn.Dropout(dropout)
+            )
+
+        def forward(self, x):
+            x = self.layer_norm_1(x)
+            x += self.attn(x, x, x)[0]  # Residual Connection
+            x = self.layer_norm_2(x)
+            x += self.linear(x)         # Residual Connection
+            return x
+    ```
 
 :::
 <!-- ----------------------------------------- -->
