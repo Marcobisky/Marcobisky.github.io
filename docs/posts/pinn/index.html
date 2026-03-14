@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Marcobisky">
+<meta name="dcterms.date" content="2026-03-14">
+<meta name="description" content="Third Chapter of PDE series!">
+
+<title>PDE3: PINNs – How Do Neural Networks Solve PDEs? 神经网络如何求解偏微分方程? – Marcobisky</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-5bc7f946787c109e621af665ddda306b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-611d27bfacf889a592cb25f4080bab07.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-5bc7f946787c109e621af665ddda306b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="PDE3: PINNs – How Do Neural Networks Solve PDEs? 神经网络如何求解偏微分方程? – Marcobisky">
+<meta property="og:description" content="Third Chapter of PDE series!">
+<meta property="og:image" content="https://marcobisky.github.io/posts/pinn/cover.png">
+<meta property="og:site_name" content="Marcobisky">
+<meta property="og:locale" content="en_US">
+<meta property="og:image:height" content="802">
+<meta property="og:image:width" content="1901">
+<meta name="twitter:title" content="PDE3: PINNs – How Do Neural Networks Solve PDEs? 神经网络如何求解偏微分方程? – Marcobisky">
+<meta name="twitter:description" content="Third Chapter of PDE series!">
+<meta name="twitter:image" content="https://marcobisky.github.io/posts/pinn/cover.png">
+<meta name="twitter:creator" content="@Marcobisky77">
+<meta name="twitter:image-height" content="802">
+<meta name="twitter:image-width" content="1901">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Marcobisky</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tinyml/index.html"> 
+<span class="menu-text">TinyML</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../blog.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#motivation" id="toc-motivation" class="nav-link active" data-scroll-target="#motivation"><span class="header-section-number">1</span> Motivation</a></li>
+  <li><a href="#heat-equation" id="toc-heat-equation" class="nav-link" data-scroll-target="#heat-equation"><span class="header-section-number">2</span> Heat Equation</a></li>
+  <li><a href="#collocation-points-生成" id="toc-collocation-points-生成" class="nav-link" data-scroll-target="#collocation-points-生成"><span class="header-section-number">3</span> Collocation Points 生成</a></li>
+  <li><a href="#neural-network-设计" id="toc-neural-network-设计" class="nav-link" data-scroll-target="#neural-network-设计"><span class="header-section-number">4</span> Neural Network 设计</a></li>
+  <li><a href="#training" id="toc-training" class="nav-link" data-scroll-target="#training"><span class="header-section-number">5</span> Training</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results"><span class="header-section-number">6</span> Results</a></li>
+  <li><a href="#takeaways" id="toc-takeaways" class="nav-link" data-scroll-target="#takeaways"><span class="header-section-number">7</span> Takeaways</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-page-left" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">PDE3: PINNs – How Do Neural Networks Solve PDEs? 神经网络如何求解偏微分方程?</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">machine-learning</div>
+    <div class="quarto-category">Differential-Equation</div>
+    <div class="quarto-category">CN-blogs</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    Third Chapter of PDE series!
+  </div>
+</div>
+
+
+<div class="quarto-title-meta column-page-left">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Marcobisky </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 14, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<blockquote class="blockquote">
+<p><strong>PDEs are not so difference from ODEs</strong>: 就我个人而言, 处理 ODE 时感觉比较轻松, 但见到 PDE 时总感觉有莫名的心里负担. 直到我意识到: ODE 要求的函数是单变量的函数, 如果是多变量的函数呢? 这就是 PDE 啊! 比如热传导方程, 要求解的函数是 <span class="math inline">\(u(x,t)\)</span>, 可是 <span class="math inline">\(x\)</span> 和 <span class="math inline">\(t\)</span> 可以认为是等地位的! PDE 只是 ODE 的自然推广而已 (好像这是废话耶, 被自己蠢到了 (///▽///)).</p>
+</blockquote>
+<section id="motivation" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="motivation"><span class="header-section-number">1</span> Motivation</h2>
+<ul>
+<li><strong>Naive method</strong>: 比如求解一维热传导方程时, 需要输入位置和时间 <span class="math inline">\((x,t)\)</span>, 输出温度 <span class="math inline">\(u\)</span>, 直接设计一个 2 输入 1 输出的神经网络, 然后收集很多 <span class="math inline">\((x,t,u)\)</span> 数据集进行训练. 再比如求解 Navier-Stokes 方程时, 同样需要输入位置和时间 <span class="math inline">\((x,y,z,t)\)</span>, 输出速度和压力 <span class="math inline">\((u,v,w,p)\)</span>, 直接设计一个 4 输入 4 输出的神经网络, 然后收集 <span class="math inline">\((x,y,z,t,u,v,w,p)\)</span> 数据集进行训练.
+<ul>
+<li>这样需要大量的测量数据! 但是不同于 LLM, 热量的传导和流体的流动我们已经有非常精确的 PDE 来描述了, 那为什么还要用神经网络? 是因为它们很难解哈哈! 但是设计神经网络的时候, 它是完全不知道这些 PDE 的存在的, 有没有什么方法将 PDE 的知识注入到神经网络?</li>
+</ul></li>
+<li><strong>PINNs</strong>: Idea 很简单, 由于 PDE 里面那些算子恰好都是输出值对输入值的微分 (一阶、二阶或高阶), 而神经网络恰好可以用 autograd 来完成输出对输入的微分!!! Autograd 算出来的结果一般都不满足 PDE, 对吧, 会有一个残差 (residual), 那我们就把这个残差加入 Loss 函数让它去优化, 这样神经网络就会在训练过程中逐渐满足 PDE 的约束了!
+<ul>
+<li>这样所需的测量数据就会很少 (在下面的 hands-on experiment 里我们甚至都没有用任何测量数据, 只用 PDE 的残差来训练神经网络, 毕竟任何满足 PDE 的函数都是热传导方程的解嘛, 只需要对 PDE 进行 “蒸馏” 就可以了).</li>
+<li>当然一般求解 PDE 还需要给定初始条件和边界条件, 这些也可以加入 Loss 函数中进行优化, 这样神经网络就会同时满足 PDE、初始条件和边界条件的约束了!</li>
+</ul></li>
+</ul>
+</section>
+<section id="heat-equation" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="heat-equation"><span class="header-section-number">2</span> Heat Equation</h2>
+<p>这里简单复习一下 1D 的热传导方程: <span class="math display">\[
+\boxed{u_t = \alpha u_{xx}}
+\]</span></p>
+<p>简单起见, 假设初始状态是 <span class="math inline">\(u(x,0)=\sin \pi x\)</span> (见 <a href="#fig-temp-time-evolution" class="quarto-xref">Figure&nbsp;1</a>), 边界条件就是 <span class="math inline">\(x=1,-1\)</span> 处的温度恒为 <span class="math inline">\(0\)</span>. 由于正弦函数是空间二阶导算子的特征向量, 显然在任意时刻的温度分布都是一个 <span class="math inline">\(\sin\)</span> 函数, 而且是指数衰减的, 所以我们可以轻松地写出解析解:</p>
+<p><span class="math display">\[
+u(x,t) = \underbrace{e^{-\alpha \pi^2 t}}_{\mathclap{\scriptsize \text{exponential decay}}} \sin \pi x
+\]</span></p>
+<div id="fig-temp-time-evolution" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-temp-time-evolution-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="temp-time-evolution.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-temp-time-evolution-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 随时间的变化, 初始状态 <span class="math inline">\(u(x,0)\)</span> 的演化 (温度趋近平衡).
+</figcaption>
+</figure>
+</div>
+<p>也就是说, 在任意位置和时间 <span class="math inline">\((x,t)\)</span>, 我们都能解析地算出温度, 我们会用这个结果与 PINN 预测的结果进行对比:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>ALPHA <span class="op">=</span> <span class="fl">1.0</span>  <span class="co"># Thermal diffusivity</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to compute exact solution for verification</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exact_solution(x, t):</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">-</span>np.exp(<span class="op">-</span>ALPHA <span class="op">*</span> np.pi<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> t) <span class="op">*</span> np.sin(np.pi <span class="op">*</span> x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="collocation-points-生成" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="collocation-points-生成"><span class="header-section-number">3</span> Collocation Points 生成</h2>
+<p>这里我们所有的训练数据都只用 Collocation Points 而没有用实际测量的数据.</p>
+<div id="fig-collocation-sample" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-collocation-sample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="collocation-sample.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-collocation-sample-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 三种 Collocation Points 的采样, 对应下面代码的参数.
+</figcaption>
+</figure>
+</div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># N_IC = 4: Number of initial state points</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># N_BC = 3: Number of boundary condition points</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># N_PDE = 100: Number of collocation points for PDE residual</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_data(N_IC, N_BC, N_PDE):</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># a) Initial Condition Data (u(x, 0) = -sin(\pi * x))</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    x_ic <span class="op">=</span> np.random.uniform(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, (N_IC, <span class="dv">1</span>))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    t_ic <span class="op">=</span> np.zeros((N_IC, <span class="dv">1</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    u_ic <span class="op">=</span> <span class="op">-</span>np.sin(np.pi <span class="op">*</span> x_ic)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co"># b) Boundary Condition Data (u(\pm 1, t) = 0)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Left boundary (x = -1)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    x_bc_left <span class="op">=</span> <span class="op">-</span>np.ones((N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    t_bc_left <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">1</span>, (N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    u_bc_left <span class="op">=</span> np.zeros((N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Right boundary (x = 1)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    x_bc_right <span class="op">=</span> np.ones((N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    t_bc_right <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">1</span>, (N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    u_bc_right <span class="op">=</span> np.zeros((N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># c) Collocation Points for PDE Residual (Latin Hypercube Sampling)</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Define bounds: [x_min, t_min], [x_max, t_max]</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    l_bounds <span class="op">=</span> [<span class="op">-</span><span class="fl">1.0</span>, <span class="fl">0.0</span>]</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    u_bounds <span class="op">=</span> [<span class="fl">1.0</span>, <span class="fl">1.0</span>]</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Create an LHS sampler</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    sampler <span class="op">=</span> qmc.LatinHypercube(d<span class="op">=</span><span class="dv">2</span>) <span class="co"># 2 dimensions (x, t)</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    sample <span class="op">=</span> sampler.random(n<span class="op">=</span>N_PDE)</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Scale samples to the domain bounds</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>    points_pde <span class="op">=</span> qmc.scale(sample, l_bounds, u_bounds)</span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    x_pde <span class="op">=</span> points_pde[:, <span class="dv">0</span>:<span class="dv">1</span>]</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>    t_pde <span class="op">=</span> points_pde[:, <span class="dv">1</span>:<span class="dv">2</span>]</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Convert everything to PyTorch Tensors and move to device</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> to_tensor(arr, requires_grad<span class="op">=</span><span class="va">False</span>):</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.tensor(arr, dtype<span class="op">=</span>torch.float32, device<span class="op">=</span>device, requires_grad<span class="op">=</span>requires_grad)</span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>    X_ic <span class="op">=</span> to_tensor(x_ic)</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    T_ic <span class="op">=</span> to_tensor(t_ic)</span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    U_ic <span class="op">=</span> to_tensor(u_ic)</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>    X_bc <span class="op">=</span> to_tensor(np.vstack([x_bc_left, x_bc_right]))</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a>    T_bc <span class="op">=</span> to_tensor(np.vstack([t_bc_left, t_bc_right]))</span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    U_bc <span class="op">=</span> to_tensor(np.vstack([u_bc_left, u_bc_right]))</span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    <span class="co"># PDE points need requires_grad=True for autograd</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>    X_pde <span class="op">=</span> to_tensor(x_pde, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    T_pde <span class="op">=</span> to_tensor(t_pde, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X_ic, T_ic, U_ic, X_bc, T_bc, U_bc, X_pde, T_pde</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="neural-network-设计" class="level2" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="neural-network-设计"><span class="header-section-number">4</span> Neural Network 设计</h2>
+<p>输入位置和时间 <span class="math inline">\((x,t)\)</span>, 输出温度值 <span class="math inline">\(u\)</span>, 不妨就用简单的 MLP 来实现 (具体层数和每层的神经元数量可以通过输入 <code>layers</code> 参数来调整):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PINN(nn.Module):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, layers):</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(PINN, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># layers is a list of hidden layer sizes, e.g., [2, 20, 20, 20, 1]</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linears <span class="op">=</span> nn.ModuleList()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(layers) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.linears.append(nn.Linear(layers[i], layers[i<span class="op">+</span><span class="dv">1</span>]))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Weight initialization (helpful for PINNs)</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>            nn.init.xavier_normal_(<span class="va">self</span>.linears[<span class="op">-</span><span class="dv">1</span>].weight)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>            nn.init.zeros_(<span class="va">self</span>.linears[<span class="op">-</span><span class="dv">1</span>].bias)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Activation function (Tanh is very common for smooth solutions like heat flow)</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.activation <span class="op">=</span> nn.Tanh()</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x, t):</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Input concatenation: [x, t]</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> torch.cat([x, t], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(<span class="va">self</span>.linears) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>            inputs <span class="op">=</span> <span class="va">self</span>.activation(<span class="va">self</span>.linears[i](inputs))</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Last layer doesn't need activation</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> <span class="va">self</span>.linears[<span class="op">-</span><span class="dv">1</span>](inputs)</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>下文称这个神经网络为 <span class="math inline">\(u_\theta\)</span>.</p>
+</section>
+<section id="training" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="training"><span class="header-section-number">5</span> Training</h2>
+<p>定义三种 Loss:</p>
+<ul>
+<li><p><strong>Initial Condition Loss</strong>: <span class="math display">\[
+  L_1 = \text{MSE}(u_\theta(\texttt{X\_ic}), \texttt{U\_ic})
+  \]</span></p></li>
+<li><p><strong>Boundary Condition Loss</strong>: <span class="math display">\[
+  L_2 = \text{MSE}(u_\theta(\texttt{X\_bc}), \texttt{U\_bc})
+  \]</span></p></li>
+<li><p><strong>PDE Residual Loss</strong>: <span class="math display">\[
+  L_3 = \text{MSE}\left(\frac{\partial \texttt{u\_pde}}{\partial t}, \alpha \frac{\partial^2 \texttt{u\_pde}}{\partial x^2}\right)
+  \]</span> where <span class="math inline">\(\texttt{u\_pde} := u_\theta(\texttt{X\_pde}, \texttt{T\_pde})\)</span>.</p>
+<ul>
+<li>这里我们用自动微分来计算 <span class="math inline">\(\partial \texttt{u\_pde} / \partial t\)</span> 和 <span class="math inline">\(\partial^2 \texttt{u\_pde} / \partial x^2\)</span>.</li>
+</ul></li>
+<li><p><strong>Total Loss</strong>: 三者的加权和: <span class="math display">\[
+  L = w_1 L_1 + w_2 L_2 + w_3 L_3
+  \]</span></p>
+<ul>
+<li><span class="math inline">\(w_1, w_2, w_3\)</span> 是用来平衡各项损失权重的超参数.</li>
+</ul></li>
+</ul>
+<p>下面的代码没有用 Mini-batch 来训练而是用了整个数据集 (因为数据量很小).</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 返回 epoch 长度的 loss history</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(pinn, X_ic, T_ic, U_ic, X_bc, T_bc, U_bc, X_pde, T_pde, epochs<span class="op">=</span><span class="dv">5000</span>, lr<span class="op">=</span><span class="fl">1e-3</span>, w_pde<span class="op">=</span><span class="fl">1.0</span>, w_ic<span class="op">=</span><span class="fl">10.0</span>, w_bc<span class="op">=</span><span class="fl">10.0</span>):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> optim.Adam(pinn.parameters(), lr<span class="op">=</span>lr)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Track losses</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    losses <span class="op">=</span> []</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        <span class="co"># a) Compute losses from initial condition</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        u_ic_pred <span class="op">=</span> pinn(X_ic, T_ic)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        loss_ic <span class="op">=</span> torch.mean((u_ic_pred <span class="op">-</span> U_ic)<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># b) Compute losses from boundary conditions</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        u_bc_pred <span class="op">=</span> pinn(X_bc, T_bc)</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        loss_bc <span class="op">=</span> torch.mean((u_bc_pred <span class="op">-</span> U_bc)<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="co"># c) Compute losses from PDE residual at collocation points</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        u_pde <span class="op">=</span> pinn(X_pde, T_pde)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Compute partial derivatives using torch.autograd.grad</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        u_t <span class="op">=</span> torch.autograd.grad(u_pde, T_pde, torch.ones_like(u_pde), create_graph<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>]</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>        u_x <span class="op">=</span> torch.autograd.grad(u_pde, X_pde, torch.ones_like(u_pde), create_graph<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>]</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        u_xx <span class="op">=</span> torch.autograd.grad(u_x, X_pde, torch.ones_like(u_x), create_graph<span class="op">=</span><span class="va">True</span>)[<span class="dv">0</span>]</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>        <span class="co"># PDE residual f = u_t - \ALPHA * u_xx</span></span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>        residual_pde <span class="op">=</span> u_t <span class="op">-</span> ALPHA <span class="op">*</span> u_xx</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>        loss_pde <span class="op">=</span> torch.mean(residual_pde<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Total Loss with weights</span></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>        total_loss <span class="op">=</span> w_pde <span class="op">*</span> loss_pde <span class="op">+</span> w_ic <span class="op">*</span> loss_ic <span class="op">+</span> w_bc <span class="op">*</span> loss_bc</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        losses.append(total_loss.item())</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>        total_loss.backward()</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Log progress every 500 epochs</span></span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> epoch <span class="op">%</span> <span class="dv">500</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"Epoch </span><span class="sc">{</span>epoch<span class="sc">:5d}</span><span class="ss">: Loss = </span><span class="sc">{</span>total_loss<span class="sc">.</span>item()<span class="sc">:.4e}</span><span class="ss"> (IC: </span><span class="sc">{</span>loss_ic<span class="sc">.</span>item()<span class="sc">:.2e}</span><span class="ss">, BC: </span><span class="sc">{</span>loss_bc<span class="sc">.</span>item()<span class="sc">:.2e}</span><span class="ss">, PDE: </span><span class="sc">{</span>loss_pde<span class="sc">.</span>item()<span class="sc">:.2e}</span><span class="ss">)"</span>)</span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> losses</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="results" class="level2" data-number="6">
+<h2 data-number="6" class="anchored" data-anchor-id="results"><span class="header-section-number">6</span> Results</h2>
+<p>我们在:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>N_IC <span class="op">=</span> <span class="dv">50</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>N_BC <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>N_PDE <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>pinn_layers <span class="op">=</span> [<span class="dv">2</span>, <span class="dv">20</span>, <span class="dv">20</span>, <span class="dv">20</span>, <span class="dv">20</span>, <span class="dv">1</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>且 <span class="math display">\[
+w_1 = 10, \quad w_2 = 10, \quad w_3 = 1
+\]</span></p>
+<p>的配置下训练了 500 个 epoch, 下面是训练结果:</p>
+<div id="fig-heat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-heat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="heat.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-heat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: 实际的温度演化和 PINN 预测的温度演化 (静态)
+</figcaption>
+</figure>
+</div>
+<div id="fig-heat-gif" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-heat-gif-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="heat.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-heat-gif-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: 实际的温度演化和 PINN 预测的温度演化 (动态)
+</figcaption>
+</figure>
+</div>
+<div id="fig-loss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="loss.png" class="img-fluid figure-img" style="width:60.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: 损失函数随训练轮次的变化
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="takeaways" class="level2" data-number="7">
+<h2 data-number="7" class="anchored" data-anchor-id="takeaways"><span class="header-section-number">7</span> Takeaways</h2>
+<p>为了求解一个有初始条件和边界条件的 PDE, 你甚至不需要任何测量数据, 只需要选取不同的自变量点, 比如有两个自变量 <span class="math inline">\((x,t)\)</span>, 就用 <code>meshgrid</code> 随机生成一些 <span class="math inline">\((x,t)\)</span> 组合, 让神经网络前向传播, 然后用自动微分算出输出对输入的微分, 计算 PDE 的残差, 把残差加入 Loss 函数进行优化. 特别的, 初始条件其实就是 PDE 在 <span class="math inline">\(t=0\)</span> 时的一个特殊约束, 边界条件也是 PDE 在 <span class="math inline">\(x=-1\)</span> 和 <span class="math inline">\(x=1\)</span> 时的特殊约束, 这些都可以直接加入 Loss 函数进行优化.</p>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Important
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p><strong>注意</strong>: 这样训练出来的网络只能用来求固定初始条件和边界条件的热传导方程的解!!! 如果想要训练一个能适用于不同初始条件和边界条件的网络, 就需要<strong>在网络和训练数据里面注入初始条件和边界条件</strong>, 如何注入呢? 我今后会用它引入 DeepONet 和 FNO 这种 operator learning.</p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Code for reproducibility
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>pinn.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-pinn-py" data-filename="pinn.py"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-pinn-py-1"><a href="#lst-pinn-py-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="lst-pinn-py-2"><a href="#lst-pinn-py-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="lst-pinn-py-3"><a href="#lst-pinn-py-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="lst-pinn-py-4"><a href="#lst-pinn-py-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.optim <span class="im">as</span> optim</span>
+<span id="lst-pinn-py-5"><a href="#lst-pinn-py-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="lst-pinn-py-6"><a href="#lst-pinn-py-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> qmc</span>
+<span id="lst-pinn-py-7"><a href="#lst-pinn-py-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="lst-pinn-py-8"><a href="#lst-pinn-py-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib.animation <span class="im">import</span> FuncAnimation, PillowWriter</span>
+<span id="lst-pinn-py-9"><a href="#lst-pinn-py-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-10"><a href="#lst-pinn-py-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Check if GPU is available</span></span>
+<span id="lst-pinn-py-11"><a href="#lst-pinn-py-11" aria-hidden="true" tabindex="-1"></a>device <span class="op">=</span> torch.device(<span class="st">"cuda"</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">"cpu"</span>)</span>
+<span id="lst-pinn-py-12"><a href="#lst-pinn-py-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Using device: </span><span class="sc">{</span>device<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="lst-pinn-py-13"><a href="#lst-pinn-py-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-14"><a href="#lst-pinn-py-14" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 1. Problem Setup ---</span></span>
+<span id="lst-pinn-py-15"><a href="#lst-pinn-py-15" aria-hidden="true" tabindex="-1"></a><span class="co"># 1D Heat Equation: u_t = ALPHA * u_xx</span></span>
+<span id="lst-pinn-py-16"><a href="#lst-pinn-py-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Domain: x in [-1, 1], t in [0, 1]</span></span>
+<span id="lst-pinn-py-17"><a href="#lst-pinn-py-17" aria-hidden="true" tabindex="-1"></a><span class="co"># IC: u(x, 0) = -sin(pi * x)</span></span>
+<span id="lst-pinn-py-18"><a href="#lst-pinn-py-18" aria-hidden="true" tabindex="-1"></a><span class="co"># BC: u(-1, t) = 0, u(1, t) = 0</span></span>
+<span id="lst-pinn-py-19"><a href="#lst-pinn-py-19" aria-hidden="true" tabindex="-1"></a>ALPHA <span class="op">=</span> <span class="fl">1.0</span></span>
+<span id="lst-pinn-py-20"><a href="#lst-pinn-py-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-21"><a href="#lst-pinn-py-21" aria-hidden="true" tabindex="-1"></a>MODEL_PATH <span class="op">=</span> <span class="st">"pinn_heat.pth"</span></span>
+<span id="lst-pinn-py-22"><a href="#lst-pinn-py-22" aria-hidden="true" tabindex="-1"></a>GIF_PATH <span class="op">=</span> <span class="st">"heat_sine.gif"</span></span>
+<span id="lst-pinn-py-23"><a href="#lst-pinn-py-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-24"><a href="#lst-pinn-py-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Function to compute exact solution for verification</span></span>
+<span id="lst-pinn-py-25"><a href="#lst-pinn-py-25" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exact_solution(x, t):</span>
+<span id="lst-pinn-py-26"><a href="#lst-pinn-py-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">-</span>np.exp(<span class="op">-</span>ALPHA <span class="op">*</span> np.pi<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> t) <span class="op">*</span> np.sin(np.pi <span class="op">*</span> x)</span>
+<span id="lst-pinn-py-27"><a href="#lst-pinn-py-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-28"><a href="#lst-pinn-py-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-29"><a href="#lst-pinn-py-29" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 2. Data Generation ---</span></span>
+<span id="lst-pinn-py-30"><a href="#lst-pinn-py-30" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_data(N_IC, N_BC, N_PDE):</span>
+<span id="lst-pinn-py-31"><a href="#lst-pinn-py-31" aria-hidden="true" tabindex="-1"></a>    <span class="co"># a) Initial Condition Data</span></span>
+<span id="lst-pinn-py-32"><a href="#lst-pinn-py-32" aria-hidden="true" tabindex="-1"></a>    x_ic <span class="op">=</span> np.random.uniform(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, (N_IC, <span class="dv">1</span>))</span>
+<span id="lst-pinn-py-33"><a href="#lst-pinn-py-33" aria-hidden="true" tabindex="-1"></a>    t_ic <span class="op">=</span> np.zeros((N_IC, <span class="dv">1</span>))</span>
+<span id="lst-pinn-py-34"><a href="#lst-pinn-py-34" aria-hidden="true" tabindex="-1"></a>    u_ic <span class="op">=</span> <span class="op">-</span>np.sin(np.pi <span class="op">*</span> x_ic)</span>
+<span id="lst-pinn-py-35"><a href="#lst-pinn-py-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-36"><a href="#lst-pinn-py-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># b) Boundary Condition Data</span></span>
+<span id="lst-pinn-py-37"><a href="#lst-pinn-py-37" aria-hidden="true" tabindex="-1"></a>    x_bc_left <span class="op">=</span> <span class="op">-</span>np.ones((N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="lst-pinn-py-38"><a href="#lst-pinn-py-38" aria-hidden="true" tabindex="-1"></a>    t_bc_left <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">1</span>, (N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="lst-pinn-py-39"><a href="#lst-pinn-py-39" aria-hidden="true" tabindex="-1"></a>    u_bc_left <span class="op">=</span> np.zeros((N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="lst-pinn-py-40"><a href="#lst-pinn-py-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-41"><a href="#lst-pinn-py-41" aria-hidden="true" tabindex="-1"></a>    x_bc_right <span class="op">=</span> np.ones((N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="lst-pinn-py-42"><a href="#lst-pinn-py-42" aria-hidden="true" tabindex="-1"></a>    t_bc_right <span class="op">=</span> np.random.uniform(<span class="dv">0</span>, <span class="dv">1</span>, (N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="lst-pinn-py-43"><a href="#lst-pinn-py-43" aria-hidden="true" tabindex="-1"></a>    u_bc_right <span class="op">=</span> np.zeros((N_BC <span class="op">//</span> <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="lst-pinn-py-44"><a href="#lst-pinn-py-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-45"><a href="#lst-pinn-py-45" aria-hidden="true" tabindex="-1"></a>    <span class="co"># c) PDE collocation points (Latin Hypercube Sampling)</span></span>
+<span id="lst-pinn-py-46"><a href="#lst-pinn-py-46" aria-hidden="true" tabindex="-1"></a>    l_bounds <span class="op">=</span> [<span class="op">-</span><span class="fl">1.0</span>, <span class="fl">0.0</span>]</span>
+<span id="lst-pinn-py-47"><a href="#lst-pinn-py-47" aria-hidden="true" tabindex="-1"></a>    u_bounds <span class="op">=</span> [<span class="fl">1.0</span>, <span class="fl">1.0</span>]</span>
+<span id="lst-pinn-py-48"><a href="#lst-pinn-py-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-49"><a href="#lst-pinn-py-49" aria-hidden="true" tabindex="-1"></a>    sampler <span class="op">=</span> qmc.LatinHypercube(d<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="lst-pinn-py-50"><a href="#lst-pinn-py-50" aria-hidden="true" tabindex="-1"></a>    sample <span class="op">=</span> sampler.random(n<span class="op">=</span>N_PDE)</span>
+<span id="lst-pinn-py-51"><a href="#lst-pinn-py-51" aria-hidden="true" tabindex="-1"></a>    points_pde <span class="op">=</span> qmc.scale(sample, l_bounds, u_bounds)</span>
+<span id="lst-pinn-py-52"><a href="#lst-pinn-py-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-53"><a href="#lst-pinn-py-53" aria-hidden="true" tabindex="-1"></a>    x_pde <span class="op">=</span> points_pde[:, <span class="dv">0</span>:<span class="dv">1</span>]</span>
+<span id="lst-pinn-py-54"><a href="#lst-pinn-py-54" aria-hidden="true" tabindex="-1"></a>    t_pde <span class="op">=</span> points_pde[:, <span class="dv">1</span>:<span class="dv">2</span>]</span>
+<span id="lst-pinn-py-55"><a href="#lst-pinn-py-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-56"><a href="#lst-pinn-py-56" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> to_tensor(arr, requires_grad<span class="op">=</span><span class="va">False</span>):</span>
+<span id="lst-pinn-py-57"><a href="#lst-pinn-py-57" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.tensor(</span>
+<span id="lst-pinn-py-58"><a href="#lst-pinn-py-58" aria-hidden="true" tabindex="-1"></a>            arr, dtype<span class="op">=</span>torch.float32, device<span class="op">=</span>device, requires_grad<span class="op">=</span>requires_grad</span>
+<span id="lst-pinn-py-59"><a href="#lst-pinn-py-59" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="lst-pinn-py-60"><a href="#lst-pinn-py-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-61"><a href="#lst-pinn-py-61" aria-hidden="true" tabindex="-1"></a>    X_ic <span class="op">=</span> to_tensor(x_ic)</span>
+<span id="lst-pinn-py-62"><a href="#lst-pinn-py-62" aria-hidden="true" tabindex="-1"></a>    T_ic <span class="op">=</span> to_tensor(t_ic)</span>
+<span id="lst-pinn-py-63"><a href="#lst-pinn-py-63" aria-hidden="true" tabindex="-1"></a>    U_ic <span class="op">=</span> to_tensor(u_ic)</span>
+<span id="lst-pinn-py-64"><a href="#lst-pinn-py-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-65"><a href="#lst-pinn-py-65" aria-hidden="true" tabindex="-1"></a>    X_bc <span class="op">=</span> to_tensor(np.vstack([x_bc_left, x_bc_right]))</span>
+<span id="lst-pinn-py-66"><a href="#lst-pinn-py-66" aria-hidden="true" tabindex="-1"></a>    T_bc <span class="op">=</span> to_tensor(np.vstack([t_bc_left, t_bc_right]))</span>
+<span id="lst-pinn-py-67"><a href="#lst-pinn-py-67" aria-hidden="true" tabindex="-1"></a>    U_bc <span class="op">=</span> to_tensor(np.vstack([u_bc_left, u_bc_right]))</span>
+<span id="lst-pinn-py-68"><a href="#lst-pinn-py-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-69"><a href="#lst-pinn-py-69" aria-hidden="true" tabindex="-1"></a>    X_pde <span class="op">=</span> to_tensor(x_pde, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="lst-pinn-py-70"><a href="#lst-pinn-py-70" aria-hidden="true" tabindex="-1"></a>    T_pde <span class="op">=</span> to_tensor(t_pde, requires_grad<span class="op">=</span><span class="va">True</span>)</span>
+<span id="lst-pinn-py-71"><a href="#lst-pinn-py-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-72"><a href="#lst-pinn-py-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> X_ic, T_ic, U_ic, X_bc, T_bc, U_bc, X_pde, T_pde</span>
+<span id="lst-pinn-py-73"><a href="#lst-pinn-py-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-74"><a href="#lst-pinn-py-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-75"><a href="#lst-pinn-py-75" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 3. Neural Network Design (PINN) ---</span></span>
+<span id="lst-pinn-py-76"><a href="#lst-pinn-py-76" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PINN(nn.Module):</span>
+<span id="lst-pinn-py-77"><a href="#lst-pinn-py-77" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, layers):</span>
+<span id="lst-pinn-py-78"><a href="#lst-pinn-py-78" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(PINN, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="lst-pinn-py-79"><a href="#lst-pinn-py-79" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.linears <span class="op">=</span> nn.ModuleList()</span>
+<span id="lst-pinn-py-80"><a href="#lst-pinn-py-80" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(layers) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="lst-pinn-py-81"><a href="#lst-pinn-py-81" aria-hidden="true" tabindex="-1"></a>            layer <span class="op">=</span> nn.Linear(layers[i], layers[i <span class="op">+</span> <span class="dv">1</span>])</span>
+<span id="lst-pinn-py-82"><a href="#lst-pinn-py-82" aria-hidden="true" tabindex="-1"></a>            nn.init.xavier_normal_(layer.weight)</span>
+<span id="lst-pinn-py-83"><a href="#lst-pinn-py-83" aria-hidden="true" tabindex="-1"></a>            nn.init.zeros_(layer.bias)</span>
+<span id="lst-pinn-py-84"><a href="#lst-pinn-py-84" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.linears.append(layer)</span>
+<span id="lst-pinn-py-85"><a href="#lst-pinn-py-85" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-86"><a href="#lst-pinn-py-86" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.activation <span class="op">=</span> nn.Tanh()</span>
+<span id="lst-pinn-py-87"><a href="#lst-pinn-py-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-88"><a href="#lst-pinn-py-88" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x, t):</span>
+<span id="lst-pinn-py-89"><a href="#lst-pinn-py-89" aria-hidden="true" tabindex="-1"></a>        inputs <span class="op">=</span> torch.cat([x, t], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="lst-pinn-py-90"><a href="#lst-pinn-py-90" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(<span class="va">self</span>.linears) <span class="op">-</span> <span class="dv">1</span>):</span>
+<span id="lst-pinn-py-91"><a href="#lst-pinn-py-91" aria-hidden="true" tabindex="-1"></a>            inputs <span class="op">=</span> <span class="va">self</span>.activation(<span class="va">self</span>.linears[i](inputs))</span>
+<span id="lst-pinn-py-92"><a href="#lst-pinn-py-92" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> <span class="va">self</span>.linears[<span class="op">-</span><span class="dv">1</span>](inputs)</span>
+<span id="lst-pinn-py-93"><a href="#lst-pinn-py-93" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> output</span>
+<span id="lst-pinn-py-94"><a href="#lst-pinn-py-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-95"><a href="#lst-pinn-py-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-96"><a href="#lst-pinn-py-96" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 4. Training Function ---</span></span>
+<span id="lst-pinn-py-97"><a href="#lst-pinn-py-97" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train(</span>
+<span id="lst-pinn-py-98"><a href="#lst-pinn-py-98" aria-hidden="true" tabindex="-1"></a>    pinn,</span>
+<span id="lst-pinn-py-99"><a href="#lst-pinn-py-99" aria-hidden="true" tabindex="-1"></a>    X_ic,</span>
+<span id="lst-pinn-py-100"><a href="#lst-pinn-py-100" aria-hidden="true" tabindex="-1"></a>    T_ic,</span>
+<span id="lst-pinn-py-101"><a href="#lst-pinn-py-101" aria-hidden="true" tabindex="-1"></a>    U_ic,</span>
+<span id="lst-pinn-py-102"><a href="#lst-pinn-py-102" aria-hidden="true" tabindex="-1"></a>    X_bc,</span>
+<span id="lst-pinn-py-103"><a href="#lst-pinn-py-103" aria-hidden="true" tabindex="-1"></a>    T_bc,</span>
+<span id="lst-pinn-py-104"><a href="#lst-pinn-py-104" aria-hidden="true" tabindex="-1"></a>    U_bc,</span>
+<span id="lst-pinn-py-105"><a href="#lst-pinn-py-105" aria-hidden="true" tabindex="-1"></a>    X_pde,</span>
+<span id="lst-pinn-py-106"><a href="#lst-pinn-py-106" aria-hidden="true" tabindex="-1"></a>    T_pde,</span>
+<span id="lst-pinn-py-107"><a href="#lst-pinn-py-107" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span><span class="dv">5000</span>,</span>
+<span id="lst-pinn-py-108"><a href="#lst-pinn-py-108" aria-hidden="true" tabindex="-1"></a>    lr<span class="op">=</span><span class="fl">1e-3</span>,</span>
+<span id="lst-pinn-py-109"><a href="#lst-pinn-py-109" aria-hidden="true" tabindex="-1"></a>    w_pde<span class="op">=</span><span class="fl">1.0</span>,</span>
+<span id="lst-pinn-py-110"><a href="#lst-pinn-py-110" aria-hidden="true" tabindex="-1"></a>    w_ic<span class="op">=</span><span class="fl">10.0</span>,</span>
+<span id="lst-pinn-py-111"><a href="#lst-pinn-py-111" aria-hidden="true" tabindex="-1"></a>    w_bc<span class="op">=</span><span class="fl">10.0</span>,</span>
+<span id="lst-pinn-py-112"><a href="#lst-pinn-py-112" aria-hidden="true" tabindex="-1"></a>):</span>
+<span id="lst-pinn-py-113"><a href="#lst-pinn-py-113" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> optim.Adam(pinn.parameters(), lr<span class="op">=</span>lr)</span>
+<span id="lst-pinn-py-114"><a href="#lst-pinn-py-114" aria-hidden="true" tabindex="-1"></a>    losses <span class="op">=</span> []</span>
+<span id="lst-pinn-py-115"><a href="#lst-pinn-py-115" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-116"><a href="#lst-pinn-py-116" aria-hidden="true" tabindex="-1"></a>    pinn.train()</span>
+<span id="lst-pinn-py-117"><a href="#lst-pinn-py-117" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(epochs):</span>
+<span id="lst-pinn-py-118"><a href="#lst-pinn-py-118" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="lst-pinn-py-119"><a href="#lst-pinn-py-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-120"><a href="#lst-pinn-py-120" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Initial condition loss</span></span>
+<span id="lst-pinn-py-121"><a href="#lst-pinn-py-121" aria-hidden="true" tabindex="-1"></a>        u_ic_pred <span class="op">=</span> pinn(X_ic, T_ic)</span>
+<span id="lst-pinn-py-122"><a href="#lst-pinn-py-122" aria-hidden="true" tabindex="-1"></a>        loss_ic <span class="op">=</span> torch.mean((u_ic_pred <span class="op">-</span> U_ic) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="lst-pinn-py-123"><a href="#lst-pinn-py-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-124"><a href="#lst-pinn-py-124" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Boundary condition loss</span></span>
+<span id="lst-pinn-py-125"><a href="#lst-pinn-py-125" aria-hidden="true" tabindex="-1"></a>        u_bc_pred <span class="op">=</span> pinn(X_bc, T_bc)</span>
+<span id="lst-pinn-py-126"><a href="#lst-pinn-py-126" aria-hidden="true" tabindex="-1"></a>        loss_bc <span class="op">=</span> torch.mean((u_bc_pred <span class="op">-</span> U_bc) <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="lst-pinn-py-127"><a href="#lst-pinn-py-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-128"><a href="#lst-pinn-py-128" aria-hidden="true" tabindex="-1"></a>        <span class="co"># PDE residual loss</span></span>
+<span id="lst-pinn-py-129"><a href="#lst-pinn-py-129" aria-hidden="true" tabindex="-1"></a>        u_pde <span class="op">=</span> pinn(X_pde, T_pde)</span>
+<span id="lst-pinn-py-130"><a href="#lst-pinn-py-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-131"><a href="#lst-pinn-py-131" aria-hidden="true" tabindex="-1"></a>        u_t <span class="op">=</span> torch.autograd.grad(</span>
+<span id="lst-pinn-py-132"><a href="#lst-pinn-py-132" aria-hidden="true" tabindex="-1"></a>            u_pde, T_pde, torch.ones_like(u_pde), create_graph<span class="op">=</span><span class="va">True</span></span>
+<span id="lst-pinn-py-133"><a href="#lst-pinn-py-133" aria-hidden="true" tabindex="-1"></a>        )[<span class="dv">0</span>]</span>
+<span id="lst-pinn-py-134"><a href="#lst-pinn-py-134" aria-hidden="true" tabindex="-1"></a>        u_x <span class="op">=</span> torch.autograd.grad(</span>
+<span id="lst-pinn-py-135"><a href="#lst-pinn-py-135" aria-hidden="true" tabindex="-1"></a>            u_pde, X_pde, torch.ones_like(u_pde), create_graph<span class="op">=</span><span class="va">True</span></span>
+<span id="lst-pinn-py-136"><a href="#lst-pinn-py-136" aria-hidden="true" tabindex="-1"></a>        )[<span class="dv">0</span>]</span>
+<span id="lst-pinn-py-137"><a href="#lst-pinn-py-137" aria-hidden="true" tabindex="-1"></a>        u_xx <span class="op">=</span> torch.autograd.grad(</span>
+<span id="lst-pinn-py-138"><a href="#lst-pinn-py-138" aria-hidden="true" tabindex="-1"></a>            u_x, X_pde, torch.ones_like(u_x), create_graph<span class="op">=</span><span class="va">True</span></span>
+<span id="lst-pinn-py-139"><a href="#lst-pinn-py-139" aria-hidden="true" tabindex="-1"></a>        )[<span class="dv">0</span>]</span>
+<span id="lst-pinn-py-140"><a href="#lst-pinn-py-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-141"><a href="#lst-pinn-py-141" aria-hidden="true" tabindex="-1"></a>        residual_pde <span class="op">=</span> u_t <span class="op">-</span> ALPHA <span class="op">*</span> u_xx</span>
+<span id="lst-pinn-py-142"><a href="#lst-pinn-py-142" aria-hidden="true" tabindex="-1"></a>        loss_pde <span class="op">=</span> torch.mean(residual_pde <span class="op">**</span> <span class="dv">2</span>)</span>
+<span id="lst-pinn-py-143"><a href="#lst-pinn-py-143" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-144"><a href="#lst-pinn-py-144" aria-hidden="true" tabindex="-1"></a>        total_loss <span class="op">=</span> w_pde <span class="op">*</span> loss_pde <span class="op">+</span> w_ic <span class="op">*</span> loss_ic <span class="op">+</span> w_bc <span class="op">*</span> loss_bc</span>
+<span id="lst-pinn-py-145"><a href="#lst-pinn-py-145" aria-hidden="true" tabindex="-1"></a>        losses.append(total_loss.item())</span>
+<span id="lst-pinn-py-146"><a href="#lst-pinn-py-146" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-147"><a href="#lst-pinn-py-147" aria-hidden="true" tabindex="-1"></a>        total_loss.backward()</span>
+<span id="lst-pinn-py-148"><a href="#lst-pinn-py-148" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="lst-pinn-py-149"><a href="#lst-pinn-py-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-150"><a href="#lst-pinn-py-150" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> epoch <span class="op">%</span> <span class="dv">100</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="lst-pinn-py-151"><a href="#lst-pinn-py-151" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(</span>
+<span id="lst-pinn-py-152"><a href="#lst-pinn-py-152" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"Epoch </span><span class="sc">{</span>epoch<span class="sc">:5d}</span><span class="ss">: Loss = </span><span class="sc">{</span>total_loss<span class="sc">.</span>item()<span class="sc">:.4e}</span><span class="ss"> "</span></span>
+<span id="lst-pinn-py-153"><a href="#lst-pinn-py-153" aria-hidden="true" tabindex="-1"></a>                <span class="ss">f"(IC: </span><span class="sc">{</span>loss_ic<span class="sc">.</span>item()<span class="sc">:.2e}</span><span class="ss">, BC: </span><span class="sc">{</span>loss_bc<span class="sc">.</span>item()<span class="sc">:.2e}</span><span class="ss">, PDE: </span><span class="sc">{</span>loss_pde<span class="sc">.</span>item()<span class="sc">:.2e}</span><span class="ss">)"</span></span>
+<span id="lst-pinn-py-154"><a href="#lst-pinn-py-154" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="lst-pinn-py-155"><a href="#lst-pinn-py-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-156"><a href="#lst-pinn-py-156" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> losses</span>
+<span id="lst-pinn-py-157"><a href="#lst-pinn-py-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-158"><a href="#lst-pinn-py-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-159"><a href="#lst-pinn-py-159" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 5. Save / Load ---</span></span>
+<span id="lst-pinn-py-160"><a href="#lst-pinn-py-160" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> save_checkpoint(model, loss_history, path<span class="op">=</span>MODEL_PATH):</span>
+<span id="lst-pinn-py-161"><a href="#lst-pinn-py-161" aria-hidden="true" tabindex="-1"></a>    torch.save(</span>
+<span id="lst-pinn-py-162"><a href="#lst-pinn-py-162" aria-hidden="true" tabindex="-1"></a>        {</span>
+<span id="lst-pinn-py-163"><a href="#lst-pinn-py-163" aria-hidden="true" tabindex="-1"></a>            <span class="st">"model_state_dict"</span>: model.state_dict(),</span>
+<span id="lst-pinn-py-164"><a href="#lst-pinn-py-164" aria-hidden="true" tabindex="-1"></a>            <span class="st">"loss_history"</span>: loss_history,</span>
+<span id="lst-pinn-py-165"><a href="#lst-pinn-py-165" aria-hidden="true" tabindex="-1"></a>        },</span>
+<span id="lst-pinn-py-166"><a href="#lst-pinn-py-166" aria-hidden="true" tabindex="-1"></a>        path,</span>
+<span id="lst-pinn-py-167"><a href="#lst-pinn-py-167" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="lst-pinn-py-168"><a href="#lst-pinn-py-168" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Model checkpoint saved to: </span><span class="sc">{</span>path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="lst-pinn-py-169"><a href="#lst-pinn-py-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-170"><a href="#lst-pinn-py-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-171"><a href="#lst-pinn-py-171" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_checkpoint(model, path<span class="op">=</span>MODEL_PATH):</span>
+<span id="lst-pinn-py-172"><a href="#lst-pinn-py-172" aria-hidden="true" tabindex="-1"></a>    checkpoint <span class="op">=</span> torch.load(path, map_location<span class="op">=</span>device)</span>
+<span id="lst-pinn-py-173"><a href="#lst-pinn-py-173" aria-hidden="true" tabindex="-1"></a>    model.load_state_dict(checkpoint[<span class="st">"model_state_dict"</span>])</span>
+<span id="lst-pinn-py-174"><a href="#lst-pinn-py-174" aria-hidden="true" tabindex="-1"></a>    loss_history <span class="op">=</span> checkpoint.get(<span class="st">"loss_history"</span>, [])</span>
+<span id="lst-pinn-py-175"><a href="#lst-pinn-py-175" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Loaded model checkpoint from: </span><span class="sc">{</span>path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="lst-pinn-py-176"><a href="#lst-pinn-py-176" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> loss_history</span>
+<span id="lst-pinn-py-177"><a href="#lst-pinn-py-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-178"><a href="#lst-pinn-py-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-179"><a href="#lst-pinn-py-179" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 6. Evaluation ---</span></span>
+<span id="lst-pinn-py-180"><a href="#lst-pinn-py-180" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> predict_on_grid(model, nx<span class="op">=</span><span class="dv">100</span>, nt<span class="op">=</span><span class="dv">100</span>):</span>
+<span id="lst-pinn-py-181"><a href="#lst-pinn-py-181" aria-hidden="true" tabindex="-1"></a>    x_test <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, nx)</span>
+<span id="lst-pinn-py-182"><a href="#lst-pinn-py-182" aria-hidden="true" tabindex="-1"></a>    t_test <span class="op">=</span> np.linspace(<span class="dv">0</span>, <span class="dv">1</span>, nt)</span>
+<span id="lst-pinn-py-183"><a href="#lst-pinn-py-183" aria-hidden="true" tabindex="-1"></a>    X_test, T_test <span class="op">=</span> np.meshgrid(x_test, t_test)</span>
+<span id="lst-pinn-py-184"><a href="#lst-pinn-py-184" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-185"><a href="#lst-pinn-py-185" aria-hidden="true" tabindex="-1"></a>    X_test_flat <span class="op">=</span> torch.tensor(</span>
+<span id="lst-pinn-py-186"><a href="#lst-pinn-py-186" aria-hidden="true" tabindex="-1"></a>        X_test.flatten()[:, <span class="va">None</span>], dtype<span class="op">=</span>torch.float32, device<span class="op">=</span>device</span>
+<span id="lst-pinn-py-187"><a href="#lst-pinn-py-187" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="lst-pinn-py-188"><a href="#lst-pinn-py-188" aria-hidden="true" tabindex="-1"></a>    T_test_flat <span class="op">=</span> torch.tensor(</span>
+<span id="lst-pinn-py-189"><a href="#lst-pinn-py-189" aria-hidden="true" tabindex="-1"></a>        T_test.flatten()[:, <span class="va">None</span>], dtype<span class="op">=</span>torch.float32, device<span class="op">=</span>device</span>
+<span id="lst-pinn-py-190"><a href="#lst-pinn-py-190" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="lst-pinn-py-191"><a href="#lst-pinn-py-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-192"><a href="#lst-pinn-py-192" aria-hidden="true" tabindex="-1"></a>    model.<span class="bu">eval</span>()</span>
+<span id="lst-pinn-py-193"><a href="#lst-pinn-py-193" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="lst-pinn-py-194"><a href="#lst-pinn-py-194" aria-hidden="true" tabindex="-1"></a>        U_pred_flat <span class="op">=</span> model(X_test_flat, T_test_flat)</span>
+<span id="lst-pinn-py-195"><a href="#lst-pinn-py-195" aria-hidden="true" tabindex="-1"></a>        U_pred <span class="op">=</span> U_pred_flat.cpu().numpy().reshape(nt, nx)</span>
+<span id="lst-pinn-py-196"><a href="#lst-pinn-py-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-197"><a href="#lst-pinn-py-197" aria-hidden="true" tabindex="-1"></a>    U_exact <span class="op">=</span> exact_solution(X_test, T_test)</span>
+<span id="lst-pinn-py-198"><a href="#lst-pinn-py-198" aria-hidden="true" tabindex="-1"></a>    U_err <span class="op">=</span> np.<span class="bu">abs</span>(U_exact <span class="op">-</span> U_pred)</span>
+<span id="lst-pinn-py-199"><a href="#lst-pinn-py-199" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-200"><a href="#lst-pinn-py-200" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x_test, t_test, X_test, T_test, U_exact, U_pred, U_err</span>
+<span id="lst-pinn-py-201"><a href="#lst-pinn-py-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-202"><a href="#lst-pinn-py-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-203"><a href="#lst-pinn-py-203" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 7. Static Plots ---</span></span>
+<span id="lst-pinn-py-204"><a href="#lst-pinn-py-204" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_heatmaps(X_test, T_test, U_exact, U_pred, U_err):</span>
+<span id="lst-pinn-py-205"><a href="#lst-pinn-py-205" aria-hidden="true" tabindex="-1"></a>    fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">18</span>, <span class="dv">5</span>))</span>
+<span id="lst-pinn-py-206"><a href="#lst-pinn-py-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-207"><a href="#lst-pinn-py-207" aria-hidden="true" tabindex="-1"></a>    vmin <span class="op">=</span> <span class="bu">min</span>(U_exact.<span class="bu">min</span>(), U_pred.<span class="bu">min</span>())</span>
+<span id="lst-pinn-py-208"><a href="#lst-pinn-py-208" aria-hidden="true" tabindex="-1"></a>    vmax <span class="op">=</span> <span class="bu">max</span>(U_exact.<span class="bu">max</span>(), U_pred.<span class="bu">max</span>())</span>
+<span id="lst-pinn-py-209"><a href="#lst-pinn-py-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-210"><a href="#lst-pinn-py-210" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Exact solution</span></span>
+<span id="lst-pinn-py-211"><a href="#lst-pinn-py-211" aria-hidden="true" tabindex="-1"></a>    im0 <span class="op">=</span> axes[<span class="dv">0</span>].pcolormesh(T_test, X_test, U_exact, cmap<span class="op">=</span><span class="st">"seismic"</span>, shading<span class="op">=</span><span class="st">"auto"</span>, vmin<span class="op">=</span>vmin, vmax<span class="op">=</span>vmax)</span>
+<span id="lst-pinn-py-212"><a href="#lst-pinn-py-212" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].set_title(<span class="st">"Exact Solution"</span>)</span>
+<span id="lst-pinn-py-213"><a href="#lst-pinn-py-213" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].set_xlabel(<span class="st">"Time t"</span>)</span>
+<span id="lst-pinn-py-214"><a href="#lst-pinn-py-214" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">0</span>].set_ylabel(<span class="st">"Position x"</span>)</span>
+<span id="lst-pinn-py-215"><a href="#lst-pinn-py-215" aria-hidden="true" tabindex="-1"></a>    fig.colorbar(im0, ax<span class="op">=</span>axes[<span class="dv">0</span>])</span>
+<span id="lst-pinn-py-216"><a href="#lst-pinn-py-216" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-217"><a href="#lst-pinn-py-217" aria-hidden="true" tabindex="-1"></a>    <span class="co"># PINN prediction</span></span>
+<span id="lst-pinn-py-218"><a href="#lst-pinn-py-218" aria-hidden="true" tabindex="-1"></a>    im1 <span class="op">=</span> axes[<span class="dv">1</span>].pcolormesh(T_test, X_test, U_pred, cmap<span class="op">=</span><span class="st">"seismic"</span>, shading<span class="op">=</span><span class="st">"auto"</span>, vmin<span class="op">=</span>vmin, vmax<span class="op">=</span>vmax)</span>
+<span id="lst-pinn-py-219"><a href="#lst-pinn-py-219" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].set_title(<span class="st">"PINN Prediction"</span>)</span>
+<span id="lst-pinn-py-220"><a href="#lst-pinn-py-220" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].set_xlabel(<span class="st">"Time t"</span>)</span>
+<span id="lst-pinn-py-221"><a href="#lst-pinn-py-221" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">1</span>].set_ylabel(<span class="st">"Position x"</span>)</span>
+<span id="lst-pinn-py-222"><a href="#lst-pinn-py-222" aria-hidden="true" tabindex="-1"></a>    fig.colorbar(im1, ax<span class="op">=</span>axes[<span class="dv">1</span>])</span>
+<span id="lst-pinn-py-223"><a href="#lst-pinn-py-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-224"><a href="#lst-pinn-py-224" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Absolute error</span></span>
+<span id="lst-pinn-py-225"><a href="#lst-pinn-py-225" aria-hidden="true" tabindex="-1"></a>    im2 <span class="op">=</span> axes[<span class="dv">2</span>].pcolormesh(T_test, X_test, U_err, cmap<span class="op">=</span><span class="st">"viridis"</span>, shading<span class="op">=</span><span class="st">"auto"</span>)</span>
+<span id="lst-pinn-py-226"><a href="#lst-pinn-py-226" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].set_title(<span class="st">"Absolute Error"</span>)</span>
+<span id="lst-pinn-py-227"><a href="#lst-pinn-py-227" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].set_xlabel(<span class="st">"Time t"</span>)</span>
+<span id="lst-pinn-py-228"><a href="#lst-pinn-py-228" aria-hidden="true" tabindex="-1"></a>    axes[<span class="dv">2</span>].set_ylabel(<span class="st">"Position x"</span>)</span>
+<span id="lst-pinn-py-229"><a href="#lst-pinn-py-229" aria-hidden="true" tabindex="-1"></a>    fig.colorbar(im2, ax<span class="op">=</span>axes[<span class="dv">2</span>])</span>
+<span id="lst-pinn-py-230"><a href="#lst-pinn-py-230" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-231"><a href="#lst-pinn-py-231" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="lst-pinn-py-232"><a href="#lst-pinn-py-232" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="lst-pinn-py-233"><a href="#lst-pinn-py-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-234"><a href="#lst-pinn-py-234" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-235"><a href="#lst-pinn-py-235" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_loss_history(loss_history):</span>
+<span id="lst-pinn-py-236"><a href="#lst-pinn-py-236" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">5</span>))</span>
+<span id="lst-pinn-py-237"><a href="#lst-pinn-py-237" aria-hidden="true" tabindex="-1"></a>    plt.plot(loss_history, linewidth<span class="op">=</span><span class="fl">1.5</span>)</span>
+<span id="lst-pinn-py-238"><a href="#lst-pinn-py-238" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">"Epoch"</span>)</span>
+<span id="lst-pinn-py-239"><a href="#lst-pinn-py-239" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">"Total Loss"</span>)</span>
+<span id="lst-pinn-py-240"><a href="#lst-pinn-py-240" aria-hidden="true" tabindex="-1"></a>    plt.yscale(<span class="st">"log"</span>)</span>
+<span id="lst-pinn-py-241"><a href="#lst-pinn-py-241" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="st">"Loss History"</span>)</span>
+<span id="lst-pinn-py-242"><a href="#lst-pinn-py-242" aria-hidden="true" tabindex="-1"></a>    plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="lst-pinn-py-243"><a href="#lst-pinn-py-243" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="lst-pinn-py-244"><a href="#lst-pinn-py-244" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="lst-pinn-py-245"><a href="#lst-pinn-py-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-246"><a href="#lst-pinn-py-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-247"><a href="#lst-pinn-py-247" aria-hidden="true" tabindex="-1"></a><span class="co"># --- 8. Animated GIF ---</span></span>
+<span id="lst-pinn-py-248"><a href="#lst-pinn-py-248" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> save_animation_gif(x_test, t_test, U_exact, U_pred, U_err, gif_path<span class="op">=</span>GIF_PATH):</span>
+<span id="lst-pinn-py-249"><a href="#lst-pinn-py-249" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="lst-pinn-py-250"><a href="#lst-pinn-py-250" aria-hidden="true" tabindex="-1"></a><span class="co">    这里做的是“时间切片动画”：</span></span>
+<span id="lst-pinn-py-251"><a href="#lst-pinn-py-251" aria-hidden="true" tabindex="-1"></a><span class="co">    每一帧固定一个 t，画出沿着 x 的三条/三类分布：</span></span>
+<span id="lst-pinn-py-252"><a href="#lst-pinn-py-252" aria-hidden="true" tabindex="-1"></a><span class="co">    1) exact temperature</span></span>
+<span id="lst-pinn-py-253"><a href="#lst-pinn-py-253" aria-hidden="true" tabindex="-1"></a><span class="co">    2) predicted temperature</span></span>
+<span id="lst-pinn-py-254"><a href="#lst-pinn-py-254" aria-hidden="true" tabindex="-1"></a><span class="co">    3) absolute error</span></span>
+<span id="lst-pinn-py-255"><a href="#lst-pinn-py-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-256"><a href="#lst-pinn-py-256" aria-hidden="true" tabindex="-1"></a><span class="co">    你要求温度纵坐标和 x 范围一致，所以温度子图设置 y in [-1, 1]。</span></span>
+<span id="lst-pinn-py-257"><a href="#lst-pinn-py-257" aria-hidden="true" tabindex="-1"></a><span class="co">    你原话里写 [-1,-1] 是错误区间，这里按 [-1,1] 实现。</span></span>
+<span id="lst-pinn-py-258"><a href="#lst-pinn-py-258" aria-hidden="true" tabindex="-1"></a><span class="co">    如果你更想看清 error，可以把 ax_err.set_ylim(0, U_err.max()*1.1)。</span></span>
+<span id="lst-pinn-py-259"><a href="#lst-pinn-py-259" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="lst-pinn-py-260"><a href="#lst-pinn-py-260" aria-hidden="true" tabindex="-1"></a>    fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="lst-pinn-py-261"><a href="#lst-pinn-py-261" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-262"><a href="#lst-pinn-py-262" aria-hidden="true" tabindex="-1"></a>    ax_temp, ax_err <span class="op">=</span> axes</span>
+<span id="lst-pinn-py-263"><a href="#lst-pinn-py-263" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-264"><a href="#lst-pinn-py-264" aria-hidden="true" tabindex="-1"></a>    line_exact, <span class="op">=</span> ax_temp.plot([], [], lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Exact"</span>, color<span class="op">=</span><span class="st">"tab:blue"</span>)</span>
+<span id="lst-pinn-py-265"><a href="#lst-pinn-py-265" aria-hidden="true" tabindex="-1"></a>    line_pred, <span class="op">=</span> ax_temp.plot([], [], lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Prediction"</span>, color<span class="op">=</span><span class="st">"tab:orange"</span>)</span>
+<span id="lst-pinn-py-266"><a href="#lst-pinn-py-266" aria-hidden="true" tabindex="-1"></a>    line_err, <span class="op">=</span> ax_err.plot([], [], lw<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">"Abs Error"</span>, color<span class="op">=</span><span class="st">"tab:red"</span>)</span>
+<span id="lst-pinn-py-267"><a href="#lst-pinn-py-267" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-268"><a href="#lst-pinn-py-268" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Temperature subplot (exact vs prediction on same axes)</span></span>
+<span id="lst-pinn-py-269"><a href="#lst-pinn-py-269" aria-hidden="true" tabindex="-1"></a>    ax_temp.set_title(<span class="st">"Temperature Evolution (Exact vs PINN)"</span>)</span>
+<span id="lst-pinn-py-270"><a href="#lst-pinn-py-270" aria-hidden="true" tabindex="-1"></a>    ax_temp.set_xlabel(<span class="st">"Position x"</span>)</span>
+<span id="lst-pinn-py-271"><a href="#lst-pinn-py-271" aria-hidden="true" tabindex="-1"></a>    ax_temp.set_ylabel(<span class="st">"Temperature u(x,t)"</span>)</span>
+<span id="lst-pinn-py-272"><a href="#lst-pinn-py-272" aria-hidden="true" tabindex="-1"></a>    ax_temp.set_xlim(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="lst-pinn-py-273"><a href="#lst-pinn-py-273" aria-hidden="true" tabindex="-1"></a>    ax_temp.set_ylim(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="lst-pinn-py-274"><a href="#lst-pinn-py-274" aria-hidden="true" tabindex="-1"></a>    ax_temp.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="lst-pinn-py-275"><a href="#lst-pinn-py-275" aria-hidden="true" tabindex="-1"></a>    ax_temp.legend(loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
+<span id="lst-pinn-py-276"><a href="#lst-pinn-py-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-277"><a href="#lst-pinn-py-277" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Error subplot</span></span>
+<span id="lst-pinn-py-278"><a href="#lst-pinn-py-278" aria-hidden="true" tabindex="-1"></a>    ax_err.set_title(<span class="st">"Absolute Error Evolution"</span>)</span>
+<span id="lst-pinn-py-279"><a href="#lst-pinn-py-279" aria-hidden="true" tabindex="-1"></a>    ax_err.set_xlabel(<span class="st">"Position x"</span>)</span>
+<span id="lst-pinn-py-280"><a href="#lst-pinn-py-280" aria-hidden="true" tabindex="-1"></a>    ax_err.set_ylabel(<span class="st">"|u_exact - u_pred|"</span>)</span>
+<span id="lst-pinn-py-281"><a href="#lst-pinn-py-281" aria-hidden="true" tabindex="-1"></a>    ax_err.set_xlim(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="lst-pinn-py-282"><a href="#lst-pinn-py-282" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Automatically adjust y-limits based on error range</span></span>
+<span id="lst-pinn-py-283"><a href="#lst-pinn-py-283" aria-hidden="true" tabindex="-1"></a>    ax_err.set_ylim(<span class="dv">0</span>, U_err.<span class="bu">max</span>() <span class="op">*</span> <span class="fl">1.1</span>)</span>
+<span id="lst-pinn-py-284"><a href="#lst-pinn-py-284" aria-hidden="true" tabindex="-1"></a>    ax_err.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="lst-pinn-py-285"><a href="#lst-pinn-py-285" aria-hidden="true" tabindex="-1"></a>    ax_err.legend(loc<span class="op">=</span><span class="st">"upper right"</span>)</span>
+<span id="lst-pinn-py-286"><a href="#lst-pinn-py-286" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-287"><a href="#lst-pinn-py-287" aria-hidden="true" tabindex="-1"></a>    time_text <span class="op">=</span> fig.suptitle(<span class="st">""</span>, fontsize<span class="op">=</span><span class="dv">14</span>)</span>
+<span id="lst-pinn-py-288"><a href="#lst-pinn-py-288" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-289"><a href="#lst-pinn-py-289" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> init():</span>
+<span id="lst-pinn-py-290"><a href="#lst-pinn-py-290" aria-hidden="true" tabindex="-1"></a>        line_exact.set_data([], [])</span>
+<span id="lst-pinn-py-291"><a href="#lst-pinn-py-291" aria-hidden="true" tabindex="-1"></a>        line_pred.set_data([], [])</span>
+<span id="lst-pinn-py-292"><a href="#lst-pinn-py-292" aria-hidden="true" tabindex="-1"></a>        line_err.set_data([], [])</span>
+<span id="lst-pinn-py-293"><a href="#lst-pinn-py-293" aria-hidden="true" tabindex="-1"></a>        time_text.set_text(<span class="st">""</span>)</span>
+<span id="lst-pinn-py-294"><a href="#lst-pinn-py-294" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> line_exact, line_pred, line_err, time_text</span>
+<span id="lst-pinn-py-295"><a href="#lst-pinn-py-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-296"><a href="#lst-pinn-py-296" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> update(frame):</span>
+<span id="lst-pinn-py-297"><a href="#lst-pinn-py-297" aria-hidden="true" tabindex="-1"></a>        y_exact <span class="op">=</span> U_exact[frame, :]</span>
+<span id="lst-pinn-py-298"><a href="#lst-pinn-py-298" aria-hidden="true" tabindex="-1"></a>        y_pred <span class="op">=</span> U_pred[frame, :]</span>
+<span id="lst-pinn-py-299"><a href="#lst-pinn-py-299" aria-hidden="true" tabindex="-1"></a>        y_err <span class="op">=</span> U_err[frame, :]</span>
+<span id="lst-pinn-py-300"><a href="#lst-pinn-py-300" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-301"><a href="#lst-pinn-py-301" aria-hidden="true" tabindex="-1"></a>        line_exact.set_data(x_test, y_exact)</span>
+<span id="lst-pinn-py-302"><a href="#lst-pinn-py-302" aria-hidden="true" tabindex="-1"></a>        line_pred.set_data(x_test, y_pred)</span>
+<span id="lst-pinn-py-303"><a href="#lst-pinn-py-303" aria-hidden="true" tabindex="-1"></a>        line_err.set_data(x_test, y_err)</span>
+<span id="lst-pinn-py-304"><a href="#lst-pinn-py-304" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-305"><a href="#lst-pinn-py-305" aria-hidden="true" tabindex="-1"></a>        time_text.set_text(<span class="ss">f"Time evolution at t = </span><span class="sc">{</span>t_test[frame]<span class="sc">:.3f}</span><span class="ss">"</span>)</span>
+<span id="lst-pinn-py-306"><a href="#lst-pinn-py-306" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> line_exact, line_pred, line_err, time_text</span>
+<span id="lst-pinn-py-307"><a href="#lst-pinn-py-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-308"><a href="#lst-pinn-py-308" aria-hidden="true" tabindex="-1"></a>    anim <span class="op">=</span> FuncAnimation(</span>
+<span id="lst-pinn-py-309"><a href="#lst-pinn-py-309" aria-hidden="true" tabindex="-1"></a>        fig,</span>
+<span id="lst-pinn-py-310"><a href="#lst-pinn-py-310" aria-hidden="true" tabindex="-1"></a>        update,</span>
+<span id="lst-pinn-py-311"><a href="#lst-pinn-py-311" aria-hidden="true" tabindex="-1"></a>        frames<span class="op">=</span><span class="bu">len</span>(t_test),</span>
+<span id="lst-pinn-py-312"><a href="#lst-pinn-py-312" aria-hidden="true" tabindex="-1"></a>        init_func<span class="op">=</span>init,</span>
+<span id="lst-pinn-py-313"><a href="#lst-pinn-py-313" aria-hidden="true" tabindex="-1"></a>        blit<span class="op">=</span><span class="va">True</span>,</span>
+<span id="lst-pinn-py-314"><a href="#lst-pinn-py-314" aria-hidden="true" tabindex="-1"></a>        interval<span class="op">=</span><span class="dv">80</span>,</span>
+<span id="lst-pinn-py-315"><a href="#lst-pinn-py-315" aria-hidden="true" tabindex="-1"></a>        repeat<span class="op">=</span><span class="va">True</span>,</span>
+<span id="lst-pinn-py-316"><a href="#lst-pinn-py-316" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="lst-pinn-py-317"><a href="#lst-pinn-py-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-318"><a href="#lst-pinn-py-318" aria-hidden="true" tabindex="-1"></a>    anim.save(gif_path, writer<span class="op">=</span>PillowWriter(fps<span class="op">=</span><span class="dv">12</span>))</span>
+<span id="lst-pinn-py-319"><a href="#lst-pinn-py-319" aria-hidden="true" tabindex="-1"></a>    plt.close(fig)</span>
+<span id="lst-pinn-py-320"><a href="#lst-pinn-py-320" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Animated GIF saved to: </span><span class="sc">{</span>gif_path<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="lst-pinn-py-321"><a href="#lst-pinn-py-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-322"><a href="#lst-pinn-py-322" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-323"><a href="#lst-pinn-py-323" aria-hidden="true" tabindex="-1"></a><span class="co"># --- Main Execution ---</span></span>
+<span id="lst-pinn-py-324"><a href="#lst-pinn-py-324" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="lst-pinn-py-325"><a href="#lst-pinn-py-325" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Settings</span></span>
+<span id="lst-pinn-py-326"><a href="#lst-pinn-py-326" aria-hidden="true" tabindex="-1"></a>    N_IC_points <span class="op">=</span> <span class="dv">50</span></span>
+<span id="lst-pinn-py-327"><a href="#lst-pinn-py-327" aria-hidden="true" tabindex="-1"></a>    N_BC_points <span class="op">=</span> <span class="dv">4</span></span>
+<span id="lst-pinn-py-328"><a href="#lst-pinn-py-328" aria-hidden="true" tabindex="-1"></a>    N_PDE_points <span class="op">=</span> <span class="dv">5000</span></span>
+<span id="lst-pinn-py-329"><a href="#lst-pinn-py-329" aria-hidden="true" tabindex="-1"></a>    pinn_layers <span class="op">=</span> [<span class="dv">2</span>, <span class="dv">20</span>, <span class="dv">20</span>, <span class="dv">20</span>, <span class="dv">20</span>, <span class="dv">1</span>]</span>
+<span id="lst-pinn-py-330"><a href="#lst-pinn-py-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-331"><a href="#lst-pinn-py-331" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reproducibility</span></span>
+<span id="lst-pinn-py-332"><a href="#lst-pinn-py-332" aria-hidden="true" tabindex="-1"></a>    torch.manual_seed(<span class="dv">42</span>)</span>
+<span id="lst-pinn-py-333"><a href="#lst-pinn-py-333" aria-hidden="true" tabindex="-1"></a>    np.random.seed(<span class="dv">42</span>)</span>
+<span id="lst-pinn-py-334"><a href="#lst-pinn-py-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-335"><a href="#lst-pinn-py-335" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Generate Data</span></span>
+<span id="lst-pinn-py-336"><a href="#lst-pinn-py-336" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Generating data..."</span>)</span>
+<span id="lst-pinn-py-337"><a href="#lst-pinn-py-337" aria-hidden="true" tabindex="-1"></a>    X_ic, T_ic, U_ic, X_bc, T_bc, U_bc, X_pde, T_pde <span class="op">=</span> generate_data(</span>
+<span id="lst-pinn-py-338"><a href="#lst-pinn-py-338" aria-hidden="true" tabindex="-1"></a>        N_IC_points, N_BC_points, N_PDE_points</span>
+<span id="lst-pinn-py-339"><a href="#lst-pinn-py-339" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="lst-pinn-py-340"><a href="#lst-pinn-py-340" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-341"><a href="#lst-pinn-py-341" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Design Network</span></span>
+<span id="lst-pinn-py-342"><a href="#lst-pinn-py-342" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Designing network..."</span>)</span>
+<span id="lst-pinn-py-343"><a href="#lst-pinn-py-343" aria-hidden="true" tabindex="-1"></a>    pinn_model <span class="op">=</span> PINN(pinn_layers).to(device)</span>
+<span id="lst-pinn-py-344"><a href="#lst-pinn-py-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-345"><a href="#lst-pinn-py-345" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Train or Load</span></span>
+<span id="lst-pinn-py-346"><a href="#lst-pinn-py-346" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os.path.exists(MODEL_PATH):</span>
+<span id="lst-pinn-py-347"><a href="#lst-pinn-py-347" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f"Found existing model file: </span><span class="sc">{</span>MODEL_PATH<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="lst-pinn-py-348"><a href="#lst-pinn-py-348" aria-hidden="true" tabindex="-1"></a>        loss_history <span class="op">=</span> load_checkpoint(pinn_model, MODEL_PATH)</span>
+<span id="lst-pinn-py-349"><a href="#lst-pinn-py-349" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="lst-pinn-py-350"><a href="#lst-pinn-py-350" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"No existing model file found. Starting training..."</span>)</span>
+<span id="lst-pinn-py-351"><a href="#lst-pinn-py-351" aria-hidden="true" tabindex="-1"></a>        loss_history <span class="op">=</span> train(</span>
+<span id="lst-pinn-py-352"><a href="#lst-pinn-py-352" aria-hidden="true" tabindex="-1"></a>            pinn_model,</span>
+<span id="lst-pinn-py-353"><a href="#lst-pinn-py-353" aria-hidden="true" tabindex="-1"></a>            X_ic,</span>
+<span id="lst-pinn-py-354"><a href="#lst-pinn-py-354" aria-hidden="true" tabindex="-1"></a>            T_ic,</span>
+<span id="lst-pinn-py-355"><a href="#lst-pinn-py-355" aria-hidden="true" tabindex="-1"></a>            U_ic,</span>
+<span id="lst-pinn-py-356"><a href="#lst-pinn-py-356" aria-hidden="true" tabindex="-1"></a>            X_bc,</span>
+<span id="lst-pinn-py-357"><a href="#lst-pinn-py-357" aria-hidden="true" tabindex="-1"></a>            T_bc,</span>
+<span id="lst-pinn-py-358"><a href="#lst-pinn-py-358" aria-hidden="true" tabindex="-1"></a>            U_bc,</span>
+<span id="lst-pinn-py-359"><a href="#lst-pinn-py-359" aria-hidden="true" tabindex="-1"></a>            X_pde,</span>
+<span id="lst-pinn-py-360"><a href="#lst-pinn-py-360" aria-hidden="true" tabindex="-1"></a>            T_pde,</span>
+<span id="lst-pinn-py-361"><a href="#lst-pinn-py-361" aria-hidden="true" tabindex="-1"></a>            epochs<span class="op">=</span><span class="dv">500</span>,</span>
+<span id="lst-pinn-py-362"><a href="#lst-pinn-py-362" aria-hidden="true" tabindex="-1"></a>            lr<span class="op">=</span><span class="fl">1e-3</span>,</span>
+<span id="lst-pinn-py-363"><a href="#lst-pinn-py-363" aria-hidden="true" tabindex="-1"></a>            w_ic<span class="op">=</span><span class="fl">100.0</span>,</span>
+<span id="lst-pinn-py-364"><a href="#lst-pinn-py-364" aria-hidden="true" tabindex="-1"></a>            w_bc<span class="op">=</span><span class="fl">100.0</span>,</span>
+<span id="lst-pinn-py-365"><a href="#lst-pinn-py-365" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="lst-pinn-py-366"><a href="#lst-pinn-py-366" aria-hidden="true" tabindex="-1"></a>        save_checkpoint(pinn_model, loss_history, MODEL_PATH)</span>
+<span id="lst-pinn-py-367"><a href="#lst-pinn-py-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-368"><a href="#lst-pinn-py-368" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4. Evaluation</span></span>
+<span id="lst-pinn-py-369"><a href="#lst-pinn-py-369" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Evaluating..."</span>)</span>
+<span id="lst-pinn-py-370"><a href="#lst-pinn-py-370" aria-hidden="true" tabindex="-1"></a>    x_test, t_test, X_test, T_test, U_exact, U_pred, U_err <span class="op">=</span> predict_on_grid(</span>
+<span id="lst-pinn-py-371"><a href="#lst-pinn-py-371" aria-hidden="true" tabindex="-1"></a>        pinn_model, nx<span class="op">=</span><span class="dv">100</span>, nt<span class="op">=</span><span class="dv">100</span></span>
+<span id="lst-pinn-py-372"><a href="#lst-pinn-py-372" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="lst-pinn-py-373"><a href="#lst-pinn-py-373" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-374"><a href="#lst-pinn-py-374" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 5. Static plots: (a)</span></span>
+<span id="lst-pinn-py-375"><a href="#lst-pinn-py-375" aria-hidden="true" tabindex="-1"></a>    plot_heatmaps(X_test, T_test, U_exact, U_pred, U_err)</span>
+<span id="lst-pinn-py-376"><a href="#lst-pinn-py-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-377"><a href="#lst-pinn-py-377" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 6. Loss history: (b)</span></span>
+<span id="lst-pinn-py-378"><a href="#lst-pinn-py-378" aria-hidden="true" tabindex="-1"></a>    plot_loss_history(loss_history)</span>
+<span id="lst-pinn-py-379"><a href="#lst-pinn-py-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="lst-pinn-py-380"><a href="#lst-pinn-py-380" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 7. Animated GIF: (c)</span></span>
+<span id="lst-pinn-py-381"><a href="#lst-pinn-py-381" aria-hidden="true" tabindex="-1"></a>    save_animation_gif(x_test, t_test, U_exact, U_pred, U_err, GIF_PATH)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+
+
+</section>
+
+</main> <!-- /main -->
+<!-- Cloudflare Web Analytics --><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;d0b3c27b7e5c43938065722a5136416f&quot;}"></script><!-- End Cloudflare Web Analytics -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/marcobisky\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<script src="https://utteranc.es/client.js" repo="Marcobisky.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2025 Marcobisky.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
