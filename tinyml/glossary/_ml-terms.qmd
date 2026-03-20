@@ -35,9 +35,10 @@
 - **Post-training/Fine-tuning 后训练/微调**: 预训练模型只会续写不会回答问题, 在预训练模型的基础上, 用相对少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论->情感标签, 提问->回答).
     - **Full fine-tuning 全参数微调**: 更新模型的所有参数, 且每个参数的变化是**独立自由**的. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).
     - **Parameter-efficient fine-tuning (PEFT) 参数高效微调**: 主流, 可以选择更新模型某些模块的参数 (从代码来看, 可以在 `target_modules` 上设置 `"q_proj", "k_proj", "v_proj"`), 而且需要更新的参数的自由度会小很多 (比如 **LoRA** 由 rank 超参数决定).
-    - **Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)**: 用**指令-回答对数据集**微调 @tcheyan_2025_decentralized, 如 "翻译成中文: How are you?" -> "你好吗?", 让模型会回答而只是文本补全. 但是这样的数据集太小了, 因为让人写回答太慢了, 但是**让人判断哪种回答更好很简单**, 于是有了 RLHF:
+    - **Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)**: 用**指令-回答对数据集**微调 @tcheyan_2025_decentralized, 如 "翻译成中文: How are you?" -> "你好吗?", 让模型会回答而不只是文本补全. 但是这样的数据集太小了, 因为让人写回答太慢了, 但是**让人判断哪种回答更好很简单**, 于是有了 RLHF:
     - **Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习**: RLHF 让模型给出多个回答, 然后让**人类**打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward @tcheyan_2025_decentralized.
-        - **Reward Model**: 甚至不用人类来打分, 为了创造更大的 “数据集”, 可以用人类打过分的数据集训练一个会打分的模型 (Reward Model), 然后这个模型就能给新的指令-回答对打分了 (而不用人类了).
+        - **Reward Model (RM)**: 甚至不用人类来打分, 为了创造更大的 “数据集”, 可以用人类打过分的数据集训练一个会打分的模型 (Reward Model), 这个模型输入 (Prompt, Response), 输出一个 score (相当于一个人类打分者).
+            - **Comparison Data**: 不同的人会给不同的 (Prompt, Response) pair 打不同的分, 但是人类针对哪个回答**更好**一般是一致的 (OpenAI's labelers 的 inter-labeler agreement 为 73%), 这样数据集就变成了 (prompt, winning_response, losing_response).
     - **DPO (Direct Preference Optimization) 直接偏好优化**
 
 - **Alignment 对齐**: 不仅让模型会回答问题/生成满足 prompt 的图片, 还要让它的回答更好.
@@ -97,6 +98,18 @@
 
     ![Agent Framework.](agent-arch.png){#fig-agent-arch width=80%}
 
+### Diffusion 相关
+
+- **Schrödinger Bridge (SB) Problem**: 在所有把分布 $p_0$ 变成 $p_1$ 的随机过程中, 找到一个最接近 Brownian motion 的过程. 
+    - 对于所有的随机的东西, 都有一种方法将它变成确定的、能把握的东西, 这就是**取平均** (与这个思想有关的概念包括不限于: Probability Flow, Distribution, etc.)
+    - 随机过程有一种理解方法是剔除时间这个变量, 这样随机过程就退化为了随机变量, 可测空间是所有路径的空间 (Sample path space), **路径分布** 就是在路径空间上的测度. 注意这里路径空间是很大的, 而且是连续的, 所以「一条」路径没有概率, 只有概率密度.
+    - SB 问题可以 (不严格地) 表述为: 已知 Brownian motion 的路径分布 $R$, 求另一个路径分布 $P$, s.t. $P$ 的边缘分布分别是 $p_0$ 和 $p_1$, 同时 $\text{KL}(P \| R)$ 最小. 
+    - 当 $p_0$ 为 Gaussian distribution, $p_1$ 为图片的分布时, SB 问题的解就是一个 diffusion model.
+
+- **Wasserstein Distance (WD)**: 也叫 Earth Mover's Distance, 衡量了两个分布之间的距离, 直观理解是把一个分布的「土」搬到另一个分布需要的最小「工作量」.
+    - 看 [this video](https://www.youtube.com/watch?v=CDiol4LG2Ao) 即可理解.
+    - WD 可以看成对 $\lVert \cdot \rVert_\infty$ 的优化.
+    - WD 和 $\lVert \cdot \rVert_\infty$ 都是 distance. 但 KL divergence 不是 distance (不满足对称性和三角不等式).
 
 ### Computing in ML
 
@@ -252,18 +265,27 @@
 
 ### Benchmarks in ML
 
-- **AUC (Area Under Curve)**: 二分类模型的性能评估指标, 越大越好.
+- **ROC (Receiver-operating characteristic curve)**: 二分类最后都会有一个 hard threshold, 改变这个 threshold 就会得到不同的 FPR/TPR (见 @fig-pre-recall), 以 FPR 为横轴, TPR 为纵轴画出的曲线就是 ROC curve.
+
+- **AUC (Area Under Curve)**: 二分类模型的性能评估指标, ROC curve 下的面积, 越大越好.
+    - AUC = 0.5 代表随机猜测, AUC = 1 代表完美分类器.
 
 - **F-score**: 二分类 (正类、负类) 模型的性能评估指标.
     - **TP (True Positive)**: 正类被正确分类为正类.
-    - **FP (False Positive)**: 负类被错误分类为正类.
-    - **FN (False Negative)**: 正类被错误分类为负类.
+    - **FP (False Positive)**: 负类被错误分类为正类. (也叫 Type I error)
+    - **FN (False Negative)**: 正类被错误分类为负类. (也叫 Type II error)
     - **Recall 召回率**: $TP/TP+FP$
     - **Precision 精确率**: $TP/TP+FN$
     - **F1-score**: Recall 和 Precision 的调和平均 (F-$\beta$ score 的特例)
     - **F-$\beta$ score**: 仅仅是给 recall 加了权重.
 
-        ![](F-score.png)
+        
+::: {.column-margin}
+![应用场景](F-score.png){#fig-f-score}
+
+![Precision (FPR, False Positive Rate) 和 Recall (TPR, True Positive Rate)](pre-recall.png){#fig-pre-recall}
+:::
+
 
 - **A/B Test**: 类似双盲实验, 比如研究修改按钮颜色能否提升点击率? 新模型是否真的比旧模型好? 可以用这种方法进行对比实验.
 
