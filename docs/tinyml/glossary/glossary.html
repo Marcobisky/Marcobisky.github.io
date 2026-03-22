@@ -514,14 +514,8 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../nn-essence/nn-essence.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">The Essence of NN 神经网络的本质</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../nn-arch/nn-arch.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">NN Architectures 常见网络架构</span></span></a>
+  <a href="../ml/ml.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Hodge Podge of ML</span></span></a>
   </div>
 </li>
       </ul>
@@ -538,13 +532,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../coral-npu/coral-npu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../ml-infra/ml-infra.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">ML Infra 基础</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Google Coral NPU</span></span></a>
   </div>
 </li>
       </ul>
@@ -561,7 +549,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../cfu-proj-struct/cfu-proj-struct.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">CFU-Playground 工程结构</span></span></a>
   </div>
 </li>
       </ul>
@@ -599,9 +587,11 @@ window.Quarto = {
   <li><a href="#ml-terms" id="toc-ml-terms" class="nav-link" data-scroll-target="#ml-terms">ML Terms</a>
   <ul class="collapse">
   <li><a href="#general-terms-1" id="toc-general-terms-1" class="nav-link" data-scroll-target="#general-terms-1">General Terms</a></li>
+  <li><a href="#rl-相关" id="toc-rl-相关" class="nav-link" data-scroll-target="#rl-相关">RL 相关</a></li>
   <li><a href="#sec-cv-terms" id="toc-sec-cv-terms" class="nav-link" data-scroll-target="#sec-cv-terms">CV 计算机视觉相关</a></li>
   <li><a href="#transformer-相关" id="toc-transformer-相关" class="nav-link" data-scroll-target="#transformer-相关">Transformer 相关</a></li>
   <li><a href="#agent-相关" id="toc-agent-相关" class="nav-link" data-scroll-target="#agent-相关">Agent 相关</a></li>
+  <li><a href="#diffusion-相关" id="toc-diffusion-相关" class="nav-link" data-scroll-target="#diffusion-相关">Diffusion 相关</a></li>
   <li><a href="#computing-in-ml" id="toc-computing-in-ml" class="nav-link" data-scroll-target="#computing-in-ml">Computing in ML</a></li>
   <li><a href="#optimizer-in-ml" id="toc-optimizer-in-ml" class="nav-link" data-scroll-target="#optimizer-in-ml">Optimizer in ML</a></li>
   <li><a href="#ml-frameworks" id="toc-ml-frameworks" class="nav-link" data-scroll-target="#ml-frameworks">ML Frameworks</a></li>
@@ -1183,13 +1173,23 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <li><strong>Masked Language Modeling (MLM)</strong>: 随机挖空, 然后预测挖空的词语.</li>
 <li><strong>Next Sentence Prediction (NSP)</strong>: 以句子为单位的 MLM.</li>
 </ul></li>
-<li><p><strong>Post-training/Fine-tuning 后训练/微调</strong>: 在预训练模型的基础上, 用少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论-&gt;情感标签, 提问-&gt;回答 (而不是续写提问)).</p>
+<li><p><strong>Post-training/Fine-tuning 后训练/微调</strong>: 预训练模型只会续写不会回答问题, 在预训练模型的基础上, 用相对少量标注数据对模型进行训练, 以适应特定任务 (比如电影评论-&gt;情感标签, 提问-&gt;回答).</p>
 <ul>
 <li><strong>Full fine-tuning 全参数微调</strong>: 更新模型的所有参数, 且每个参数的变化是<strong>独立自由</strong>的. 性能好, 但成本极高 (700 亿参数的 LLM 需要 1TB 显存).</li>
 <li><strong>Parameter-efficient fine-tuning (PEFT) 参数高效微调</strong>: 主流, 可以选择更新模型某些模块的参数 (从代码来看, 可以在 <code>target_modules</code> 上设置 <code>"q_proj", "k_proj", "v_proj"</code>), 而且需要更新的参数的自由度会小很多 (比如 <strong>LoRA</strong> 由 rank 超参数决定).</li>
-<li><strong>Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)</strong>: 用<strong>指令-回答对</strong>微调 <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[16]</a></span>, 如 “翻译成中文: How are you?” -&gt; “你好吗?”, 让模型会回答而只是文本补全.</li>
-<li><strong>Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习</strong>: SFT 微调后的模型不是最有帮助的/有害的/不符合价值观的, RLHF 不是喂给模型更多数据, 而是让模型给出多个回答, 然后让<strong>人类</strong>打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[16]</a></span>.</li>
+<li><strong>Instruction tuning/Supervised fine-tuning 指令微调/有监督微调 (SFT)</strong>: 用<strong>指令-回答对数据集</strong>微调 <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[16]</a></span>, 如 “翻译成中文: How are you?” -&gt; “你好吗?”, 让模型会回答而不只是文本补全. 但是这样的数据集太小了, 因为让人写回答太慢了, 但是<strong>让人判断哪种回答更好很简单</strong>, 于是有了 RLHF:</li>
+<li><strong>Alignment tuning/Reinforcement Learning with Human Feedback (RLHF) 对齐微调/基于人类反馈的强化学习</strong>: RLHF 让模型给出多个回答, 然后让<strong>人类</strong>打分 (Reward), 用强化学习 (如 PPO) 进行微调来最大化这个 Reward <span class="citation" data-cites="tcheyan_2025_decentralized"><a href="#ref-tcheyan_2025_decentralized" role="doc-biblioref">[16]</a></span>.
+<ul>
+<li><strong>Reward Model (RM)</strong>: 甚至不用人类来打分, 为了创造更大的 “数据集”, 可以用人类打过分的数据集训练一个会打分的模型 (Reward Model), 这个模型输入 (Prompt, Response), 输出一个 score (相当于一个人类打分者).
+<ul>
+<li><strong>Comparison Data</strong>: 不同的人会给不同的 (Prompt, Response) pair 打不同的分, 但是人类针对哪个回答<strong>更好</strong>一般是一致的 (OpenAI’s labelers 的 inter-labeler agreement 为 73%), 这样数据集就变成了 (prompt, winning_response, losing_response).</li>
+</ul></li>
+</ul></li>
 <li><strong>DPO (Direct Preference Optimization) 直接偏好优化</strong></li>
+</ul></li>
+<li><p><strong>Alignment 对齐</strong>: 不仅让模型会回答问题/生成满足 prompt 的图片, 还要让它的回答更好.</p>
+<ul>
+<li>但是和 Post-training 有交叉, 不是完全功能独立的.</li>
 </ul></li>
 <li><p><strong>VLA (Vision Language Action)</strong>: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.</p></li>
 <li><p><strong>VLM (Vision Language Model)</strong>: 视觉语言模型, 可处理图片和自然语言两种模态进行理解和生成任务的模型.</p></li>
@@ -1197,6 +1197,21 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <li><p><strong>AIGC (AI-Generated Content)</strong>: 生成式 AI.</p></li>
 <li><p><strong>PINN (Physics-Informed Neural Networks)</strong>: 比如用神经网络来预测 Navier-Stokes 方程的解, 神经网络的输入为 <span class="math inline">\((x,y,z,t)\)</span>, 输出为 <span class="math inline">\((u,v,w,p)\)</span> (三个方向的速度和压强), 然后基于这些数据可以得到一些偏导数的信息, loss 函数由两个方面构成: 少量的数据点、以及 Navier-Stokes 方程本身的约束条件.</p></li>
 <li><p><strong>End-to-end model 端到端模型</strong>: 不拆解问题而是直接用一个步骤来解决. 比如同声传译, 标准化流程需要设计 3 个网络 (ZNspeech -&gt; Chinese -&gt; English -&gt; ENspeech); 而端到端模型直接是 ZNspeech -&gt; ENspeech.</p></li>
+<li><p><strong>Prompt Engineering 提示词工程</strong>: 通过<strong>设计一个模版</strong>告诉模型额外的信息.</p>
+<ul>
+<li>为什么要设计模版呢? 比如训练 CLIP 模型需要图片-文本对, 如果发现某个文本模版少了一些信息, 就需要补上, 怎么补上呢? 比如是一张遥控器 (remote) 的图片, 直接把 “remote” 加到原始文本的后面? 肯定不行, 这样句子都不完整, 而且模型可能会觉得 “remote” 是 “遥远的” 意思, 这时候就需要用 “A photo of a remote” 这样的<strong>模版</strong>来补全这个文本, 这就是 prompt engineering.</li>
+</ul></li>
+<li><p><strong>Embedding space and Latent space 嵌入空间和潜空间</strong>: 一样的意思, 表示将 token 或高维的数据映射到一个新的低维空间 (这个过程叫 embedding / encoding / dimensionality reduction / feature extraction / manifold learning / feature representation, etc. 真会起名字, 无语了), 空间中的元素叫做 embedding vector.</p>
+<ul>
+<li>如果真要说有区别的话, <strong>latent space 更 intrinsic 一点</strong>, 毕竟 embedding 感觉可以潜入欧式空间一点.</li>
+</ul></li>
+<li><p><strong>World Models 世界模型</strong></p></li>
+</ul>
+</section>
+<section id="rl-相关" class="level3">
+<h3 class="anchored" data-anchor-id="rl-相关">RL 相关</h3>
+<ul>
+<li><strong>Reinforcement Learning (RL) 强化学习</strong>:</li>
 </ul>
 </section>
 <section id="sec-cv-terms" class="level3">
@@ -1260,6 +1275,24 @@ Figure&nbsp;15: Agent Framework.
 </figcaption>
 </figure>
 </div></li>
+</ul>
+</section>
+<section id="diffusion-相关" class="level3">
+<h3 class="anchored" data-anchor-id="diffusion-相关">Diffusion 相关</h3>
+<ul>
+<li><strong>Schrödinger Bridge (SB) Problem</strong>: 在所有把分布 <span class="math inline">\(p_0\)</span> 变成 <span class="math inline">\(p_1\)</span> 的随机过程中, 找到一个最接近 Brownian motion 的过程.
+<ul>
+<li>对于所有的随机的东西, 都有一种方法将它变成确定的、能把握的东西, 这就是<strong>取平均</strong> (与这个思想有关的概念包括不限于: Probability Flow, Distribution, etc.)</li>
+<li>随机过程有一种理解方法是剔除时间这个变量, 这样随机过程就退化为了随机变量, 可测空间是所有路径的空间 (Sample path space), <strong>路径分布</strong> 就是在路径空间上的测度. 注意这里路径空间是很大的, 而且是连续的, 所以「一条」路径没有概率, 只有概率密度.</li>
+<li>SB 问题可以 (不严格地) 表述为: 已知 Brownian motion 的路径分布 <span class="math inline">\(R\)</span>, 求另一个路径分布 <span class="math inline">\(P\)</span>, s.t. <span class="math inline">\(P\)</span> 的边缘分布分别是 <span class="math inline">\(p_0\)</span> 和 <span class="math inline">\(p_1\)</span>, 同时 <span class="math inline">\(\text{KL}(P \| R)\)</span> 最小.</li>
+<li>当 <span class="math inline">\(p_0\)</span> 为 Gaussian distribution, <span class="math inline">\(p_1\)</span> 为图片的分布时, SB 问题的解就是一个 diffusion model.</li>
+</ul></li>
+<li><strong>Wasserstein Distance (WD)</strong>: 也叫 Earth Mover’s Distance, 衡量了两个分布之间的距离, 直观理解是把一个分布的「土」搬到另一个分布需要的最小「工作量」.
+<ul>
+<li>看 <a href="https://www.youtube.com/watch?v=CDiol4LG2Ao">this video</a> 即可理解.</li>
+<li>WD 可以看成对 <span class="math inline">\(\lVert \cdot \rVert_\infty\)</span> 的优化.</li>
+<li>WD 和 <span class="math inline">\(\lVert \cdot \rVert_\infty\)</span> 都是 distance. 但 KL divergence 不是 distance (不满足对称性和三角不等式).</li>
+</ul></li>
 </ul>
 </section>
 <section id="computing-in-ml" class="level3">
@@ -1374,7 +1407,9 @@ Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 </ul></li>
 <li><strong>Batch</strong>: 每次用多少样本进行一次参数更新.
 <ul>
-<li><em>Abuse of Terms:</em> 有时候卷积核的个数也称为 batch (这是因为 image batch 和 kernel 在内存中的布局方法可以一样, 但真是离大谱!)</li>
+<li><p>Batch 其实就是数据集的一种<strong>分割</strong> (如果数据集小的话就不分割了, 直接用整个数据集). 分割的意思就是每个 batch 中的东西不会重复: <code>python       data = [1,2,3,4,5]       loader = DataLoader(data, batch_size=2, shuffle=True)       # loader = [[3,4], [2,5], [1]]</code></p></li>
+<li><p><em>Abuse of Terms:</em> 有时候卷积核的个数也称为 batch (这是因为 image batch 和 kernel 在内存中的布局方法可以一样, 但真是离大谱!)</p></li>
+<li><p><strong>注意区分 batch 和 epoch</strong>: 一个 epoch 是指整个训练集的每一条都用过了, 10000 个 epoch 就是每条相同的数据都用了 10000 次. 一个 epoch 内部可能会分很多个 batch (也可以只有一个 batch, 即整个数据集都喂进去, 即 BGD).</p></li>
 </ul></li>
 </ul></li>
 </ul>
@@ -1482,21 +1517,48 @@ Figure&nbsp;20
 </ul></li>
 </ul>
 </section>
-<section id="benchmarks-in-ml" class="level3">
+<section id="benchmarks-in-ml" class="level3 page-columns page-full">
 <h3 class="anchored" data-anchor-id="benchmarks-in-ml">Benchmarks in ML</h3>
 <ul>
-<li><p><strong>AUC (Area Under Curve)</strong>: 二分类模型的性能评估指标, 越大越好.</p></li>
+<li><p><strong>ROC (Receiver-operating characteristic curve)</strong>: 二分类最后都会有一个 hard threshold, 改变这个 threshold 就会得到不同的 FPR/TPR (见 <a href="#fig-pre-recall" class="quarto-xref">Figure&nbsp;<span class="quarto-unresolved-ref">fig-pre-recall</span></a>), 以 FPR 为横轴, TPR 为纵轴画出的曲线就是 ROC curve.</p></li>
+<li><p><strong>AUC (Area Under Curve)</strong>: 二分类模型的性能评估指标, ROC curve 下的面积, 越大越好.</p>
+<ul>
+<li>AUC = 0.5 代表随机猜测, AUC = 1 代表完美分类器.</li>
+</ul></li>
 <li><p><strong>F-score</strong>: 二分类 (正类、负类) 模型的性能评估指标.</p>
 <ul>
-<li><p><strong>TP (True Positive)</strong>: 正类被正确分类为正类.</p></li>
-<li><p><strong>FP (False Positive)</strong>: 负类被错误分类为正类.</p></li>
-<li><p><strong>FN (False Negative)</strong>: 正类被错误分类为负类.</p></li>
-<li><p><strong>Recall 召回率</strong>: <span class="math inline">\(TP/TP+FP\)</span></p></li>
-<li><p><strong>Precision 精确率</strong>: <span class="math inline">\(TP/TP+FN\)</span></p></li>
-<li><p><strong>F1-score</strong>: Recall 和 Precision 的调和平均 (F-<span class="math inline">\(\beta\)</span> score 的特例)</p></li>
-<li><p><strong>F-<span class="math inline">\(\beta\)</span> score</strong>: 仅仅是给 recall 加了权重.</p>
-<p><img src="F-score.png" class="img-fluid"></p></li>
+<li><strong>TP (True Positive)</strong>: 正类被正确分类为正类.</li>
+<li><strong>FP (False Positive)</strong>: 负类被错误分类为正类. (也叫 Type I error)</li>
+<li><strong>FN (False Negative)</strong>: 正类被错误分类为负类. (也叫 Type II error)</li>
+<li><strong>Recall 召回率</strong>: <span class="math inline">\(TP/TP+FP\)</span></li>
+<li><strong>Precision 精确率</strong>: <span class="math inline">\(TP/TP+FN\)</span></li>
+<li><strong>F1-score</strong>: Recall 和 Precision 的调和平均 (F-<span class="math inline">\(\beta\)</span> score 的特例)</li>
+<li><strong>F-<span class="math inline">\(\beta\)</span> score</strong>: 仅仅是给 recall 加了权重.</li>
 </ul></li>
+</ul>
+
+<div class="no-row-height column-margin column-container"><div class="">
+<div id="fig-f-score" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-f-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="F-score.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-f-score-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;21: 应用场景
+</figcaption>
+</figure>
+</div>
+<div id="fig-pre-recall" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pre-recall-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="pre-recall.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pre-recall-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;22: Precision (FPR, False Positive Rate) 和 Recall (TPR, True Positive Rate)
+</figcaption>
+</figure>
+</div>
+</div></div><ul>
 <li><p><strong>A/B Test</strong>: 类似双盲实验, 比如研究修改按钮颜色能否提升点击率? 新模型是否真的比旧模型好? 可以用这种方法进行对比实验.</p></li>
 <li><p><strong>QE (Quantization Error) 量化误差</strong></p>
 <ul>
@@ -1533,7 +1595,7 @@ Figure&nbsp;20
 <img src="colored-cat.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-colored-cat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;21: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “金刚鹦鹉”, 而 ViT 分类为 “埃及猫” <span class="citation" data-cites="juliaturc_2025_why"><a href="#ref-juliaturc_2025_why" role="doc-biblioref">[27]</a></span>.
+Figure&nbsp;23: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “金刚鹦鹉”, 而 ViT 分类为 “埃及猫” <span class="citation" data-cites="juliaturc_2025_why"><a href="#ref-juliaturc_2025_why" role="doc-biblioref">[27]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -1546,7 +1608,7 @@ Figure&nbsp;21: Inductive Bias Demo. 一张彩色猫, ResNet 将其分类为 “
 <img src="cnn-fcnn.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cnn-fcnn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;22: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline">\(64\)</span> 个参数减小到了 <span class="math inline">\(4\)</span> 个参数).
+Figure&nbsp;24: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline">\(64\)</span> 个参数减小到了 <span class="math inline">\(4\)</span> 个参数).
 </figcaption>
 </figure>
 </div>
@@ -1558,7 +1620,7 @@ Figure&nbsp;22: CNN 是有归纳偏见的 FCNN (原本 <span class="math inline"
 <img src="different-ib.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-different-ib-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;23: 不同的 Inductive Bias 带来完全不同的拟合效果 <span class="citation" data-cites="gerstnerlab_2023_rl36"><a href="#ref-gerstnerlab_2023_rl36" role="doc-biblioref">[28]</a></span>.
+Figure&nbsp;25: 不同的 Inductive Bias 带来完全不同的拟合效果 <span class="citation" data-cites="gerstnerlab_2023_rl36"><a href="#ref-gerstnerlab_2023_rl36" role="doc-biblioref">[28]</a></span>.
 </figcaption>
 </figure>
 </div>
@@ -1604,7 +1666,7 @@ Figure&nbsp;23: 不同的 Inductive Bias 带来完全不同的拟合效果 <span
 <img src="amd-gpu-2015.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-amd-gpu-2015-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
+Figure&nbsp;26: AMD GPU 2015 采用 2.5D 封装.
 </figcaption>
 </figure>
 </div>
@@ -1796,7 +1858,7 @@ Figure&nbsp;24: AMD GPU 2015 采用 2.5D 封装.
 <img src="ffsp.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ffsp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;25: FFSP
+Figure&nbsp;27: FFSP
 </figcaption>
 </figure>
 </div></li>

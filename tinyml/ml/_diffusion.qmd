@@ -87,15 +87,16 @@
 ### Bellman Equation
 
 
-| MDP | HJB | Lagrangian / Hamiltonian Mechanics | VGG-Flow |
+| MDP (马尔可夫决策过程) | HJB (哈密顿-雅可比-贝尔曼方程) | 拉格朗日/哈密顿力学 | VGG-Flow |
 |-----|-----|-----|-----|
-| State $$s(t)$$ | State $$x(t)$$ | State $$q(t)$$ | Picture $$x(t)$$ |
+| State $$s(t)$$ | State $$x(t)$$ | State $$q(t)$$ | Image $$x(t)$$ |
 | Policy (Probabilistic) $$\pi(a\|s)$$ | Control (Deterministic) $$u(x,t)$$ | Velocity $$\dot{q}(q,t)$$ | Residual Field $$\tilde{v}_\theta(x,t)$$ |
-| Environment (Stationary) $$\begin{cases} p: (s,a) &\mapsto s' \\ r: (s,a) &\mapsto \text{Reward}\end{cases}$$ | Dynamics (Time-varying) $$\begin{cases} f: (x,u,t) &\mapsto \dot{x} \\ L: (x,u,t) &\mapsto \text{Loss} \end{cases}$$ | Dynamics (Time-varying) $$\begin{cases} f: (q, \_, t) &\mapsto \dot{q} \\ \mathcal{L}: (q, \dot{q}, t) &\mapsto \text{Lagrangian} \end{cases}$$ | Dynamics (Time-varying) $$\begin{cases} v_\theta: (x, \_, t) &\mapsto \dot{x} \\ L: (x, \tilde{v}_\theta, t) &\mapsto \text{Loss} \end{cases}$$ |
+| Environment (Stationary) $$\begin{cases} p: (s,a) &\mapsto s' \\ r: (s,a) &\mapsto \text{Reward}\end{cases}$$ | Dynamics (Time-varying) $$\begin{cases} f: (x,u,t) &\mapsto \dot{x} \\ L: (x,u,t) &\mapsto \text{Loss} \end{cases}$$ | Dynamics (Time-varying) $$\begin{cases} f: (q, \_, t) &\mapsto \dot{q} \\ \mathcal{L}: (q, \dot{q}, t) &\mapsto \text{Lagrangian} \end{cases}$$ | Dynamics (Time-varying) $$\begin{cases} v_\theta: (x, \tilde{v}_\theta, t) &\mapsto \dot{x} \\ L: (x, \tilde{v}_\theta, t) &\mapsto \text{Loss} \end{cases}$$ |
 | State Value (Given $\pi$) $$V(s) = \mathbb{E}(\underbrace{\Sigma r}_{\mathclap{\scriptsize \text{discounted reward}}})$$ | Value (Given $u$) $$V(x,t) = \int_t^T L \mathrm{d}\tau + \underbrace{\Phi(x(T))}_{\mathclap{\scriptsize \text{terminal loss}}}$$ | Action (Given $\dot{q}$) $$S(q,t) = \int_t^T \mathcal{L} \mathrm{d}\tau$$ | Value (Given $\tilde{v}_\theta$) $$V(x,t) = \int_t^1 L \mathrm{d}\tau - \underbrace{r(x(1))}_{\mathclap{\scriptsize \text{terminal reward}}}$$ |
 | State-action Quality $$q(s,a)$$ | Quality Density $$H(x,\nabla V,t) = L + \langle \nabla V, \dot{x} \rangle$$ | Hamiltonian $$\mathcal{H}(q, \nabla S, t) = \mathcal{L} + \langle \underbrace{\nabla S}_{\mathclap{\scriptsize \text{momenta } p}} \cdot \dot{q} \rangle$$ | Quality Density $$H(x, \nabla V, t) = L + \langle \nabla V, \dot{x} \rangle$$ |
 | Bellman Equation (Given $\pi$) $$\begin{cases} V &= \langle q_i \rangle \\ q_i &= \langle r_j + \gamma V_k \rangle \end{cases}$$ | HJB Equation (Given $u$) $$-\frac{\partial V}{\partial t} = L + \langle \nabla V, \dot{x} \rangle \quad (= H)$$ | HJ Equation (Given $\dot{q}$) $$-\frac{\partial S}{\partial t} = \mathcal{H}$$ | HJB Equation (Given $\tilde{v}_\theta$) $$-\frac{\partial V}{\partial t} = L + \langle \nabla V, \dot{x} \rangle \quad (= H)$$ |
 | Optimal Bellman (For deterministic $\pi^*$) $$\begin{cases} V^* &= \max_i q_i \equiv q^* \\ q^* &= \langle r_j + \gamma V'^* \rangle \end{cases}$$ | Optimal HJB $$-\frac{\partial V^*}{\partial t} = \min_u \left\{ L + \langle \nabla V^*, \dot{x} \rangle \right\}$$ | - | Optimal HJB $$-\frac{\partial V^*}{\partial t} = \min_{\tilde{v}_\theta} \left\{ L + \langle \nabla V^*, \dot{x} \rangle \right\}$$ |
+
 
 - 一些解释:
     - Quality 和 Value 是一模一样的, 除了 Value 是严格按照 policy $\pi$, 而 Quality 虽然也给定了 $\pi$, 但第一步可以选择任何一个 action (不一定是 $\pi$ 里选择概率最大的那个), 后面都按 $\pi$ 来走的期望 reward 是多少.
@@ -122,21 +123,6 @@
         - $S$ 不是随时间变化的, 是固定的!
 
 - 如何训练呢?
-
-### Flow Matching
-
-- **Network**: 输入图片和时间, 输出速度, $(\mathbf{x}, t) \mapsto \mathbf{v}$.
-    - 相当于找一个时变向量场 (non-stationary vector field).
-    - 一般规定 $t \in [0,1]$.
-
-- **一条训练数据的构建**: 在正态分布和 $p_{\text{data}}$ 中分别随机选一个点构成 $(\mathbf{x}_0, \mathbf{x}_1)$ pair, 它们连线上的任意一点 $\mathbf{x}_t$ 都可以构建一条训练数据 $(\mathbf{x}_t, t, \mathbf{v}_t)$.
-    - $\mathbf{v}_t$ 的方向就是简单粗暴地从 $\mathbf{x}_0$ 指向 $\mathbf{x}_1$.
-
-        ![用直线移动训练模型 @hawley2025flowwithwhat.](fm-train.png){#fig-fm-train width=70%}
-    
-    - 训练后的向量场不会使得轨迹是直线而是曲线!
-
-        ![要区分 Training trajectory 和 Actual Path @hawley2025flowwithwhat.](fm-train-vs-actual.png){#fig-fm-train-vs-actual width=80%}
 
 
 ### DDPM

@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.7.32">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Marcobisky">
+<meta name="dcterms.date" content="2026-03-22">
+<meta name="description" content="可视化 Flow Matching (FM) 的预训练、微调和对齐的过程, 以及背后的 Control Theory 和 RL 的思想.">
+
+<title>Visualization of Conditional Flow Matching and Human Preference Alignment Using RL and Control Theory – Marcobisky</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dark-2fef5ea3f8957b3e4ecc936fc74692ca.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-5bc7f946787c109e621af665ddda306b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-dark-611d27bfacf889a592cb25f4080bab07.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="../../site_libs/bootstrap/bootstrap-5bc7f946787c109e621af665ddda306b.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="../../styles.css">
+<meta property="og:title" content="Visualization of Conditional Flow Matching and Human Preference Alignment Using RL and Control Theory – Marcobisky">
+<meta property="og:description" content="可视化 Flow Matching (FM) 的预训练、微调和对齐的过程, 以及背后的 Control Theory 和 RL 的思想.">
+<meta property="og:image" content="https://marcobisky.github.io/posts/vgg/vtheta-no-distill.png">
+<meta property="og:site_name" content="Marcobisky">
+<meta property="og:locale" content="en_US">
+<meta property="og:image:height" content="1373">
+<meta property="og:image:width" content="1872">
+<meta name="twitter:title" content="Visualization of Conditional Flow Matching and Human Preference Alignment Using RL and Control Theory – Marcobisky">
+<meta name="twitter:description" content="可视化 Flow Matching (FM) 的预训练、微调和对齐的过程, 以及背后的 Control Theory 和 RL 的思想.">
+<meta name="twitter:image" content="https://marcobisky.github.io/posts/vgg/vtheta-no-distill.png">
+<meta name="twitter:creator" content="@Marcobisky77">
+<meta name="twitter:image-height" content="1373">
+<meta name="twitter:image-width" content="1872">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+
+<body class="nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const queryPrefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+    const darkModeDefault = queryPrefersDark.matches;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    queryPrefersDark.addEventListener("change", e => {
+      if(window.localStorage.getItem("quarto-color-scheme") !== null)
+        return;
+      const alternate = e.matches
+      toggleColorMode(alternate);
+      localAlternateSentinel = e.matches ? 'alternate' : 'default'; // this is used alongside local storage!
+      toggleGiscusIfUsed(alternate, darkModeDefault);
+    });
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Marcobisky</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../cv"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../tinyml/index.html"> 
+<span class="menu-text">TinyML</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="../../blog.xml"> <i class="bi bi-rss" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active" data-toc-expanded="99">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#intro" id="toc-intro" class="nav-link active" data-scroll-target="#intro"><span class="header-section-number">1</span> Intro</a></li>
+  <li><a href="#pretrain" id="toc-pretrain" class="nav-link" data-scroll-target="#pretrain"><span class="header-section-number">2</span> Pretrain</a>
+  <ul class="collapse">
+  <li><a href="#pretrain-process" id="toc-pretrain-process" class="nav-link" data-scroll-target="#pretrain-process"><span class="header-section-number">2.1</span> Pretrain Process</a></li>
+  <li><a href="#pretrain-result" id="toc-pretrain-result" class="nav-link" data-scroll-target="#pretrain-result"><span class="header-section-number">2.2</span> Pretrain Result</a></li>
+  </ul></li>
+  <li><a href="#finetuning-ft" id="toc-finetuning-ft" class="nav-link" data-scroll-target="#finetuning-ft"><span class="header-section-number">3</span> Finetuning (FT)</a>
+  <ul class="collapse">
+  <li><a href="#ft-result" id="toc-ft-result" class="nav-link" data-scroll-target="#ft-result"><span class="header-section-number">3.1</span> FT Result</a></li>
+  <li><a href="#dropout-对-sampling-的影响" id="toc-dropout-对-sampling-的影响" class="nav-link" data-scroll-target="#dropout-对-sampling-的影响"><span class="header-section-number">3.2</span> Dropout 对 Sampling 的影响</a></li>
+  </ul></li>
+  <li><a href="#alignment" id="toc-alignment" class="nav-link" data-scroll-target="#alignment"><span class="header-section-number">4</span> Alignment</a>
+  <ul class="collapse">
+  <li><a href="#naïve-pinn-design" id="toc-naïve-pinn-design" class="nav-link" data-scroll-target="#naïve-pinn-design"><span class="header-section-number">4.1</span> Naïve PINN Design</a></li>
+  <li><a href="#final-pinn-dual-head-autograd-free-random-fourier-features" id="toc-final-pinn-dual-head-autograd-free-random-fourier-features" class="nav-link" data-scroll-target="#final-pinn-dual-head-autograd-free-random-fourier-features"><span class="header-section-number">4.2</span> Final PINN: Dual-head, Autograd-free, Random Fourier Features</a></li>
+  <li><a href="#alignment-result" id="toc-alignment-result" class="nav-link" data-scroll-target="#alignment-result"><span class="header-section-number">4.3</span> Alignment Result</a></li>
+  </ul></li>
+  <li><a href="#conclusion-and-future-work" id="toc-conclusion-and-future-work" class="nav-link" data-scroll-target="#conclusion-and-future-work"><span class="header-section-number">5</span> Conclusion and Future Work</a></li>
+  
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content page-columns page-full column-page-left" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Visualization of Conditional Flow Matching and Human Preference Alignment Using RL and Control Theory</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">machine-learning</div>
+    <div class="quarto-category">CN-blogs</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    可视化 Flow Matching (FM) 的预训练、微调和对齐的过程, 以及背后的 Control Theory 和 RL 的思想.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta column-page-left">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Marcobisky </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 22, 2026</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<blockquote class="blockquote">
+<p>本文代码: <a href="https://github.com/Marcobisky/smallflowmatching">GitHub - smallflowmatching</a>.</p>
+</blockquote>
+<section id="intro" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="intro"><span class="header-section-number">1</span> Intro</h2>
+<p>本文我们用一个可视化的方式理解一下 FM 的预训练、微调和对齐的过程, 以及背后的 Control Theory 和 RL 的思想. 很多技术处理参考了 Prof.&nbsp;Z. Liu et al 的 <span class="citation" data-cites="liu2025vggflow">[<a href="#ref-liu2025vggflow" role="doc-biblioref">1</a>]</span> 文章, 但是为了可视化的方便我们做了很多简化和改动.</p>
+</section>
+<section id="pretrain" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="pretrain"><span class="header-section-number">2</span> Pretrain</h2>
+<blockquote class="blockquote">
+<p>Image space 相关的基础概念在此忽略.</p>
+</blockquote>
+<p>简单来说, 预训练的目标是找一个时变向量场, 它输入图片 <span class="math inline">\(x\)</span> (在这里假定 <span class="math inline">\(x \in \mathbb{R}^2\)</span>) 和时间 <span class="math inline">\(t\)</span> (<span class="math inline">\(t \in [0,1]\)</span>), 输出一个向量, 代表点 <span class="math inline">\(x\)</span> 应该向哪个方向运动. 我们构建经典的 Swiss Spiral 数据集, 代表有意义的图片分布在 <span class="math inline">\(\mathbb{R}^2\)</span> 的子流形上.</p>
+<div id="fig-swiss-raw" class="quarto-float quarto-figure quarto-figure-center anchored" width="50%">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-swiss-raw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="swiss-raw.png" id="fig-swiss-raw" class="img-fluid figure-img" style="width:50.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-swiss-raw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+<p>我们用一个简单的 MLP <code>MLPVelocity</code> 来拟合这个时变向量场, 它将作为我们后续进行 finetuning 和 alignment 的 base model (或叫 backbone).</p>
+<section id="pretrain-process" class="level3" data-number="2.1">
+<h3 data-number="2.1" class="anchored" data-anchor-id="pretrain-process"><span class="header-section-number">2.1</span> Pretrain Process</h3>
+<p>不妨<strong>先用 batch = 1 来思考</strong>, 一个「可训练的条目」里面有三样东西:</p>
+<ul>
+<li>一个 <span class="math inline">\(\mathcal{N}(0,I)\)</span> 中的随机点 <span class="math inline">\(x_0\)</span>.</li>
+<li>数据集中的一个随机图片 <span class="math inline">\(x_1\)</span>.</li>
+<li>一个随机时间点 <span class="math inline">\(t\)</span>.</li>
+</ul>
+<p>想象一个从 <span class="math inline">\(x_0\)</span> 匀速开向 <span class="math inline">\(x_1\)</span> 的车, 这个车在 <span class="math inline">\(t\)</span> 时刻的位置 <span class="math inline">\(x_t\)</span> 和速度 <span class="math inline">\(\dot{x}_t\)</span> 为:</p>
+<p><span class="math display">\[
+\begin{aligned}
+x_t &amp;= (1-t) x_0 + t x_1 \\
+\dot{x}_t &amp;= x_1 - x_0
+\end{aligned}
+\]</span></p>
+<p>这里 FM 得思想非常反直觉: 直接让 <span class="math inline">\((x_t, t)\)</span> 作为输入, <span class="math inline">\(\dot{x}_t\)</span> 作为标签来训练 <code>MLPVelocity</code>!</p>
+<div id="fig-fm-train" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-fm-train-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="fm-train.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fm-train-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: 一个大小为 15 的 batch, 每个红色箭头都是一个「可训练的条目」. 由于时间 <span class="math inline">\(t\)</span> 的采样是随机的, 红点的高度也都是随机的 (Adapted from <span class="citation" data-cites="hawley2025flowwithwhat">[<a href="#ref-hawley2025flowwithwhat" role="doc-biblioref">2</a>]</span>).
+</figcaption>
+</figure>
+</div>
+<p>乍一看, 点在这样训练出来的向量场中的运动好像是直线. 但是由于随机配对和随机时间的因素, 最后点的运动<strong>不会是直线而是曲线</strong>! 要注意区分一下 training trajectory 和 actual path:</p>
+<div id="fig-fm-train-vs-actual" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-fm-train-vs-actual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="fm-train-vs-actual.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fm-train-vs-actual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: 要区分 Training trajectory 和 Actual Path <span class="citation" data-cites="hawley2025flowwithwhat">[<a href="#ref-hawley2025flowwithwhat" role="doc-biblioref">2</a>]</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="pretrain-result" class="level3" data-number="2.2">
+<h3 data-number="2.2" class="anchored" data-anchor-id="pretrain-result"><span class="header-section-number">2.2</span> Pretrain Result</h3>
+<p>由于我们的数据集不大, 所以每个 epoch 只有一个 batch (整个数据集), 训练了 15000 个 epoch:</p>
+<div class="quarto-layout-panel" data-layout="[50,50]">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-pretrain-loss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pretrain-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="pretrain-loss.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pretrain-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: 预训练的 loss 曲线.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-pretrain-gif" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pretrain-gif-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="pretrain.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pretrain-gif-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: 在预训练出来的向量场中随机点的演化, <code>MLPVelocity</code> 成功将噪声 guide 到了图片的子流形上.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="finetuning-ft" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="finetuning-ft"><span class="header-section-number">3</span> Finetuning (FT)</h2>
+<p>我们已经实现了噪声到有意义图片的 FM 模型. 现在我们的目标是提示词生成对应的图片. 这一般需要大量的 text-image pair 数据集来进行监督学习, 但是 text 怎么送到神经网络里面呢? 一个很自然的想法是先用一个预训练的文本编码器 (比如 CLIP 的文本编码器) 将文本编码成一个向量, 然后把这个向量「用某种方法」送到神经网络里面去.</p>
+<p>在这个简化的例子中, 我们把一段提示词简化成一个 0-8 的 class label (8 代表没有提示词), 然后自己随便定义一个 label-image pair 数据集, 它长这样:</p>
+<div id="fig-swiss-label" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-swiss-label-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="swiss-label.png" class="img-fluid figure-img" style="width:50.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-swiss-label-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: 自定义的 7 种类别的 image 点.
+</figcaption>
+</figure>
+</div>
+<p>然后用一个 Embedding 层 <code>CondEmbedderLabel</code> 将这个 class label 升维到一个长度为 4 的向量, 怎么做呢? 可以用 <code>nn.Embedding(8,4)</code> <strong>随机</strong>生成一个 embedding LUT (即一个 <span class="math inline">\(8 \times 4\)</span> 的矩阵), 然后用 class label 作为 index 从这个 LUT 里取出对应的向量, 注意这个 LUT 在反向传播的时候是会被更新的 (可以想想为什么 LUT 也可以更新), 即这个 embedding 是可学习的. 用代码写出来是:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> CondEmbedderLabel(nn.Module):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Embed discrete class labels into continuous vectors.</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Labels in [0, num_classes) are valid class labels.</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">    Label = num_classes is the unconditional (null) label.</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">    During training, labels are randomly replaced with the null label</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">    at rate ``dropout_prob`` to enable classifier-free guidance.</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, cond_dim: <span class="bu">int</span>, num_classes: <span class="bu">int</span>, dropout_prob: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.1</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.embeddings <span class="op">=</span> nn.Embedding(num_classes <span class="op">+</span> <span class="dv">1</span>, cond_dim)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.null_cond <span class="op">=</span> num_classes</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.dropout_prob <span class="op">=</span> dropout_prob</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, labels: torch.Tensor) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.training:</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            drop_ids <span class="op">=</span> torch.rand(labels.shape[<span class="dv">0</span>], device<span class="op">=</span>labels.device) <span class="op">&lt;</span> <span class="va">self</span>.dropout_prob</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            labels <span class="op">=</span> torch.where(drop_ids, <span class="va">self</span>.null_cond, labels)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.embeddings(labels)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>这里我们加了一点点小 trick, 就是一个带标签的输入进来, 会有默认 0.1 的概率被替换为无条件标签. 这样在训练过程中模型就会同时见到带条件的输入和不带条件的输入, 让模型学会<strong>在没有条件输入的情况下也能生成有意义的输出</strong>.</p>
+<p>最后我们将 <code>CondEmbedderLabel</code> 的输出直接用 MLP 连接到 backbone 网络的第一层上, 连接的地方 <strong>weights 和 bias 全初始化为 0</strong> (<a href="#fig-controlnet" class="quarto-xref">Figure&nbsp;7</a> 红色部分), 剩余的参数直接拷贝预训练网络的参数 (因为其它部分跟 <code>MLPVelocity</code> 网络结构一模一样), 这样就保证了在<strong>训练初期</strong>这个 ControlNet 不会对 backbone 的输出产生任何影响. 随着训练的进行, 网络中的权重语义会<strong>混合在一起</strong>变成一个<strong>端到端</strong>的模型 <code>ConditionalMLPVelocity</code>.</p>
+<p>如果讲得 fancier 一点, 其实这里我们借鉴了 ControlNet <span class="citation" data-cites="zhang2023addingconditionalcontroltexttoimage">[<a href="#ref-zhang2023addingconditionalcontroltexttoimage" role="doc-biblioref">3</a>]</span> 的思路, 但是叫什么不重要.</p>
+<div id="fig-controlnet" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-controlnet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="controlnet.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-controlnet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: 利用 ControlNet (<code>CondEmbedderLabel</code>) 的思想将 text (class label) 注入预训练的网络 <code>MLPVelocity</code> 形成新的 <code>ConditionalMLPVelocity</code>.
+</figcaption>
+</figure>
+</div>
+<p>然后一个「可训练的条目」里面也是有三样东西:</p>
+<ul>
+<li>一个 <span class="math inline">\(\mathcal{N}(0,I)\)</span> 中的随机点 <span class="math inline">\(x_0\)</span>.</li>
+<li>数据集中的一个随机的 image-label pair <span class="math inline">\((x_1, c)\)</span>.</li>
+<li>一个随机时间点 <span class="math inline">\(t\)</span>.</li>
+</ul>
+<p>训练过程跟预训练几乎一样, 只是现在输入到网络里面的除了 <span class="math inline">\(x_t\)</span> 和 <span class="math inline">\(t\)</span> 以外还有 class label <span class="math inline">\(c\)</span> 的 embedding.</p>
+<p>这个 <code>ConditionalMLPVelocity</code> 也是在 <span class="math inline">\(\mathbb{R}^2\)</span> 上定义了一个时变的 vector field, 或者说一个 ODE, 任何一个点 (初始条件) 都可以顺着它演化到另一个点. 当然不同的 class label 会影响这个 ODE 动力学, 使得 <span class="math inline">\(t=1\)</span> 的时候的点落在不同的区域.</p>
+<section id="ft-result" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="ft-result"><span class="header-section-number">3.1</span> FT Result</h3>
+<div id="fig-finetune-colored" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-finetune-colored-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="finetune-colored.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-finetune-colored-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: 微调后由 <code>ConditionalMLPVelocity</code> 模型定义的 ODE 以及点的演化.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="dropout-对-sampling-的影响" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="dropout-对-sampling-的影响"><span class="header-section-number">3.2</span> Dropout 对 Sampling 的影响</h3>
+<p>观察 <a href="#fig-finetune-colored" class="quarto-xref">Figure&nbsp;8</a> 会发现 unconditional 的最终分布并不是一个比较理想的 spiral, 这是因为 dropout 设置过低, 造成模型对 unconditional 的数据见得太少了, 导致它在 unconditional 的时候的表现不够好. 你可以把 dropout 调高一点, 比如调到 0.5, 就会发现 unconditional 的分布变得更像 spiral 了, 但是 conditional 的分布就变得更差了, 这是一个 trade-off, 见 <a href="#fig-ft-dropout" class="quarto-xref">Figure&nbsp;9</a>.</p>
+<div id="fig-ft-dropout" class="quarto-layout-panel">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ft-dropout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ft-dropout" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-ft-dropout00" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-ft-dropout00-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ft-dropout0.png" class="img-fluid figure-img" data-ref-parent="fig-ft-dropout">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ft-dropout00-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) dropout=0.0
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ft-dropout" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-ft-dropout02" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-ft-dropout02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ft-dropout0.2.png" class="img-fluid figure-img" data-ref-parent="fig-ft-dropout">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ft-dropout02-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b) dropout=0.2
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ft-dropout" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-ft-dropout04" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-ft-dropout04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ft-dropout0.4.png" class="img-fluid figure-img" data-ref-parent="fig-ft-dropout">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ft-dropout04-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c) dropout=0.4
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ft-dropout" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-ft-dropout06" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-ft-dropout06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ft-dropout0.6.png" class="img-fluid figure-img" data-ref-parent="fig-ft-dropout">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ft-dropout06-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(d) dropout=0.6
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ft-dropout" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-ft-dropout08" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-ft-dropout08-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ft-dropout0.8.png" class="img-fluid figure-img" data-ref-parent="fig-ft-dropout">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ft-dropout08-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(e) dropout=0.8
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell-subref quarto-layout-cell" data-ref-parent="fig-ft-dropout" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div id="fig-ft-dropout10" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-ft-dropout10-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="ft-dropout1.png" class="img-fluid figure-img" data-ref-parent="fig-ft-dropout">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-ft-dropout10-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(f) dropout=1.0
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ft-dropout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: conditional 和 unconditional 的分布在不同 dropout 下是 trade-off 关系.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="alignment" class="level2 page-columns page-full" data-number="4">
+<h2 data-number="4" class="anchored" data-anchor-id="alignment"><span class="header-section-number">4</span> Alignment</h2>
+<p>得到 conditional FM model <code>ConditionalMLPVelocity</code> 之后, 我们的目标是让它的输出图片 (2D 点) 的「质量」更高 (称为 <strong>alignment</strong> 对齐人类美学). 我们定义了一个 reward function <code>Reward2D</code> <span class="math inline">\(r(x)\)</span> 来衡量输出点的质量 (<a href="#fig-reward-function" class="quarto-xref">Figure&nbsp;10</a>), 黄色区域表示质量较高, 蓝色区域表示质量较低.</p>
+<div id="fig-reward-function" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-reward-function-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="reward-function.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-reward-function-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: 黄色区域表示图片质量较高.
+</figcaption>
+</figure>
+</div>
+<p>当然实际上 Image Space 中并不存在这样一个 reward function, 怎么办呢?</p>
+<ul>
+<li>一种办法是让人类打分, 比如构建出数据集 <code>(image, human_score)</code>.
+<ul>
+<li>但是由于我们无法穷尽所有的图片, 永远存在有没有被打分的图片, 而 <strong>align 一个 model 必须要具备对任意图片进行评价的能力</strong>. 于是我们可以用这个 (image, human_score) 数据集来训练一个网络, 称为 <strong>Reward Model (RM)</strong>, 让它学会对任意图片进行打分, 这样就间接地得到了一个可以对任意图片进行评价的网络, 相当于一个无穷大的数据集 <code>(image, ai_score)</code>.</li>
+<li>但是比如「8 分」在不同的人眼里可能有完全不同的理解! 所以我们这样做:</li>
+</ul></li>
+<li><strong>让人类只给出一些「相对」的评价</strong>, 比如「这个图片比那个图片更好」, 而不是「这个图片的质量是 8 分」.
+<ul>
+<li><p>这样我们就可以构建一个数据集 <code>(image1, image2, human_prefer)</code>, <code>human_prefer</code> 表示这个 labeler 更喜欢 <code>image1</code> 还是 <code>image2</code>. 然后再用某些 RLHF 的方法训练一个 RM (还是要训练! 只不过训练方法不一样).</p>
+<div id="fig-rank-ui" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rank-ui-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="rank-ui-openai.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rank-ui-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: OpenAI’s labeler 对指令-回答对打分的 UI <span class="citation" data-cites="huyen_2023_rlhf">[<a href="#ref-huyen_2023_rlhf" role="doc-biblioref">4</a>]</span>.
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+</ul>
+<p>扯远了, 反正我们在这个 toy example 里直接把 reward model 写死了, <code>Reward2D</code> 输入一个 2D 点, 输出一个标量 reward. 目标就是让 <code>ConditionalMLPVelocity</code> 的输出点的 reward 尽可能高. 一个很自然的想法是<strong>将 reward 加入 Loss 函数里面</strong>, 然后继续用 FT 的方法训练 <code>ConditionalMLPVelocity</code>.</p>
+<p>但是仔细思考一下 FT 的训练过程, 我们<strong>并没有跑任何一个完整的 trajectory 来反向传播</strong>, 而是通过随机的时间点采样和随机配对来训练, 只有 <span class="math inline">\(t=1\)</span> 的输入点才会真正地受到 reward 的影响 (这几乎没有!). 所以这 Loss 等于没加. 是不是考虑下换个训练思路?</p>
+<blockquote class="blockquote">
+<p>说实话笔者写到这里的时候没想出一个自然的引入 RL 的方法, 姑且用「让我们换个思路」圆过去吧嘻嘻 o(≧v≦)o</p>
+</blockquote>
+<p>让我们换个思路, 不过我们其实还有一个隐性的要求, 就是 <strong>align 出来的模型不要跟原先的模型差太远</strong> (now this requirement seems weird, 我们只是需要一个端到端生成的模型, 能生成就好了, 为什么要求它跟原先的模型差不多呢? anyway, 不管了), 如何度量这个差异? 不妨<strong>别在 <span class="math inline">\(v_{\text{base}}\)</span> 上直接改</strong>, 而是让它保持不变, 设计一个新的 residual vector field <span class="math inline">\(\tilde{v}_\theta\)</span> 来 align.</p>
+<p>我们已经有 base model <code>ConditionalMLPVelocity</code> <span class="math inline">\(v_{\text{base}} (x,t \mid c)\)</span> (<span class="math inline">\(c\)</span> 是 class label), 以及写死的 reward model <code>Reward2D</code> <span class="math inline">\(r(x)\)</span>. 我们想找一个控制信号 <span class="math inline">\(\tilde{v}_\theta (x,t \mid c)\)</span>, 可以想象成温迪 E 技能制造的额外的时变风场 (residual vector field), 一个点在某时刻的速度是 <span class="math inline">\(v_{\text{base}}\)</span> 和 <span class="math inline">\(\tilde{v}_\theta\)</span> 的叠加:</p>
+<p><span id="eq-total-field"><span class="math display">\[
+\dot{x} := v_{\text{base}} + \tilde{v}_\theta
+\tag{1}\]</span></span></p>
+<p><strong><span class="math inline">\(\dot{x}\)</span> 在 <span class="citation" data-cites="liu2025vggflow">[<a href="#ref-liu2025vggflow" role="doc-biblioref">1</a>]</span> 也写成 <span class="math inline">\(v_\theta\)</span>. 注意 <a href="#eq-total-field" class="quarto-xref">Equation&nbsp;1</a> 是定义式!</strong> 在 Control Theory 中相当于我们构造了一个物理系统 <span class="math inline">\(f\)</span>, 使得 state velocity <strong>恰好等于</strong>控制信号 <span class="math inline">\(\tilde{v}_\theta\)</span> 加一个跟 <span class="math inline">\(x\)</span> 有关的向量 <span class="math inline">\(v_{\text{base}}\)</span>, 非线性正来源于 <span class="math inline">\(v_{\text{base}}\)</span> 对 <span class="math inline">\(x\)</span> 的非线性依赖.</p>
+<div id="fig-control-theory-reminder" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-control-theory-reminder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="control-theory-reminder.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-control-theory-reminder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: A quick reminder of nonlinear control theory. 注意这里举的例子不太一样, 是<strong>时不变</strong>的系统, 所以自变量没有 <span class="math inline">\(t\)</span>. 另外箭头的方向我随便画的没有特殊含义.
+</figcaption>
+</figure>
+</div>
+<p>我们希望这个风场 <span class="math inline">\(\tilde{v}_\theta\)</span> 能在演化结束时获得的 reward 更高. 但是! 也不希望这股风太大, 具体来说就是可以将 <span class="math inline">\(\|\tilde{v}_\theta\|^2\)</span> 也加入 Loss 函数中, 来限制风场的大小.</p>
+<p>值得一提的是, 这里所有涉及到的量都是确定的 (但是是时变的), 而且是 ODE, 没有任何随机性因素! 初始点固定了, base dynamics <span class="math inline">\(v_{\text{base}}\)</span> 固定, <span class="math inline">\(\tilde{v}_\theta\)</span> 也固定, 这个点的未来也是确定的 (有点机械论的悲观 ¯\_(ツ)_/¯). 想象一下, 每给出一种风场 <span class="math inline">\(\tilde{v}_\theta\)</span>, 从 <span class="math inline">\(x\)</span> 出发一路积分 Loss, 加上最后的 terminal reward, 得到一个数, 这个值被定义为 State Value <span class="math inline">\(V(x,0)\)</span>,</p>
+<p><span class="math display">\[
+V^{\tilde{v}_\theta} := \int_0^1 \|\tilde{v}_\theta(x,t \mid c)\|^2 \mathrm{d}t - r(x(1))
+\]</span></p>
+<p>当然 <span class="citation" data-cites="liu2025vggflow">[<a href="#ref-liu2025vggflow" role="doc-biblioref">1</a>]</span> 文中给前者加了一个系数来平衡两者的权重:</p>
+<p><span id="eq-value"><span class="math display">\[
+V^{\tilde{v}_\theta} := \frac{\lambda}{2} \int_0^1 \|\tilde{v}_\theta(x,t \mid c)\|^2 \mathrm{d}t - r(x(1))
+\tag{2}\]</span></span></p>
+<p>它越小越好<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>! 我们要求的就是:</p>
+<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;稍微提一下, 这里 MDP 的 state value 是未来 <strong>reward</strong> 的 sum (确切来说, 是 expected, discounted sum), 而 HJB 里的 value 是未来 <strong>loss</strong> 的 sum, 前者要最大化, 后者要最小化 (有点 confusing).</p></div></div><p><span class="math display">\[
+\arg \min_{\tilde{v}_\theta} \{V^{\tilde{v}_\theta}\}
+\]</span></p>
+<p><span class="math inline">\(V^{\tilde{v}_\theta}\)</span> 本身会满足一个 PDE, 叫做 HJB 方程:</p>
+<p><span class="math display">\[
+-\frac{\partial V}{\partial t} = L + \langle \nabla V, \dot{x} \rangle
+\]</span></p>
+<p>其中:</p>
+<p><span class="math display">\[
+\begin{aligned}
+L &amp;= \frac{\lambda}{2} \|\tilde{v}_\theta\|^2 \\
+\dot{x} &amp;= v_{\text{base}} + \tilde{v}_\theta
+\end{aligned}
+\]</span></p>
+<p>假设我们已经找到了最优的 <span class="math inline">\(\tilde{v}_\theta^*\)</span>, 它对应的 <span class="math inline">\(V^*\)</span> 会满足 Optimal HJB 方程:</p>
+<p><span id="eq-optimal-hjb"><span class="math display">\[
+\begin{aligned}
+-\frac{\partial V^*}{\partial t} &amp;= \min_{\tilde{v}_\theta} \left\{ L + \langle \nabla V^*, \dot{x} \rangle \right\} \\
+&amp;= \min_{\tilde{v}_\theta} \left\{ \frac{\lambda}{2} \|\tilde{v}_\theta\|^2 + \langle \nabla V^*, v_{\text{base}} + \tilde{v}_\theta \rangle \right\}
+\end{aligned}
+\tag{3}\]</span></span></p>
+<p><a href="#eq-optimal-hjb" class="quarto-xref">Equation&nbsp;3</a> RHS 中的 <span class="math inline">\(v_{\text{base}}\)</span> 是固定的, 右侧的最小值问题等价于求:</p>
+<p><span class="math display">\[
+\min_{\tilde{v}_\theta} \left\{ \frac{\lambda}{2} \|\tilde{v}_\theta\|^2 + \langle \nabla V^*, \tilde{v}_\theta \rangle \right\}
+\]</span></p>
+<p>这是一个关于 <span class="math inline">\(\tilde{v}_\theta\)</span> 的函数, 不妨记为 <span class="math inline">\(\xi(\tilde{v}_\theta)\)</span>, 我们可以通过对 <span class="math inline">\(\xi\)</span> 求<strong>方向导数</strong>来找到最优解 <span class="math inline">\(\tilde{v}_\theta^*\)</span>:</p>
+<p><span id="eq-vv"><span class="math display">\[
+\begin{aligned}
+\nabla_{\tilde{v}_\theta} \xi &amp;= \lambda \tilde{v}_\theta + \nabla V^* = 0 \\
+\implies \tilde{v}_\theta^* &amp;= -\frac{1}{\lambda} \nabla V^*
+\end{aligned}
+\tag{4}\]</span></span></p>
+<p>这说明了什么? <strong>如果我们知道 <span class="math inline">\(V^*\)</span>, 它的梯度直接就是最优的风场!</strong> (所以 <span class="citation" data-cites="liu2025vggflow">[<a href="#ref-liu2025vggflow" role="doc-biblioref">1</a>]</span> 叫 VGG, Value Gradient Guidance). 但是 <span class="math inline">\(V^*\)</span> 又满足 Optimal HJB 方程, 我们再把 <a href="#eq-vv" class="quarto-xref">Equation&nbsp;4</a> 代回 <a href="#eq-optimal-hjb" class="quarto-xref">Equation&nbsp;3</a> 就得到了一个关于 <span class="math inline">\(V^*\)</span> 的 PDE!:</p>
+<p><span class="math display">\[
+\begin{aligned}
+-\frac{\partial V^*}{\partial t} &amp;= \frac{\lambda}{2} \left\|-\frac{1}{\lambda} \nabla V^*\right\|^2 - \left\langle \nabla V^*, v_{\text{base}} -\frac{1}{\lambda} \nabla V^* \right\rangle \\
+\implies \frac{\partial V^*}{\partial t} &amp;= \frac{1}{2\lambda} \|\nabla V^*\|^2 - \nabla V^* \cdot v_{\text{base}}
+\end{aligned}
+\]</span></p>
+<p>或者展开来写:</p>
+<p><span id="eq-pde"><span class="math display">\[
+\frac{\partial}{\partial t} V^*(x,t \mid c) = \frac{1}{2\lambda} \|\nabla V^*(x,t \mid c)\|^2 - \nabla V^*(x,t \mid c) \cdot v_{\text{base}}(x,t \mid c)
+\tag{5}\]</span></span></p>
+<p>这里有很多给定 class label 的 “<span class="math inline">\(\mid c\)</span>”, 其实不同的 <span class="math inline">\(c\)</span> 就提供了不同的 <span class="math inline">\(v_{\text{base}}\)</span>, 也就提供了一连串不同的 PDE, 不用管它, 反正我们训练的时候会随机采样 <span class="math inline">\(c\)</span> 来训练一个网络 <span class="math inline">\(V_\phi\)</span> 来拟合所有的 <span class="math inline">\(V^*\)</span>.</p>
+<p>Terminal reward 去哪了? 其实它变成了一个边界条件, <a href="#eq-value" class="quarto-xref">Equation&nbsp;2</a> 在 <span class="math inline">\(t=1\)</span> 的时候:</p>
+<p><span class="math display">\[
+V^*(x,1 \mid c) = -r(x)
+\]</span></p>
+<p>i.e.,</p>
+<p><span id="eq-boundary"><span class="math display">\[
+\nabla V^*(x,1 \mid c) = -\nabla r(x)
+\tag{6}\]</span></span></p>
+<p>有了 <a href="../../posts/pinn/index.html">PDE3: PINNs – How Do Neural Networks Solve PDEs? 神经网络如何求解偏微分方程?</a> 的经验, we can’t help but to solve this PDE using PINN!</p>
+<p>但是初始条件呢? 即 <span class="math inline">\(t=0\)</span> 任意位置 <span class="math inline">\(x\)</span> 的 <span class="math inline">\(V^*\)</span> 是多少? 我们不关心这个问题, 到时候训练的时候随机采样作为 batch 然后平均一下就可以了. (其实这里笔者没太理解)</p>
+<section id="naïve-pinn-design" class="level3" data-number="4.1">
+<h3 data-number="4.1" class="anchored" data-anchor-id="naïve-pinn-design"><span class="header-section-number">4.1</span> Naïve PINN Design</h3>
+<p>我们先设计一个神经网络 <code>PINN</code> 来拟合 <span class="math inline">\(V^*\)</span>, 它输入 <span class="math inline">\((x,t,c)\)</span>, 输出一个实数. 损失来源于两个地方: <a href="#eq-pde" class="quarto-xref">Equation&nbsp;5</a> 和 <a href="#eq-boundary" class="quarto-xref">Equation&nbsp;6</a> 的满足情况. 我们可以随机生成很多个 Collocation points <span class="math inline">\(x_i\)</span> 塞进 <code>PINN</code>, 但是还要同时输入 <span class="math inline">\(t\)</span> 和 <span class="math inline">\(c\)</span> 神经网络才会吐出值来, 所以直接随机产生一大堆 <span class="math inline">\(t\)</span> 和 <span class="math inline">\(c\)</span> 然后分成 batch 平均掉. 所以 Loss 可以表达为:</p>
+<p><span class="math display">\[
+\begin{aligned}
+L_{\text{PDE}}(\phi) &amp;= \mathbb{E}_{x_0 \sim \mathcal{N}(0,I), t \sim U([0,1]), c \sim U(\mathbb{Z}_7)} \left\| \frac{\partial V}{\partial t} - \frac{1}{2\lambda} \|\nabla V\|^2 + \nabla V \cdot v_\text{base} \right\|^2 \\
+L_{\text{boundary}}(\phi) &amp;= \mathbb{E}_{x_0 \sim \mathcal{N}(0,I), t = 1, c \sim U(\mathbb{Z}_7)} \|\nabla V + \nabla r(x_1)\|^2
+\end{aligned}
+\]</span></p>
+<p>其中 <span class="math inline">\(\phi\)</span> 是 <code>PINN</code> 的参数. 总 Loss 就是两者的和:</p>
+<p><span class="math display">\[
+L_{\text{PINN}} (\phi) = \alpha L_{\text{boundary}}(\phi) + L_{\text{PDE}}(\phi)
+\]</span></p>
+<p>Loss 里面 <span class="math inline">\(\partial V / \partial t\)</span> 和 <span class="math inline">\(\nabla V\)</span> 都可以通过 Autograd 来求. <span class="math inline">\(\alpha\)</span> 用来调整边界条件的重要性占比. 理论上我们就已经可以拿到 <span class="math inline">\(V^*\)</span> 了!</p>
+<p>但是训练过就会发现不论将 <span class="math inline">\(\alpha\)</span> 调多大, 训练出来的 <span class="math inline">\(\nabla V^*\)</span> 都接近 0, 也就是学到的风一直为 0. 原因不明, <span class="citation" data-cites="liu2025vggflow">[<a href="#ref-liu2025vggflow" role="doc-biblioref">1</a>]</span> 文中也写到「直接参数化 <span class="math inline">\(V^*\)</span> 不如参数化 <span class="math inline">\(\nabla V^*\)</span> 有效果」, 从而 <span class="citation" data-cites="liu2025vggflow">[<a href="#ref-liu2025vggflow" role="doc-biblioref">1</a>]</span> 选择了对 <a href="#eq-pde" class="quarto-xref">Equation&nbsp;5</a> 两边求梯度, 得到一个比较复杂的 PDE:</p>
+<p><span class="math display">\[
+\frac{\partial}{\partial t} \nabla V^* = [\nabla \nabla V^*]^T \left(\frac{1}{\lambda} \nabla V^* - v_{\text{base}}\right) - [\nabla v_{\text{base}}]^T \nabla V^*
+\]</span></p>
+<p>然后可能用输入为 <span class="math inline">\((x,t,c)\)</span>, 输出一个向量 <span class="math inline">\(\nabla V^*\)</span> 的网络来拟合这个 PDE.</p>
+<p>但是这样代码会有点复杂, 我也没试过, 但是笔者尝试了下面的方案, 效果还不错, 动机和原因就忽略了哈哈, 直接罗列出来:</p>
+</section>
+<section id="final-pinn-dual-head-autograd-free-random-fourier-features" class="level3" data-number="4.2">
+<h3 data-number="4.2" class="anchored" data-anchor-id="final-pinn-dual-head-autograd-free-random-fourier-features"><span class="header-section-number">4.2</span> Final PINN: Dual-head, Autograd-free, Random Fourier Features</h3>
+<div id="fig-pinn" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pinn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="pinn.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pinn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Final PINN Architecture.
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-pinn" class="quarto-xref">Figure&nbsp;13</a> 是最终的 <code>PINN</code> 设计, 主要有以下几个特点:</p>
+<section id="dual-head" class="level4" data-number="4.2.1">
+<h4 data-number="4.2.1" class="anchored" data-anchor-id="dual-head"><span class="header-section-number">4.2.1</span> Dual-head</h4>
+<p>还是用 <a href="#eq-pde" class="quarto-xref">Equation&nbsp;5</a> 的形式来训练 <code>PINN</code>, 输入还是 <span class="math inline">\((x,t,c)\)</span>, 只不过<strong>输出多加一个 head</strong>, 即输出 <span class="math inline">\((V^*, \nabla V^*)\)</span>.</p>
+<p>但是神经网络会将 <span class="math inline">\(V^*\)</span> 和 <span class="math inline">\(\nabla V^*\)</span> 看作同地位的输出 (比如 <span class="math inline">\((V^*, W)\)</span>), 而不是一者为另一者的梯度, 所以损失函数里面还要加一项: <span class="math display">\[
+L_{\text{consistency}} (\phi) = \|W - \nabla V^*\|^2
+\]</span></p>
+<p>注意这里 <span class="math inline">\(\nabla V^*\)</span> 是用 Autograd 求的.</p>
+</section>
+<section id="two-stage-training" class="level4" data-number="4.2.2">
+<h4 data-number="4.2.2" class="anchored" data-anchor-id="two-stage-training"><span class="header-section-number">4.2.2</span> Two-stage Training</h4>
+<p>动机很简单也很 ad hoc: 既然学不到边界条件, 那就先单独训练边界条件, 再用三个 Loss 进行联合训练:</p>
+<ul>
+<li><strong>Stage 1</strong>: 只开启 Boundary Loss: <span class="math display">\[
+  L_{\text{boundary}}(\phi)
+  \]</span></li>
+<li><strong>Stage 2</strong>: 三个 Loss 一起训练: <span class="math display">\[
+  L_{\text{PINN}} (\phi) = \alpha_b L_{\text{boundary}}(\phi) + L_{\text{PDE}}(\phi) + \alpha_c L_{\text{consistency}} (\phi)
+  \]</span> where <span class="math inline">\(\alpha_b=5\)</span>, <span class="math inline">\(\alpha_c=0.5\)</span>.</li>
+</ul>
+</section>
+<section id="autograd-free" class="level4" data-number="4.2.3">
+<h4 data-number="4.2.3" class="anchored" data-anchor-id="autograd-free"><span class="header-section-number">4.2.3</span> Autograd-free</h4>
+<p>不用 Autograd 来求 Loss 中的 <span class="math inline">\(\partial V / \partial t\)</span> 和 <span class="math inline">\(\nabla V\)</span>, 而是都用中心差分来近似 (除了 <span class="math inline">\(L_{\text{consistency}}\)</span>): <span class="math display">\[
+\frac{\partial V}{\partial t} \approx \frac{V(x, t + \epsilon) - V(x, t - \epsilon)}{2\epsilon}
+\]</span> where <span class="math inline">\(\epsilon = 10^{-3}\)</span>.</p>
+</section>
+<section id="random-fourier-features-encoding-rff" class="level4" data-number="4.2.4">
+<h4 data-number="4.2.4" class="anchored" data-anchor-id="random-fourier-features-encoding-rff"><span class="header-section-number">4.2.4</span> Random Fourier Features Encoding (RFF)</h4>
+<p>由于 <code>PINN</code> 设计成了 MLP, <strong>MLP 难以学到高频信号</strong> <span class="citation" data-cites="tancik2020fourierfeaturesletnetworks sun2024learninghighfrequencyfunctionseasy">[<a href="#ref-tancik2020fourierfeaturesletnetworks" role="doc-biblioref">5</a>, <a href="#ref-sun2024learninghighfrequencyfunctionseasy" role="doc-biblioref">6</a>]</span>, 即微小的 <span class="math inline">\(x\)</span> 变化造成的梯度信息难以被捕捉 (是这样诠释吗?).</p>
+<p>方案如图 <a href="#fig-pinn" class="quarto-xref">Figure&nbsp;13</a>, 对点的位置采用 RFF 编码: 先将 <span class="math inline">\(x\)</span> 乘上一个随机矩阵升到 64 维, 再模仿 <span class="math inline">\(t\)</span> 的编码方式用 <span class="math inline">\(\sin\)</span> 和 <span class="math inline">\(\cos\)</span> 进行逐点运算再拼接得到 128 维的向量 (64 个蓝色箭头, 64 个绿色箭头).</p>
+<p>目前的理解是<strong>直接学习一个信号如何变化, 不如学习这个信号的频谱如何变化来得快</strong>.</p>
+</section>
+</section>
+<section id="alignment-result" class="level3" data-number="4.3">
+<h3 data-number="4.3" class="anchored" data-anchor-id="alignment-result"><span class="header-section-number">4.3</span> Alignment Result</h3>
+<p>经过上面的训练, 我们得到了 <span class="math inline">\(\tilde{v}_\theta^*\)</span> 风场, 我们直接将它加到 <code>ConditionalMLPVelocity</code> 的输出上, 就得到了一个 align 过后的网络:</p>
+<div id="fig-vtheta-no-distill" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-vtheta-no-distill-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="vtheta-no-distill.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vtheta-no-distill-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14: 直接将 <span class="math inline">\(\tilde{v}_\theta^*\)</span> 加到 <span class="math inline">\(v_{\text{base}}\)</span> 上得到 <span class="math inline">\(v_\theta\)</span> 网络.
+</figcaption>
+</figure>
+</div>
+<p>注意这里跟 <span class="citation" data-cites="liu2025vggflow">[<a href="#ref-liu2025vggflow" role="doc-biblioref">1</a>]</span> 有区别, <span class="citation" data-cites="liu2025vggflow">[<a href="#ref-liu2025vggflow" role="doc-biblioref">1</a>]</span> 相当于还对 <a href="#fig-vtheta-no-distill" class="quarto-xref">Figure&nbsp;14</a> 的知识 distill 到了 <span class="math inline">\(v_{\text{base}}\)</span> 里面 (而不是直接两个网络的输出相加). 但是我们这里就不蒸馏了哈哈哈.</p>
+<p>用同一批噪声分别经过 align 过后的网络和未 align 的网络, 可以得到两批点的分布, 我们计算在每种 class 下 final 分布的平均 reward. 由 <a href="#fig-alignment-result" class="quarto-xref">Figure&nbsp;15</a> 可以看到, align 过后 final 点的平均 reward 在所有 class label 下 (包括 unconditional) 都有了提升, 说明 <code>PINN</code> 成功学到了人类的审美.</p>
+<div id="fig-alignment-result" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-alignment-result-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="alignment_step2_sampling.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alignment-result-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: 从 <span class="math inline">\(\mathcal{N}(0, I)\)</span> 采样的<strong>同一批噪声</strong>经未 align 的 ODE 和 align 后 ODE 的点的分布.
+</figcaption>
+</figure>
+</div>
+<p>来欣赏一下动画吧!</p>
+<div id="fig-alignment-result-jet" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-alignment-result-jet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="alignment-total-jet.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alignment-result-jet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16: 加和以后的 ODE flow (<span class="math inline">\(v_{\theta}\)</span>).
+</figcaption>
+</figure>
+</div>
+<div id="fig-alignment-result-jet2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-alignment-result-jet2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="alignment-base-gray-residual-red.gif" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alignment-result-jet2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17: 把分量画出来, 红色代表风场, 不太明显的灰色代表 <span class="math inline">\(v_{\text{base}}\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>我突然发现所有的这种 diffusion 出来的时变向量场都会在 <span class="math inline">\(t\)</span> 接近 <span class="math inline">\(1\)</span> 的时候发生类似「相变」的现象, 何意味?</p>
+</section>
+</section>
+<section id="conclusion-and-future-work" class="level2" data-number="5">
+<h2 data-number="5" class="anchored" data-anchor-id="conclusion-and-future-work"><span class="header-section-number">5</span> Conclusion and Future Work</h2>
+<p>我们用一个简单的 2D toy example 实现了下面技术的基本流程:</p>
+<ul>
+<li>FM 的 pretrain, finetune 和 alignment.</li>
+<li>如何用 ControlNet 的思想将条件信息注入预训练的模型中.</li>
+<li>如何用人类偏好和 RL 建模来对模型进行 alignment.</li>
+<li>如果用 Collocation points 训练 PINN 时总是收敛到平凡解或 boundary condition 的 loss 总是不收敛该怎么办? (Dual-head, two-stage training, autograd-free, RFF, etc.)</li>
+</ul>
+<p>此实验的局限性包括:</p>
+<ul>
+<li>没有在实际的图像空间中进行训练.
+<ul>
+<li>这个空间过大, 比如可能需要用其它的方法注入信息 (参考 Stable Diffusion 3 的 Unet 如何注入文本信息和 <span class="math inline">\(t\)</span>), 或者在 latent space 中进行 diffusion.</li>
+</ul></li>
+<li>没有训练一个真正的 reward model 来进行 alignment, 而是直接把 reward function 写死了.</li>
+<li>没有对 align 过后的模型进行 distillation, 直接让它们的输出相加了.</li>
+</ul>
+<p>若有兴趣, 可以研究:</p>
+<ul>
+<li>最后出来的 ODE 有一个类似「相变」的现象, 原因是什么? 感觉 diffusion 的信息量都集中在最后 <span class="math inline">\(t\)</span> 接近 1 的时候.</li>
+<li>真实图片空间的维度过大, 能不能想出一种将这种空间可视化的方法 (尽量 faithful)?</li>
+<li>不要在 Euclidean space 上进行扩散? 比如加入可学习的曲率或 metric.</li>
+</ul>
+</section>
+
+
+
+<div id="quarto-appendix" class="default page-columns page-full"><section id="unifying-control-theory-rl-and-lagrangian-hamiltonian-mechanics" class="level2 appendix page-columns page-full" data-number="6"><h2 class="anchored quarto-appendix-heading"><span class="header-section-number">6</span> Unifying Control Theory, RL and Lagrangian / Hamiltonian Mechanics</h2><div class="quarto-appendix-contents page-columns page-full">
+
+<p>控制论、马尔可夫决策过程、HJB 方程、拉格朗日量、哈密顿量、广义动量、强化学习 和本文的 residual field 等可以在下面的统一框架下进行理解:</p>
+<div class="column-page-inset-right">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>MDP (马尔可夫决策过程)</th>
+<th>HJB (哈密顿-雅可比-贝尔曼方程)</th>
+<th>拉格朗日/哈密顿力学</th>
+<th>VGG-Flow</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>State <span class="math display">\[s(t)\]</span></td>
+<td>State <span class="math display">\[x(t)\]</span></td>
+<td>State <span class="math display">\[q(t)\]</span></td>
+<td>Image <span class="math display">\[x(t)\]</span></td>
+</tr>
+<tr class="even">
+<td>Policy (Probabilistic) <span class="math display">\[\pi(a\|s)\]</span></td>
+<td>Control (Deterministic) <span class="math display">\[u(x,t)\]</span></td>
+<td>Velocity <span class="math display">\[\dot{q}(q,t)\]</span></td>
+<td>Residual Field <span class="math display">\[\tilde{v}_\theta(x,t)\]</span></td>
+</tr>
+<tr class="odd">
+<td>Environment (Stationary) <span class="math display">\[\begin{cases} p: (s,a) &amp;\mapsto s' \\ r: (s,a) &amp;\mapsto \text{Reward}\end{cases}\]</span></td>
+<td>Dynamics (Time-varying) <span class="math display">\[\begin{cases} f: (x,u,t) &amp;\mapsto \dot{x} \\ L: (x,u,t) &amp;\mapsto \text{Loss} \end{cases}\]</span></td>
+<td>Dynamics (Time-varying) <span class="math display">\[\begin{cases} f: (q, \_, t) &amp;\mapsto \dot{q} \\ \mathcal{L}: (q, \dot{q}, t) &amp;\mapsto \text{Lagrangian} \end{cases}\]</span></td>
+<td>Dynamics (Time-varying) <span class="math display">\[\begin{cases} v_\theta: (x, \tilde{v}_\theta, t) &amp;\mapsto \dot{x} \\ L: (x, \tilde{v}_\theta, t) &amp;\mapsto \text{Loss} \end{cases}\]</span></td>
+</tr>
+<tr class="even">
+<td>State Value (Given <span class="math inline">\(\pi\)</span>) <span class="math display">\[V(s) = \mathbb{E}(\underbrace{\Sigma r}_{\mathclap{\scriptsize \text{discounted reward}}})\]</span></td>
+<td>Value (Given <span class="math inline">\(u\)</span>) <span class="math display">\[V(x,t) = \int_t^T L \mathrm{d}\tau + \underbrace{\Phi(x(T))}_{\mathclap{\scriptsize \text{terminal loss}}}\]</span></td>
+<td>Action (Given <span class="math inline">\(\dot{q}\)</span>) <span class="math display">\[S(q,t) = \int_t^T \mathcal{L} \mathrm{d}\tau\]</span></td>
+<td>Value (Given <span class="math inline">\(\tilde{v}_\theta\)</span>) <span class="math display">\[V(x,t) = \int_t^1 L \mathrm{d}\tau - \underbrace{r(x(1))}_{\mathclap{\scriptsize \text{terminal reward}}}\]</span></td>
+</tr>
+<tr class="odd">
+<td>State-action Quality <span class="math display">\[q(s,a)\]</span></td>
+<td>Quality Density <span class="math display">\[H(x,\nabla V,t) = L + \langle \nabla V, \dot{x} \rangle\]</span></td>
+<td>Hamiltonian <span class="math display">\[\mathcal{H}(q, \nabla S, t) = \mathcal{L} + \langle \underbrace{\nabla S}_{\mathclap{\scriptsize \text{momenta } p}} \cdot \dot{q} \rangle\]</span></td>
+<td>Quality Density <span class="math display">\[H(x, \nabla V, t) = L + \langle \nabla V, \dot{x} \rangle\]</span></td>
+</tr>
+<tr class="even">
+<td>Bellman Eq (Given <span class="math inline">\(\pi\)</span>) <span class="math display">\[\begin{cases} V &amp;= \langle q_i \rangle \\ q_i &amp;= \langle r_j + \gamma V_k \rangle \end{cases}\]</span></td>
+<td>HJB Eq (Given <span class="math inline">\(u\)</span>) <span class="math display">\[-\frac{\partial V}{\partial t} = L + \langle \nabla V, \dot{x} \rangle \quad (= H)\]</span></td>
+<td>HJ Eq (Given <span class="math inline">\(\dot{q}\)</span>) <span class="math display">\[-\frac{\partial S}{\partial t} = \mathcal{H}\]</span></td>
+<td>HJB Eq (Given <span class="math inline">\(\tilde{v}_\theta\)</span>) <span class="math display">\[-\frac{\partial V}{\partial t} = L + \langle \nabla V, \dot{x} \rangle \quad (= H)\]</span></td>
+</tr>
+<tr class="odd">
+<td>Optimal Bellman (For deterministic <span class="math inline">\(\pi^*\)</span>) <span class="math display">\[\begin{cases} V^* &amp;= \max_i q_i \equiv q^* \\ q^* &amp;= \langle r_j + \gamma V'^* \rangle \end{cases}\]</span></td>
+<td>Optimal HJB <span class="math display">\[-\frac{\partial V^*}{\partial t} = \min_u \left\{ L + \langle \nabla V^*, \dot{x} \rangle \right\}\]</span></td>
+<td>-</td>
+<td>Optimal HJB <span class="math display">\[-\frac{\partial V^*}{\partial t} = \min_{\tilde{v}_\theta} \left\{ L + \langle \nabla V^*, \dot{x} \rangle \right\}\]</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+
+
+</div></section><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body" role="list">
+<div id="ref-liu2025vggflow" class="csl-entry" role="listitem">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Liu Z, Xiao TZ, Liu W, Domingo-Enrich C, Zhang D (2025) Value gradient guidance for flow matching alignment. In: NeurIPS</div>
+</div>
+<div id="ref-hawley2025flowwithwhat" class="csl-entry" role="listitem">
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">Hawley SH (2025) <a href="https://iclr-blogposts.github.io/2025/blog/flow-with-what-you-know/">Flow with what you know</a>. In: ICLR blogposts 2025</div>
+</div>
+<div id="ref-zhang2023addingconditionalcontroltexttoimage" class="csl-entry" role="listitem">
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">Zhang L, Rao A, Agrawala M (2023) <a href="https://arxiv.org/abs/2302.05543">Adding conditional control to text-to-image diffusion models</a></div>
+</div>
+<div id="ref-huyen_2023_rlhf" class="csl-entry" role="listitem">
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">Huyen C (2023) <a href="https://huyenchip.com/2023/05/02/rlhf.html">RLHF: Reinforcement learning from human feedback</a></div>
+</div>
+<div id="ref-tancik2020fourierfeaturesletnetworks" class="csl-entry" role="listitem">
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">Tancik M, Srinivasan PP, Mildenhall B, et al (2020) <a href="https://arxiv.org/abs/2006.10739">Fourier features let networks learn high frequency functions in low dimensional domains</a></div>
+</div>
+<div id="ref-sun2024learninghighfrequencyfunctionseasy" class="csl-entry" role="listitem">
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">Sun C, Yuan Z, Xu K, et al (2024) <a href="https://arxiv.org/abs/2407.09370">Learning high-frequency functions made easy with sinusoidal positional encoding</a></div>
+</div>
+</div></section></div></main> <!-- /main -->
+<!-- Cloudflare Web Analytics --><script defer="" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon="{&quot;token&quot;: &quot;d0b3c27b7e5c43938065722a5136416f&quot;}"></script><!-- End Cloudflare Web Analytics -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
+          }
+        }
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/marcobisky\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<script src="https://utteranc.es/client.js" repo="Marcobisky.github.io" issue-term="pathname" theme="github-light" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© Copyright 2025 Marcobisky.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

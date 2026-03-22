@@ -188,7 +188,15 @@
     - **Mini-batch Gradient Descent 小批量梯度下降**: 每次用一批样本 (mini-batch, 如 $32$ 个样本) 前向传播然后算这批样本的平均 Loss 来进行反向传播更新参数.
         - 前两个太极端了, BGD 计算量太大, SGD 不稳定, 基本不会用!
     - **Batch**: 每次用多少样本进行一次参数更新.
+        - Batch 其实就是数据集的一种**分割** (如果数据集小的话就不分割了, 直接用整个数据集). 分割的意思就是每个 batch 中的东西不会重复:
+            ```python
+            data = [1,2,3,4,5]
+            loader = DataLoader(data, batch_size=2, shuffle=True)
+            # loader = [[3,4], [2,5], [1]]
+            ```
+
         - *Abuse of Terms:* 有时候卷积核的个数也称为 batch (这是因为 image batch 和 kernel 在内存中的布局方法可以一样, 但真是离大谱!)
+        - **注意区分 batch 和 epoch**: 一个 epoch 是指整个训练集的每一条都用过了, 10000 个 epoch 就是每条相同的数据都用了 10000 次. 一个 epoch 内部可能会分很多个 batch (也可以只有一个 batch, 即整个数据集都喂进去, 即 BGD).
 
 [^gd]: *Abuse of Terms:* 现在说的 GD/SGD 就是指 Mini-batch 版本! 实际训练中不用 BGD (计算量太大) 和纯 SGD (不稳定)!
 
