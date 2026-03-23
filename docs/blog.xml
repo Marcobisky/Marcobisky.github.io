@@ -357,18 +357,28 @@ Figure&nbsp;9: conditional 和 unconditional 的分布在不同 dropout 下是 t
 </figcaption>
 </figure>
 </div>
+<div id="fig-ft-loss-dropout" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ft-loss-dropout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/vgg/ft-loss-dropout.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ft-loss-dropout-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: 不同的 dropout 设置对损失函数的影响.
+</figcaption>
+</figure>
+</div>
 </section>
 </section>
 <section id="alignment" class="level2 page-columns page-full" data-number="4">
 <h2 data-number="4" class="anchored" data-anchor-id="alignment"><span class="header-section-number">4</span> Alignment</h2>
-<p>得到 conditional FM model <code>ConditionalMLPVelocity</code> 之后, 我们的目标是让它的输出图片 (2D 点) 的「质量」更高 (称为 <strong>alignment</strong> 对齐人类美学). 我们定义了一个 reward function <code>Reward2D</code> <img src="https://latex.codecogs.com/png.latex?r(x)"> 来衡量输出点的质量 (Figure&nbsp;10), 黄色区域表示质量较高, 蓝色区域表示质量较低.</p>
+<p>得到 conditional FM model <code>ConditionalMLPVelocity</code> 之后, 我们的目标是让它的输出图片 (2D 点) 的「质量」更高 (称为 <strong>alignment</strong> 对齐人类美学). 我们定义了一个 reward function <code>Reward2D</code> <img src="https://latex.codecogs.com/png.latex?r(x)"> 来衡量输出点的质量 (Figure&nbsp;11), 黄色区域表示质量较高, 蓝色区域表示质量较低.</p>
 <div id="fig-reward-function" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-reward-function-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="https://marcobisky.github.io/posts/vgg/reward-function.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-reward-function-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;10: 黄色区域表示图片质量较高.
+Figure&nbsp;11: 黄色区域表示图片质量较高.
 </figcaption>
 </figure>
 </div>
@@ -388,7 +398,7 @@ Figure&nbsp;10: 黄色区域表示图片质量较高.
 <img src="https://marcobisky.github.io/posts/vgg/rank-ui-openai.png" class="img-fluid figure-img" style="width:80.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rank-ui-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;11: OpenAI’s labeler 对指令-回答对打分的 UI <span class="citation" data-cites="huyen_2023_rlhf">[4]</span>.
+Figure&nbsp;12: OpenAI’s labeler 对指令-回答对打分的 UI <span class="citation" data-cites="huyen_2023_rlhf">[4]</span>.
 </figcaption>
 </figure>
 </div></li>
@@ -409,7 +419,7 @@ Figure&nbsp;11: OpenAI’s labeler 对指令-回答对打分的 UI <span class="
 <img src="https://marcobisky.github.io/posts/vgg/control-theory-reminder.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-control-theory-reminder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;12: A quick reminder of nonlinear control theory. 注意这里举的例子不太一样, 是<strong>时不变</strong>的系统, 所以自变量没有 <img src="https://latex.codecogs.com/png.latex?t">. 另外箭头的方向我随便画的没有特殊含义.
+Figure&nbsp;13: A quick reminder of nonlinear control theory. 注意这里举的例子不太一样, 是<strong>时不变</strong>的系统, 所以自变量没有 <img src="https://latex.codecogs.com/png.latex?t">. 另外箭头的方向我随便画的没有特殊含义.
 </figcaption>
 </figure>
 </div>
@@ -446,9 +456,16 @@ Figure&nbsp;12: A quick reminder of nonlinear control theory. 注意这里举的
 <p>我们先设计一个神经网络 <code>PINN</code> 来拟合 <img src="https://latex.codecogs.com/png.latex?V%5E*">, 它输入 <img src="https://latex.codecogs.com/png.latex?(x,t,c)">, 输出一个实数. 损失来源于两个地方: Equation&nbsp;5 和 Equation&nbsp;6 的满足情况. 我们可以随机生成很多个 Collocation points <img src="https://latex.codecogs.com/png.latex?x_i"> 塞进 <code>PINN</code>, 但是还要同时输入 <img src="https://latex.codecogs.com/png.latex?t"> 和 <img src="https://latex.codecogs.com/png.latex?c"> 神经网络才会吐出值来, 所以直接随机产生一大堆 <img src="https://latex.codecogs.com/png.latex?t"> 和 <img src="https://latex.codecogs.com/png.latex?c"> 然后分成 batch 平均掉. 所以 Loss 可以表达为:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0AL_%7B%5Ctext%7BPDE%7D%7D(%5Cphi)%20&amp;=%20%5Cmathbb%7BE%7D_%7Bx_0%20%5Csim%20%5Cmathcal%7BN%7D(0,I),%20t%20%5Csim%20U(%5B0,1%5D),%20c%20%5Csim%20U(%5Cmathbb%7BZ%7D_7)%7D%20%5Cleft%5C%7C%20%5Cfrac%7B%5Cpartial%20V%7D%7B%5Cpartial%20t%7D%20-%20%5Cfrac%7B1%7D%7B2%5Clambda%7D%20%5C%7C%5Cnabla%20V%5C%7C%5E2%20+%20%5Cnabla%20V%20%5Ccdot%20v_%5Ctext%7Bbase%7D%20%5Cright%5C%7C%5E2%20%5C%5C%0AL_%7B%5Ctext%7Bboundary%7D%7D(%5Cphi)%20&amp;=%20%5Cmathbb%7BE%7D_%7Bx_0%20%5Csim%20%5Cmathcal%7BN%7D(0,I),%20t%20=%201,%20c%20%5Csim%20U(%5Cmathbb%7BZ%7D_7)%7D%20%5C%7C%5Cnabla%20V%20+%20%5Cnabla%20r(x_1)%5C%7C%5E2%0A%5Cend%7Baligned%7D%0A"></p>
 <p>其中 <img src="https://latex.codecogs.com/png.latex?%5Cphi"> 是 <code>PINN</code> 的参数. 总 Loss 就是两者的和:</p>
-<p><img src="https://latex.codecogs.com/png.latex?%0AL_%7B%5Ctext%7BPINN%7D%7D%20(%5Cphi)%20=%20%5Calpha%20L_%7B%5Ctext%7Bboundary%7D%7D(%5Cphi)%20+%20L_%7B%5Ctext%7BPDE%7D%7D(%5Cphi)%0A"></p>
+<p><span id="eq-pinn-total-loss"><img src="https://latex.codecogs.com/png.latex?%0AL_%7B%5Ctext%7BPINN%7D%7D%20(%5Cphi)%20=%20%5Calpha%20L_%7B%5Ctext%7Bboundary%7D%7D(%5Cphi)%20+%20L_%7B%5Ctext%7BPDE%7D%7D(%5Cphi)%0A%5Ctag%7B7%7D"></span></p>
 <p>Loss 里面 <img src="https://latex.codecogs.com/png.latex?%5Cpartial%20V%20/%20%5Cpartial%20t"> 和 <img src="https://latex.codecogs.com/png.latex?%5Cnabla%20V"> 都可以通过 Autograd 来求. <img src="https://latex.codecogs.com/png.latex?%5Calpha"> 用来调整边界条件的重要性占比. 理论上我们就已经可以拿到 <img src="https://latex.codecogs.com/png.latex?V%5E*"> 了!</p>
-<p>但是训练过就会发现不论将 <img src="https://latex.codecogs.com/png.latex?%5Calpha"> 调多大, 训练出来的 <img src="https://latex.codecogs.com/png.latex?%5Cnabla%20V%5E*"> 都接近 0, 也就是学到的风一直为 0. 原因不明, <span class="citation" data-cites="liu2025vggflow">[1]</span> 文中也写到「直接参数化 <img src="https://latex.codecogs.com/png.latex?V%5E*"> 不如参数化 <img src="https://latex.codecogs.com/png.latex?%5Cnabla%20V%5E*"> 有效果」, 从而 <span class="citation" data-cites="liu2025vggflow">[1]</span> 选择了对 Equation&nbsp;5 两边求梯度, 得到一个比较复杂的 PDE:</p>
+<p>但是训练过就会发现不论将 <img src="https://latex.codecogs.com/png.latex?%5Calpha"> 调多大, 训练出来的 <img src="https://latex.codecogs.com/png.latex?%5Cnabla%20V%5E*"> 都接近 0, 也就是学到的风一直为 0. <span class="citation" data-cites="wang2020understandingmitigatinggradientpathologies">[5]</span> 中的研究也发现, 如果用 Equation&nbsp;7 这种加权的形式来训练 PINN 的话, PDE Loss <img src="https://latex.codecogs.com/png.latex?L_%7B%5Ctext%7BPDE%7D%7D"> 会淹没掉 Boundary Loss <img src="https://latex.codecogs.com/png.latex?L_%7B%5Ctext%7Bboundary%7D%7D">, 网络会疯狂地看 PDE 方程本身, 而忽略边界条件:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://marcobisky.github.io/posts/vgg/helmholtz.png" class="img-fluid figure-img"></p>
+<figcaption><span class="citation" data-cites="wang2020understandingmitigatinggradientpathologies">[5]</span> 用神经网络拟合 Helmholtz 方程, 在 40000 步时, 4 个隐藏层反向传播梯度大小的统计. 蓝色的 <img src="https://latex.codecogs.com/png.latex?L_%7B%5Ctext%7Bboundary%7D%7D"> 尖锐地集中在 0 附近.</figcaption>
+</figure>
+</div>
+<p><span class="citation" data-cites="liu2025vggflow">[1]</span> 文中也写到「直接参数化 <img src="https://latex.codecogs.com/png.latex?V%5E*"> 不如参数化 <img src="https://latex.codecogs.com/png.latex?%5Cnabla%20V%5E*"> 有效果」, 从而 <span class="citation" data-cites="liu2025vggflow">[1]</span> 选择了对 Equation&nbsp;5 两边求梯度, 得到一个比较复杂的 PDE:</p>
 <p><img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7B%5Cpartial%7D%7B%5Cpartial%20t%7D%20%5Cnabla%20V%5E*%20=%20%5B%5Cnabla%20%5Cnabla%20V%5E*%5D%5ET%20%5Cleft(%5Cfrac%7B1%7D%7B%5Clambda%7D%20%5Cnabla%20V%5E*%20-%20v_%7B%5Ctext%7Bbase%7D%7D%5Cright)%20-%20%5B%5Cnabla%20v_%7B%5Ctext%7Bbase%7D%7D%5D%5ET%20%5Cnabla%20V%5E*%0A"></p>
 <p>然后可能用输入为 <img src="https://latex.codecogs.com/png.latex?(x,t,c)">, 输出一个向量 <img src="https://latex.codecogs.com/png.latex?%5Cnabla%20V%5E*"> 的网络来拟合这个 PDE.</p>
 <p>但是这样代码会有点复杂, 我也没试过, 但是笔者尝试了下面的方案, 效果还不错, 动机和原因就忽略了哈哈, 直接罗列出来:</p>
@@ -461,11 +478,11 @@ Figure&nbsp;12: A quick reminder of nonlinear control theory. 注意这里举的
 <img src="https://marcobisky.github.io/posts/vgg/pinn.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pinn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;13: Final PINN Architecture.
+Figure&nbsp;14: Final PINN Architecture.
 </figcaption>
 </figure>
 </div>
-<p>Figure&nbsp;13 是最终的 <code>PINN</code> 设计, 主要有以下几个特点:</p>
+<p>Figure&nbsp;14 是最终的 <code>PINN</code> 设计, 主要有以下几个特点:</p>
 <section id="dual-head" class="level4" data-number="4.2.1">
 <h4 data-number="4.2.1" class="anchored" data-anchor-id="dual-head"><span class="header-section-number">4.2.1</span> Dual-head</h4>
 <p>还是用 Equation&nbsp;5 的形式来训练 <code>PINN</code>, 输入还是 <img src="https://latex.codecogs.com/png.latex?(x,t,c)">, 只不过<strong>输出多加一个 head</strong>, 即输出 <img src="https://latex.codecogs.com/png.latex?(V%5E*,%20%5Cnabla%20V%5E*)">.</p>
@@ -474,11 +491,21 @@ Figure&nbsp;13: Final PINN Architecture.
 </section>
 <section id="two-stage-training" class="level4" data-number="4.2.2">
 <h4 data-number="4.2.2" class="anchored" data-anchor-id="two-stage-training"><span class="header-section-number">4.2.2</span> Two-stage Training</h4>
-<p>动机很简单也很 ad hoc: 既然学不到边界条件, 那就先单独训练边界条件, 再用三个 Loss 进行联合训练:</p>
+<p>动机很简单也很 ad hoc: 既然学不到边界条件, 那就先单独训练边界条件, 训完以后再用三个 Loss 进行联合训练:</p>
 <ul>
 <li><strong>Stage 1</strong>: 只开启 Boundary Loss: <img src="https://latex.codecogs.com/png.latex?%0A%20%20L_%7B%5Ctext%7Bboundary%7D%7D(%5Cphi)%0A%20%20"></li>
 <li><strong>Stage 2</strong>: 三个 Loss 一起训练: <img src="https://latex.codecogs.com/png.latex?%0A%20%20L_%7B%5Ctext%7BPINN%7D%7D%20(%5Cphi)%20=%20%5Calpha_b%20L_%7B%5Ctext%7Bboundary%7D%7D(%5Cphi)%20+%20L_%7B%5Ctext%7BPDE%7D%7D(%5Cphi)%20+%20%5Calpha_c%20L_%7B%5Ctext%7Bconsistency%7D%7D%20(%5Cphi)%0A%20%20"> where <img src="https://latex.codecogs.com/png.latex?%5Calpha_b=5">, <img src="https://latex.codecogs.com/png.latex?%5Calpha_c=0.5">.</li>
 </ul>
+<div id="fig-pinn-loss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pinn-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/vgg/pinn-loss.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pinn-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15: 分两个阶段训练能让 PINN 学到边界条件的 Loss.
+</figcaption>
+</figure>
+</div>
 </section>
 <section id="autograd-free" class="level4" data-number="4.2.3">
 <h4 data-number="4.2.3" class="anchored" data-anchor-id="autograd-free"><span class="header-section-number">4.2.3</span> Autograd-free</h4>
@@ -486,8 +513,8 @@ Figure&nbsp;13: Final PINN Architecture.
 </section>
 <section id="random-fourier-features-encoding-rff" class="level4" data-number="4.2.4">
 <h4 data-number="4.2.4" class="anchored" data-anchor-id="random-fourier-features-encoding-rff"><span class="header-section-number">4.2.4</span> Random Fourier Features Encoding (RFF)</h4>
-<p>由于 <code>PINN</code> 设计成了 MLP, <strong>MLP 难以学到高频信号</strong> <span class="citation" data-cites="tancik2020fourierfeaturesletnetworks sun2024learninghighfrequencyfunctionseasy">[5, 6]</span>, 即微小的 <img src="https://latex.codecogs.com/png.latex?x"> 变化造成的梯度信息难以被捕捉 (是这样诠释吗?).</p>
-<p>方案如图 Figure&nbsp;13, 对点的位置采用 RFF 编码: 先将 <img src="https://latex.codecogs.com/png.latex?x"> 乘上一个随机矩阵升到 64 维, 再模仿 <img src="https://latex.codecogs.com/png.latex?t"> 的编码方式用 <img src="https://latex.codecogs.com/png.latex?%5Csin"> 和 <img src="https://latex.codecogs.com/png.latex?%5Ccos"> 进行逐点运算再拼接得到 128 维的向量 (64 个蓝色箭头, 64 个绿色箭头).</p>
+<p>由于 <code>PINN</code> 设计成了 MLP, <strong>MLP 难以学到高频信号</strong> <span class="citation" data-cites="tancik2020fourierfeaturesletnetworks sun2024learninghighfrequencyfunctionseasy">[6, 7]</span>, 即微小的 <img src="https://latex.codecogs.com/png.latex?x"> 变化造成的梯度信息难以被捕捉 (是这样诠释吗?).</p>
+<p>方案如图 Figure&nbsp;14, 对点的位置采用 RFF 编码: 先将 <img src="https://latex.codecogs.com/png.latex?x"> 乘上一个随机矩阵升到 64 维, 再模仿 <img src="https://latex.codecogs.com/png.latex?t"> 的编码方式用 <img src="https://latex.codecogs.com/png.latex?%5Csin"> 和 <img src="https://latex.codecogs.com/png.latex?%5Ccos"> 进行逐点运算再拼接得到 128 维的向量 (64 个蓝色箭头, 64 个绿色箭头).</p>
 <p>目前的理解是<strong>直接学习一个信号如何变化, 不如学习这个信号的频谱如何变化来得快</strong>.</p>
 </section>
 </section>
@@ -500,19 +527,19 @@ Figure&nbsp;13: Final PINN Architecture.
 <img src="https://marcobisky.github.io/posts/vgg/vtheta-no-distill.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-vtheta-no-distill-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;14: 直接将 <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7Bv%7D_%5Ctheta%5E*"> 加到 <img src="https://latex.codecogs.com/png.latex?v_%7B%5Ctext%7Bbase%7D%7D"> 上得到 <img src="https://latex.codecogs.com/png.latex?v_%5Ctheta"> 网络.
+Figure&nbsp;16: 直接将 <img src="https://latex.codecogs.com/png.latex?%5Ctilde%7Bv%7D_%5Ctheta%5E*"> 加到 <img src="https://latex.codecogs.com/png.latex?v_%7B%5Ctext%7Bbase%7D%7D"> 上得到 <img src="https://latex.codecogs.com/png.latex?v_%5Ctheta"> 网络.
 </figcaption>
 </figure>
 </div>
-<p>注意这里跟 <span class="citation" data-cites="liu2025vggflow">[1]</span> 有区别, <span class="citation" data-cites="liu2025vggflow">[1]</span> 相当于还对 Figure&nbsp;14 的知识 distill 到了 <img src="https://latex.codecogs.com/png.latex?v_%7B%5Ctext%7Bbase%7D%7D"> 里面 (而不是直接两个网络的输出相加). 但是我们这里就不蒸馏了哈哈哈.</p>
-<p>用同一批噪声分别经过 align 过后的网络和未 align 的网络, 可以得到两批点的分布, 我们计算在每种 class 下 final 分布的平均 reward. 由 Figure&nbsp;15 可以看到, align 过后 final 点的平均 reward 在所有 class label 下 (包括 unconditional) 都有了提升, 说明 <code>PINN</code> 成功学到了人类的审美.</p>
+<p>注意这里跟 <span class="citation" data-cites="liu2025vggflow">[1]</span> 有区别, <span class="citation" data-cites="liu2025vggflow">[1]</span> 相当于还对 Figure&nbsp;16 的知识 distill 到了 <img src="https://latex.codecogs.com/png.latex?v_%7B%5Ctext%7Bbase%7D%7D"> 里面 (而不是直接两个网络的输出相加). 但是我们这里就不蒸馏了哈哈哈.</p>
+<p>用同一批噪声分别经过 align 过后的网络和未 align 的网络, 可以得到两批点的分布, 我们计算在每种 class 下 final 分布的平均 reward. 由 Figure&nbsp;17 可以看到, align 过后 final 点的平均 reward 在所有 class label 下 (包括 unconditional) 都有了提升, 说明 <code>PINN</code> 成功学到了人类的审美.</p>
 <div id="fig-alignment-result" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-alignment-result-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="https://marcobisky.github.io/posts/vgg/alignment_step2_sampling.png" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alignment-result-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;15: 从 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(0,%20I)"> 采样的<strong>同一批噪声</strong>经未 align 的 ODE 和 align 后 ODE 的点的分布.
+Figure&nbsp;17: 从 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7BN%7D(0,%20I)"> 采样的<strong>同一批噪声</strong>经未 align 的 ODE 和 align 后 ODE 的点的分布.
 </figcaption>
 </figure>
 </div>
@@ -523,7 +550,7 @@ Figure&nbsp;15: 从 <img src="https://latex.codecogs.com/png.latex?%5Cmathcal%7B
 <img src="https://marcobisky.github.io/posts/vgg/alignment-total-jet.gif" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alignment-result-jet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;16: 加和以后的 ODE flow (<img src="https://latex.codecogs.com/png.latex?v_%7B%5Ctheta%7D">).
+Figure&nbsp;18: 加和以后的 ODE flow (<img src="https://latex.codecogs.com/png.latex?v_%7B%5Ctheta%7D">).
 </figcaption>
 </figure>
 </div>
@@ -533,7 +560,7 @@ Figure&nbsp;16: 加和以后的 ODE flow (<img src="https://latex.codecogs.com/p
 <img src="https://marcobisky.github.io/posts/vgg/alignment-base-gray-residual-red.gif" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-alignment-result-jet2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17: 把分量画出来, 红色代表风场, 不太明显的灰色代表 <img src="https://latex.codecogs.com/png.latex?v_%7B%5Ctext%7Bbase%7D%7D">.
+Figure&nbsp;19: 把分量画出来, 红色代表风场, 不太明显的灰色代表 <img src="https://latex.codecogs.com/png.latex?v_%7B%5Ctext%7Bbase%7D%7D">.
 </figcaption>
 </figure>
 </div>
@@ -649,11 +676,14 @@ Figure&nbsp;17: 把分量画出来, 红色代表风场, 不太明显的灰色代
 <div id="ref-huyen_2023_rlhf" class="csl-entry">
 <div class="csl-left-margin">4. </div><div class="csl-right-inline">Huyen C (2023) <a href="https://huyenchip.com/2023/05/02/rlhf.html">RLHF: Reinforcement learning from human feedback</a></div>
 </div>
+<div id="ref-wang2020understandingmitigatinggradientpathologies" class="csl-entry">
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">Wang S, Teng Y, Perdikaris P (2020) <a href="https://arxiv.org/abs/2001.04536">Understanding and mitigating gradient pathologies in physics-informed neural networks</a></div>
+</div>
 <div id="ref-tancik2020fourierfeaturesletnetworks" class="csl-entry">
-<div class="csl-left-margin">5. </div><div class="csl-right-inline">Tancik M, Srinivasan PP, Mildenhall B, et al (2020) <a href="https://arxiv.org/abs/2006.10739">Fourier features let networks learn high frequency functions in low dimensional domains</a></div>
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">Tancik M, Srinivasan PP, Mildenhall B, et al (2020) <a href="https://arxiv.org/abs/2006.10739">Fourier features let networks learn high frequency functions in low dimensional domains</a></div>
 </div>
 <div id="ref-sun2024learninghighfrequencyfunctionseasy" class="csl-entry">
-<div class="csl-left-margin">6. </div><div class="csl-right-inline">Sun C, Yuan Z, Xu K, et al (2024) <a href="https://arxiv.org/abs/2407.09370">Learning high-frequency functions made easy with sinusoidal positional encoding</a></div>
+<div class="csl-left-margin">7. </div><div class="csl-right-inline">Sun C, Yuan Z, Xu K, et al (2024) <a href="https://arxiv.org/abs/2407.09370">Learning high-frequency functions made easy with sinusoidal positional encoding</a></div>
 </div>
 </div></section></div> ]]></description>
   <category>machine-learning</category>

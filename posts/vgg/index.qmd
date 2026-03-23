@@ -143,6 +143,8 @@ class CondEmbedderLabel(nn.Module):
 conditional 和 unconditional 的分布在不同 dropout 下是 trade-off 关系.
 :::
 
+![不同的 dropout 设置对损失函数的影响.](ft-loss-dropout.png){#fig-ft-loss-dropout width=90%}
+
 ## Alignment
 
 得到 conditional FM model `ConditionalMLPVelocity` 之后, 我们的目标是让它的输出图片 (2D 点) 的「质量」更高 (称为 **alignment** 对齐人类美学). 我们定义了一个 reward function `Reward2D` $r(x)$ 来衡量输出点的质量 (@fig-reward-function), 黄色区域表示质量较高, 蓝色区域表示质量较低. 
@@ -290,11 +292,15 @@ $$
 
 $$
 L_{\text{PINN}} (\phi) = \alpha L_{\text{boundary}}(\phi) + L_{\text{PDE}}(\phi)
-$$
+$${#eq-pinn-total-loss}
 
 Loss 里面 $\partial V / \partial t$ 和 $\nabla V$ 都可以通过 Autograd 来求. $\alpha$ 用来调整边界条件的重要性占比. 理论上我们就已经可以拿到 $V^*$ 了! 
 
-但是训练过就会发现不论将 $\alpha$ 调多大, 训练出来的 $\nabla V^*$ 都接近 0, 也就是学到的风一直为 0. 原因不明, @liu2025vggflow 文中也写到「直接参数化 $V^*$ 不如参数化 $\nabla V^*$ 有效果」, 从而 @liu2025vggflow 选择了对 @eq-pde 两边求梯度, 得到一个比较复杂的 PDE:
+但是训练过就会发现不论将 $\alpha$ 调多大, 训练出来的 $\nabla V^*$ 都接近 0, 也就是学到的风一直为 0. @wang2020understandingmitigatinggradientpathologies 中的研究也发现, 如果用 @eq-pinn-total-loss 这种加权的形式来训练 PINN 的话, PDE Loss $L_{\text{PDE}}$ 会淹没掉 Boundary Loss $L_{\text{boundary}}$, 网络会疯狂地看 PDE 方程本身, 而忽略边界条件:
+
+![@wang2020understandingmitigatinggradientpathologies 用神经网络拟合 Helmholtz 方程, 在 40000 步时, 4 个隐藏层反向传播梯度大小的统计. 蓝色的 $L_{\text{boundary}}$ 尖锐地集中在 0 附近.](helmholtz.png)
+
+@liu2025vggflow 文中也写到「直接参数化 $V^*$ 不如参数化 $\nabla V^*$ 有效果」, 从而 @liu2025vggflow 选择了对 @eq-pde 两边求梯度, 得到一个比较复杂的 PDE:
 
 $$
 \frac{\partial}{\partial t} \nabla V^* = [\nabla \nabla V^*]^T \left(\frac{1}{\lambda} \nabla V^* - v_{\text{base}}\right) - [\nabla v_{\text{base}}]^T \nabla V^*
@@ -323,7 +329,7 @@ $$
 
 #### Two-stage Training
 
-动机很简单也很 ad hoc: 既然学不到边界条件, 那就先单独训练边界条件, 再用三个 Loss 进行联合训练:
+动机很简单也很 ad hoc: 既然学不到边界条件, 那就先单独训练边界条件, 训完以后再用三个 Loss 进行联合训练:
 
 - **Stage 1**: 只开启 Boundary Loss:
     $$
@@ -334,6 +340,8 @@ $$
     L_{\text{PINN}} (\phi) = \alpha_b L_{\text{boundary}}(\phi) + L_{\text{PDE}}(\phi) + \alpha_c L_{\text{consistency}} (\phi)
     $$
     where $\alpha_b=5$, $\alpha_c=0.5$.
+
+![分两个阶段训练能让 PINN 学到边界条件的 Loss.](pinn-loss.png){#fig-pinn-loss width=90%}
 
 #### Autograd-free
 
