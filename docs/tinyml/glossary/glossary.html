@@ -1193,10 +1193,29 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 </ul></li>
 <li><p><strong>VLA (Vision Language Action)</strong>: 智能驾驶/机器人领域内的一种先进的多模态机器学习模型, 它结合了视觉、语言和动作三种能力, 旨在实现从感知输入直接映射到机器人控制动作的完整闭环能力.</p></li>
 <li><p><strong>VLM (Vision Language Model)</strong>: 视觉语言模型, 可处理图片和自然语言两种模态进行理解和生成任务的模型.</p></li>
+<li><p><strong>自动驾驶相关</strong>:</p>
+<ul>
+<li>研究方式:
+<ul>
+<li><strong>闭环</strong>: 需要用到仿真器 (如 CARLA) 来模拟自动驾驶的环境, 模型的输出会反过来影响输入 (所以叫闭环).</li>
+<li><strong>开环</strong>: 不需要仿真器, 用录制好的真实驾驶的视频来训练模型, 模型是在被动地学习, 输入不会因为模型的输出而改变 (所以叫开环).
+<ul>
+<li>开环中用来评估模型好坏的指标: <strong>L2 distance</strong> (预测轨迹与真实轨迹的 L2 距离), <strong>Collision rate</strong> (预测轨迹与其它物体发生碰撞的频率).</li>
+</ul></li>
+</ul></li>
+<li>相关模型:
+<ul>
+<li><strong>BEV Net (Birds-Eye-View)</strong>: 一系列网络模型 (而不是一个).</li>
+</ul></li>
+</ul></li>
 <li><p><strong>ViT (Vision Transformer)</strong>: 一种基于 Transformer 架构的计算机视觉模型.</p></li>
 <li><p><strong>AIGC (AI-Generated Content)</strong>: 生成式 AI.</p></li>
 <li><p><strong>PINN (Physics-Informed Neural Networks)</strong>: 比如用神经网络来预测 Navier-Stokes 方程的解, 神经网络的输入为 <span class="math inline">\((x,y,z,t)\)</span>, 输出为 <span class="math inline">\((u,v,w,p)\)</span> (三个方向的速度和压强), 然后基于这些数据可以得到一些偏导数的信息, loss 函数由两个方面构成: 少量的数据点、以及 Navier-Stokes 方程本身的约束条件.</p></li>
-<li><p><strong>End-to-end model 端到端模型</strong>: 不拆解问题而是直接用一个步骤来解决. 比如同声传译, 标准化流程需要设计 3 个网络 (ZNspeech -&gt; Chinese -&gt; English -&gt; ENspeech); 而端到端模型直接是 ZNspeech -&gt; ENspeech.</p></li>
+<li><p><strong>End-to-end model 端到端模型</strong>: 不拆解问题而是直接用一个步骤来解决.</p>
+<ul>
+<li>比如同声传译, 标准化流程需要设计 3 个网络 (ZNspeech -&gt; Chinese -&gt; English -&gt; ENspeech); 而端到端模型直接是 ZNspeech -&gt; ENspeech.</li>
+<li>再比如自动驾驶, 端到端直接就是图像/传感器输入 -&gt; 油门/方向盘角度输出, 用一个网络解决, 没有明确的分工网络.</li>
+</ul></li>
 <li><p><strong>Prompt Engineering 提示词工程</strong>: 通过<strong>设计一个模版</strong>告诉模型额外的信息.</p>
 <ul>
 <li>为什么要设计模版呢? 比如训练 CLIP 模型需要图片-文本对, 如果发现某个文本模版少了一些信息, 就需要补上, 怎么补上呢? 比如是一张遥控器 (remote) 的图片, 直接把 “remote” 加到原始文本的后面? 肯定不行, 这样句子都不完整, 而且模型可能会觉得 “remote” 是 “遥远的” 意思, 这时候就需要用 “A photo of a remote” 这样的<strong>模版</strong>来补全这个文本, 这就是 prompt engineering.</li>
@@ -1205,13 +1224,20 @@ Figure&nbsp;13: ANN vs SNN <span class="citation" data-cites="deng2025edgeintell
 <ul>
 <li>如果真要说有区别的话, <strong>latent space 更 intrinsic 一点</strong>, 毕竟 embedding 感觉可以潜入欧式空间一点.</li>
 </ul></li>
-<li><p><strong>World Models 世界模型</strong></p></li>
+<li><p><strong>World Models 世界模型</strong></p>
+<ul>
+<li><strong>JEPA (Joint-Embedding Predictive Architecture)</strong>: Yann LeCun 提出的一种世界模型的思想/模型架构. 大概意思是不要期待模型逐帧/逐像素生成, 而是在一个抽象的语义空间中预测和生成 (有点 Latent Diffusion 的感觉?)</li>
+</ul></li>
 </ul>
 </section>
 <section id="rl-相关" class="level3">
 <h3 class="anchored" data-anchor-id="rl-相关">RL 相关</h3>
 <ul>
-<li><strong>Reinforcement Learning (RL) 强化学习</strong>:</li>
+<li>RL 中不同算法的一个很重要的区别是 reward 的来源, 根据它, RL 可分为下面两个大类:
+<ul>
+<li><p><strong>RLHF (Reinforcement Learning with Human Feedback)</strong>: Reward 来源于 hman preference reward model.</p></li>
+<li><p><strong>RLVR (Reinforcement Learning with Verifiable Rewards)</strong>: Reward 来源于 rule-based or deterministic verifiers.</p></li>
+</ul></li>
 </ul>
 </section>
 <section id="sec-cv-terms" class="level3">
@@ -1317,6 +1343,8 @@ Figure&nbsp;16: 分布式训练: The Third Epoch of AI <span class="citation" da
 </figure>
 </div></li>
 </ul></li>
+<li><p><strong>Model States</strong>: 训练时模型本身相关的、必须存储的参数. 包括 Parameters, Gradients, Optimizer States (比如 Adam 中的 momentum 和 variance).</p></li>
+<li><p><strong>Residual States</strong>: 训练过程中非模型必须的数据: Activation, Temporary buffers, Unusable fragmented memory (碎片化存储空间).</p></li>
 <li><p><strong>数据类型</strong>:</p>
 <ul>
 <li><strong>FP32</strong>: 32 位浮点数, 1 位符号位, 8 位指数位, 23 位尾数位 (<strong>E8M23</strong>), 精度高, 计算速度慢.
@@ -1324,7 +1352,9 @@ Figure&nbsp;16: 分布式训练: The Third Epoch of AI <span class="citation" da
 <li><strong>FP16</strong>: E5M10.</li>
 </ul></li>
 <li><strong>BF16</strong>: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位 (<strong>E8M7</strong>), 精度低, 计算速度快.</li>
+<li>对于小数的表示, 16/32/64 位也叫: <strong>半精度/单精度/双精度</strong>.</li>
 </ul></li>
+<li><p><strong>混合精度</strong>: 一般指 FP32 + FP16/BF16.</p></li>
 <li><p><strong>FLOP (Floating-Point OPeration)</strong>: 一次浮点运算包括一次加/减/乘/除.</p>
 <ul>
 <li><strong>FLOPs (Floating-point Operations)</strong>: 用来表达<strong>计算量</strong>.</li>
@@ -1367,7 +1397,7 @@ Figure&nbsp;17: 用权重矩阵展示 (a) Structured (b) unstructured (c) semi-s
 </ul></li>
 <li><p><strong>Tiling 分块/瓦片</strong>: 在 CUDA 编程中, 由于 global memory 访问延迟高, 比如计算两个矩阵相加, 可以将上半和下半部分分别交给两个 block 里进行计算, 开辟两个 shared memory 来存储各自的半部分 (注意 shared memory 不在 block 间共享, 矩阵上下两半部分的相加刚好也是无依赖的! 如果是 GEMM 就不能这样分配!). shared memory 访问效率高.</p></li>
 <li><p><strong>PTX (Parallel Thread eXecution)</strong>: NVIDIA GPU 的汇编语言.</p></li>
-<li><p><strong>TBE (Tensor Boost Engine)</strong>: 华为自研的、专门用于在昇腾AI处理器 (NPU) 上编写和运行高性能计算算子 (Operator) 的核心组件.</p></li>
+<li><p><strong>TBE (Tensor Boost Engine)</strong>: 华为自研的、专门用于在昇腾 AI 处理器 (NPU) 上编写和运行高性能计算算子 (Operator) 的核心组件.</p></li>
 <li><p><strong>BLAS (Basic Linear Algebra Subproblems)</strong>: 计算机的几乎所有的数值计算 (QR 分解, 神经网络前向传播, etc.) 最终都会退化成以下三种形式 (当然前两种是第三种的特殊情况). BLAS 就是定义下面三个 level 的规范. (<em>cuBLAS</em> 是 NVIDIA 的 BLAS 实现, Apple 的 BLAS 实现是 <em>Accelerate</em>).</p>
 <ul>
 <li><strong>Level 1</strong>: 数据访问量 <span class="math inline">\(\mathcal{O}(N)\)</span> 的系列操作, 包括:</li>

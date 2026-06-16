@@ -136,9 +136,63 @@
     ```python
     t = torch.tensor([1,2,3,4,5,6,7,8])
     t = t.view(4, 2)        # Grouping, t.shape = [4,2], t = [[1,2],[3,4],[5,6],[7,8]]
+    # t = t.reshape(4, 2)   # same as view()
     t = t.view(2, -1, 2)    # -1 represents to compute that dimension automatically, same as view(2, 2, 2)
                             # t = [[[1,2],[3,4]],[[5,6],[7,8]]]
     t = t.view(-1)          # Flatten all, t = [1,2,3,4,5,6,7,8]
+    ```
+
+#### 添加维度
+
+- `unsqueeze(dim=d)` 在维度 `d` 的位置添加一个大小为 1 的维度 (类似集合的套壳 $\varnothing, \{\varnothing\}, \{\{\varnothing\}\}$, etc.)
+
+    ```python
+    import torch
+
+    t = torch.tensor([[1,2,3],[4,5,6]])  # shape = [2,3]
+    t1 = t.unsqueeze(0)   # t1 = [[[1,2,3],[4,5,6]]]            # shape = [1,2,3]
+    t2 = t.unsqueeze(1)   # t2 = [[[1,2,3]],[[4,5,6]]]          # shape = [2,1,3]
+    t3 = t.unsqueeze(2)   # t3 = [[[1],[2],[3]],[[4],[5],[6]]]  # shape = [2,3,1]
+    ```
+
+#### Tensor 某一维求和
+
+- **对 Tensor 第 `dim=d` 维求和, 这一维度就会消失**
+
+    ```python
+    import torch
+    a = torch.tensor([[[1,1], [2,2], [3,3], [4,4]],
+                        [[5,5], [6,6], [7,7], [8,8]],
+                        [[9,9], [10,10], [11,11], [12,12]]])
+    print(a.shape)      # torch.Size([3, 4, 2])
+    sum = a.sum(dim=-1) # 代表最后一个维度 (2)
+    print(sum.shape)    # torch.Size([3, 4])
+    ```
+
+#### Tensor 某一维 concat
+
+- **对 Tensor 第 `dim=d` 维 concat, 这一维度的大小会增加**
+
+    ```python
+    import torch
+
+    a = torch.tensor([[1,1], [2,2], [3,3], [4,4]])
+    b = torch.tensor([[5], [6], [7], [8]])
+
+    c = torch.cat((a, b), dim=1)    # [115 226 337 448]
+    print(c)
+    ```
+
+- 对一个 tensor list 进行 concat:
+
+    ```python
+    import torch
+
+    t0 = torch.tensor([1, 2, 3])
+    t1 = torch.tensor([4, 5, 6])
+    t = [t0, t1]
+
+    t_cat = torch.cat(t)    # t_Cat = [1, 2, 3, 4, 5, 6]
     ```
 
 #### Tensor 切分
@@ -209,3 +263,12 @@
 ![逐点运算之前要进行 tensor broadcasting.](tensor-broadcasting.png){#fig-tensor-broadcasting}
 :::
 
+- **Tensor Expand**: 就理解为 tensor broadcasting:
+
+    ```python
+    import torch
+
+    t = torch.tensor([[[1,2,3],[4,5,6]]]) # 1*2*3
+    t1 = t.expand(6,2,3)    # t1 = [[[1,2,3],[4,5,6]],[[1,2,3],[4,5,6]],[[1,2,3],[4,5,6]],[[1,2,3],[4,5,6]],[[1,2,3],[4,5,6]],[[1,2,3],[4,5,6]]]
+    # t2 = t.expand(1,4,3)    # error
+    ```

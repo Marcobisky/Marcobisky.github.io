@@ -1,0 +1,315 @@
+---
+author: Marcobisky
+title: "SFT, GRPO, KD, OPD: 当我们在谈论 RL post-training 的时候, 我们到底在谈论什么?"
+description: Updating
+date: 2026-05-29
+# image: vtheta-no-distill.png
+categories:
+    - machine-learning
+    - CN-blogs
+format: 
+    html: default
+
+bibliography: refs.bib
+bibliographystyle: ieee
+csl: ../../diabetologia.csl # https://github.com/citation-style-language/styles
+---
+
+## Notation
+
+- $\pi_\theta, \pi_\text{ref}$ 代表 student 和 teacher.
+    - Student 是要训练的模型, teacher 冻结. 
+    - $\pi_\theta(y|x)$ 和 $\pi_\theta(y_t|x,y_{<t})$ 代表 sequence-level 和 token-level 的概率分布.
+- $x$ 代表整条问题, $y$ 代表整条回答.
+    - $y$ 可以是 teacher 生成的回答 (off-policy) 或 student 生成的回答 (on-policy).
+    - $y_t$ 代表回答的第 $t$ 个 token, $y_i$ 代表对问题 $x$ 的第 $i$ 次 rollout, $|y|$ 或 $T$ 代表这次回答的长度.
+- $r(x,y)$ 代表环境对问题回答对 $(x,y)$ 给出的 reward.
+
+- 我们需要 maximize $J$, minimize $L$.
+
+## Classical RL
+
+- Policy 策略 (可以是确定性, 也可以是概率性的):
+    - $s \to a$
+- Environment 环境 (可以是确定性, 也可以是概率性的):
+    - $(s,a) \to s'$
+    - $(s,a) \to r$
+
+## Reward Model (RM)
+
+- 目标: 给问题-回答对 $(x,y)$ 打分, 让分数能反映人类的偏好 (越好越高分).
+
+- 一般只训练 1 epoch 来避免 overfitting.
+
+## 无限资源下的训练
+
+Token-level forward/reverse KL:
+
+$$
+\text{FKL}_t = \text{KL}(\pi_{\text{ref}}(\cdot|x,y_{<t}) \Vert \pi_\theta(\cdot|x,y_{<t}))
+$$
+
+$$
+\text{RKL}_t = \text{KL}(\pi_\theta(\cdot|x,y_{<t}) \Vert \pi_{\text{ref}}(\cdot|x,y_{<t}))
+$$
+
+- FKL 是 mode-covering, RKL 是 mode-seeking.
+
+$$
+\text{KL} := \mathbb{E}_{x \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\theta(\cdot|x)} \sum_{t=1}^{T} \mathrm{KL}_t
+$$
+
+## RLHF
+
+直觉上来看, 我们希望模型能生成 reward 更高的回答, 同时又不想它离 reference model 太远, 于是我们构造:
+
+$$
+\boxed{
+L_\text{RLHF} := \underbrace{- \mathbb{E}_{x \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\theta(\cdot|x)} [r(x,y)]}_{L} + \text{KL}
+}
+$$
+
+(也可以加个权重给 KL), anyway, 上面式子中, $\text{KL}$ 可以反向传播, 但是 $L$ 由于 $r(x,y)$ 不是「算」出来的所以不能直接反向传播. 怎么办呢? 难道训练不了了吗? 我们先直接算一下 $L$ 的梯度看看, 先把后面一个期望用加权形式展开:
+
+$$
+-L = \mathbb{E}_{x \sim \mathcal{D}} \sum_{y} \pi_\theta(y|x) \cdot r(x,y)
+$$
+
+然后再求梯度:
+
+$$
+- \nabla L = \mathbb{E}_{x \sim \mathcal{D}} \sum_{y} \nabla \pi_\theta(y|x) \cdot r(x,y) 
+$${#eq-loss-grpo-grad}
+
+其中的 $\nabla \pi_\theta(y|x)$ 用 log-trick 展开:
+
+$$
+\nabla \pi_\theta(y|x) = \pi_\theta(y|x) \nabla \log \pi_\theta(y|x)
+$$
+
+所以 @eq-loss-grpo-grad 变成:
+
+$$
+\begin{aligned}
+- \nabla L &= \mathbb{E}_{x \sim \mathcal{D}} \sum_{y} \pi_\theta(y|x) \nabla \log \pi_\theta(y|x) \cdot r(x,y) \\
+&= \mathbb{E}_{x \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\theta(\cdot|x)} \left[\nabla \log \pi_\theta(y|x) \cdot r(x,y)\right]
+\end{aligned}
+$$
+
+
+理论上我们可以通过**单样本 $\bar{y}$** 来 (无偏地) 估计这个梯度:
+
+$$
+- \nabla L \approx \mathbb{E}_{x \sim \mathcal{D}} \left[\nabla \log \pi_\theta(\bar{y}|x) \cdot r(x,\bar{y})\right]
+$${#eq-loss-grpo-sample-grad}
+
+计算它相当于 (但**不等价于**) 对下面的数值进行反向传播:
+
+$$
+- \tilde{L} := \mathbb{E}_{x \sim \mathcal{D}} \left[\log \pi_\theta(\bar{y}|x) \cdot r(x,\bar{y})\right]
+$${#eq-reinforce}
+
+$\tilde{L}$ 称为 $L$ 的 **surrogate loss**.
+
+### REINFORCE
+
+我们把利用 @eq-reinforce 进行反向传播的算法称为 REINFORCE, 这是 RLHF 的最原始的形式, 后面会有很多方法对它的效果进行改良.
+
+### REINFORCE + Baseline
+
+$$
+-\tilde{L} := \mathbb{E}_{x \sim \mathcal{D}} \left[\frac{1}{G} \sum_{i=1}^G \log \pi_\theta(y_i|x) \cdot A_i\right]
+$$
+
+$$
+A_i = \frac{r(x,y_i) - b_G(x)}{\sigma_G(x)}
+$$
+
+我们不能再以单样本来估计来, 要对同一个问题 $x$ rollout $G$ 次 (称为一个 group), 然后以组为单位 (**Group Relative**) 来归一化组内这些回答的 reward, 归一化后的数值称为 Advantage (每条 rollout $y_i$ 都有一个 Advantage $A_i$).
+
+还有一个 slightly different 的变体: RLOO (REINFORCE leave one out). 它的唯一区别是第 $i$ 次 rollout 的 Advantage $A_i$ 是用组内其它 $G-1$ 次 rollout 的 reward 的平均值来计算的:
+
+$$
+A_i = \frac{r(x,y_i) - b_{G-1}(x)}{\sigma_{G-1}(x)}
+$$
+
+### VPG (Vanilla Policy Gradient)
+
+REINFORCE 的问题是它的方差非常大, 我们可以直接再训一个网络 $V_\phi$ (Critic) 来估计从 $(x, \bar{y}_{<t})$ 出发的 reward (每生成一个 $\bar{y}_t$ 就可以估计一次), 称为 Actor-Critic 网络. 由于这次是逐 token 来估计的 reward, 我们要在 token-level 来写公式, 这次由于有 critic, 可以用单样本估计!
+
+首先把 $\log \pi_\theta(\bar{y}|x)$ 逐 token 展开成:
+
+$$
+\log \pi_\theta(\bar{y}|x) = \sum_{t=1}^{T} \log \pi_\theta(\bar{y}_t|x,\bar{y}_{<t})
+$$
+
+而且当一整条 $\bar{y}$ 生成完毕之后, 其中的任何一个 token 都对应一个 reward:
+
+$$
+A_t = r(x,\bar{y}) - V_\phi(x, \bar{y}_{<t})
+$$
+
+于是:
+
+$$
+\begin{aligned}
+-\tilde{L}_{\text{actor}} &:= \mathbb{E}_{x \sim \mathcal{D}} \left[\frac{1}{T} \sum_{t=1}^{T} \log \pi_\theta(\bar{y}_t|x,\bar{y}_{<t}) \cdot A_t\right] \\
+\tilde{L}_{\text{critic}} &:= \mathbb{E}_{x \sim \mathcal{D}} \left[\frac{1}{T} \sum_{t=1}^{T} \big(r(x,\bar{y}) - V_\phi(x, \bar{y}_{<t})\big)^2\right]
+\end{aligned}
+$$
+
+最后两个 loss 加起来作为最终的 loss:
+
+$$
+L_{\text{VPG}} := L_{\text{actor}} + \alpha \cdot L_{\text{critic}}
+$$
+
+### GRPO
+
+就是 REINFORCE + Baseline + clip.
+
+## Off-policy Method
+
+Off-method 的动机就是**让 $\pi_\theta$ 模仿 $\pi_\text{ref}$ 的行为**, 那么有两个问题需要决定:
+
+- 如果用 KL 来度量, KL 散度不对称, 用哪个方向呢?
+- 模仿 $\pi_\text{ref}$ 采样前 (soft-label) 还是采样后 (hard-label/one-hot) 的 $y$?
+
+对于第一个问题, 用 FKL (因为 xxx).
+
+对于第二个问题, 两种方法都可以, 且我们把 soft-label 方法称为 KD, hard-label 方法称为 SFT, 它们的 loss 分别是:
+
+$$
+\boxed{
+L_{\text{KD}} := -\mathbb{E}_{x \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\text{ref}(\cdot|x)} \left[\sum_t \text{FKL}_t \right]
+}
+$${#eq-loss-kd}
+
+$$
+\boxed{
+L_\text{SFT} := -\mathbb{E}_{x \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\text{ref}(\cdot|x)} \left[\sum_t \log \pi_\theta(y_t|x,y_{<t})\right]
+}
+$${#eq-loss-sft}
+
+假设在 $t$ 位置 4 个 token 的概率分布如下:
+
+$$
+\begin{aligned}
+\pi_\text{ref}^\text{soft} &= [0.6, 0.2, 0.1, 0.1] \\
+\pi_\text{ref}^\text{hard} &= [1.0, 0.0, 0.0, 0.0] \\
+\pi_\theta &= [0.2, 0.3, 0.4, 0.1]
+\end{aligned}
+$$
+
+SFT 完完全全就是 teacher 的概率分布从 $\pi_\text{ref}^\text{soft}$ 坍缩到 $\pi_\text{ref}^\text{hard}$ 后的 KD! (只是 SFT 的数据集可以是 teacher 生成的, 也可以是人类标注的)
+
+> SFT is distribution-collapsed KD, KD is soft-label SFT.
+
+对于 @eq-loss-kd 和 @eq-loss-sft, 由于它们是计算出来的, 直接可以对它们进行反向传播更新参数.
+
+## On-Policy Method
+
+On-policy method 跟 Off-policy 的区别在于, teacher 是顺着 student 的思路来提供监督信号的 (而不是反过来). Loss 可以严格写成:
+
+$$
+\boxed{
+L_\text{OPD} := -\mathbb{E}_{x \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\theta(\cdot|x)} \left[\sum_t \text{FKL}_t\right]
+}
+$${#eq-loss-opd}
+
+**能否直接对 @eq-loss-opd 进行反向传播?** 这一看这 loss 也是计算出来的, 也能进行反向传播, 但我们用单样本 (或有限样本) 估计出来的 loss 数值进行反向传播的时候其实是有偏的!!!
+
+为了简化式子: 由于当 $x$ 固定时, @eq-loss-opd 后面的 $\sum_t \text{FKL}_t$ 仅仅是一个与 $\theta$ 和 $y$ 有关的函数, 不妨记为 $f(\theta, y)$.
+
+我们计算一下 $L_\text{OPD}$ 的梯度, 首先也把后面一个期望用求和展开, 
+
+$$
+L_\text{OPD} = -\mathbb{E}_{x \sim \mathcal{D}} \sum_{y} \pi_\theta(y|x) \cdot f(\theta, y)
+$$
+
+然后我们求梯度:
+
+$$
+\begin{aligned}
+- \nabla L_\text{OPD} &= \mathbb{E}_{x \sim \mathcal{D}} \sum_{y} \nabla (\pi_\theta(y|x) \cdot f(\theta, y)) \\
+&= \mathbb{E}_{x \sim \mathcal{D}} \sum_{y} \left( \underbrace{\nabla \pi_\theta(y|x)}_\text{log trick} \cdot f(\theta, y) + \pi_\theta(y|x) \cdot \nabla f(\theta, y) \right) \\
+&= \mathbb{E}_{x \sim \mathcal{D}} \sum_{y} \Big( \pi_\theta(y|x) \nabla \log \pi_\theta(y|x) \cdot f(\theta, y) + \pi_\theta(y|x) \cdot \nabla f(\theta, y) \Big) \\
+&= \mathbb{E}_{x \sim \mathcal{D}} \mathbb{E}_{y \sim \pi_\theta(\cdot|x)} \Big[ \nabla \log \pi_\theta(y|x) \cdot f(\theta, y) + \nabla f(\theta, y) \Big]
+\end{aligned}
+$$
+
+用单样本 $\bar{y}$ 来估计这个梯度:
+
+$$
+- \nabla L_\text{OPD} \approx \mathbb{E}_{x \sim \mathcal{D}} \Big[ \nabla \log \pi_\theta(\bar{y}|x) \cdot f(\theta, \bar{y}) + \nabla f(\theta, \bar{y}) \Big]
+$${#eq-loss-opd-sample-grad}
+
+我们可以将 $f(\theta, \bar{y})$ 看作 @eq-loss-grpo-sample-grad 里面的 reward, 虽然他与 $\theta$ 有关, 但是可以 detach 掉不让它传播回去. 所以计算 @eq-loss-opd-sample-grad 等价于对下面的数值进行反向传播 (无偏估计):
+
+$$
+- \tilde{L}_\text{OPD} := \mathbb{E}_{x \sim \mathcal{D}} \Big[ \log \pi_\theta(\bar{y}|x) \cdot f(\theta, \bar{y}).\texttt{stop\_grad} + f(\theta, \bar{y}) \Big]
+$$
+
+
+| | Off-policy | On-policy |
+|---|---|---|
+| Hard-label | SFT | - |
+| Soft-label | KD | OPD |
+| Verifiable Reward | - | GRPO |
+
+
+## Questions
+
+- 所谓训练范式到底是什么?
+
+- 既然环境能给问题-回答对 $(x,y)$ 打分, 为啥不能直接将 reward 作为 -loss 来反向传播优化?
+
+- 为什么 GPRO 的式子里面有一个 probability ratio? 如何理解 importance sampling?
+
+- 仿真里面为什么 pretrain 的 loss landscape 看起来很平滑而 GRPO 的 loss landscape 很 rough? 是比例尺的问题吗? 如果在 GRPO 的尺度下看 pretrain 的 loss landscape, 是不是也很 rough?
+
+- $f(\theta, y)$ 需要类似归一化的操作吗? 玩意序列长度非常长, 这个数字会很大, 有影响吗?
+
+- PPO-style RLHF often starts with one scalar reward for the whole completion. How does that become a per-
+token training signal?
+
+## Thing to explain
+
+- 无限资源下的训练, loss 与 surrogate loss.
+    - batch, rollout 都是有限资源下用样本近似期望的手段.
+    - 梯度算子和期望算子不可交换 (前提是期望跟参数相关 (比如 on-policy))
+
+- 一些具体的算法, 如: REINFORCE
+
+- 工程实践的引入的事实、问题和解决方案
+    - 评估速度显著快于生成.
+    - 为什么要引入概率比值 $\rho$? 重要性采样是什么? 为什么要 clip 函数?
+
+- 为什么需要优势函数 (baseline+normalization)? 
+
+
+- Off-policy 和 on-policy 的区别, 以及它们的 trade-off.
+    - 一个不在自身模型上求期望, 一个在自身模型上求期望.
+    - Off-policy（exposure bias）：优化了错误的目标。目标本身没问题（teacher 在 data prefix 上是可靠的），但它覆盖的 prefix 集合跟推理时不一致。
+    - On-policy（teacher unreliability）：优化了正确的目标（prefix 分布对了），但目标里的 teacher 信号可能在这些 prefix 上不可靠。
+
+- SFT 和 KD 的区别: soft label 和 hard label.
+
+- forward KL 和 reverse KL 的区别.
+    - reverse KL: mode-seeking
+    - forward KL: mode-covering
+
+- 一些隐含的假设:
+    - 预训练: 如果 next token 预测得越好, 模型就越会说话、甚至记住一些知识.
+        - 一旦前面的 token 出现问题, 后面的预测会越走越偏 (生成的 token 不能改).
+    - off-policy training: teacher 生成回答 (SFT 的话就是用数据集里的 $(x,y)$), student 用 teacher 的 prefix 来评估, 它们的分布越相似, 学习效果越好.
+        - Exposure bias: 训练到极致时, student 和 teacher 针对相同的 $x$ 给出的 next token prediction 完全一样, 这也是 KD 的理论极限. 但实际训练后 student 和 teacher 不可能完全一样. 推理时是用 student 推理而不是 teacher, 如果 student 逐渐生成的时候产生了一些「不太好」的 token, 而这样的 prefix 在训练时几乎没有出现过 (因为从来都没有让 student 自己生成, 而是直接给 teacher 生成的), student 在这个稀有 prefix 上的行为几乎完全靠泛化, 这样误差就会被逐步放大.
+    - on-policy training: student 生成回答, teacher 用 student 的 prefix 来评估 (学生产生的有多差), 利用这个差距来更新学生.
+        - Teacher unreliability: 核心问题就是: **teacher 在 student 的垃圾 prefix 上给出的分布是一个值得模仿的目标吗?** 如果学生一窍不通, 比如生成了一大堆胡言乱语, teacher 在 student 的每个 token 上产生的信号可能就显得没什么参考价值. 而且我确实也 have no idea 这样的训练目标为什么能 work.
+        - 不过 on-policy 的好处就是学生有大量机会学习如何处理很垃圾的 prefix (因为回答是自己产生的, 所以 prefix 的分布和推理时完全一样), 这样就能缓解 exposure bias 的问题, 但是 teacher 的信号又感觉没什么意义.
+
+- LLM = 泛化能力 + 拟合能力
+
+- **Goodhart's Law**: When a measure becomes a target, it ceases to be a good measure.
+    - 在 LLM 的 policy-gradient 中, **需要 KL 的原因就是 RM 不是完美的**, 如果不用 KL:
+        - **Reward hacking**: 策略模型会开始过度优化, 寻找奖励模型中的漏洞. LLM 可能会发现, 只要生成极其冗长的排比句 (Verbosity), 或者使用过度礼貌和奉承的语气 (Sycophancy), 就能骗过奖励模型拿到极高的分数.

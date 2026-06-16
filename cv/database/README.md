@@ -21,7 +21,7 @@ cd cv/database
 # generate English CV pdf
 ./gen.sh <local-config-name> e.g. ./gen.sh cv-lite
 # generate Chinese CV pdf
-./gen.sh <local-config-name> e.g. ./gen.sh cv-lite-cn
+./gen-cn.sh <local-config-name> e.g. ./gen-cn.sh cv-lite-cn
 ```
 
 ### Json to Quarto Markdown

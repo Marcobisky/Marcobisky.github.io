@@ -210,7 +210,7 @@ def render_template_entry(items: List[Dict[str, Any]], enabled: List[str]) -> st
         if "extra" in en:
             extra = (it.get("extra") or "").strip()
             if extra:
-                out.append(r"\vspace{-0.5em} \begin{small} \textit{" + md_inline_to_latex(extra) + r"} \end{small} \vspace{-0.5em}")
+                out.append(r"\vspace{-0.2em} \begin{small} \textit{" + md_inline_to_latex(extra) + r"} \end{small} \vspace{-0.2em}")
                 out.append("")
 
         # description bullet list
@@ -218,7 +218,6 @@ def render_template_entry(items: List[Dict[str, Any]], enabled: List[str]) -> st
             desc = it.get("description") or []
             if desc:
                 out.append(r"\begin{itemize}")
-                out.append(r"    \setlength\itemsep{-0.5em}")
                 for line in desc:
                     out.append("    " + r"\item " + md_inline_to_latex(line))
                 out.append(r"\end{itemize}")

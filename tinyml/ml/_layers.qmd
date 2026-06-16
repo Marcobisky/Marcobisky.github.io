@@ -121,8 +121,13 @@ my_norm = nn.LayerNorm(normalized_shape=[224,224])  # 也可以定制, 即将最
     - Score: How relevant is what you guys offer in terms of **\<syntax\>**?
     - Value $V$: What direction in the embedding space should I move to capture **\<syntax\>** information?
 
+- 关于 Embedding 维度和 Value (或 Query, Key) 维度的关系:
+    - 默认 **Embedding 维度 = Value 维度!** (Single-head attention 下).
+
+        ![3b1b 在解释 Single-head attention 的时候用了 12288 的 Embedding dimension 和 128 的 Query dimension, 这是错误的. Query 的维度这个数据是针对 GPT-3 的 96 head 的配置 ($96*128=12288$).](attention-dim-3b1b.png){#fig-attention-dim-3b1b width=70%}
+
 - Multi-head: 相当于问很多个不同的问题, 即改变 "**\<\>**" 里面的内容, 比如 **\<meaning\>**, **\<irrelevance\>**, **\<description\>**, etc.
-    - 合并多个 head 输出的向量可以用相加或者拼接.
+    - 合并多个 head 输出的向量默认用拼接!
 
         ![(a) Single Head Attention; (b) 3-head Attention. (`dim = 6`, `dim_head = 2`, `heads = 3`, `inner_dim = 2*3 = 6 = dim`)](mha.png){#fig-mha width=80%}
 
@@ -133,7 +138,7 @@ my_norm = nn.LayerNorm(normalized_shape=[224,224])  # 也可以定制, 即将最
 ![(b) Computationally.](mha-compute.png){#fig-mha-compute width=120%}
 :::
 
-- 注意 `MultiheadAttention` 里面自带了一个不改变维度的全连接层, 这个并不是 3b1b 视频中的 FFL, 真正的 attention block 还包括 `LayerNorm`, `Dropout`, Residual Connection. 下面的代码对应 @fig-pre-post (b).
+- 注意 `MultiheadAttention` 里面还有一个不改变维度的全连接层 $W_O$! 这个并不是 3b1b 视频中的 MLP, 真正的 attention block 还包括 `LayerNorm`, `Dropout`, Residual Connection. 下面的代码对应 @fig-pre-post (b), **非常重要!!!**
 
     ```python
     class AttentionBlock(nn.Module):
@@ -142,8 +147,7 @@ my_norm = nn.LayerNorm(normalized_shape=[224,224])  # 也可以定制, 即将最
             super().__init__()
 
             self.layer_norm_1 = nn.LayerNorm(embed_dim)
-            self.attn = nn.MultiheadAttention(embed_dim, num_heads,
-                                            dropout=dropout)
+            self.attn = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout)
             self.layer_norm_2 = nn.LayerNorm(embed_dim)
             self.linear = nn.Sequential(
                 nn.Linear(embed_dim, hidden_dim),

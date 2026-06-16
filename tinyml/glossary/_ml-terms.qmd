@@ -48,13 +48,23 @@
 
 - **VLM (Vision Language Model)**: 视觉语言模型, 可处理图片和自然语言两种模态进行理解和生成任务的模型.
 
+- **自动驾驶相关**:
+    - 研究方式:
+        - **闭环**: 需要用到仿真器 (如 CARLA) 来模拟自动驾驶的环境, 模型的输出会反过来影响输入 (所以叫闭环).
+        - **开环**: 不需要仿真器, 用录制好的真实驾驶的视频来训练模型, 模型是在被动地学习, 输入不会因为模型的输出而改变 (所以叫开环).
+            - 开环中用来评估模型好坏的指标: **L2 distance** (预测轨迹与真实轨迹的 L2 距离), **Collision rate** (预测轨迹与其它物体发生碰撞的频率).
+    - 相关模型:
+        - **BEV Net (Birds-Eye-View)**: 一系列网络模型 (而不是一个).
+
 - **ViT (Vision Transformer)**: 一种基于 Transformer 架构的计算机视觉模型.
 
 - **AIGC (AI-Generated Content)**: 生成式 AI.
 
 - **PINN (Physics-Informed Neural Networks)**: 比如用神经网络来预测 Navier-Stokes 方程的解, 神经网络的输入为 $(x,y,z,t)$, 输出为 $(u,v,w,p)$ (三个方向的速度和压强), 然后基于这些数据可以得到一些偏导数的信息, loss 函数由两个方面构成: 少量的数据点、以及 Navier-Stokes 方程本身的约束条件.
 
-- **End-to-end model 端到端模型**: 不拆解问题而是直接用一个步骤来解决. 比如同声传译, 标准化流程需要设计 3 个网络 (ZNspeech -> Chinese -> English -> ENspeech); 而端到端模型直接是 ZNspeech -> ENspeech.
+- **End-to-end model 端到端模型**: 不拆解问题而是直接用一个步骤来解决. 
+    - 比如同声传译, 标准化流程需要设计 3 个网络 (ZNspeech -> Chinese -> English -> ENspeech); 而端到端模型直接是 ZNspeech -> ENspeech.
+    - 再比如自动驾驶, 端到端直接就是图像/传感器输入 -> 油门/方向盘角度输出, 用一个网络解决, 没有明确的分工网络.
 
 - **Prompt Engineering 提示词工程**: 通过**设计一个模版**告诉模型额外的信息.
     - 为什么要设计模版呢? 比如训练 CLIP 模型需要图片-文本对, 如果发现某个文本模版少了一些信息, 就需要补上, 怎么补上呢? 比如是一张遥控器 (remote) 的图片, 直接把 “remote” 加到原始文本的后面? 肯定不行, 这样句子都不完整, 而且模型可能会觉得 “remote” 是 “遥远的” 意思, 这时候就需要用 “A photo of a remote” 这样的**模版**来补全这个文本, 这就是 prompt engineering.
@@ -63,10 +73,14 @@
     - 如果真要说有区别的话, **latent space 更 intrinsic 一点**, 毕竟 embedding 感觉可以潜入欧式空间一点.
 
 - **World Models 世界模型**
+    - **JEPA (Joint-Embedding Predictive Architecture)**: Yann LeCun 提出的一种世界模型的思想/模型架构. 大概意思是不要期待模型逐帧/逐像素生成, 而是在一个抽象的语义空间中预测和生成 (有点 Latent Diffusion 的感觉?)
 
 ### RL 相关
 
-- **Reinforcement Learning (RL) 强化学习**: 
+- RL 中不同算法的一个很重要的区别是 reward 的来源, 根据它, RL 可分为下面两个大类:
+    - **RLHF (Reinforcement Learning with Human Feedback)**: Reward 来源于 hman preference reward model.
+
+    - **RLVR (Reinforcement Learning with Verifiable Rewards)**: Reward 来源于 rule-based or deterministic verifiers.
 
 ### CV 计算机视觉相关 {#sec-cv-terms}
 
@@ -129,8 +143,9 @@
     - **FP32**: 32 位浮点数, 1 位符号位, 8 位指数位, 23 位尾数位 (**E8M23**), 精度高, 计算速度慢.
         - **FP16**: E5M10.
     - **BF16**: Brain Floating Point 16, 1 位符号位, 8 位指数位, 7 位尾数位 (**E8M7**), 精度低, 计算速度快.
+    - 对于小数的表示, 16/32/64 位也叫: **半精度/单精度/双精度**.
 
-- **混合精度**: 一般指 FP32 + FP16.
+- **混合精度**: 一般指 FP32 + FP16/BF16.
 
 - **FLOP (Floating-Point OPeration)**: 一次浮点运算包括一次加/减/乘/除.
     - **FLOPs (Floating-point Operations)**: 用来表达**计算量**.
