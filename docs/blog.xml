@@ -10,7 +10,1024 @@
 <atom:link href="https://marcobisky.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Getting better every second!</description>
 <generator>quarto-1.7.32</generator>
-<lastBuildDate>Sat, 21 Mar 2026 16:00:00 GMT</lastBuildDate>
+<lastBuildDate>Sun, 22 Mar 2026 16:00:00 GMT</lastBuildDate>
+<item>
+  <title>Autograd 自动微分的动机和实现</title>
+  <dc:creator>Marcobisky </dc:creator>
+  <link>https://marcobisky.github.io/posts/autograd/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="motivation" class="level3" data-number="0.1">
+<h3 data-number="0.1" class="anchored" data-anchor-id="motivation"><span class="header-section-number">0.1</span> Motivation</h3>
+<ul>
+<li>如何在计算机中进行微分?
+<ul>
+<li><p><strong>Manual Differentiation</strong>: 人工推导导数公式, 然后写进代码.</p></li>
+<li><p><strong>Symbolic Differentiation</strong>: 计算机符号化地推导导数公式, 然后生成代码 (Mathematica 就是这么干的)</p></li>
+<li><p><strong>Numerical Differentiation</strong>: 用数值方法近似地计算导数.</p></li>
+<li><p><strong>Automatic Differentiation</strong>: 通过链式法则和计算图, 自动地计算导数.</p>
+<div id="fig-diff-computer" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-diff-computer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/autograd/diff-computer.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-diff-computer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: 计算机中微分的 4 种方式 <span class="citation" data-cites="baydin2018automaticdifferentiationmachinelearning">[1]</span>.
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+<li>放在 ML 的场景下, 一个神经网络可能有几十亿的参数, 每个参数都要求梯度, 手动推导不可能完成! 符号化推导也会导致表达式爆炸, 数值方法精度又不够好. 但是神经网络的函数不是随意的函数, 它是<strong>高度算子化和分层的</strong>. 我们希望导数的信息能自动沿着计算的路径 (<strong>Computational Graph</strong>) 反向传播!
+<ul>
+<li>用「传播」这个词是因为神经网络是高度分层的结构, 数据之间有明显的依赖关系 (partially-ordered).</li>
+<li>用「自动」这个词是因为我们希望一句 <code>loss.backward()</code> 就能像遍历一个树一样完成所有的梯度计算.</li>
+<li>而且我们希望在程序看来每个梯度计算都是「局部」的, 运行的函数并不知道自己在传播一个大计算图.
+<ul>
+<li>这个理论基础是 <strong>Chain Rule 链式法则</strong>! 我们这样解读链式法则: 要求 <img src="https://latex.codecogs.com/png.latex?y"> 关于变量 <img src="https://latex.codecogs.com/png.latex?v"> 的导数, 只要知道下面三类信息 (在 Figure&nbsp;2 标为蓝色):
+<ul>
+<li><img src="https://latex.codecogs.com/png.latex?v"> 参与了<strong>哪些算子的运算</strong>;</li>
+<li>这些<strong>算子的输出</strong> (当然每个算子只有一个) <strong>分别对 <img src="https://latex.codecogs.com/png.latex?y"> 的导数</strong>;</li>
+<li>这些算子的<strong>其它输入的值</strong>.</li>
+</ul>
+<div id="fig-chain-rule" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chain-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/autograd/chain-rule.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chain-rule-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Chain Rule 的局部视角, 求 <img src="https://latex.codecogs.com/png.latex?%5Cpartial_v%20y"> 只需要知道蓝色的信息, 对于 <img src="https://latex.codecogs.com/png.latex?a,b,%20%5Cldots,%20c"> 与 <img src="https://latex.codecogs.com/png.latex?y"> 的关系不需要知道!
+</figcaption>
+</figure>
+</div></li>
+</ul></li>
+</ul></li>
+</ul>
+<!-- ----------------------------------------- -->
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+EXAMPLE: A scalar computational graph
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<p>考虑式子 <span class="citation" data-cites="deep_thoughts_2021_derive">[2]</span>: <span id="eq-example"><img src="https://latex.codecogs.com/png.latex?%0Ay%20:=%20%5Cln%20x_1%20+%20x_1%20x_2%20-%20e%5E%7Bx_2%7D%0A%5Ctag%7B1%7D"></span></p>
+<p>可以由以下图表示:</p>
+<div id="fig-example-plain" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-example-plain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/autograd/example-plain.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-example-plain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Computational graph demo.
+</figcaption>
+</figure>
+</div>
+<p>我们希望计算 <img src="https://latex.codecogs.com/png.latex?y"> 关于 <img src="https://latex.codecogs.com/png.latex?x_1,%20x_2"> 在 <img src="https://latex.codecogs.com/png.latex?(x_1,%20x_2)%20=%20(2,%205)"> 处的梯度.</p>
+<ul>
+<li><p><strong>Forward propagation</strong>: 首先进行前向传播, 目的是计算出中间变量的数值 (为什么要算呢, 因为链式法则需要知道中间变量的值!):</p>
+<div id="fig-ex-forward" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ex-forward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/autograd/ex-forward.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ex-forward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Forward propagation.
+</figcaption>
+</figure>
+</div></li>
+<li><p><strong>Backward propagation</strong>: 如 Figure&nbsp;5, 蓝色数值代表 <img src="https://latex.codecogs.com/png.latex?y"> 对该节点的导数.</p>
+<div id="fig-ex-backward" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ex-backward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/autograd/ex-backward.png" class="img-fluid figure-img" style="width:70.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ex-backward-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Backward propagation.
+</figcaption>
+</figure>
+</div></li>
+</ul>
+<p>可知:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0A%5Cpartial_%7Bx_1%7D%20y%20&amp;=%205.5%20%5C%5C%0A%5Cpartial_%7Bx_2%7D%20y%20&amp;=%20-146.4%0A%5Cend%7Baligned%7D%0A"></p>
+</div>
+</div>
+</div>
+<!-- ----------------------------------------- -->
+</section>
+<section id="minimal-implementation" class="level3" data-number="0.2">
+<h3 data-number="0.2" class="anchored" data-anchor-id="minimal-implementation"><span class="header-section-number">0.2</span> Minimal Implementation</h3>
+<p>我们将 Figure&nbsp;4 的棕色方块建模为 <code>Tensor</code> 类, 青色圆形建模为算子比如 <code>Add</code>. 这是 autograd 重点关注的两个结构. 现在我们实现 Equation&nbsp;1 的 autograd 库 (只实现了必要的算子, adapted from <span class="citation" data-cites="eduardoleito_2024_documented">[3]</span>). <strong>主要关注 <code>Tensor</code> 类的 <code>backward()</code> 方法和各个算子的 <code>backward()</code> 方法的相互调用!</strong></p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>mytorch/tensor.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-tensorpy" data-filename="mytorch/tensor.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-tensorpy-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> __future__ <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> annotations</span>
+<span id="lst-tensorpy-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> typing <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> Optional</span>
+<span id="lst-tensorpy-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="lst-tensorpy-4"></span>
+<span id="lst-tensorpy-5"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Tensor:</span>
+<span id="lst-tensorpy-6">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, data: np.ndarray, requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">False</span>, operation<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>):</span>
+<span id="lst-tensorpy-7">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Payload</span></span>
+<span id="lst-tensorpy-8">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> data</span>
+<span id="lst-tensorpy-9">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Metadata</span></span>
+<span id="lst-tensorpy-10">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.requires_grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> requires_grad</span>
+<span id="lst-tensorpy-11">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.requires_grad:</span>
+<span id="lst-tensorpy-12">            <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.zeros_like(data, dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.float32)</span>
+<span id="lst-tensorpy-13">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.operation <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> operation  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># What operation cls created this tensor</span></span>
+<span id="lst-tensorpy-14">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.children <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> []          <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># What other tensors are created from this tensor</span></span>
+<span id="lst-tensorpy-15"></span>
+<span id="lst-tensorpy-16">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># This method is called by the operation backward()</span></span>
+<span id="lst-tensorpy-17">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, </span>
+<span id="lst-tensorpy-18">                 grad_: Optional[np.ndarray] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>,    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># The downstream operator pass this gradient for you</span></span>
+<span id="lst-tensorpy-19">                 z: Optional[Tensor] <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>):           <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Which child tensor is passing the gradient</span></span>
+<span id="lst-tensorpy-20">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">not</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.requires_grad:</span>
+<span id="lst-tensorpy-21">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Cannot backpropagate on a tensor that does not require gradients."</span></span>
+<span id="lst-tensorpy-22">        </span>
+<span id="lst-tensorpy-23">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> grad_ <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">is</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>:           <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Called only the first time from loss.backward()</span></span>
+<span id="lst-tensorpy-24">            grad_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.ones_like(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.data, dtype<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>np.float32)   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Set a tiny nudge of ones</span></span>
+<span id="lst-tensorpy-25">            </span>
+<span id="lst-tensorpy-26">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+=</span> grad_          <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Aggregate gradients from that children (but possibly not all yet)</span></span>
+<span id="lst-tensorpy-27">        </span>
+<span id="lst-tensorpy-28">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> z <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">is</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">not</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>:           <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># NOT called only the first time</span></span>
+<span id="lst-tensorpy-29">            <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.children.remove(z) <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># I heard the gradient from you, no need to wait for you anymore</span></span>
+<span id="lst-tensorpy-30">        </span>
+<span id="lst-tensorpy-31">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.operation:</span>
+<span id="lst-tensorpy-32">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">not</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.children:   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Received grad_ from all children, ready to pass grad upstream</span></span>
+<span id="lst-tensorpy-33">                <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.operation.backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.grad, <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>)</span>
+<span id="lst-tensorpy-34"></span>
+<span id="lst-tensorpy-35">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> zero_grad(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>):</span>
+<span id="lst-tensorpy-36">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">''' Sets the gradient of this tensor to zero. '''</span></span>
+<span id="lst-tensorpy-37">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.requires_grad:</span>
+<span id="lst-tensorpy-38">            <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.zeros_like(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.data)</span>
+<span id="lst-tensorpy-39">            </span>
+<span id="lst-tensorpy-40">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Some basic operators, more operators must be called via their classes below</span></span>
+<span id="lst-tensorpy-41">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__add__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, other: Tensor) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-42">        op <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Add()</span>
+<span id="lst-tensorpy-43">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> op.forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, other)</span>
+<span id="lst-tensorpy-44"></span>
+<span id="lst-tensorpy-45">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__neg__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-46">        op <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Neg()</span>
+<span id="lst-tensorpy-47">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> op.forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>)</span>
+<span id="lst-tensorpy-48"></span>
+<span id="lst-tensorpy-49">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__sub__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, other: Tensor) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-50">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> (<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>other)</span>
+<span id="lst-tensorpy-51">    </span>
+<span id="lst-tensorpy-52">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__mul__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, other: Tensor) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-53">        op <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Mul()</span>
+<span id="lst-tensorpy-54">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> op.forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, other)</span>
+<span id="lst-tensorpy-55">    </span>
+<span id="lst-tensorpy-56"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Paramaters are exact the same as Tensors except they always require gradients to be updated.</span></span>
+<span id="lst-tensorpy-57"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Parameter(Tensor):</span>
+<span id="lst-tensorpy-58">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">''' Subclass of Tensor which always tracks gradients. '''</span></span>
+<span id="lst-tensorpy-59">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, data, requires_grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>, operation <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">None</span>:</span>
+<span id="lst-tensorpy-60">        <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">super</span>().<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">__init__</span>(data, requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>requires_grad, operation<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>operation)</span>
+<span id="lst-tensorpy-61"></span>
+<span id="lst-tensorpy-62"></span>
+<span id="lst-tensorpy-63"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># These are just operators</span></span>
+<span id="lst-tensorpy-64"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Add:</span>
+<span id="lst-tensorpy-65">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, a: Tensor, b: Tensor) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-66">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Record which two tensors were added</span></span>
+<span id="lst-tensorpy-67">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parents <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a, b)</span>
+<span id="lst-tensorpy-68">        </span>
+<span id="lst-tensorpy-69">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create result tensor z</span></span>
+<span id="lst-tensorpy-70">        requires_grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.requires_grad <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">or</span> b.requires_grad</span>
+<span id="lst-tensorpy-71">        data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> b.data</span>
+<span id="lst-tensorpy-72">        z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Tensor(data, requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>requires_grad, operation<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>) </span>
+<span id="lst-tensorpy-73">        </span>
+<span id="lst-tensorpy-74">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Side effects to a, b</span></span>
+<span id="lst-tensorpy-75">        a.children.append(z)</span>
+<span id="lst-tensorpy-76">        b.children.append(z)</span>
+<span id="lst-tensorpy-77"></span>
+<span id="lst-tensorpy-78">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> z</span>
+<span id="lst-tensorpy-79">        </span>
+<span id="lst-tensorpy-80">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-81">        a, b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parents</span>
+<span id="lst-tensorpy-82">        </span>
+<span id="lst-tensorpy-83">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-84">            da_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> dz</span>
+<span id="lst-tensorpy-85">            a.backward(da_, z)</span>
+<span id="lst-tensorpy-86">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> b.requires_grad:</span>
+<span id="lst-tensorpy-87">            db_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> dz</span>
+<span id="lst-tensorpy-88">            b.backward(db_, z)</span>
+<span id="lst-tensorpy-89"></span>
+<span id="lst-tensorpy-90"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Neg:</span>
+<span id="lst-tensorpy-91">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, a: Tensor) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-92">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Record which tensor was negated</span></span>
+<span id="lst-tensorpy-93">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parent <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a</span>
+<span id="lst-tensorpy-94">        </span>
+<span id="lst-tensorpy-95">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create result tensor z</span></span>
+<span id="lst-tensorpy-96">        requires_grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.requires_grad</span>
+<span id="lst-tensorpy-97">        data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>a.data</span>
+<span id="lst-tensorpy-98">        z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Tensor(data, requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>requires_grad, operation<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>) </span>
+<span id="lst-tensorpy-99">        </span>
+<span id="lst-tensorpy-100">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Side effects to a</span></span>
+<span id="lst-tensorpy-101">        a.children.append(z)</span>
+<span id="lst-tensorpy-102"></span>
+<span id="lst-tensorpy-103">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> z</span>
+<span id="lst-tensorpy-104">        </span>
+<span id="lst-tensorpy-105">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-106">        a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parent</span>
+<span id="lst-tensorpy-107">        </span>
+<span id="lst-tensorpy-108">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-109">            da_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span>dz</span>
+<span id="lst-tensorpy-110">            a.backward(da_, z)</span>
+<span id="lst-tensorpy-111"></span>
+<span id="lst-tensorpy-112"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Mul:</span>
+<span id="lst-tensorpy-113">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, a: Tensor, b: Tensor) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-114">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Record which two tensors were multiplied</span></span>
+<span id="lst-tensorpy-115">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parents <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (a, b)</span>
+<span id="lst-tensorpy-116">        </span>
+<span id="lst-tensorpy-117">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create result tensor z</span></span>
+<span id="lst-tensorpy-118">        requires_grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.requires_grad <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">or</span> b.requires_grad</span>
+<span id="lst-tensorpy-119">        data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b.data</span>
+<span id="lst-tensorpy-120">        z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Tensor(data, requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>requires_grad, operation<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>) </span>
+<span id="lst-tensorpy-121">        </span>
+<span id="lst-tensorpy-122">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Side effects to a, b</span></span>
+<span id="lst-tensorpy-123">        a.children.append(z)</span>
+<span id="lst-tensorpy-124">        b.children.append(z)</span>
+<span id="lst-tensorpy-125"></span>
+<span id="lst-tensorpy-126">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> z</span>
+<span id="lst-tensorpy-127">        </span>
+<span id="lst-tensorpy-128">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-129">        a, b <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parents</span>
+<span id="lst-tensorpy-130">        </span>
+<span id="lst-tensorpy-131">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-132">            da_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> dz <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> b.data</span>
+<span id="lst-tensorpy-133">            a.backward(da_, z)</span>
+<span id="lst-tensorpy-134">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> b.requires_grad:</span>
+<span id="lst-tensorpy-135">            db_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> dz <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> a.data</span>
+<span id="lst-tensorpy-136">            b.backward(db_, z)</span>
+<span id="lst-tensorpy-137">            </span>
+<span id="lst-tensorpy-138"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Exp:</span>
+<span id="lst-tensorpy-139">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, a: Tensor) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-140">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Record which tensor was exponentiated</span></span>
+<span id="lst-tensorpy-141">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parent <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a</span>
+<span id="lst-tensorpy-142">        </span>
+<span id="lst-tensorpy-143">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create result tensor z</span></span>
+<span id="lst-tensorpy-144">        requires_grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.requires_grad</span>
+<span id="lst-tensorpy-145">        data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.exp(a.data)</span>
+<span id="lst-tensorpy-146">        z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Tensor(data, requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>requires_grad, operation<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>) </span>
+<span id="lst-tensorpy-147">        </span>
+<span id="lst-tensorpy-148">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Side effects to a</span></span>
+<span id="lst-tensorpy-149">        a.children.append(z)</span>
+<span id="lst-tensorpy-150"></span>
+<span id="lst-tensorpy-151">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> z</span>
+<span id="lst-tensorpy-152">        </span>
+<span id="lst-tensorpy-153">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-154">        a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parent</span>
+<span id="lst-tensorpy-155">        </span>
+<span id="lst-tensorpy-156">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-157">            da_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> dz <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> z.data   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># since d(exp(a))/da = exp(a)</span></span>
+<span id="lst-tensorpy-158">            a.backward(da_, z)</span>
+<span id="lst-tensorpy-159">            </span>
+<span id="lst-tensorpy-160"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">class</span> Log:</span>
+<span id="lst-tensorpy-161">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> forward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, a: Tensor) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-&gt;</span> Tensor:</span>
+<span id="lst-tensorpy-162">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Record which tensor was logged</span></span>
+<span id="lst-tensorpy-163">        <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parent <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a</span>
+<span id="lst-tensorpy-164">        </span>
+<span id="lst-tensorpy-165">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Create result tensor z</span></span>
+<span id="lst-tensorpy-166">        requires_grad <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> a.requires_grad</span>
+<span id="lst-tensorpy-167">        data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.log(a.data)</span>
+<span id="lst-tensorpy-168">        z <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> Tensor(data, requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>requires_grad, operation<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>) </span>
+<span id="lst-tensorpy-169">        </span>
+<span id="lst-tensorpy-170">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Side effects to a</span></span>
+<span id="lst-tensorpy-171">        a.children.append(z)</span>
+<span id="lst-tensorpy-172"></span>
+<span id="lst-tensorpy-173">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> z</span>
+<span id="lst-tensorpy-174">        </span>
+<span id="lst-tensorpy-175">    <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> backward(<span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>, dz: np.ndarray, z: Tensor):</span>
+<span id="lst-tensorpy-176">        a <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">self</span>.parent</span>
+<span id="lst-tensorpy-177">        </span>
+<span id="lst-tensorpy-178">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> a.requires_grad:</span>
+<span id="lst-tensorpy-179">            da_ <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> dz <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> a.data   <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># since d(log(a))/da = 1/a</span></span>
+<span id="lst-tensorpy-180">            a.backward(da_, z)</span></code></pre></div>
+</div>
+<ul>
+<li><code>Tensor</code> 类中包含的信息:
+<ul>
+<li><code>data</code>: 该 tensor 的数值.</li>
+<li><code>grad</code>: 该 tensor 的梯度 (y 对它的导数).</li>
+<li><code>operation</code>: 创建它的 operator. 用来在反向传播时</li>
+<li><code>children</code>:</li>
+</ul>
+<div id="fig-tensor" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tensor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/autograd/tensor.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tensor-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: 每个 tensor 包含 data, grad (y 对它的导数), 创建它的 operator 和依赖它的 tensors (红色的 tensor 含有红色区域的信息, etc.)
+</figcaption>
+</figure>
+</div></li>
+</ul>
+<p>写一个测试程序:</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>tensor-backward.py</strong></pre>
+</div>
+<div class="sourceCode" id="lst-tensor-backwardpy" data-filename="tensor-backward.py" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="lst-tensor-backwardpy-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> mytorch <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> torch</span>
+<span id="lst-tensor-backwardpy-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="lst-tensor-backwardpy-3"></span>
+<span id="lst-tensor-backwardpy-4">x1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.Tensor(np.array([<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>]), requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="lst-tensor-backwardpy-5">x2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.Tensor(np.array([<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>]), requires_grad<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>)</span>
+<span id="lst-tensor-backwardpy-6"></span>
+<span id="lst-tensor-backwardpy-7">v1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.Log().forward(x1)</span>
+<span id="lst-tensor-backwardpy-8">v2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> x1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> x2</span>
+<span id="lst-tensor-backwardpy-9">v3 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> torch.Exp().forward(x2)</span>
+<span id="lst-tensor-backwardpy-10"></span>
+<span id="lst-tensor-backwardpy-11">v4 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> v1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> v2</span>
+<span id="lst-tensor-backwardpy-12"></span>
+<span id="lst-tensor-backwardpy-13">loss <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> v4 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> v3</span>
+<span id="lst-tensor-backwardpy-14"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"loss ="</span>, loss.data)</span>
+<span id="lst-tensor-backwardpy-15"></span>
+<span id="lst-tensor-backwardpy-16">loss.backward()</span>
+<span id="lst-tensor-backwardpy-17"></span>
+<span id="lst-tensor-backwardpy-18"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"x1.grad ="</span>, x1.grad)</span>
+<span id="lst-tensor-backwardpy-19"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"x2.grad ="</span>, x2.grad)</span></code></pre></div>
+</div>
+<p>运行结果:</p>
+<div class="sourceCode" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">loss</span> = <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">[-</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">137.72001192</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb1-2"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">x1.grad</span> = <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">[</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">5.5</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">]</span></span>
+<span id="cb1-3"><span class="ex" style="color: null;
+background-color: null;
+font-style: inherit;">x2.grad</span> = <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">[-</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">146.41316</span><span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">]</span></span></code></pre></div>
+<div id="fig-operator" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-operator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="https://marcobisky.github.io/posts/autograd/operator.png" class="img-fluid figure-img" style="width:80.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-operator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: 每个 operator 包含它所有的 operands (红色的算子含有红色区域的信息, etc.)
+</figcaption>
+</figure>
+</div>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body">
+<div id="ref-baydin2018automaticdifferentiationmachinelearning" class="csl-entry">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Baydin AG, Pearlmutter BA, Radul AA, Siskind JM (2018) <a href="https://arxiv.org/abs/1502.05767">Automatic differentiation in machine learning: A survey</a></div>
+</div>
+<div id="ref-deep_thoughts_2021_derive" class="csl-entry">
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">deep_thoughts (2021) <a href="https://www.bilibili.com/video/BV1PF411h7Ew?spm_id_from=333.788.videopod.sections&amp;vd_source=42579e22289b6144ba0b2bdcf99834e3">Derive autograd forward and reverse propagation from scratch</a></div>
+</div>
+<div id="ref-eduardoleito_2024_documented" class="csl-entry">
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">Leitão E (2024) <a href="https://github.com/eduardoleao052/Autograd-from-scratch">Documented and unit tested educational deep learning framework with autograd from scratch.</a></div>
+</div>
+</div></section></div> ]]></description>
+  <category>machine-learning</category>
+  <category>CN-blogs</category>
+  <guid>https://marcobisky.github.io/posts/autograd/</guid>
+  <pubDate>Sun, 22 Mar 2026 16:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Visualization of Conditional Flow Matching and Human Preference Alignment Using RL and Control Theory</title>
   <dc:creator>Marcobisky </dc:creator>
@@ -14224,348 +15241,6 @@ Proof of Theorem&nbsp;2
   <guid>https://marcobisky.github.io/posts/quadrocopter-control/</guid>
   <pubDate>Sun, 06 Apr 2025 16:00:00 GMT</pubDate>
   <media:content url="https://marcobisky.github.io/posts/quadrocopter-control/cover.png" medium="image" type="image/png" height="86" width="144"/>
-</item>
-<item>
-  <title>PDE1: Wave and Heat Equations Made Obvious 推导波动方程与热传导方程</title>
-  <dc:creator>Marcobisky </dc:creator>
-  <link>https://marcobisky.github.io/posts/pde-derivation/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<section id="takeaways" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="takeaways">Takeaways</h2>
-<ol type="1">
-<li><p>Conservation law seems underratedly important.</p></li>
-<li><p>Oscillation and overshooting comes from second order time derivative. Smooth exponential decay comes from first order time derivative.</p></li>
-<li><p><img src="https://latex.codecogs.com/png.latex?a_%7Bn+1%7D%20+%20a_%7Bn-1%7D%20-%202a_n"> is the second order spatial derivative, the mental picture of it is the difference between current value and the average of its two neighbors.</p></li>
-<li><p>Forcing terms are usually comes with second order spacial derivative. This is because first order spacial derivative only represent force from one side, and second order spacial derivative is the net force of the neighboring particles acting on the particle we analyze.</p></li>
-</ol>
-</section>
-<section id="welcome" class="level2 page-columns page-full" data-number="1">
-<h2 data-number="1" class="anchored" data-anchor-id="welcome"><span class="header-section-number">1</span> Welcome!</h2>
-<p>This is the first chapter of my PDE series. You will learn how to derive two of the most important PDEs in physics: <strong>Wave equation and heat equation</strong>, with nearly no prerequisites. The goal of this article is to make these two equations <em>as obvious as possible</em><sup>1</sup> to you:</p>
-<div class="no-row-height column-margin column-container"><div id="fn1"><p><sup>1</sup>&nbsp;We <strong>avoid</strong> using the notation <img src="https://latex.codecogs.com/png.latex?%5CDelta"> for <img src="https://latex.codecogs.com/png.latex?%5Cnabla%5E2">. <img src="https://latex.codecogs.com/png.latex?%5CDelta"> in this article just mean “difference in” blablabla. We also use <img src="https://latex.codecogs.com/png.latex?%5Cxi_%7Bt%7D"> and <img src="https://latex.codecogs.com/png.latex?%5Cxi_%7Btt%7D"> to represent <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%20%5Cxi%7D%7B%5Cpartial%20t%7D"> and <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%5E2%20%5Cxi%7D%7B%5Cpartial%20t%5E2%7D">.</p></div></div><ul>
-<li><strong>Wave equation</strong>: <img src="https://latex.codecogs.com/png.latex?%5Cxi_%7Btt%7D%20=%20c%5E2%20%5Cnabla%5E2%20%5Cxi">.</li>
-<li><strong>Heat equation</strong>: <img src="https://latex.codecogs.com/png.latex?T_t%20=%20%5Calpha%20%5Cnabla%5E2%20T">.</li>
-</ul>
-<p>Let’s do it!</p>
-</section>
-<section id="wave-equation" class="level2 page-columns page-full" data-number="2">
-<h2 data-number="2" class="anchored" data-anchor-id="wave-equation"><span class="header-section-number">2</span> Wave Equation</h2>
-<section id="d-wave-equation" class="level3 page-columns page-full" data-number="2.1">
-<h3 data-number="2.1" class="anchored" data-anchor-id="d-wave-equation"><span class="header-section-number">2.1</span> 1D Wave Equation</h3>
-<p>There are two kinds of one-dimensional wave: longitudinal and transverse.</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/pde-derivation/longitudinal-transverse-wave.png" class="img-fluid figure-img"></p>
-<figcaption>Longitudinal wave and transverse wave cartoon</figcaption>
-</figure>
-</div>
-<p>They look totally different, but they share exactly the same properties and could be described by the same wave PDE! Let’s have a look at longitudinal wave first.</p>
-<section id="longitudinal-wave" class="level4 page-columns page-full" data-number="2.1.1">
-<h4 data-number="2.1.1" class="anchored" data-anchor-id="longitudinal-wave"><span class="header-section-number">2.1.1</span> Longitudinal Wave</h4>
-<p>This kind of wave can be considered as little balls connected by springs:</p>
-<div id="fig-longitudinal-equilibrium" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-longitudinal-equilibrium-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/pde-derivation/longitudinal-equilibrium.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-longitudinal-equilibrium-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Balls at equilibrium position
-</figcaption>
-</figure>
-</div>
-<p>As shown in Figure&nbsp;1, each small ball is in a tranquil state called “equilibrium position” where all resultant force acting on it is zero. Now we want to describe the system when there are perturbations using PDEs. So there should be a variable that depends on time and space. What is that variable? Well, we should define it. Let’s make it the displacement value <img src="https://latex.codecogs.com/png.latex?%5Cxi(x,t)"> of each ball from its equilibrium position.</p>
-<div id="fig-longitudinal-zoomed-in" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-longitudinal-zoomed-in-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/pde-derivation/longitudinal-zoomed-in.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-longitudinal-zoomed-in-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Zoom in at one of the balls
-</figcaption>
-</figure>
-</div>
-<p>Consider the scenario shown in Figure&nbsp;2, we zoom in at the <img src="https://latex.codecogs.com/png.latex?n">-th ball. In order to find the equation of motion for this ball, we need to define some parameters:</p>
-<ul>
-<li><img src="https://latex.codecogs.com/png.latex?k">: Microscopic string constant.</li>
-<li><img src="https://latex.codecogs.com/png.latex?m">: Mass of each ball.</li>
-</ul>
-<p>The net force acting on the <img src="https://latex.codecogs.com/png.latex?n">-th ball is the sum of the forces from the two adjacent balls: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0AF_n%20&amp;=%20F_L%20+%20F_R%20%5C%5C%0A&amp;=%20(-F_0%20-%20k(%5Cxi_n%20-%20%5Cxi_%7Bn-1%7D))%20+%20(F_0%20+%20k(%5Cxi_%7Bn+1%7D%20-%20%5Cxi_n))%20%5C%5C%0A&amp;=%20k((%5Cxi_%7Bn+1%7D%20-%20%5Cxi_n)%20-%20(%5Cxi_n%20-%20%5Cxi_%7Bn-1%7D)),%0A%5Cend%7Baligned%7D%0A"> where <img src="https://latex.codecogs.com/png.latex?F_0"> is the force from both left and right balls acting on the <img src="https://latex.codecogs.com/png.latex?n">-th ball at equilibrium position (they balanced out at equilibrium position). According to Newton’s second law<sup>2</sup> <img src="https://latex.codecogs.com/png.latex?F_n%20=%20m%20%5Cddot%20%5Cxi_n">, we have: <span id="eq-longitude-discrete"><img src="https://latex.codecogs.com/png.latex?%0Ak((%5Cxi_%7Bn+1%7D%20-%20%5Cxi_n)%20-%20(%5Cxi_n%20-%20%5Cxi_%7Bn-1%7D))%20=%20m%20%5Cddot%20%5Cxi_n.%0A%5Ctag%7B1%7D"></span></p>
-<div class="no-row-height column-margin column-container"><div id="fn2"><p><sup>2</sup>&nbsp;<img src="https://latex.codecogs.com/png.latex?%5Cddot%20%5Cxi_n"> means <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%5E2%20%5Cxi%7D%7B%5Cpartial%20t%5E2%7D"> in the article.</p></div></div><p>Now Equation&nbsp;1 should be it! But in reality, we do not know <img src="https://latex.codecogs.com/png.latex?m"> and <img src="https://latex.codecogs.com/png.latex?k"> since they are <em>microscopic parameters</em>. We now define some new parameters to connect the quantities that we can measure with the microscopic parameters:</p>
-<ul>
-<li><img src="https://latex.codecogs.com/png.latex?N">: Total number of balls.</li>
-<li><img src="https://latex.codecogs.com/png.latex?%5CDelta%20l">: Microscopic distance between adjacent balls.</li>
-<li><img src="https://latex.codecogs.com/png.latex?L">: Total length, <img src="https://latex.codecogs.com/png.latex?L%20=%20N%20%5CDelta%20l">.</li>
-<li><img src="https://latex.codecogs.com/png.latex?M">: Total mass of the system, <img src="https://latex.codecogs.com/png.latex?M%20=%20Nm">.</li>
-<li><img src="https://latex.codecogs.com/png.latex?%5Crho">: Mass density, <img src="https://latex.codecogs.com/png.latex?%5Crho%20=%20%5Cfrac%7BM%7D%7BL%7D">.</li>
-<li><img src="https://latex.codecogs.com/png.latex?K">: Total spring constant<sup>3</sup>, <img src="https://latex.codecogs.com/png.latex?K%20=%20%5Cfrac%7Bk%7D%7BN%7D">.</li>
-</ul>
-<div class="no-row-height column-margin column-container"><div id="fn3"><p><sup>3</sup>&nbsp;The spring constant of serial spring is smaller than that of individual spring by a factor of <img src="https://latex.codecogs.com/png.latex?N">.</p></div></div><p>Now Equation&nbsp;1 becomes: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign*%7D%0A&amp;k%20%5Cfrac%7B(%5Cxi_%7Bn+1%7D%20-%20%5Cxi_n)%20-%20(%5Cxi_n%20-%20%5Cxi_%7Bn-1%7D)%7D%7B(%5CDelta%20l)%5E2%7D%20=%20%5Cfrac%7B%5Crho%20%5Cddot%20%5Cxi_n%7D%7B%5CDelta%20l%7D%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;k%20%5Cxi_%7Bxx%7D%20=%20%5Cfrac%7B%5Crho%20%5Cddot%20%5Cxi_n%7D%7B%5CDelta%20l%7D%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;%5Cddot%20%5Cxi_n%20=%20%5Cfrac%7Bk%20%5CDelta%20l%7D%7B%5Crho%7D%20%5Cxi_%7Bxx%7D%20=%20%5Cfrac%7BNK%20%5Cfrac%7BL%7D%7BN%7D%7D%7B%5Cfrac%7BM%7D%7BL%7D%7D%20%5Cxi_%7Bxx%7D%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;%5Cddot%20%5Cxi_n%20=%20%5Cfrac%7BKL%5E2%7D%7BM%7D%20%5Cxi_%7Bxx%7D%0A%5Cend%7Balign*%7D%0A"></p>
-<p><img src="https://latex.codecogs.com/png.latex?n"> is arbitrary, so we got: <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0A%5Cddot%20%5Cxi%20=%20%5Cfrac%7BKL%5E2%7D%7BM%7D%20%5Cxi_%7Bxx%7D.%0A%7D%0A"></p>
-</section>
-<section id="sec-transverse-wave" class="level4 page-columns page-full" data-number="2.1.2">
-<h4 data-number="2.1.2" class="anchored" data-anchor-id="sec-transverse-wave"><span class="header-section-number">2.1.2</span> Transverse wave</h4>
-<p>To derive the wave equation for transverse wave, we need to make some basic assumptions:</p>
-<ol type="1">
-<li><p>Every particle could only move in a fixed line perpendicular to the direction of wave propagation, which means the horizontal resultant force is zero for each particle.</p></li>
-<li><p>The vibration amplitude is extremely small.</p></li>
-<li><p>Following above, the tension (density) is constant throughout the string.</p></li>
-</ol>
-
-<div class="no-row-height column-margin column-container"><div class="">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/pde-derivation/transverse-only-verticle.png" class="img-fluid figure-img"></p>
-<figcaption>Only verticle movement of each particle</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/pde-derivation/transverse-small-amplitude.png" class="img-fluid figure-img"></p>
-<figcaption>Vibration amplitude of each particle is small</figcaption>
-</figure>
-</div>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/pde-derivation/transverse-tension-constant.png" class="img-fluid figure-img"></p>
-<figcaption>Tension is asssumed to be invariant</figcaption>
-</figure>
-</div>
-</div></div><p>Now we define some parameters of the string:</p>
-<ul>
-<li><img src="https://latex.codecogs.com/png.latex?T">: Tension of the string.</li>
-<li><img src="https://latex.codecogs.com/png.latex?%5Clambda">: Line density of the string (mass per unit length).</li>
-</ul>
-<p>We focus on an element of the string shown in Figure&nbsp;3.</p>
-<div id="fig-transverse-line-segment" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-transverse-line-segment-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/pde-derivation/transverse-line-segment.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-transverse-line-segment-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Line segment of the string
-</figcaption>
-</figure>
-</div>
-<p>Suppose the mass of that element is <img src="https://latex.codecogs.com/png.latex?%5CDelta%20m">, the displacement is <img src="https://latex.codecogs.com/png.latex?%5Cxi">. The resultant force <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign*%7D%0A&amp;%20%5CSigma%20F%20=%20%5CDelta%20m%20%5Ccdot%20%5Cddot%7B%5Cxi%7D%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;%20T%20%5Csin%20%5Ctheta_2%20-%20T%20%5Csin%20%5Ctheta_1%20=%20%5Clambda%20%5Cfrac%7B%5CDelta%20x%7D%7B%5Ccos%20%5Ctheta_1%7D%20%5Ccdot%20%5Cddot%7B%5Cxi%7D%0A%5Cend%7Balign*%7D%0A"></p>
-<p>Since <img src="https://latex.codecogs.com/png.latex?%5Ctheta_1,%20%5Ctheta_2%20%5Cto%200,%20%5Ccos%20%5Ctheta_1%20%5Capprox%201,%20%5Csin%20%5Ctheta%20%5Capprox%20%5Ctan%20%5Ctheta">, we have: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign*%7D%0A&amp;T(%5Ctan%20%5Ctheta_2%20-%20%5Ctan%20%5Ctheta_1)%20=%20%5Clambda%20%5CDelta%20x%20%5Ccdot%20%5Cddot%7B%5Cxi%7D%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;T%20%5Cleft(%20%5Cleft.%20%5Cfrac%7B%5Cpartial%20%5Cxi%7D%7B%5Cpartial%20x%7D%20%5Cright%7C_%7Bx+%5CDelta%20x%7D%20-%20%5Cleft.%20%5Cfrac%7B%5Cpartial%20%5Cxi%7D%7B%5Cpartial%20x%7D%20%5Cright%7C_%7Bx%7D%20%20%5Cright)%20=%20%5Clambda%20%5CDelta%20x%20%5Ccdot%20%5Cddot%7B%5Cxi%7D%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;T%20%5Cfrac%7B%5Cpartial%5E2%20%5Cxi%7D%7B%5Cpartial%20x%5E2%7D%20%5CDelta%20x%20=%20%5Clambda%20%5CDelta%20x%20%5Ccdot%20%5Cddot%7B%5Cxi%7D%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;%5Cfrac%7BT%7D%7B%5Clambda%7D%20%5Cxi_%7Bxx%7D%20=%20%5Cddot%7B%5Cxi%7D.%0A%5Cend%7Balign*%7D%0A"></p>
-<p>Done! This is the wave equation for transverse wave. We can also see the famous result that the wave speed is the square root of tension divide by density: <img src="https://latex.codecogs.com/png.latex?%0Av%20=%20%5Csqrt%7B%5Cfrac%7BT%7D%7B%5Clambda%7D%7D.%0A"></p>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Spatial Second order derivative
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>In the derivation of the two kinds of waves, the crucial part! is the realization that these two expressions: <span id="eq-average"><img src="https://latex.codecogs.com/png.latex?%0A(%5Cxi_%7Bn+1%7D%20-%20%5Cxi_n)%20-%20(%5Cxi_n%20-%20%5Cxi_%7Bn-1%7D)%0A%5Ctag%7B2%7D"></span> and <img src="https://latex.codecogs.com/png.latex?%0A%5Cleft.%20%5Cfrac%7B%5Cpartial%20%5Cxi%7D%7B%5Cpartial%20x%7D%20%5Cright%7C_%7Bx+%5CDelta%20x%7D%20-%20%5Cleft.%20%5Cfrac%7B%5Cpartial%20%5Cxi%7D%7B%5Cpartial%20x%7D%20%5Cright%7C_%7Bx%7D%0A"> are essentially the <strong>second order spatial derivative</strong> <img src="https://latex.codecogs.com/png.latex?%5Cxi_%7Bxx%7D">. This is obvious if you recall the definition of second derivative: just the derivative of derivative. Or in discrete version, <strong>the difference of difference</strong>. In particular, Equation&nbsp;2 can be also interpreted as the comparison between current value and the average of its two neighbors<sup>4</sup>: <span id="eq-average-2"><img src="https://latex.codecogs.com/png.latex?%0A(%5Cxi_%7Bn+1%7D%20-%20%5Cxi_n)%20-%20(%5Cxi_n%20-%20%5Cxi_%7Bn-1%7D)%20%5Cpropto%20%5Cfrac%7BT_%7Bn-1%7D%20+%20T_%7Bn+1%7D%7D%7B2%7D%20-%20T_n.%0A%5Ctag%7B3%7D"></span></p>
-<p>We will encounter this in the derivation of heat equation as well, so keep this in mind!</p>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<div class="no-row-height column-margin column-container"><div id="fn4"><p><sup>4</sup>&nbsp;This incredible idea is inspired by <a href="https://www.youtube.com/watch?v=ly4S0oi3Yz8">this video</a> by 3Blue1Brown.</p></div></div></section>
-</section>
-<section id="d-wave-equation-1" class="level3 page-columns page-full" data-number="2.2">
-<h3 data-number="2.2" class="anchored" data-anchor-id="d-wave-equation-1"><span class="header-section-number">2.2</span> 2D Wave Equation</h3>
-<p>You may think the 2D analog is something like Figure&nbsp;4. However, this kind of wave is <strong>vector-valued</strong> just like electromagnetic wave, where the “amplitude” <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7B%5Cxi%7D:%20%5Cmathbb%7BR%7D%5En%20%5Ctimes%20%5Cmathbb%7BR%7D%20%5Cto%20%5Cmathbb%7BR%7D%5En"> is a time-dependent vector field. We will focus on <strong>scalar-valued</strong> waves in this article, leaving vector-valued waves in the future discussion<sup>5</sup>. In fact, the transverse wave (shown in Figure&nbsp;5) is quite accurate for 2D scalar-valued waves.</p>
-<div class="no-row-height column-margin column-container"><div id="fn5"><p><sup>5</sup>&nbsp;For those of the curious reader, the wave equation <img src="https://latex.codecogs.com/png.latex?%5Cmathbf%7B%5Cxi%7D_%7Btt%7D%20=%20c%5E2%20%5Cnabla%5E2%20%5Cmathbf%7B%5Cxi%7D"> is also true <em>component-wise</em> for vector-valued waves, i.e., <img src="https://latex.codecogs.com/png.latex?(%5Cmathbf%7B%5Cxi%7D_i)_%7Btt%7D%20=%20c%5E2%20%5Cnabla%5E2%20%5Cmathbf%7B%5Cxi%7D_i">.</p></div></div><div class="quarto-layout-panel" data-layout-nrow="1">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-d2-longitudinal-wave" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-d2-longitudinal-wave-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/pde-derivation/d2-longitudinal-wave.png" class="img-fluid figure-img" style="width:80.0%">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-d2-longitudinal-wave-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4: Vector-valued 2D longitudinal wave
-</figcaption>
-</figure>
-</div>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div id="fig-d2-transverse-wave" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-d2-transverse-wave-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/pde-derivation/d2-transverse-wave.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-d2-transverse-wave-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5: Scalar-valued 2D transverse wave
-</figcaption>
-</figure>
-</div>
-</div>
-</div>
-</div>
-<p>You can imagine Figure&nbsp;5 as a curved rubber band with similar assumptions in Section&nbsp;2.1.2. Suppose:</p>
-<ul>
-<li><img src="https://latex.codecogs.com/png.latex?T">: Tension <strong>per unit length</strong><sup>6</sup>.</li>
-<li><img src="https://latex.codecogs.com/png.latex?%5Csigma">: Surface mass density of the rubber band (mass per unit area).</li>
-</ul>
-<div class="no-row-height column-margin column-container"><div id="fn6"><p><sup>6</sup>&nbsp;Note that it doesn’t make sense to say “tension at a point” but “tension at both sides of a line of a given length” (unit: N/m).</p></div></div><p>Along <img src="https://latex.codecogs.com/png.latex?z"> axies, <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign*%7D%0A&amp;%5CSigma%20F%20=%20%5CDelta%20m%20%5Ccdot%20%5Cddot%7B%5Cxi%7D%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;(T%20%5CDelta%20y)%20%5Cfrac%7B%5Cpartial%5E2%20%5Cxi%7D%7B%5Cpartial%20x%5E2%7D%20%5CDelta%20x%20+%20(T%20%5CDelta%20x)%20%5Cfrac%7B%5Cpartial%5E2%20%5Cxi%7D%7B%5Cpartial%20y%5E2%7D%20%5CDelta%20y%20=%20%5Csigma%20(%5CDelta%20x%20%5CDelta%20y)%20%5Cfrac%7B%5Cpartial%5E2%20%5Cxi%7D%7B%5Cpartial%20t%5E2%7D%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;%5Cfrac%7BT%7D%7B%5Csigma%7D%20(%5Cxi_%7Bxx%7D%20+%20%5Cxi_%7Byy%7D)%20=%20%5Cddot%7B%5Cxi%7D.%0A%5Cend%7Balign*%7D%0A"></p>
-<p>This can also be generalized to wave equation in <img src="https://latex.codecogs.com/png.latex?n"> dimension: <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0A%5Cddot%7B%5Cxi%7D%20=%20%5Cfrac%7BT%7D%7B%5Csigma%7D%20%5Cnabla%5E2%20%5Cxi.%20%7D%0A"></p>
-</section>
-</section>
-<section id="heat-equation" class="level2 page-columns page-full" data-number="3">
-<h2 data-number="3" class="anchored" data-anchor-id="heat-equation"><span class="header-section-number">3</span> Heat Equation</h2>
-<section id="d-heat-equation" class="level3 page-columns page-full" data-number="3.1">
-<h3 data-number="3.1" class="anchored" data-anchor-id="d-heat-equation"><span class="header-section-number">3.1</span> 1D Heat Equation</h3>
-<section id="modelling" class="level4 page-columns page-full" data-number="3.1.1">
-<h4 data-number="3.1.1" class="anchored" data-anchor-id="modelling"><span class="header-section-number">3.1.1</span> Modelling</h4>
-<p>The following physical model of heat conduction on a rod is based on the following assumptions and facts:</p>
-<ol type="1">
-<li><p>No thermal source on the thin rod.</p></li>
-<li><p><strong>(Prop Relation 1)</strong> <img src="https://latex.codecogs.com/png.latex?T"> (in Kelvin) is <em>defined</em> to be proportional<sup>7</sup> to thermal energy <img src="https://latex.codecogs.com/png.latex?Q"> (in <img src="https://latex.codecogs.com/png.latex?%5Ctext%7BJ%7D">), i.e., <img src="https://latex.codecogs.com/png.latex?%0AT%20:%20%5Cpropto%20Q.%0A"></p>
-<p>This is reflected in the following well-known fact: <img src="https://latex.codecogs.com/png.latex?%0A%5CDelta%20Q%20=%20cm%20%5CDelta%20T,%0A"> where <img src="https://latex.codecogs.com/png.latex?c"> is the specific heat capacity of the rod, <img src="https://latex.codecogs.com/png.latex?m"> is the mass we analyze on.</p></li>
-<li><p><strong>(Prop Relation 2)</strong> Conduction of heat energy is <strong><em>proportional</em></strong> to temperature difference<sup>8</sup>: <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0Aq%20=%20-k%20%5Cnabla%20T,%7D%0A"> where <img src="https://latex.codecogs.com/png.latex?q"> is called <strong>heat flux density</strong><sup>9</sup>, the amount of thermal energy passing through a point (1D case) or a unit area (3D case)</p></li>
-<li><p>Thermal energy in conserved!</p></li>
-</ol>
-<!-- ----------------------------------------- -->
-<div class="no-row-height column-margin column-container"><div id="fn7"><p><sup>7</sup>&nbsp;Loosely speaking, this is the <em>definition</em> of temperature. If there is no temperature (<img src="https://latex.codecogs.com/png.latex?T%20=%200%5Ctext%7B%20K%7D">), then there is no particle motion, <img src="https://latex.codecogs.com/png.latex?Q%20=%200">.</p></div><div id="fn8"><p><sup>8</sup>&nbsp;This famous equation is called <strong>Fourier’s law for heat conduction</strong>.</p></div><div id="fn9"><p><sup>9</sup>&nbsp;Since in 1D case, <img src="https://latex.codecogs.com/png.latex?q"> is just the amount of thermal energy pssing through a <em>point</em>. Thus in 1D, we often drop the word “density” by just saying “heat flux”.</p></div></div><div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Importance of proportion relations
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>You may have noticed there are two proportional relations: <img src="https://latex.codecogs.com/png.latex?%0A%20%20%20%20T%20:%20%5Cpropto%20Q.%0A"> This allows us to use temperature to reflect energy! Temperature is more tangible than energy. <img src="https://latex.codecogs.com/png.latex?%0A%20%20%20%20q%20=%20-k%20%5Cnabla%20T.%0A"> This connects time derivative and space derivative. So Heat equation is actully easier to derive since this Fourier’s law directly gives us nearly the final result. I say nearly because the only thing left is the <strong>conservation of energy</strong>!</p>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-</section>
-<section id="derivation" class="level4 page-columns page-full" data-number="3.1.2">
-<h4 data-number="3.1.2" class="anchored" data-anchor-id="derivation"><span class="header-section-number">3.1.2</span> Derivation</h4>
-<p>The notations used are defined below:</p>
-<ul>
-<li><img src="https://latex.codecogs.com/png.latex?%5Clambda">: Line density of the rod (mass per unit length).</li>
-<li><img src="https://latex.codecogs.com/png.latex?x,%20x%20+%20%5CDelta%20x">: The coordinates of the start and end points of the rod segment we analyze (Right is the positive direction).</li>
-<li><img src="https://latex.codecogs.com/png.latex?T:%20%5Cmathbb%7BR%7D%20%5Ctimes%20%5Cmathbb%7BR%7D%20%5Cto%20%5Cmathbb%7BR%7D">: Temperature field (time dependent) on the rod.</li>
-</ul>
-<p>The quantity we care is obviously how the temperature changes over time and space. We chooce a tiny segment of the rod of length <img src="https://latex.codecogs.com/png.latex?%5CDelta%20x"> and build equation on it. The temperature on that extremely small segment can be viewed as a constant.</p>
-<div id="fig-rod-segment" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-rod-segment-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/pde-derivation/rod-segment.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rod-segment-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6: Energy conservation on a small element of the rod
-</figcaption>
-</figure>
-</div>
-<p>As shown in Figure&nbsp;6, suppose the left side of the rod is hotter than its right side<sup>10</sup>. We know that the thermal energy increased in <img src="https://latex.codecogs.com/png.latex?%5Cmathrm%7Bd%7Dt"> should equal to thermal energy entering the segment on the left minus thermal energy leaving the segment on the right: <span id="eq-energy-conservation"><img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7B%5Cmathrm%7Bd%7D%20Q%7D%7B%5Cmathrm%7Bd%7D%20t%7D%20=%20q_%7B%5Ctext%7Bin,%20left%7D%7D%20-%20q_%7B%5Ctext%7Bout,%20right%7D%7D.%0A%5Ctag%7B4%7D"></span></p>
-<div class="no-row-height column-margin column-container"><div id="fn10"><p><sup>10</sup>&nbsp;This is an assumption without loss of generality in terms of writing out the heat equation. The signs can be a lot tricker to determine if you don’t have a certain physical picture.</p></div></div><p>Now we expect <img src="https://latex.codecogs.com/png.latex?q_%7B%5Ctext%7Bin,%20left%7D%7D"> and <img src="https://latex.codecogs.com/png.latex?q_%7B%5Ctext%7Bout,%20right%7D%7D"> to be both positive. The gradient of temperature <img src="https://latex.codecogs.com/png.latex?%5Cfrac%7B%5Cpartial%20T%7D%7B%5Cpartial%20x%7D"> on position <img src="https://latex.codecogs.com/png.latex?x"> and <img src="https://latex.codecogs.com/png.latex?x%20+%20%5CDelta%20x"> are both negative (since temperature decreases along the positive direction), therefore, <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Baligned%7D%0Aq_%7B%5Ctext%7Bin,%20left%7D%7D%20&amp;=%20%5Cleft.%20-k%20%5Cfrac%7B%5Cpartial%20T%7D%7B%5Cpartial%20x%7D%20%5Cright%7C_%7Bx%7D%20%3E%200%20%5C%5C%0Aq_%7B%5Ctext%7Bout,%20right%7D%7D%20&amp;=%20%5Cleft.%20-k%20%5Cfrac%7B%5Cpartial%20T%7D%7B%5Cpartial%20x%7D%20%5Cright%7C_%7Bx%20+%20%5CDelta%20x%7D%20%3E%200.%0A%5Cend%7Baligned%7D%0A"></p>
-<p>Therefore, Equation&nbsp;4 becomes: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign*%7D%0A&amp;%20%5Cfrac%7B%5Cmathrm%7Bd%7D%20Q%7D%7B%5Cmathrm%7Bd%7D%20t%7D%20=%20k%20(T_x%7C_%7Bx+%5CDelta%20x%7D%20-%20T_x%7C_%7Bx%7D)%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;%20c%20(%5Clambda%20%5CDelta%20x)%20%5Cfrac%7B%5Cpartial%20T%7D%7B%5Cpartial%20t%7D%20=%20k%20T_%7Bxx%7D%20%5CDelta%20x%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;%20T_t%20=%20%5Cfrac%7Bk%7D%7Bc%20%5Clambda%7D%20T_%7Bxx%7D.%0A%5Cend%7Balign*%7D%0A"></p>
-<p>Just this simple, we derived the heat equation! <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0AT_t%20=%20%5Cfrac%7Bk%7D%7Bc%20%5Clambda%7D%20T_%7Bxx%7D.%7D%0A"></p>
-<!-- ----------------------------------------- -->
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Why do wave equation and heat equation so similar and different?
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<ol type="1">
-<li><p>Why do they both have <img src="https://latex.codecogs.com/png.latex?%5Cxi_%7Bxx%7D"> term?</p>
-<p>The “forcing” on a small element is proportional to the change of changes. This is very common in nature.</p>
-<ul>
-<li>In wave case, the force on each particle not depend on the change of displacement of adjacent particles, but the change of the change (because first order determines <em>force</em> on either side, second order determines the <em>net force</em> on the particle we analyze)!</li>
-<li>In heat case, the heat increase in a small segment does not depend on first order derivative of temperature field, that’s just one side. There’s yet another side that may compensate for this change in temperature. So it’s the difference of difference that matters.</li>
-</ul></li>
-<li><p>Why temperature only cares first order time derivative?</p>
-<p>There’s a fundamental difference between wave equation and heat equation: Heat will never <em>overshoot</em> but wave will. In other words, a spring will overshoot its equilibrium with maximal speed, resulting a movement of back and forth. But heat will evolve as smooth and efficient as possible, never oscillating.</p></li>
-</ol>
-<div class="quarto-layout-panel" data-layout-nrow="1">
-<div class="quarto-layout-row">
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/pde-derivation/Heat.gif" class="img-fluid figure-img"></p>
-<figcaption>Heat diffusion</figcaption>
-</figure>
-</div>
-</div>
-<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/pde-derivation/Wave.gif" class="img-fluid figure-img"></p>
-<figcaption>Wave propagation<sup>11</sup></figcaption>
-</figure>
-</div>
-</div>
-</div>
-</div>
-<blockquote class="blockquote">
-<p>A second order derivative in time means overshooting.</p>
-</blockquote>
-<p>Second order time derivative appears in wave equation is because Newton’s second law involves acceleration. Whereas in heat equation the first order time derivative actually comes from conservation laws. There is a wide class of PDEs (called <strong>continuity equation</strong>) that can be derived from conservation law. We will discuss this later.</p>
-<p>Just to give a intuitive understanding of the difference behavior of wave and heat, recall that in Equation&nbsp;3 we introduced a new way of looking at second order spatial derivative (Difference to the average of its neighbors). As shown in Figure&nbsp;7, the second order spatial derivative is proportional to the blue <img src="https://latex.codecogs.com/png.latex?d">.</p>
-<div id="fig-difference-between-d-a-v" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-difference-between-d-a-v-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="https://marcobisky.github.io/posts/pde-derivation/difference-between-d-a-v.png" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-difference-between-d-a-v-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7: Difference between <img src="https://latex.codecogs.com/png.latex?d%20%5Cpropto%20a"> and <img src="https://latex.codecogs.com/png.latex?d%5C%20propto%20v">
-</figcaption>
-</figure>
-</div>
-<p>The only difference in wave and heat equation is that if <img src="https://latex.codecogs.com/png.latex?d"> is proportional to the acceleration <img src="https://latex.codecogs.com/png.latex?a"> (of the middle particle), or its velocity <img src="https://latex.codecogs.com/png.latex?v">, i.e., <span id="eq-heat-abstraction"><img src="https://latex.codecogs.com/png.latex?%0A%5Cdot%7B%5Cxi%7D%20=%20%5Cxi%0A%5Ctag%7B5%7D"></span> or <span id="eq-wave-abstraction"><img src="https://latex.codecogs.com/png.latex?%0A%5Cddot%7B%5Cxi%7D%20=%20%5Cxi.%0A%5Ctag%7B6%7D"></span></p>
-<p>The solution to Equation&nbsp;5 is the famous exponential decay, whereas the solution to Equation&nbsp;6 is obviously the ocsillation!</p>
-</div>
-</div>
-<!-- ----------------------------------------- -->
-<div class="no-row-height column-margin column-container"><div id="fn11"><p><sup>11</sup>&nbsp;Made with <a href="https://visualpde.com/explore.html">this website</a> where you can explore different PDEs visually!</p></div></div></section>
-</section>
-<section id="d-heat-equation-1" class="level3" data-number="3.2">
-<h3 data-number="3.2" class="anchored" data-anchor-id="d-heat-equation-1"><span class="header-section-number">3.2</span> 3D Heat Equation</h3>
-<p>Now substitude the rod with a 3D material like metal. Suppose</p>
-<ul>
-<li><img src="https://latex.codecogs.com/png.latex?%5Crho">: Volume density of the rod (mass per unit volume).</li>
-<li><img src="https://latex.codecogs.com/png.latex?%5CDelta%20V">: Volume of the small segment we analyze, <img src="https://latex.codecogs.com/png.latex?%5CDelta%20V%20=%20%5CDelta%20x%20%5CDelta%20y%20%5CDelta%20z">.</li>
-<li><img src="https://latex.codecogs.com/png.latex?T:%20%5Cmathbb%7BR%7D%5E3%20%5Ctimes%20%5Cmathbb%7BR%7D%20%5Cto%20%5Cmathbb%7BR%7D">: Temperature field (time dependent) on the rod.</li>
-</ul>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="https://marcobisky.github.io/posts/pde-derivation/metal-segment.png" class="img-fluid figure-img"></p>
-<figcaption>Isolate a small sube inside the metal</figcaption>
-</figure>
-</div>
-<p>From conservation of thermal energy, the increase of <img src="https://latex.codecogs.com/png.latex?Q"> is unit time equal to net energy entering the volume from <img src="https://latex.codecogs.com/png.latex?x,%20y,%20z"> directions. We already know that in one dimension, say <img src="https://latex.codecogs.com/png.latex?x">, the net increase in thermal energy is proportional to the second spatial derivative times the nudge length: <img src="https://latex.codecogs.com/png.latex?%0Aq%20=%20k%20T_%7Bxx%7D%20%5Coverbrace%7B%5CDelta%20x%7D%5E%7B%5Ctext%7Bnudge%7D%7D.%0A"></p>
-<p>However, <img src="https://latex.codecogs.com/png.latex?q"> is three-dimension is the heat flux <em>density</em>, so we also need to multiply the cross section area: <img src="https://latex.codecogs.com/png.latex?%0A%5Cfrac%7B%5Cmathrm%7Bd%7D%20Q%7D%7B%5Cmathrm%7Bd%7D%20t%7D%20=%20q%20%5Ccdot%20%5CDelta%20%5Ctext%7BArea%7D%20=%20%5Coverbrace%7Bk%20T_%7Bxx%7D%20%5CDelta%20x%7D%5E%7B%5Ctext%7Bdensity%7D%7D%20%5Ccdot%20%5Coverbrace%7B(%5CDelta%20y%20%5CDelta%20z)%7D%5E%7B%5Ctext%7Barea%20size%7D%7D.%0A"></p>
-<p>Sum up all heat contributions from three directions: <img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign*%7D%0A&amp;%20%5CSigma%20%5Cfrac%7B%5Cmathrm%7Bd%7D%20Q%7D%7B%5Cmathrm%7Bd%7D%20t%7D%20=%20q_x%20(%5CDelta%20y%20%5CDelta%20z)%20+%20q_y%20(%5CDelta%20z%20%5CDelta%20x)%20+%20q_z%20(%5CDelta%20x%20%5CDelta%20y)%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;%20c%20(%5Crho%20%5CDelta%20V)%20%5Cfrac%7B%5Cpartial%20T%7D%7B%5Cpartial%20t%7D%20=%20(k%20T_%7Bxx%7D%20%5CDelta%20x)(%5CDelta%20y%20%5CDelta%20z)%20+%20(k%20T_%7Byy%7D%20%5CDelta%20y)(%5CDelta%20z%20%5CDelta%20x)%20+%20(k%20T_%7Bzz%7D%20%5CDelta%20z)(%5CDelta%20x%20%5CDelta%20y)%20%5C%5C%0A%5Cimplies%5Cquad%20&amp;%20T_t%20=%20%5Cfrac%7Bk%7D%7Bc%20%5Crho%7D%20(T_%7Bxx%7D%20+%20T_%7Byy%7D%20+%20T_%7Bzz%7D),%0A%5Cend%7Balign*%7D%0A"> i.e., <img src="https://latex.codecogs.com/png.latex?%0A%5Cboxed%7B%0AT_t%20=%20%5Cfrac%7Bk%7D%7Bc%20%5Crho%7D%20%5Cnabla%5E2%20T.%7D%0A"></p>
-<p>This could be natually generalized to <img src="https://latex.codecogs.com/png.latex?n"> dimensions.</p>
-</section>
-</section>
-<section id="references" class="level2 unnumbered">
-<h2 class="unnumbered anchored" data-anchor-id="references">References</h2>
-<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0">
-<div id="ref-lamoureux_2006_the" class="csl-entry">
-Lamoureux, Michael. 2006. <span>“The Mathematics of PDEs and the Wave Equation.”</span> <a href="https://mathtube.org/sites/default/files/lecture-notes/Lamoureux_Michael.pdf">https://mathtube.org/sites/default/files/lecture-notes/Lamoureux_Michael.pdf</a>.
-</div>
-</div>
-
-
-</section>
-
-
- ]]></description>
-  <category>Differential-Equation</category>
-  <category>EN-blogs</category>
-  <guid>https://marcobisky.github.io/posts/pde-derivation/</guid>
-  <pubDate>Fri, 04 Apr 2025 16:00:00 GMT</pubDate>
-  <media:content url="https://marcobisky.github.io/posts/pde-derivation/cover.gif" medium="image" type="image/gif"/>
 </item>
 </channel>
 </rss>

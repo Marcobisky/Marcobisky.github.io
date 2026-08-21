@@ -19,9 +19,9 @@ cd cv/database
 ```bash
 # With using default template and global json
 # generate English CV pdf
-./gen.sh <local-config-name> e.g. ./gen.sh cv-lite
+./gen.sh <local-config-name> e.g. ./gen.sh cv-ml
 # generate Chinese CV pdf
-./gen-cn.sh <local-config-name> e.g. ./gen-cn.sh cv-lite-cn
+./gen-cn.sh <local-config-name> e.g. ./gen-cn.sh cv-ml-cn
 ```
 
 ### Json to Quarto Markdown

@@ -1,0 +1,59 @@
+---
+author: Marcobisky
+title: "Optimizers 优化器"
+description: Updating
+date: 2026-07-16
+# image: vtheta-no-distill.png
+categories:
+    - machine-learning
+    - CN-blogs
+format: 
+    html: default
+
+bibliography: refs.bib
+bibliographystyle: ieee
+csl: ../../diabetologia.csl # https://github.com/citation-style-language/styles
+---
+
+## L2reg+SGD 和 w/oL2reg+weight decay 是等价的
+
+设网络 $\pi_\theta$, loss $L$, 优化器 SGD.
+
+### L2 regularization
+
+L2 regularization 是直接将 $\frac{1}{2} \lambda \|\theta\|_2^2$ 加入到损失函数中:
+
+$$
+L' = L + \frac{\lambda}{2} \|\theta\|_2^2
+$$
+
+求梯度:
+
+$$
+\nabla_\theta L' = g + \lambda \theta, \quad g = \nabla_\theta L
+$$
+
+如果使用 SGD 优化器, 则更新规则为:
+
+$$
+\begin{aligned}
+\theta_{t+1} &= \theta_t - \eta (g + \lambda \theta) \\
+&= (1 - \eta \lambda) \theta_t - \eta g
+\end{aligned}
+$$
+
+注意 L2 regularization 不是让 $\theta$ 接近一个高维球面 (我也不知道这个记忆哪来的), 而是趋向原点 (已经有 weight decay 的意思了)!
+
+### Weight decay
+
+Weight decay 作为一个优化器, 不改 loss, 但是在每次更新参数时, 会将上次的参数乘以一个小于 1 的系数 $\alpha$. 更新规则为:
+
+$$
+\theta_{t+1} = \alpha \theta_t - \eta g
+$$
+
+这样不会优化着所有参数都变成 0 了吗? 不会, 因为还有后面一项 $\eta g$, 它会跟前面的 $\alpha \theta_t$ 竞争.
+
+当 $\alpha = 1 - \eta \lambda$ 时, weight decay 和 L2 regularization 是等价的.
+
+注意, 如果用 Weight decay 用 AdamW 来优化所有的参数就会变成 0 了.
